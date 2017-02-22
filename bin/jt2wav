@@ -1,0 +1,7 @@
+#! /usr/bin/octave -qf
+pkg load signal
+args=argv();
+val=load(args{1} );
+val_max=max(abs(val))*1.2;
+orate=55800;
+wavwrite( val./val_max,  orate, 16, "out.wav");

@@ -1,0 +1,37 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Sat Feb  4 20:04:48 2017
+[*]
+[dumpfile] "/home/jtejada/verilog/jt12/trunk/ver/jt12_pg/jt12_test.lxt"
+[dumpfile_mtime] "Sat Feb  4 20:02:13 2017"
+[dumpfile_size] 647723
+[savefile] "/home/jtejada/verilog/jt12/trunk/ver/jt12_pg/waves.gtkw"
+[timestart] 0
+[size] 1000 974
+[pos] -1 -1
+*-28.391499 931000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] jt12_test.
+[treeopen] jt12_test.u_uut.
+[sst_width] 215
+[signals_width] 196
+[sst_expanded] 1
+[sst_vpaned_height] 285
+@22
+jt12_test.cnt24[4:0]
+@28
+jt12_test.u_uut.keyon_VI[0]
+@22
+jt12_test.u_uut.phase_VIII[9:0]
+jt12_test.u_uut.phinc_II[16:0]
+jt12_test.u_uut.phinc_IV[16:0]
+@23
+jt12_test.u_uut.phinc_V[16:0]
+@22
+jt12_test.u_uut.dt1_unlimited[5:0]
+@8022
+jt12_test.phase_ch0op0[9:0]
+@20000
+-
+-
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,74 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Sat Feb  4 09:59:41 2017
+[*]
+[dumpfile] "/home/jtejada/verilog/jt12/trunk/ver/jt12_eg/jt12_test.lxt"
+[dumpfile_mtime] "Sat Feb  4 09:57:05 2017"
+[dumpfile_size] 911432
+[savefile] "/home/jtejada/verilog/jt12/trunk/ver/jt12_eg/waves.gtkw"
+[timestart] 0
+[size] 1680 975
+[pos] -1 -1
+*-27.322077 375030000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] jt12_test.
+[treeopen] jt12_test.uut.
+[sst_width] 215
+[signals_width] 222
+[sst_expanded] 1
+[sst_vpaned_height] 285
+@28
+jt12_test.ssg_eg_II[3:0]
+@8022
+jt12_test.eg0[9:0]
+@20000
+-
+-
+-
+@8024
+jt12_test.uut.eg[9:0]
+@20000
+-
+-
+@8024
+jt12_test.uut.eg_internal[9:0]
+@20000
+-
+-
+-
+@24
+jt12_test.cycles[31:0]
+@22
+jt12_test.cnt24[4:0]
+@28
+jt12_test.uut.ssg_en_I[0]
+@29
+jt12_test.uut.ssg_en_II[0]
+@28
+jt12_test.uut.ssg_eg_II[2:0]
+jt12_test.keyon[0]
+@22
+jt12_test.arate[4:0]
+@28
+jt12_test.uut.ssg_en_II[0]
+jt12_test.uut.state_out[2:0]
+jt12_test.uut.state_in_III[2:0]
+@22
+jt12_test.uut.eg_in[9:0]
+jt12_test.uut.eg_out[9:0]
+jt12_test.ssg_eg_II[3:0]
+@28
+jt12_test.uut.ssg_att_II[0]
+jt12_test.uut.ssg_alt_II[0]
+jt12_test.uut.ssg_invertion_II[0]
+jt12_test.uut.ssg_invertion_III[0]
+jt12_test.uut.ssg_att_VIII[0]
+jt12_test.uut.ssg_invertion_VIII[0]
+jt12_test.uut.keyon_III[0]
+jt12_test.uut.keyon_IV[0]
+jt12_test.uut.keyon_V[0]
+jt12_test.uut.keyon_VI[0]
+@22
+jt12_test.rest_and[9:0]
+jt12_test.rest_or[9:0]
+[pattern_trace] 1
+[pattern_trace] 0

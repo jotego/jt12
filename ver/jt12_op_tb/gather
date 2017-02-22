@@ -1,0 +1,4 @@
+jt12_op_tb.v
+../../hdl/jt12_op.v
+../../hdl/jt12_sh.v
+../../hdl/jt12_sh_rst.v

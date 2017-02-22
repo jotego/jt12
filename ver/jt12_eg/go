@@ -1,0 +1,34 @@
+#!/bin/bash
+
+TOP=jt12_test
+DUMPSIGNALS=DONT
+
+while [ $# -gt 0 ]; do
+	if [ $1 = "-w" ]; then
+		echo "Signal dump enabled"
+		DUMPSIGNALS=DUMPSIGNALS
+		shift
+		continue
+	fi      
+	echo Unrecognized option
+    exit 1
+done
+
+if [ $(hostname) == "despacho" ]; then
+    iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
+    	-D$DUMPSIGNALS -DTEST_SUPPORT && sim -lxt > s
+    #exit 0
+    if [ $? -ne 0 ]; then
+	    cat s
+	    rm s
+	    exit 1
+    fi
+else
+	ncverilog -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
+    	+define+NCVERILOG+DISPLAY_STEP+$DUMPSIGNALS+TEST_SUPPORT > s
+	if [ $? -ne 0 ]; then
+		cat s
+		rm s
+		exit 1
+	fi
+fi

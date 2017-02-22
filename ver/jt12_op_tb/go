@@ -1,0 +1,3 @@
+#!/bin/bash
+
+iverilog -f gather -o jt12_op_tb && jt12_op_tb -lxt

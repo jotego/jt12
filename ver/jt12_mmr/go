@@ -1,0 +1,71 @@
+#!/bin/bash
+
+TOP=jt12_test
+DUMPSIGNALS=DONT
+EXTRA=
+RANDWAIT=0
+
+while [ $# -gt 0 ]; do
+	if [ $1 = "-w" ]; then
+		echo "Signal dump enabled"
+		DUMPSIGNALS=DUMPSIGNALS
+		shift
+		continue
+	fi   
+	if [ $1 = "-randwait" ]; then
+		echo "Random wait enabled"
+		RANDWAIT=1
+		shift
+		continue
+	fi     
+    if [[ $1 = "-mul" || $1 = "-cont" || $1 = "-tl" || $1 = "-zero" ]]; then
+    	EXTRA=$EXTRA" "$1
+        shift
+        continue
+    fi
+	echo Unrecognized option
+    exit 1
+done
+
+if ! g++ inputs.cc -o inputs; then
+	exit 1
+fi
+
+#echo $EXTRA
+./inputs $EXTRA > inputs.vh 
+#exit 0
+
+rm -f s
+
+if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
+    iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
+    	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT && sim -lxt > s
+    #exit 0
+    if [ $? -ne 0 ]; then
+	    cat s
+	    rm s
+	    exit 1
+    fi	
+else
+	ncverilog -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
+    	+define+NCVERILOG+DISPLAY_STEP+$DUMPSIGNALS+TEST_SUPPORT+RANDWAIT=$RANDWAIT > s
+	if [ $? -ne 0 ]; then
+		cat s
+		rm s
+		exit 1
+	fi
+fi
+
+cat s | awk 'BEGIN{ g=0 }
+/DUMP END/ { g=3 }
+{ if( g==2 ) print $0 }
+/DUMP START/ { if(g<2) g=2 }' | tail -n 24 > output.csv
+sort output.csv > output_sorted.csv
+sort verify.csv > verify_sorted.csv
+diff output_sorted.csv verify_sorted.csv
+if [ $? -eq 0 ]; then
+	echo Note that order within each operator output is not checked
+	echo TEST PASS
+else
+	echo TEST FAIL
+fi

@@ -1,0 +1,75 @@
+#!/bin/bash
+
+TOP=jt12_test
+DUMPSIGNALS=DONT
+DUMPSOUND=DUMPSOUND
+EXTRA=
+RANDWAIT=0
+TIMERONLY=NOTTIMERONLY
+
+while [ $# -gt 0 ]; do
+	if [ $1 = "-w" ]; then
+		echo "Signal dump enabled"
+		DUMPSIGNALS=DUMPSIGNALS
+		shift
+		continue
+	fi 
+	if [ $1 = "-timeronly" ]; then
+		echo "Timer only"
+		TIMERONLY=TIMERONLY
+		shift
+		continue
+	fi  	  
+	if [ $1 = "-randwait" ]; then
+		echo "Random wait enabled"
+		RANDWAIT=1
+		shift
+		continue
+	fi     
+    if [[ $1 = "-mul" || $1 = "-cont" || $1 = "-tl" || $1 = "-zero" ]]; then
+    	EXTRA=$EXTRA" "$1
+        shift
+        continue
+    fi
+	echo Unrecognized option
+    exit 1
+done
+
+if ! g++ inputs.cc -o inputs; then
+	exit 1
+fi
+
+#echo $EXTRA
+./inputs $EXTRA > inputs.vh 
+#exit 0
+
+rm -f s
+
+if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
+    iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
+    	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
+        -DSIMULATION -D$TIMERONLY -D$DUMPSOUND && sim -lxt > s
+    #exit 0
+    if [ $? -ne 0 ]; then
+	    cat s
+	    rm s
+	    exit 1
+    fi	
+else
+	ncverilog -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
+    	+define+NCVERILOG+DISPLAY_STEP+$DUMPSIGNALS+TEST_SUPPORT+RANDWAIT=$RANDWAIT \
+        +define+SIMULATION+$TIMERONLY+$DUMPSOUND > s
+	if [ $? -ne 0 ]; then
+		cat s
+		rm s
+		exit 1
+	fi
+fi
+
+if [[ $DUMPSOUND = DUMPSOUND && -e s ]]; then
+	cat s | awk 'BEGIN{ g=0 }
+	/DUMP END/ { g=10 }
+    { if( g==2 && $1 !="x" ) g=3; }
+	{ if( g==3 ) print $0 }
+	/DUMP START/ { if(g<2) g=2 }' > jt12_test.jt
+fi
