@@ -226,8 +226,8 @@ always @(posedge clk) begin
 	signbit_X <= signbit_IX;    
 end
 
-wire [1:0] et_sel  = totalatten_X[7:6];
-wire [4:0] et_fine = totalatten_X[5:1];
+//wire [1:0] et_sel  = totalatten_X[7:6];
+//wire [4:0] et_fine = totalatten_X[5:1];
 
 // REGISTER/CYCLE 10
 // Exponential table

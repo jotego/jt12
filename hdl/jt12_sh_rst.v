@@ -34,7 +34,7 @@ genvar i;
 generate
 	for (i=0; i < width; i=i+1) begin: bit_shifter
 		always @(posedge clk) begin
-			if( rst ) bits[i] <= { width{1'b0}};
+			if( rst ) bits[i] <= { stages{1'b0}};
 			else begin
 				if( stages> 1 )
 					bits[i] <= {bits[i][stages-2:0], din[i]};

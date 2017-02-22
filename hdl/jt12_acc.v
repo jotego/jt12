@@ -108,15 +108,15 @@ end
 			
 reg [10:0] next;
 
-wire [10:0] pcm_sign = { 4'd0, pcm } - 11'h80;
+wire [10:0] pcm_sign = { 3'd0, pcm } - 11'h80;
 
             
 always @(*) begin
-	op_signext <= { {3{op_result[8]}}, op_result };
+	op_signext <= { {2{op_result[8]}}, op_result };
 	if( s3_enters )
 		next <= pcm_en ? pcm_sign : {11{sum_en}} & op_signext;
 	else 
-		next <= ( sum_en ? op_signext : 12'd0 ) + total;	
+		next <= ( sum_en ? op_signext : 11'd0 ) + total;	
 end
 
 jt12_sh #(.width(11),.stages(6)) buffer(

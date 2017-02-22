@@ -137,8 +137,8 @@ always @(*) begin : calcpow2
 	endcase
 end
 
-reg [5:0] dt1_limit, dt1_unlimited;
-reg [4:0] dt1_offset_IV;
+reg [5:0] dt1_unlimited;
+reg [4:0] dt1_limit, dt1_offset_IV;
 
 always @(*) begin : dt1_limit_mux
 	case( dt1_III[1:0] )
@@ -185,7 +185,7 @@ end
 reg [16:0] phinc_VI;
 always @(posedge clk) begin : phase_calculation_V
 	if( mul_V==4'd0 )
-		phinc_VI	<= { 5'b0, phinc_V[16:1] };
+		phinc_VI	<= { 1'b0, phinc_V[16:1] };
 	else
 		phinc_VI	<= phinc_V * mul_V;
 end

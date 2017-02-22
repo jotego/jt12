@@ -104,6 +104,9 @@ wire			test_eg, test_op0;
 wire	[7:0]	din_s;
 wire	[1:0]	addr_s;
 
+wire	busy, write;
+wire	keyon_II, keyoff_II;
+
 jt12_clksync u_clksync(
 	.rst		( rst		),
 	.clk		( clk		),

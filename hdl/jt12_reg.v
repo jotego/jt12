@@ -151,9 +151,9 @@ jt12_mod24 u_opch_VII( .base(opch_I), .extra(3'd6), .mod(opch_VII) );
 wire update_op_I  = cur == opch_I;
 wire update_op_II = cur == opch_II;
 wire update_op_III= cur == opch_III;
-wire update_op_IV = cur == opch_IV;
+// wire update_op_IV = cur == opch_IV;
 wire update_op_V  = cur == opch_V;
-wire update_op_VI = cur == opch_VI;
+// wire update_op_VI = cur == opch_VI;
 wire update_op_VII= cur == opch_VII;
 
 // key on/off
@@ -186,7 +186,7 @@ wire	[3:0]	ssg;
 reg			last;
 
 wire	update_ch_I  = cur == ch;
-wire	update_ch_II = cur == ch+1;
+//wire	update_ch_II = cur == ch+1;
 /*
 wire	update_ch_III= ch == ch_III;
 wire	update_ch_IV = ch == ch_IV;
@@ -195,7 +195,7 @@ wire	update_ch_VI = ch == ch_VI;
 */
 
 wire up_alg_ch	= up_alg	& update_ch_I;
-wire up_fb_ch	= up_alg	& update_ch_II;
+// wire up_fb_ch	= up_alg	& update_ch_II;
 wire up_block_ch= up_block	& update_ch_I;
 wire up_fnumlo_ch=up_fnumlo & update_ch_I;
 wire up_pms_ch	= up_pms	& update_ch_I;

@@ -28,20 +28,33 @@ module jt12_clk(
 	input		clk,
 	
 	input		set_n6,
-	input		set_n3,
+	input		set_n3, // not implemented because it relies on 50% duty cycle of clk
 	input		set_n2,
 	
-	output		clk_int,
+	output	reg clk_int,
 	output	reg rst_int
 );
 
-reg	clk_n2, clk_n3, clk_n6;
+reg	clk_n2, clk_n6;
+wire clk_n3;
 
-// Dirty clock mux, might generate glitches:
-//assign clk_int = (set_n6&clk_n6) | (set_n3&clk_n3) | (set_n2&clk_n2);
-assign clk_int = clk_n6;
-//always @(posedge clk_n6 or posedge rst)
-//	clk_int <= rst ? 1'b0 : ~clk_int;
+reg [1:0] clksel;
+
+parameter USE6=2'd0, USE3=2'b10, USE2=2'b01;
+
+always @(negedge clk_n6 or posedge rst_int) 
+	if( rst_int ) begin
+		clksel <= USE6;
+	end
+	else
+		clksel <= { set_n3, set_n2 };	
+
+always @(*)
+	case( clksel )
+		USE3: clk_int <= clk_n3;
+		USE2: clk_int <= clk_n2;
+		default: clk_int <= clk_n6;
+	endcase
 
 // n=2
 // Generate internal clock and synchronous reset for it.
@@ -49,6 +62,23 @@ reg	rst_int_aux;
 
 always @(posedge clk or posedge rst) 
 	clk_n2 	<= rst ? 1'b0 : ~clk_n2;
+	
+reg [1:0] cnt3;
+reg [2:0] cnt6;
+assign clk_n3 = cnt3[0];
+
+always @(posedge clk or posedge rst) 
+	if( rst ) begin
+		cnt3 <= 2'd0;
+		cnt6 <= 3'd0;
+		clk_n6 <= 1'b0;
+	end else begin
+		cnt3 <= cnt3==2'd2 ? 2'd0 : cnt3+2'd1;
+		cnt6 <= cnt6==3'd5 ? 3'd0 : cnt6+3'd1;
+		clk_n6 <= cnt6<=3'd2;
+	end
+
+wire [3:0] delay;
 
 always @(posedge clk_n6 or posedge rst) 
 	if( rst ) begin
@@ -60,25 +90,5 @@ always @(posedge clk_n6 or posedge rst)
 		rst_int		<= rst_int_aux;
 	end
 
-// n=3
-
-reg A,B,C;
-
-always @(posedge clk) 
-	if( rst ) {A,B} <= 2'b0;
-	else {A,B} <= {~A & ~B, A};
-
-
-always @(negedge clk)
-	C <= rst ? 1'b0 : B;
 	
-always @(*)
-	clk_n3 <= C | B;
-	
-// n=6
-
-always @(posedge clk_n3 or posedge rst)
-	clk_n6 	<= rst ? 1'b0 : ~clk_n6;
-
-
 endmodule

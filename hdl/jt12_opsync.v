@@ -37,10 +37,10 @@ module jt12_opsync(
 
 always @(posedge clk)
 	if( rst ) begin
-		s1_enters = 4'b0001;
-		s3_enters = 4'b0010;
-		s2_enters = 4'b0100;
-		s4_enters = 4'b1000;		
+		s1_enters = 1'b1;
+		s3_enters = 1'b0;
+		s2_enters = 1'b0;
+		s4_enters = 1'b0;		
 	end
 	else begin
 		s1_enters <= next < 5'd6;
