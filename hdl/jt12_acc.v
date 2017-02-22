@@ -30,7 +30,9 @@
 
 `timescale 1ns / 1ps
 
-module jt12_acc(
+module jt12_acc
+#(parameter amplify=0)
+(
 	input				rst,
     input				clk,
 	input signed [8:0]	op_result,
@@ -85,10 +87,18 @@ always @(posedge clk) begin
 		end
         if( s2_enters ) begin
         	sum_all <= 1'b0;
+			if( amplify==0 ) begin
+				left  <= pre_left;
+				right <= pre_right;
+			end
+			else begin
             left <= pre_left[13:11]==3'b000 || pre_left[13:11]==3'b111 ?
-				{ pre_left[13], pre_left[10:0], 2'b0 } : {14{pre_left[13]}};
+				{ pre_left[13], pre_left[10:0], 2'b0 } : 
+				{ pre_left[13], {13{~pre_left[13]}} };
             right <= pre_right[13:11]==3'b000 || pre_right[13:11]==3'b111 ?
-				{ pre_right[13], pre_right[10:0], 2'b0 } : {14{pre_right[13]}};
+				{ pre_right[13], pre_right[10:0], 2'b0 } : 
+				{ pre_right[13], {13{~pre_right[13]}} };
+			end
             `ifdef DUMPSOUND
             $strobe("%d\t%d", left, right);
             `endif
@@ -97,11 +107,14 @@ always @(posedge clk) begin
 end
 			
 reg [10:0] next;
+
+wire [10:0] pcm_sign = { 4'd0, pcm } - 11'h80;
+
             
 always @(*) begin
 	op_signext <= { {3{op_result[8]}}, op_result };
 	if( s3_enters )
-		next <= pcm_en ? {4'd0, pcm} : {11{sum_en}} & op_signext;
+		next <= pcm_en ? pcm_sign : {11{sum_en}} & op_signext;
 	else 
 		next <= ( sum_en ? op_signext : 12'd0 ) + total;	
 end

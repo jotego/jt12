@@ -53,7 +53,7 @@ initial begin
 	rst = 0;
     #500 rst = 1;
     #600 rst = 0;
-	#(30*1000*1000) $finish;
+	#(60*1000*1000) $finish;
 end
 
 
