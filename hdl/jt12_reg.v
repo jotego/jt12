@@ -320,8 +320,9 @@ assign { 	dt1_II, mul_V,	tl_VII, ks_III,
 			ar_II,	amsen_VII, d1r_II, d2r_II, d1l, rr_II,
             ssg_en_II,	ssg_eg_II 				} = regop_out;
 
-jt12_sh #(.width(regop_width),.stages(24)) u_regop(
+jt12_sh_rst #(.width(regop_width),.stages(24)) u_regop(
 	.clk	( clk		),
+    .rst	( rst		),
 	.din	( regop_in	),
 	.drop	( regop_out	)
 );
@@ -340,8 +341,9 @@ wire [regch_width-1:0] regch_in = {
 		
 assign { block_I_raw, fnum_I_raw, fb_I, alg, rl, ams_VII, pms } = regch_out;
 
-jt12_sh #(.width(regch_width),.stages(6)) u_regch(
+jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 	.clk	( clk		),
+    .rst	( rst		),
 	.din	( regch_in	),
 	.drop	( regch_out	)
 );
