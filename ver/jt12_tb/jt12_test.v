@@ -53,7 +53,9 @@ initial begin
 	rst = 0;
     #500 rst = 1;
     #600 rst = 0;
+	`ifdef LIMITTIME
 	#(60*1000*1000) $finish;
+    `endif
 end
 
 

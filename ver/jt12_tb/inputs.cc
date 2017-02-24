@@ -171,8 +171,9 @@ void keyon( int ch, int op ) {
 	write(  0, 0x28, (op<<4) | (ch) );
 }
 
-void alg_test( Ch ch[6] ) {
+void alg_test( Ch ch[6], int mask ) {
 	// ALG = 7
+	if (mask&0x80)
 	for( int fb=0; fb<8; fb++ ) {	
 		for( int k=0; k<6; k++ ) {
 			ch[k].set_alg(7);
@@ -187,8 +188,9 @@ void alg_test( Ch ch[6] ) {
 			}
 			keyoff_all();
 		}
-	}
+	}	
 	// ALG = 6
+	if (mask&0x40)
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(6);
 		ch[k].op[0].set_tl(20);
@@ -203,6 +205,7 @@ void alg_test( Ch ch[6] ) {
 		keyoff_all();
 	}  
 	// ALG = 5
+	if (mask&0x20)
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(5);
 		ch[k].set_fb(0);
@@ -218,6 +221,7 @@ void alg_test( Ch ch[6] ) {
 		keyoff_all();
 	}  
 	// ALG = 4
+	if (mask&0x10)
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(4);
 		ch[k].set_fb(k+1);
@@ -235,6 +239,7 @@ void alg_test( Ch ch[6] ) {
 	}	  	
 
 	// ALG = 3
+	if (mask&0x8)
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(3);
 		ch[k].set_fb(k+1);
@@ -258,7 +263,8 @@ void alg_test( Ch ch[6] ) {
 	} 
 
 	// ALG = 2..0
-	for( int alg=2; alg>=0; alg-- )
+	for( int alg=2, m=4; alg>=0; alg--,m>>=1 )
+	if( mask& m )
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(alg);
 		ch[k].set_fb(k+1);
@@ -300,17 +306,24 @@ void ssg_test( Ch ch[6] ) {
 			ch[k].op[j].set_dr( 28 );
 		}
 		keyon( k, 0xf );
-		for( int wait=0; wait<17; wait++ )
+		for( int wait=0; wait<7; wait++ )
 			write( 0, 0x01, 255 ); // wait
 
 		keyoff_all();
 	}	
+	for( int k=0; k<6; k++ ) 
+	for( int j=0; j<4; j++, ssg++ ) {
+		ch[k].op[j].ssgen = 0;
+        ch[k].op[j].set_ssg(0);
+	}    
 }
 
 void tone00( Ch ch[6] ) {
 	ch[0].op[0].set_sl(15);
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(7);
+		keyon( k, 15 );
+		keyon( k, 0 );
 	}
 	ch[0].op[0].set_tl( 0 );
 			keyon( 0, 1 );
@@ -524,23 +537,60 @@ void timerb( Ch ch[6] ) {
     }
 }
 
+void keyon_doble( Ch ch[6] ) {
+	write( 0, 0x40, 0 );
+	write( 0, 0x50, 18);
+	write( 0, 0xa4, 0xf );
+	write( 0, 0xb0, 7 );
+	write( 0, 0xb4, 0xc0 );
+	write( 0, 0x60, 18 );
+	write( 0, 0x70, 18 );
+	write( 0, 0x80, 0x4f );
+	write( 0, 0x28, 0x10 );
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	write( 0, 0x28, 0x10 );
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	// Release
+	write( 0, 0x28, 0 );
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	write( 0, 0x28, 0x10 );	
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	// AR=31
+	write( 0, 0x28, 0 );
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	write( 0, 0x50, 31);
+	write( 0, 0x28, 0x10 ); // primer keyon
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	write( 0, 0x28, 0x10 ); // segundo keyon
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	write( 0, 0x28, 0 );
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
 	
 	
 
-	//tone00( ch );
-	//alg_test( ch );
-	//ssg_test( ch );
-   fnum_check( ch );
+	// tone00( ch ); // <1min en casa
+	//alg_test( ch, 1 );
+	ssg_test( ch );
+   // fnum_check( ch );
 	//pcm_check( ch );
 //	ch[0].op[0].set_sl(15); 
 	//ch3effect_test( ch );
 	//csm_test( ch );
-    // gng2( ch );
+    // gng2( ch ); // 27 min en casa
   //  test_bin( ch );
     // timerb( ch );
+	keyon_doble( ch );
 
 //	write( 0, 3, 
 	// Finish

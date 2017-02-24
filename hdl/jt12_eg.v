@@ -161,6 +161,17 @@ end
 wire	ssg_invertion_II, ssg_invertion_VIII;
 reg		ssg_invertion_III;
 reg	[4:0] cfg_III;
+wire	ssg_pg_rst = eg_II>=10'h200 && ssg_en_II &&
+							 !( ssg_alt_II || ssg_hold_II );
+wire	ssg_en_out;
+reg		ssg_en_in_II;
+
+always @(*) begin                             
+	if( state_II==RELEASE )
+    	ssg_en_in_II <= 1'b0;
+    else
+		ssg_en_in_II <= keyon_II ? ssg_en_II : ssg_en_out;
+end
 
 always @(posedge clk) begin
 	ar_off_III	<= arate_II == 5'h1f;
@@ -172,15 +183,14 @@ always @(posedge clk) begin
 	end
 	else begin
 		// trigger 1st decay
-		if( keyon_II ) begin
+		if( keyon_II && state_II==RELEASE ) begin
 			cfg_III <= arate_II;
 			state_III <= ATTACK;
 			keyon_III <= keyon_II;
-			pg_rst_III <= 1'b0;
+			pg_rst_III <= 1'b1;
 		end
 		else begin : sel_rate
-			pg_rst_III <= eg_II>=10'h200 && ssg_en_II &&
-							 !( ssg_alt_II || ssg_hold_II );
+			pg_rst_III <= (eg_II==10'h3FF) ||ssg_pg_rst;
 			case ( state_II )
 				ATTACK: begin
 					if( eg_II==10'd0 ) begin
@@ -230,7 +240,7 @@ always @(posedge clk) begin
 						cfg_III	<=	{ rrate_II, 1'b1 };
 						state_III <= state_II;	// release
 						ssg_invertion_III <= 1'b0;
-						keyon_III <= keyon_II;
+						keyon_III <= keyon_II;                        
 					end
 				HOLD: begin
 						cfg_III <= 5'd0;
@@ -440,11 +450,9 @@ jt12_sh #(.width(10), .stages(12-8)) u_padding(
 //////////////////////////////////////////////////////////////
 // Shift registers
 
-wire ssg_en_out;
-
 jt12_sh24 #( .width(1) ) u_ssgen(
 	.clk	( clk		),
-	.din	( keyon_II ? ssg_en_II : ssg_en_out ),
+	.din	( ssg_en_in_II ),
 	.st4	( ssg_en_VI	  ),
 	.st6	( ssg_en_VIII ), // note that din is *_II 
 	.st24	( ssg_en_out  )
