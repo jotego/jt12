@@ -94,7 +94,7 @@ wire	[9:0]	eg_II;
 
 reg 	step_V, step_VI;
 reg		sum_up;
-reg		keyon_III, keyon_IV, keyon_V, keyon_VI;
+// reg		keyon_III, keyon_IV, keyon_V, keyon_VI;
 reg 	[5:0]	rate_V;
 reg		[5:1]	rate_VI;
 
@@ -173,21 +173,24 @@ always @(*) begin
 		ssg_en_in_II <= keyon_II ? ssg_en_II : ssg_en_out;
 end
 
+wire	ar_off_II = arate_II == 5'h1f;
+
 always @(posedge clk) begin
-	ar_off_III	<= arate_II == 5'h1f;
+	// ar_off_III	<= arate_II == 5'h1f;
 	// trigger release
 	if( keyoff_II ) begin
 		cfg_III <= { rrate_II, 1'b1 };
 		state_III <= RELEASE;
 		pg_rst_III	<= 1'b0;
+		ar_off_III <= 1'b0;
 	end
 	else begin
 		// trigger 1st decay
 		if( keyon_II && state_II==RELEASE ) begin
 			cfg_III <= arate_II;
 			state_III <= ATTACK;
-			keyon_III <= keyon_II;
 			pg_rst_III <= 1'b1;
+			ar_off_III <= ar_off_II;
 		end
 		else begin : sel_rate
 			pg_rst_III <= (eg_II==10'h3FF) ||ssg_pg_rst;
@@ -196,13 +199,13 @@ always @(posedge clk) begin
 					if( eg_II==10'd0 ) begin
 						state_III <= DECAY1;
 						cfg_III		 <= rate1_II;
-						ssg_invertion_III <= ssg_invertion_II;
+						ssg_invertion_III <= ssg_invertion_II;						
 					end
 					else begin
 						state_III <= state_II; // attack
 						cfg_III		 <= arate_II;
 					end
-					keyon_III <= keyon_II;
+					ar_off_III <= 1'b0;
 					end
 				DECAY1: begin
 					if( eg_II[9:5] >= d1level_II ) begin
@@ -214,7 +217,7 @@ always @(posedge clk) begin
 						state_III <= state_II;	// decay1				
 					end
 					ssg_invertion_III <= ssg_invertion_II;
-					keyon_III <= keyon_II;
+					ar_off_III <= 1'b0;
 					end
 				DECAY2: 
 					if( ssg_en_II && eg_II >= 10'h200 ) begin
@@ -222,31 +225,31 @@ always @(posedge clk) begin
 						if( ssg_hold_II ) begin
 							cfg_III <= 5'd0;
 							state_III <= HOLD; // repeats!
-							keyon_III <= keyon_II;
+							ar_off_III <= 1'b0;							
 						end
 						else begin
 							cfg_III	<=	rate2_II;
 							state_III <= ATTACK; // repeats!
-							keyon_III <= 1'b1;
+							ar_off_III <= 1'b1;
 						end						
 					end
 					else begin
 						cfg_III	<=	rate2_II;
 						state_III <= state_II;	// decay2			
 						ssg_invertion_III <= ssg_invertion_II;
-						keyon_III <= keyon_II;
+						ar_off_III <= 1'b0;
 					end
 				RELEASE: begin
 						cfg_III	<=	{ rrate_II, 1'b1 };
 						state_III <= state_II;	// release
 						ssg_invertion_III <= 1'b0;
-						keyon_III <= keyon_II;                        
+						ar_off_III <= 1'b0;
 					end
 				HOLD: begin
 						cfg_III <= 5'd0;
 						ssg_invertion_III <= ssg_invertion_II;
 						state_III <= HOLD; // repeats!
-						keyon_III <= keyon_II;
+						ar_off_III <= 1'b0;
 					end
 			endcase
 		end
@@ -271,18 +274,17 @@ always @(*) begin : pre_rate_calc
 		endcase
 end
 
-///////////////////////////////////////////////////////////////////
-//	Register Cycle IV
 always @(posedge clk) begin
 	state_IV <= state_III;
 	eg_IV <= eg_III;
 	rate_IV <= pre_rate_III[6] ? 6'd63 : pre_rate_III[5:0];
-	keyon_IV <= keyon_III;
+end
 
-	// IV
+///////////////////////////////////////////////////////////////////
+//	Register Cycle IV
+always @(posedge clk) begin
 	state_V	<= state_IV;
 	rate_V <= rate_IV;
-	keyon_V <= keyon_IV;
 	eg_V <= eg_IV;
     if( state_IV == ATTACK )
 	    casex( rate_IV[5:2] )
@@ -349,7 +351,7 @@ end
 always @(posedge clk) begin
 	state_VI <= state_V;	
 	rate_VI <= rate_V[5:1];
-	keyon_VI <= keyon_V;
+	// keyon_VI <= keyon_V;
 	eg_VI <= eg_V;
 	sum_up <= cnt_V[0] != cnt_out;
 	step_VI <= step_V;
@@ -376,7 +378,7 @@ always @(*) begin
 end
 
 always @(posedge clk) begin
-	if( keyon_VI && ar_off_VI ) begin
+	if( ar_off_VI ) begin
 		// eg_VII <= ssg_en_II ? 10'h200 : 10'd0;
 		eg_VII <= 10'd0;
 	end

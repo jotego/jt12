@@ -538,6 +538,13 @@ void timerb( Ch ch[6] ) {
 }
 
 void keyon_doble( Ch ch[6] ) {
+	cerr << "Prueba de keyon doble:\nEl keyon debe ignorarse en fases que no sean RELEASE\n";
+    cerr << "En la primera onda hay un keyon antes de RELEASE, ha de ignorarse\n";
+    cerr << "En la segunda onda se comprueba que el keyon ha reseteado la fase\n";
+    cerr << "En la tercera onda hay otra vez keyon antes de RELEASE, pero con AR=31\n";
+    cerr << "En la cuarta onda, hay keyon y enseguida keyoff para entrar en RELEASE\n"
+    	<<  "pero el RELEASE es muy lento. Entra un keyon durante el RELEASE y debe\n"
+        <<  "aceptarse, con reseteo de fase y amplitud a tope porque AR=31\n";
 	write( 0, 0x40, 0 );
 	write( 0, 0x50, 18);
 	write( 0, 0xa4, 0xf );
@@ -571,6 +578,20 @@ void keyon_doble( Ch ch[6] ) {
 	for( int wait=0; wait<3; wait++ )
 		write( 0, 0x01, 255 ); // wait
 	write( 0, 0x28, 0 );
+    write( 0, 0x01, 255 ); // espera
+    // Release largo
+    write( 0, 0x60, 0 ); // DR
+    write( 0, 0x70, 0 ); // SR
+    write( 0, 0x80, 0x0 ); // RR
+    write( 0, 0x28, 0x10 );
+    write( 0, 0x01, 255 ); // espera
+	write( 0, 0x28, 0 );    
+    write( 0, 0x01, 255 ); // espera    
+    write( 0, 0x28, 0x10 ); // Segundo keyon, deberiamos estar en release
+	for( int wait=0; wait<3; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	write( 0, 0x28, 0 );
+	write( 0, 0x01, 255 ); // espera
 }
 
 int main( int argc, char *argv[] ) {
@@ -581,7 +602,7 @@ int main( int argc, char *argv[] ) {
 
 	// tone00( ch ); // <1min en casa
 	//alg_test( ch, 1 );
-	ssg_test( ch );
+	//ssg_test( ch );
    // fnum_check( ch );
 	//pcm_check( ch );
 //	ch[0].op[0].set_sl(15); 
