@@ -31,6 +31,7 @@
 module jt12(
 	input			rst,
 	input			clk,
+	output			clk_out,
 	input	[7:0]	din,
 	input	[1:0]	addr,
 	input			cs_n,
@@ -39,6 +40,7 @@ module jt12(
 	output	[7:0]	dout,
 	output	[13:0]	snd_right,
 	output	[13:0]	snd_left,
+	output			sample,
 	output			irq_n
 );
 
@@ -95,6 +97,8 @@ wire	[ 9:0]	phase_VIII;
 wire 			s1_enters, s2_enters, s3_enters, s4_enters;
 wire			set_n2, set_n3, set_n6;
 wire			clk_int, rst_int;
+
+assign			clk_out = clk_int;
 
 `ifdef TEST_SUPPORT
 // Test bits
@@ -332,7 +336,8 @@ jt12_acc u_acc(
 	.pcm		( pcm		),
 	.alg		( alg		),
 	.left		( snd_left	),
-	.right		( snd_right	)
+	.right		( snd_right	),
+	.sample		( sample	)
 );
 
 `ifdef SIMULATION

@@ -31,7 +31,6 @@
 `timescale 1ns / 1ps
 
 module jt12_acc
-#(parameter amplify=0)
 (
 	input				rst,
     input				clk,
@@ -47,7 +46,8 @@ module jt12_acc
 	input				pcm_en,	// only enabled for channel 6
 	input	[7:0]		pcm,
 	output reg signed	[13:0]	left,
-	output reg signed	[13:0]	right
+	output reg signed	[13:0]	right,
+	output 				sample
 );
 
 wire [10:0] total;
@@ -69,10 +69,13 @@ always @(*) begin
 end
    
 reg sum_all;
+assign sample = ~sum_all;
+
 wire signed [13:0] total_signext = { {3{total[10]}}, total };
 
 always @(posedge clk) begin
-	if( rst ) sum_all <= 1'b0;
+	if( rst ) 
+		sum_all <= 1'b0;
     else begin
 		if( s3_enters )  begin
     		sum_all <= 1'b1;
@@ -87,18 +90,8 @@ always @(posedge clk) begin
 		end
         if( s2_enters ) begin
         	sum_all <= 1'b0;
-			if( amplify==0 ) begin
-				left  <= pre_left;
-				right <= pre_right;
-			end
-			else begin
-            left <= pre_left[13:11]==3'b000 || pre_left[13:11]==3'b111 ?
-				{ pre_left[13], pre_left[10:0], 2'b0 } : 
-				{ pre_left[13], {13{~pre_left[13]}} };
-            right <= pre_right[13:11]==3'b000 || pre_right[13:11]==3'b111 ?
-				{ pre_right[13], pre_right[10:0], 2'b0 } : 
-				{ pre_right[13], {13{~pre_right[13]}} };
-			end
+			left  <= pre_left;
+			right <= pre_right;
             `ifdef DUMPSOUND
             $strobe("%d\t%d", left, right);
             `endif
