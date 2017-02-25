@@ -99,7 +99,8 @@ reg  signed [8:0] next, opsum, prev;
 wire signed [8:0] total;
 wire signed [9:0] opsum10 = next+total;
 
-wire [8:0] pcm_sign = { {2{pcm[7]}}, {7{pcm[7]}}^pcm[6:0] };
+wire [8:0] pcm_sign = { 1'b0, pcm };
+// { {2{pcm[7]}}, {7{pcm[7]}}^pcm[6:0] };// este no va bien
 //{ 1'd0, pcm } - 9'h80;
 
             
