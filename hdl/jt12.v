@@ -38,8 +38,8 @@ module jt12(
 	input			wr_n,
 
 	output	[7:0]	dout,
-	output	[13:0]	snd_right,
-	output	[13:0]	snd_left,
+	output	[11:0]	snd_right,
+	output	[11:0]	snd_left,
 	output			sample,
 	output			irq_n
 );
