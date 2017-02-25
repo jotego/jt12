@@ -335,7 +335,7 @@ jt12_sh_rst #(.width(regop_width),.stages(24)) u_regop(
 );
 
 // memory for CH registers
-parameter regch_width=27;
+parameter regch_width=25;
 wire [regch_width-1:0] regch_out;
 wire [regch_width-1:0] regch_in = { 
 	up_block_ch	? { block_in, fnhi_in } : { block_I_raw, fnum_I_raw[10:8] }, // 3+3
@@ -343,16 +343,25 @@ wire [regch_width-1:0] regch_in = {
 	up_alg_ch	? { fb_in, alg_in } : { fb_I, alg },//3+3
 	//up_alg_ch	? alg_in : alg,//3+3
 	//up_fb_ch	? fb_in  : fb_II,//3+3
-	up_pms_ch	? { rl_in, ams_in, pms_in } : { rl, ams_VII, pms }//2+2+3
+	up_pms_ch	? { ams_in, pms_in } : { ams_VII, pms }//2+2+3
 }; 
 		
-assign { block_I_raw, fnum_I_raw, fb_I, alg, rl, ams_VII, pms } = regch_out;
+assign { block_I_raw, fnum_I_raw, fb_I, alg, ams_VII, pms } = regch_out;
 
-jt12_sh_rst #(.width(regch_width),.stages(6),.rstval(1'b1)) u_regch(
+jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 	.clk	( clk		),
     .rst	( rst		),
 	.din	( regch_in	),
 	.drop	( regch_out	)
+);
+
+// RL are on a different register to 
+// have the reset to 1
+jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
+	.clk	( clk		),
+    .rst	( rst		),
+	.din	( up_pms_ch	? rl_in :  rl	),
+	.drop	( rl	)
 );
 
 endmodule
