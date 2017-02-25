@@ -42,20 +42,16 @@ module jt12_acc
 	input 				s2_enters,
 	input 				s3_enters,
 	input 				s4_enters,
+	input				ch6op,
 	input	[2:0]		alg,
 	input				pcm_en,	// only enabled for channel 6
 	input	[7:0]		pcm,
-	output reg signed	[13:0]	left,
-	output reg signed	[13:0]	right,
+	output reg signed	[11:0]	left,
+	output reg signed	[11:0]	right,
 	output 				sample
 );
 
-wire [10:0] total;
-reg  [10:0] op_signext;
-reg  [10:0] sum, partial;
-
-
-reg signed [13:0] pre_left, pre_right;
+reg signed [11:0] pre_left, pre_right;
 
 reg sum_en;
 
@@ -71,7 +67,7 @@ end
 reg sum_all;
 assign sample = ~sum_all;
 
-wire signed [13:0] total_signext = { {3{total[10]}}, total };
+wire signed [11:0] total_signext = { {3{total[8]}}, total };
 
 always @(posedge clk) begin
 	if( rst ) 
@@ -80,12 +76,12 @@ always @(posedge clk) begin
 		if( s3_enters )  begin
     		sum_all <= 1'b1;
 	        if( !sum_all ) begin
-				pre_right <= rl[0] ? total_signext : 14'd0;
-    		    pre_left  <= rl[1] ? total_signext : 14'd0;
+				pre_right <= rl[0] ? total_signext : 12'd0;
+    		    pre_left  <= rl[1] ? total_signext : 12'd0;
 	        end
         	else begin
-    	    	pre_right <= pre_right + (rl[0] ? total_signext : 14'd0);
-	            pre_left  <= pre_left  + (rl[1] ? total_signext : 14'd0);
+    	    	pre_right <= pre_right + (rl[0] ? total_signext : 12'd0);
+	            pre_left  <= pre_left  + (rl[1] ? total_signext : 12'd0);
         	end
 		end
         if( s2_enters ) begin
@@ -99,22 +95,30 @@ always @(posedge clk) begin
     end
 end
 			
-reg [10:0] next;
+reg  signed [8:0] next, opsum, prev;
+wire signed [8:0] total;
+wire signed [9:0] opsum10 = next+total;
 
-wire [10:0] pcm_sign = { 3'd0, pcm } - 11'h80;
+wire [8:0] pcm_sign = { 1'b0, pcm };
+// { {2{pcm[7]}}, {7{pcm[7]}}^pcm[6:0] };// este no va bien
+//{ 1'd0, pcm } - 9'h80;
 
             
 always @(*) begin
-	op_signext <= { {2{op_result[8]}}, op_result };
+	next <= (ch6op && pcm_en) ? pcm_sign : {9{sum_en}} & op_result;
 	if( s3_enters )
-		next <= pcm_en ? pcm_sign : {11{sum_en}} & op_signext;
-	else 
-		next <= ( sum_en ? op_signext : 11'd0 ) + total;	
+		opsum <= next;
+	else begin
+		if( sum_en || (ch6op && pcm_en) )
+			opsum <= opsum10[9:1];
+		else
+			opsum <= total;
+	end
 end
 
-jt12_sh #(.width(11),.stages(6)) buffer(
+jt12_sh #(.width(9),.stages(6)) buffer(
 	.clk	( clk	),
-	.din	( next	),
+	.din	( opsum	),
 	.drop	( total	)
 );
 

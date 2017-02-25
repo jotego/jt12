@@ -52,6 +52,7 @@ module jt12_reg(
    	input				up_kon,
 
 	output				busy,
+	output	reg			ch6op,	// 1 when the operator belongs to CH6
     
 	// CH3 Effect-mode operation
 	input				effect,
@@ -112,7 +113,13 @@ wire [4:0] opch_II, opch_III, opch_IV, opch_V, opch_VI, opch_VII;
 reg	[4:0] next, cnt, cur;
 wire [2:0]	fb_I;
 
-always @(posedge clk) fb_II <= fb_I;
+always @(posedge clk) begin
+	fb_II <= fb_I;
+	case( next)
+		5'h5, 5'hb, 5'h11,5'h17: ch6op <= 1'b1;
+		default: ch6op <= 1'b0;
+	endcase
+end	
 
 always @(*) begin
 	case( op )
@@ -328,7 +335,7 @@ jt12_sh_rst #(.width(regop_width),.stages(24)) u_regop(
 );
 
 // memory for CH registers
-parameter regch_width=27;
+parameter regch_width=25;
 wire [regch_width-1:0] regch_out;
 wire [regch_width-1:0] regch_in = { 
 	up_block_ch	? { block_in, fnhi_in } : { block_I_raw, fnum_I_raw[10:8] }, // 3+3
@@ -336,16 +343,25 @@ wire [regch_width-1:0] regch_in = {
 	up_alg_ch	? { fb_in, alg_in } : { fb_I, alg },//3+3
 	//up_alg_ch	? alg_in : alg,//3+3
 	//up_fb_ch	? fb_in  : fb_II,//3+3
-	up_pms_ch	? { rl_in, ams_in, pms_in } : { rl, ams_VII, pms }//2+2+3
+	up_pms_ch	? { ams_in, pms_in } : { ams_VII, pms }//2+2+3
 }; 
 		
-assign { block_I_raw, fnum_I_raw, fb_I, alg, rl, ams_VII, pms } = regch_out;
+assign { block_I_raw, fnum_I_raw, fb_I, alg, ams_VII, pms } = regch_out;
 
 jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 	.clk	( clk		),
     .rst	( rst		),
 	.din	( regch_in	),
 	.drop	( regch_out	)
+);
+
+// RL are on a different register to 
+// have the reset to 1
+jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
+	.clk	( clk		),
+    .rst	( rst		),
+	.din	( up_pms_ch	? rl_in :  rl	),
+	.drop	( rl	)
 );
 
 endmodule

@@ -46,7 +46,7 @@ module jt12_timers(
 
 assign irq_n = ~( (flag_A&enable_irq_A) | (flag_B&enable_irq_B) );
 
-jt12_timer #(.mult_width(7), .mult_max(72), .counter_width(10)) 
+jt12_timer #(.mult_width(8), .mult_max(144), .counter_width(10)) 
 timer_A(
 	.clk		( clk		), 
 	.rst		( rst		),
@@ -59,7 +59,7 @@ timer_A(
 	.overflow	( overflow_A)
 );
 
-jt12_timer #(.mult_width(11), .mult_max(1152), .counter_width(8)) 
+jt12_timer #(.mult_width(12), .mult_max(2304), .counter_width(8)) 
 timer_B(
 	.clk		( clk		), 
 	.rst		( rst		),

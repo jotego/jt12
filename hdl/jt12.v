@@ -38,8 +38,8 @@ module jt12(
 	input			wr_n,
 
 	output	[7:0]	dout,
-	output	[13:0]	snd_right,
-	output	[13:0]	snd_left,
+	output	[11:0]	snd_right,
+	output	[11:0]	snd_left,
 	output			sample,
 	output			irq_n
 );
@@ -108,7 +108,7 @@ wire			test_eg, test_op0;
 wire	[7:0]	din_s;
 wire	[1:0]	addr_s;
 
-wire	busy, write;
+wire	busy, write, ch6op;
 wire	keyon_II, keyoff_II;
 
 jt12_clksync u_clksync(
@@ -155,7 +155,7 @@ jt12_mmr u_mmr(
 	.write		( write		),
 	.addr		( addr_s	),
 	.busy		( busy		),
-
+	.ch6op		( ch6op		),
 	// Clock speed
 	.set_n6		( set_n6	),
 	.set_n3		( set_n3	),
@@ -325,13 +325,14 @@ jt12_acc u_acc(
 	.rst		( rst_int	),
 	.clk		( clk_int	),
 	.op_result	( op_result	),
-	.rl			( 2'b11		),
+	.rl			( rl		),
 	// note that the order changes to deal 
 	// with the operator pipeline delay
 	.s1_enters	( s2_enters ),
 	.s2_enters	( s1_enters ),
 	.s3_enters	( s4_enters ),
 	.s4_enters	( s3_enters ),
+	.ch6op		( ch6op		),
 	.pcm_en		( pcm_en	),	// only enabled for channel 6
 	.pcm		( pcm		),
 	.alg		( alg		),

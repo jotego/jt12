@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <cstdlib>
+#include <cstring>
 
 using namespace std;
 
@@ -65,7 +66,11 @@ public:
 	void set_sl( int a ) {
 		sl = a;
 		write( chnum, 0x80+reg_offset(), (sl<<4)| rr );
-	}	
+	}
+	void set_ar( int a ) {
+		ar = a;
+		write( chnum, 0x50+a, (ks<<6)| ar );
+	}  		
 	void set_sr( int a ) {
 		sr = a;
 		write( chnum, 0x70+reg_offset(), a );
@@ -171,10 +176,10 @@ void keyon( int ch, int op ) {
 	write(  0, 0x28, (op<<4) | (ch) );
 }
 
-void alg_test( Ch ch[6], int mask ) {
+void alg_test( Ch ch[6], int mask, int fb_max ) {
 	// ALG = 7
 	if (mask&0x80)
-	for( int fb=0; fb<8; fb++ ) {	
+	for( int fb=0; fb<fb_max; fb++ ) {	
 		for( int k=0; k<6; k++ ) {
 			ch[k].set_alg(7);
 			ch[k].set_fb(fb);
@@ -351,12 +356,34 @@ void fnum_check( Ch ch[6] ) {
 }
 
 void pcm_check( Ch ch[6] ) {
+	cerr << "PCM check. 1m20s run time.\n";
+	cerr << "It will enable all operators and then PCM output\n";
+	cerr << "Check that channel 6 is being replaced by PCM samples\n";
+	cerr << "As RL settings go from 0 to 3, output should be checked\n";
+	cerr << "on both channels\n";
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(7);
+		keyon( k, 15 );
+		keyon( k, 0 );
+		for( int j=0; j<4; j++ ) {
+			ch[k].op[j].set_ar(0);
+			ch[k].op[j].set_sl(0);
+			ch[k].op[j].set_sr(0);
+			ch[k].op[j].set_dr(0);		
+			ch[k].op[j].set_tl( k==5? 0 : 127 );
+		}
+		keyon( k, 15 );
+	}
+	for( int wait=0; wait<2; wait++ )
+		write( 0, 0x01, 255 ); // wait
+	// Output PCM
 	write( 0, 0x2B, 0x80 );
-	for( int rl=0; rl<4; rl++ ) {
+	for( int rl=0,k=0; rl<4; rl++ ) {
 		ch[5].set_rl(rl);
-		for( int k=0; k<255; k++ ) {
+		for( int j=0; j<64; j++ ) {
 			write( 0, 0x2A, k );
 			write( 0, 0x01, 5 ); // wait
+			k+=2;
 		}
 	}
 }
@@ -408,6 +435,7 @@ void csm_test(Ch ch[6]) {
 		ch[k].set_fb(0);
 		ch[k].set_fnumber(925);
 		ch[k].set_block(4);
+		ch[k].set_rl(3);
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( 0 );
 			ch[k].op[j].set_dr( 0 );
@@ -594,24 +622,46 @@ void keyon_doble( Ch ch[6] ) {
 	write( 0, 0x01, 255 ); // espera
 }
 
+void dr_check( Ch ch[6] ) {
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(7);
+		ch[k].set_fb(0);
+		ch[k].set_rl(3);
+	}
+	for( int k=0; k<6; k++ ) {
+		for( int j=0; j<4; j++ ) {
+			ch[k].op[j].set_tl( 0 );
+			ch[k].op[j].set_sr(0);
+			ch[k].op[j].set_ar(31);
+			ch[k].op[j].set_dr(0);
+		}
+		keyon( k, 15 );
+		write( 0, 0x01, 55 ); // wait		
+	}
+	for( int wait=0; wait<1; wait++ )
+		write( 0, 0x01, 255 ); // wait
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
 	
-	
+	for( int k=1; k<argc; k++ ) {
+		if( strcmp( argv[k], "-pcm" )==0 ) pcm_check( ch );
+		if( strcmp( argv[k], "-dr" )==0 )  csm_test( ch );
+	}
 
-	// tone00( ch ); // <1min en casa
-	//alg_test( ch, 1 );
+	//tone00( ch ); // <1min en casa
+	//alg_test( ch, 1, 8 );
 	//ssg_test( ch );
    // fnum_check( ch );
-	//pcm_check( ch );
 //	ch[0].op[0].set_sl(15); 
 	//ch3effect_test( ch );
 	//csm_test( ch );
     // gng2( ch ); // 27 min en casa
   //  test_bin( ch );
     // timerb( ch );
-	keyon_doble( ch );
+	//keyon_doble( ch );
 
 //	write( 0, 3, 
 	// Finish

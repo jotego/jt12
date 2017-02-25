@@ -61,7 +61,7 @@ end
 
 wire	cs_n, wr_n, prog_done;
 wire	[ 7:0]	din, dout;
-wire signed	[13:0]	right, left;
+wire signed	[11:0]	right, left;
 wire	[ 1:0]	addr;
 
 jt12_testdata #(.rand_wait(`RANDWAIT)) u_testdata(
@@ -84,6 +84,8 @@ always @(posedge clk)
         $finish;
      end
 
+wire	sample;
+
 jt12 uut(
 	.rst	( rst	),
 	.clk	( clk	),
@@ -95,7 +97,39 @@ jt12 uut(
 	.dout	( dout	),	
 	.snd_right	( right	),
 	.snd_left	( left	),
+	.sample	( sample	),
     .irq_n	( irq_n	)
+);
+
+wire signed [15:0] ampleft7, ampright7;
+
+reg [2:0] vol;
+
+initial begin
+	vol = 0;
+	forever #10000000 vol=vol+1;
+end
+
+jt12_amp_stereo amp7(
+	.clk	( clk 		),
+	.sample	( sample	),
+	.preleft( { left, 2'd0}		),
+	.preright({ right, 2'd0}	),
+	.postleft( ampleft7	),
+	.postright( ampright7),
+	.volume( vol 		)
+);
+
+wire signed [15:0] ampleft4, ampright4;
+
+jt12_amp_stereo amp(
+	.clk	( clk 		),
+	.sample	( sample	),
+	.preleft( { left, 2'd0}		),
+	.preright({ right, 2'd0}	),
+	.postleft( ampleft4	),
+	.postright( ampright4),
+	.volume( ~vol 		)
 );
 
 `ifdef DUMPSOUND

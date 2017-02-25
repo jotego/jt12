@@ -42,6 +42,9 @@ wire signed [15:0] x4 = pre<<<2;
 wire signed [16:0] x5 = x4+pre;
 wire signed [16:0] x6 = x4+x2;
 wire signed [16:0] x7 = x4+x3;
+wire signed [16:0] x8 = pre<<<3;
+wire signed [17:0] x12 = x8+x4;
+wire signed [17:0] x16 = pre<<<4;
 
 always @(posedge clk)
 if( sample )
@@ -52,36 +55,60 @@ if( sample )
 			post <= { x2[14], x2	};
 		3'd2: // x2
 			post <= { x2, 1'd0   	};
+			/*
 		3'd3: // x3
 			case( x3[15:14] )
 				2'b00, 2'b11: post <= { x3[14:0], 1'd0 };
 				2'b01: post <= 16'h7FFF;
 				2'b10: post <= 16'h8000;
 			endcase
-		3'd4: // x4
+			*/
+		3'd3: // x4
 			case( x4[15:14] )
 				2'b00, 2'b11: post <= { x4[14:0], 1'd0 };
 				2'b01: post <= 16'h7FFF;
 				2'b10: post <= 16'h8000;
 			endcase		
+			/*
 		3'd5: // x5
 			case( x5[16:15] )
 				2'b00, 2'b11: post <= x5[15:0];
 				2'b01: post <= 16'h7FFF;
 				2'b10: post <= 16'h8000;
 			endcase				
-		3'd6: // x6
-			case( x6[16:15] )
+			*/
+		3'd4: // x6
+			casex( x6[16:15] )
 				2'b00, 2'b11: post <= x6[15:0];
-				2'b01: post <= 16'h7FFF;
-				2'b10: post <= 16'h8000;
+				2'b0x: post <= 16'h7FFF;
+				2'b1x: post <= 16'h8000;
 			endcase				
+/*			
 		3'd7: // x7
 			case( x7[16:15] )
 				2'b00, 2'b11: post <= x7[15:0];
 				2'b01: post <= 16'h7FFF;
 				2'b10: post <= 16'h8000;
-			endcase			
+			endcase	
+*/			
+		3'd5: // x8
+			casex( x8[16:15] )
+				2'b00, 2'b11: post <= x8[15:0];
+				2'b0x: post <= 16'h7FFF;
+				2'b1x: post <= 16'h8000;
+			endcase
+		3'd6: // x12
+			casex( x12[17:15] )
+				3'b000, 3'b111: post <= x12[15:0];
+				3'b0xx: post <= 16'h7FFF;
+				3'b1xx: post <= 16'h8000;				
+			endcase	
+		3'd7: // x16
+			casex( x16[17:15] )
+				3'b000, 3'b111: post <= x16[15:0];
+				3'b0xx: post <= 16'h7FFF;
+				3'b1xx: post <= 16'h8000;				
+			endcase						
 	endcase
 
 endmodule
