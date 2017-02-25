@@ -52,6 +52,7 @@ module jt12_reg(
    	input				up_kon,
 
 	output				busy,
+	output	reg			ch6op,	// 1 when the operator belongs to CH6
     
 	// CH3 Effect-mode operation
 	input				effect,
@@ -112,7 +113,13 @@ wire [4:0] opch_II, opch_III, opch_IV, opch_V, opch_VI, opch_VII;
 reg	[4:0] next, cnt, cur;
 wire [2:0]	fb_I;
 
-always @(posedge clk) fb_II <= fb_I;
+always @(posedge clk) begin
+	fb_II <= fb_I;
+	case( next)
+		5'h5, 5'hb, 5'h11,5'h17: ch6op <= 1'b1;
+		default: ch6op <= 1'b0;
+	endcase
+end	
 
 always @(*) begin
 	case( op )

@@ -42,6 +42,7 @@ module jt12_acc
 	input 				s2_enters,
 	input 				s3_enters,
 	input 				s4_enters,
+	input				ch6op,
 	input	[2:0]		alg,
 	input				pcm_en,	// only enabled for channel 6
 	input	[7:0]		pcm,
@@ -106,7 +107,7 @@ wire [10:0] pcm_sign = { 3'd0, pcm } - 11'h80;
             
 always @(*) begin
 	op_signext <= { {2{op_result[8]}}, op_result };
-	if( s3_enters )
+	if( ch6op )
 		next <= pcm_en ? pcm_sign : {11{sum_en}} & op_signext;
 	else 
 		next <= ( sum_en ? op_signext : 11'd0 ) + total;	

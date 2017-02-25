@@ -27,7 +27,7 @@ module jt12_mmr(
 	input			write,
 	input	[1:0]	addr,
 	output	reg		busy,
-
+	output			ch6op,
 	// Clock speed
 	output	reg		set_n6,
 	output	reg		set_n3,
@@ -319,6 +319,7 @@ jt12_reg u_reg(
 	.overflow_A	( overflow_A),
 
 	.busy		( busy_reg	),
+	.ch6op		( ch6op		),
 	// CH3 Effect-mode operation
 	.effect		( effect	),		// allows independent freq. for CH 3
 	.fnum_ch3op2( {fnum_hi_ch3op2, fnum_lo_ch3op2} ),

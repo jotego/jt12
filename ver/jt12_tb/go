@@ -33,7 +33,7 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi     
-    if [[ $1 = "-mul" || $1 = "-cont" || $1 = "-tl" || $1 = "-zero" ]]; then
+    if [[ $1 = "-pcm" || $1 = "-cont" || $1 = "-tl" || $1 = "-zero" ]]; then
     	EXTRA=$EXTRA" "$1
         shift
         continue
