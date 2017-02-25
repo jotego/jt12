@@ -348,7 +348,7 @@ wire [regch_width-1:0] regch_in = {
 		
 assign { block_I_raw, fnum_I_raw, fb_I, alg, rl, ams_VII, pms } = regch_out;
 
-jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
+jt12_sh_rst #(.width(regch_width),.stages(6),.rstval(1'b1)) u_regch(
 	.clk	( clk		),
     .rst	( rst		),
 	.din	( regch_in	),

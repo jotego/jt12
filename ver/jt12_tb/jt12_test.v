@@ -101,16 +101,35 @@ jt12 uut(
     .irq_n	( irq_n	)
 );
 
-wire signed [15:0] ampleft, ampright;
+wire signed [15:0] ampleft7, ampright7;
+
+reg [2:0] vol;
+
+initial begin
+	vol = 0;
+	forever #10000000 vol=vol+1;
+end
+
+jt12_amp_stereo amp7(
+	.clk	( clk 		),
+	.sample	( sample	),
+	.preleft( { left, 2'd0}		),
+	.preright({ right, 2'd0}	),
+	.postleft( ampleft7	),
+	.postright( ampright7),
+	.volume( vol 		)
+);
+
+wire signed [15:0] ampleft4, ampright4;
 
 jt12_amp_stereo amp(
 	.clk	( clk 		),
 	.sample	( sample	),
 	.preleft( { left, 2'd0}		),
 	.preright({ right, 2'd0}	),
-	.postleft( ampleft	),
-	.postright( ampright),
-	.volume( 3'd7 		)
+	.postleft( ampleft4	),
+	.postright( ampright4),
+	.volume( ~vol 		)
 );
 
 `ifdef DUMPSOUND
