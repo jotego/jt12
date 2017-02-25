@@ -46,7 +46,6 @@ module jt12_pg(
 	//input		[ 2:0]	pms,
 	// phase operation
 	input				pg_rst_III,
-	input				keyon_II,
 	input				zero,
 	
 	output  reg [ 4:0]  keycode_III,
@@ -198,7 +197,7 @@ reg  [19:0] phase_in;
 reg  [ 9:0] phase_VII;
 
 always @(*)
-	phase_in <= ( keyon_VI || pg_rst_VI )? 20'd0 : phase_drop + phinc_VI;
+	phase_in <=  pg_rst_VI ? 20'd0 : phase_drop + phinc_VI;
 
 always @(posedge clk) begin : phase_calculation_VI
 	phase_VII <= phase_in[19:10];
@@ -221,12 +220,6 @@ jt12_sh #( .width(20), .stages(24) ) u_phsh(
 	.clk	( clk		),
 	.din	( phase_in	),
 	.drop	( phase_drop)
-);
-
-jt12_sh #( .width(1), .stages(4) ) u_konsh(
-	.clk	( clk		),
-	.din	( keyon_II	),
-	.drop	( keyon_VI	)
 );
 
 jt12_sh #( .width(1), .stages(3) ) u_rstsh(

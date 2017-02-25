@@ -103,7 +103,7 @@ reg csm_copy;
 
 always @(posedge clk)
 	if( rst ) begin
-		{ kon_op, koff_op } <= 48'd0;
+		{ kon_op, koff_op } <= { 24'd0, ~24'd0};
 		busy <= 1'b0;
 		csm_copy <= 1'b0;
 	end

@@ -3,6 +3,7 @@
 TOP=jt12_test
 DUMPSIGNALS=DONT
 DUMPSOUND=DUMPSOUND
+LIMITTIME=
 EXTRA=
 RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
@@ -14,9 +15,15 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi 
+	if [ $1 = "-fast" ]; then
+		echo "Only simulates 60ms"
+		TIMERONLY=TIMERONLY
+		shift
+		continue
+    fi    
 	if [ $1 = "-timeronly" ]; then
 		echo "Timer only"
-		TIMERONLY=TIMERONLY
+		LIMITTIME=-DLIMITTIME
 		shift
 		continue
 	fi  	  
@@ -48,7 +55,7 @@ rm -f s
 if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
-        -DSIMULATION -D$TIMERONLY -D$DUMPSOUND && sim -lxt > s
+        -DSIMULATION -D$TIMERONLY -D$DUMPSOUND $LIMITTIME && sim -lxt > s
     #exit 0
     if [ $? -ne 0 ]; then
 	    cat s

@@ -252,6 +252,7 @@ jt12_timers u_timers(
 
 jt12_pg u_pg(
 	.clk		( clk_int		),
+    //.rst		( rst_int		),
 	// Channel frequency
 	.fnum_I		( fnum_I		),
 	.block_I	( block_I		),
@@ -260,8 +261,7 @@ jt12_pg u_pg(
 	// Operator detuning
 	.dt1_II		( dt1_II 		), // same as JT51's DT1
 	// phase operation
-	.keyon_II	( keyon_II 		),
-	.pg_rst_III	( pg_rst_III | rst_int ),
+	.pg_rst_III	( pg_rst_III	),
 	.zero		( zero			),
 	.keycode_III( keycode_III	),
 	.phase_VIII	( phase_VIII 	)
