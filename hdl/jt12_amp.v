@@ -29,6 +29,7 @@
 
 module jt12_amp(
 	input			clk,
+	input			rst,
 	input			sample,
 	input	[2:0]	volume,
 
@@ -47,6 +48,9 @@ wire signed [17:0] x12 = x8+x4;
 wire signed [17:0] x16 = pre<<<4;
 
 always @(posedge clk)
+if( rst )
+	post <= 16'd0;
+else
 if( sample )
 	case( volume ) 
 		3'd0: // /2
@@ -64,11 +68,7 @@ if( sample )
 			endcase
 			*/
 		3'd3: // x4
-			case( x4[15:14] )
-				2'b00, 2'b11: post <= { x4[14:0], 1'd0 };
-				2'b01: post <= 16'h7FFF;
-				2'b10: post <= 16'h8000;
-			endcase		
+			post <= x4;
 			/*
 		3'd5: // x5
 			case( x5[16:15] )
@@ -115,17 +115,43 @@ endmodule
 
 module jt12_amp_stereo(
 	input			clk,
+	input			rst,
 	input			sample,
-	input	signed	[13:0]	preleft,
-	input	signed	[13:0]	preright,
+
+	input			[ 5:0]	psg,
+	input			enable_psg,
+
+	input	signed	[11:0]	fmleft,
+	input	signed	[11:0]	fmright,
 	input	[2:0]	volume,
 	
 	output	signed	[15:0]	postleft,
 	output	signed	[15:0]	postright
 );
 
+wire signed	[13:0]	preleft;
+wire signed	[13:0]	preright;
+
+// psg, 6'd0 suena muy fuerte
+// According to Nemesis:
+// All 4 PSG channels at max combined is equivalent to the maximum output of a single YM2612 channel at max. 
+// A single channel at max is 11'd255
+
+//wire signed [5:0] psgm = psg-6'h20;
+//wire signed [8:0] psg_dac = psgm<<<3;
+//wire signed [12:0] psg_sum = {13{enable_psg}} & { {3{psg_dac[8]}}, psg_dac };
+
+//wire signed [5:0] psgm = psg-6'h20;
+wire signed [8:0] psg_dac = psg<<<3;
+wire signed [12:0] psg_sum = {13{enable_psg}} & { 3'b0, psg_dac };
+
+
+assign preleft = {  fmleft [11], fmleft, 1'd0 } + psg_sum;
+assign preright= {  fmright[11],fmright, 1'd0 } + psg_sum;
+
 jt12_amp amp_left(
 	.clk	( clk		),
+	.rst	( rst		),
 	.sample	( sample	),
 	.pre	( preleft	),
 	.post	( postleft	),
@@ -134,6 +160,7 @@ jt12_amp amp_left(
 
 jt12_amp amp_right(
 	.clk	( clk		),
+	.rst	( rst		),
 	.sample	( sample	),
 	.pre	( preright	),
 	.post	( postright	),
