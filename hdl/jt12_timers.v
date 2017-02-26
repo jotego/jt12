@@ -17,8 +17,9 @@
 	Version: 1.0
 	Date: 14-2-2017
 
-	Timer A = 72*(1024-NA)/Phi M
-	Timer B = 1152*(256-NB)/Phi M
+	YM3438_APL.pdf
+	Timer A = 144*(1024-NA)/Phi M
+	Timer B = 2304*(256-NB)/Phi M
 	*/
 
 `timescale 1ns / 1ps
