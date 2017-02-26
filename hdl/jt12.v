@@ -97,6 +97,8 @@ wire	[ 9:0]	phase_VIII;
 wire 			s1_enters, s2_enters, s3_enters, s4_enters;
 wire			set_n2, set_n3, set_n6;
 wire			clk_int, rst_int;
+// LFO
+wire	[6:0]	lfo_mod;
 
 assign			clk_out = clk_int;
 
@@ -248,6 +250,16 @@ jt12_timers u_timers(
 	.irq_n		( irq_n			)
 );
 
+jt12_lfo u_lfo(
+	.rst		( rst_int	),
+	.clk		( clk_int	),
+	.zero		( zero		),
+	.lfo_rst	( lfo_rst	),
+	.lfo_en		( lfo_en	),
+	.lfo_freq	( lfo_freq	),
+	.lfo_mod	( lfo_mod	)
+);
+
 `ifndef TIMERONLY
 
 jt12_pg u_pg(
@@ -289,7 +301,7 @@ jt12_eg u_eg(
 	.keyon_II		( keyon_II		),
 	.keyoff_II		( keyoff_II		),
 	// envelope number
-	.am				( 7'b0			),
+	.am				( lfo_mod		),
 	.tl_VII			( tl_VII		),
 	.ams_VII		( ams_VII		),
 	.amsen_VII		( amsen_VII		),

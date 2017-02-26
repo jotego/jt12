@@ -639,7 +639,23 @@ void dr_check( Ch ch[6] ) {
 		write( 0, 0x01, 55 ); // wait		
 	}
 	for( int wait=0; wait<1; wait++ )
-		write( 0, 0x01, 255 ); // wait
+		write( 0, 0x01, 255 ); // wait for 8.5ms
+}
+
+void amfreq_test( Ch ch[6] ) {
+	cerr << "AM Frequency test\n";
+	for( int lfo_freq=0; lfo_freq<8; lfo_freq++ ) {
+		write(	0, 0x22, 0 );
+		write(	0, 0x22, 8 | lfo_freq );
+		for( int wait=0; wait<29; wait++ )
+			write( 0, 0x01, 255 ); // wait for 8.5ms	
+	}
+}
+
+void am_test( Ch ch[6] ) {
+	//write(	0, 0x22, 0x80 | lfo_freq );
+	for( int wait=0; wait<1; wait++ )
+		write( 0, 0x01, 255 ); // wait for 8.5ms	
 }
 
 int main( int argc, char *argv[] ) {
@@ -648,22 +664,24 @@ int main( int argc, char *argv[] ) {
 	
 	for( int k=1; k<argc; k++ ) {
 		if( strcmp( argv[k], "-pcm" )==0 ) pcm_check( ch );
-		if( strcmp( argv[k], "-dr" )==0 )  csm_test( ch );
+		if( strcmp( argv[k], "-dr" )==0 || strcmp( argv[k], "-csm" )==0)
+			csm_test( ch );
+		if( strcmp( argv[k], "-csm" )==0 )  csm_test( ch );
+		if( strcmp( argv[k], "-fnum" )==0 )  fnum_check( ch );
+		if( strcmp( argv[k], "-ssg" )==0 )  ssg_test( ch );
+		if( strcmp( argv[k], "-ch3" )==0 )  ch3effect_test( ch );
+		if( strcmp( argv[k], "-timerB" )==0 )  timerb( ch );		
+		if( strcmp( argv[k], "-keyon" )==0 )  keyon_doble( ch );
+		if( strcmp( argv[k], "-tone00" )==0 )  tone00( ch );
+		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 1, 8 );
+		if( strcmp( argv[k], "-am" )==0 )  am_test( ch );
+		if( strcmp( argv[k], "-amfreq" )==0 )  amfreq_test( ch );
 	}
 
-	//tone00( ch ); // <1min en casa
-	//alg_test( ch, 1, 8 );
-	//ssg_test( ch );
-   // fnum_check( ch );
 //	ch[0].op[0].set_sl(15); 
-	//ch3effect_test( ch );
-	//csm_test( ch );
     // gng2( ch ); // 27 min en casa
   //  test_bin( ch );
-    // timerb( ch );
-	//keyon_doble( ch );
 
-//	write( 0, 3, 
 	// Finish
 	cout << "\ncfg["<<cont<<"] = { 1'b0, 8'h0, 8'h00 }; // done\n";
 	return 0;

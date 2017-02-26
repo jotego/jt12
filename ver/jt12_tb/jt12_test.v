@@ -4,8 +4,15 @@ module jt12_test;
 
 reg	rst;
 
-
+`ifndef DUMPLFO
 `include "../common/dump.vh"
+`else
+initial begin
+	$dumpfile("jt12_test.lxt");
+	$dumpvars(0, jt12_test.uut.u_lfo );
+	$dumpon;
+end
+`endif
 
 /*
 reg	clk;
