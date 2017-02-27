@@ -51,7 +51,7 @@ module jt12_mmr(
 	input				flag_A,
 	input				overflow_A,
 	// PCM
-	output	reg	[7:0]	pcm,
+	output	reg	[8:0]	pcm,
 	output	reg			pcm_en,
 
 	`ifdef TEST_SUPPORT
@@ -137,6 +137,7 @@ parameter 	REG_TEST	=	8'h01,
 			REG_IRQMASK =	8'h29,
 			REG_PCM 	=	8'h2A,
 			REG_PCM_EN	=	8'h2B,
+			REG_DACTEST =	8'h2C,
 			REG_CLK_N6	=	8'h2D,
 			REG_CLK_N3	=	8'h2E,
 			REG_CLK_N2	=	8'h2F;
@@ -181,7 +182,7 @@ always @(posedge clk) begin : memory_mapped_registers
 		csm			<= 1'b0;
 		effect		<= 1'b0;
 		// PCM
-		pcm			<= 8'h0;
+		pcm			<= 9'h0;
 		pcm_en		<= 1'b0;
 		// clock speed
 		set_n6		<= 1'b1;
@@ -222,7 +223,8 @@ always @(posedge clk) begin : memory_mapped_registers
 						  set_run_B <=  din[1];
 						end
 					REG_LFO:	{ lfo_en, lfo_freq } <= din[3:0];
-					REG_PCM:	pcm		<= din;
+					REG_DACTEST:pcm[0] <= din[3];
+					REG_PCM:	pcm[8:1]<= din;
 					REG_PCM_EN:	pcm_en	<= din[7];
 					//REG_CLK_N6:	{ set_n6, set_n3, set_n2 } <= 3'b100;
 					//REG_CLK_N3:	{ set_n6, set_n3, set_n2 } <= 3'b010;

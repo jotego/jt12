@@ -45,7 +45,7 @@ module jt12_acc
 	input				ch6op,
 	input	[2:0]		alg,
 	input				pcm_en,	// only enabled for channel 6
-	input	[7:0]		pcm,
+	input	[8:0]		pcm,
 	output reg signed	[11:0]	left,
 	output reg signed	[11:0]	right,
 	output 				sample
@@ -99,17 +99,12 @@ reg  signed [8:0] next, opsum, prev;
 wire signed [8:0] total;
 wire signed [9:0] opsum10 = next+total;
 
-wire [8:0] pcm_sign = { 1'b0, pcm };
-// { {2{pcm[7]}}, {7{pcm[7]}}^pcm[6:0] };// este no va bien
-//{ 1'd0, pcm } - 9'h80;
-
-            
 always @(*) begin
-	next <= (ch6op && pcm_en) ? pcm_sign : {9{sum_en}} & op_result;
+	next <= sum_en ? op_result : 9'd0;
 	if( s3_enters )
-		opsum <= next;
+		opsum <= (ch6op && pcm_en) ? pcm : next;
 	else begin
-		if( sum_en || (ch6op && pcm_en) )
+		if( sum_en && !(ch6op && pcm_en) )
 			opsum <= opsum10[8:0]; // MSB is discarded according to
 			// YM3438 application notes
 		else

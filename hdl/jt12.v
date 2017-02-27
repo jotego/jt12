@@ -79,7 +79,7 @@ wire	[ 2:0]	pms;
 wire	[ 1:0]	ams_VII;
 // PCM
 wire			pcm_en;
-wire	[ 7:0]	pcm;
+wire	[ 8:0]	pcm;
 
 // Timers
 wire	[9:0]	value_A;
