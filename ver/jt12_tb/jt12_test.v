@@ -120,11 +120,13 @@ end
 jt12_amp_stereo amp7(
 	.clk	( clk 		),
 	.sample	( sample	),
-	.preleft( { left, 2'd0}		),
-	.preright({ right, 2'd0}	),
+	.fmleft	( left		),
+	.fmright( right		),
+	.enable_psg( 1'b0 	),
+	.psg	( 5'd0 		),
 	.postleft( ampleft7	),
-	.postright( ampright7),
-	.volume( vol 		)
+	.postright( ampright7	),
+	.volume	( vol 		)
 );
 
 wire signed [15:0] ampleft4, ampright4;
@@ -132,11 +134,13 @@ wire signed [15:0] ampleft4, ampright4;
 jt12_amp_stereo amp(
 	.clk	( clk 		),
 	.sample	( sample	),
-	.preleft( { left, 2'd0}		),
-	.preright({ right, 2'd0}	),
+	.fmleft	( left		),
+	.fmright( right		),
+	.enable_psg( 1'b0 	),
+	.psg	( 5'd0 		),
 	.postleft( ampleft4	),
-	.postright( ampright4),
-	.volume( ~vol 		)
+	.postright( ampright4	),
+	.volume	( ~vol 		)
 );
 
 `ifdef DUMPSOUND

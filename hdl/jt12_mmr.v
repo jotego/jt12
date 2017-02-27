@@ -144,9 +144,10 @@ parameter 	REG_TEST	=	8'h01,
 
 reg	csm, effect;
 
-reg [7:0] fnum_lo_ch3op2, fnum_lo_ch3op3, fnum_lo_ch3op1;
-reg [2:0] block_ch3op2,  block_ch3op3,  block_ch3op1;
-reg [2:0] fnum_hi_ch3op2, fnum_hi_ch3op3, fnum_hi_ch3op1;
+reg [ 2:0] block_ch3op2,  block_ch3op3,  block_ch3op1;
+reg [10:0] fnum_ch3op2, fnum_ch3op3, fnum_ch3op1;
+reg [ 5:0] latch_ch3op2,  latch_ch3op3,  latch_ch3op1;
+
 
 reg [2:0] up_ch;
 reg [1:0] up_op;
@@ -239,12 +240,14 @@ always @(posedge clk) begin : memory_mapped_registers
 						case( selected_register )
 							8'hA0, 8'hA1, 8'hA2:	up_fnumlo	<= 1'b1;
 							8'hA4, 8'hA5, 8'hA6:	up_block	<= 1'b1;
-							8'hA9: fnum_lo_ch3op1 <= din;
-                            8'hA8: fnum_lo_ch3op3 <= din;
-                            8'hAA: fnum_lo_ch3op2 <= din;
-                            8'hAD: {block_ch3op1, fnum_hi_ch3op1 } <= din[5:0];
-							8'hAC: {block_ch3op3, fnum_hi_ch3op3 } <= din[5:0];
-                            8'hAE: {block_ch3op2, fnum_hi_ch3op2 } <= din[5:0];
+							// CH3 special registers
+							8'hA9: { block_ch3op1, fnum_ch3op1 } <= { latch_ch3op1, din };
+                            8'hA8: { block_ch3op3, fnum_ch3op3 } <= { latch_ch3op3, din };
+                            8'hAA: { block_ch3op2, fnum_ch3op2 } <= { latch_ch3op2, din };
+                            8'hAD: latch_ch3op1 <= din[5:0];
+							8'hAC: latch_ch3op3 <= din[5:0];
+                            8'hAE: latch_ch3op2 <= din[5:0];
+							// FB + Algorithm
                             8'hB0, 8'hB1, 8'hB2:	up_alg		<= 1'b1;
 							8'hB4, 8'hB5, 8'hB6:	up_pms		<= 1'b1;
 						endcase
@@ -322,9 +325,9 @@ jt12_reg u_reg(
 	.ch6op		( ch6op		),
 	// CH3 Effect-mode operation
 	.effect		( effect	),		// allows independent freq. for CH 3
-	.fnum_ch3op2( {fnum_hi_ch3op2, fnum_lo_ch3op2} ),
-	.fnum_ch3op3( {fnum_hi_ch3op3, fnum_lo_ch3op3} ),
-	.fnum_ch3op1( {fnum_hi_ch3op1, fnum_lo_ch3op1} ),
+	.fnum_ch3op2( fnum_ch3op2 ),
+	.fnum_ch3op3( fnum_ch3op3 ),
+	.fnum_ch3op1( fnum_ch3op1 ),
 	.block_ch3op2( block_ch3op2 ),
 	.block_ch3op3( block_ch3op3 ),
 	.block_ch3op1( block_ch3op1 ),

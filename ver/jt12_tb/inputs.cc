@@ -658,6 +658,34 @@ void am_test( Ch ch[6] ) {
 		write( 0, 0x01, 255 ); // wait for 8.5ms	
 }
 
+void fnumorder_test( Ch ch[6] ) {
+	// block / Fnum hi
+	write( 0, 0xa4, (1<<3) | 1 );
+	write( 0, 0xa5, (2<<3) | 2 );
+	write( 0, 0xa6, (3<<3) | 3 );
+
+	write( 0, 0xa4, (4<<3) | 4, true );
+	write( 0, 0xa5, (5<<3) | 5, true );
+	write( 0, 0xa6, (6<<3) | 6, true );
+
+	write( 0, 0xad, (1<<3) | 1 );
+	write( 0, 0xae, (2<<3) | 2 );
+	write( 0, 0xac, (3<<3) | 3 );
+	// fnum lo
+	write( 0, 0xa0, 1 );
+	write( 0, 0xa1, 2 );
+	write( 0, 0xa2, 3 );
+
+	write( 0, 0xa0, 4, true );
+	write( 0, 0xa1, 5, true );
+	write( 0, 0xa2, 6, true );
+
+	write( 0, 0xa9, 1 );
+	write( 0, 0xaa, 2 );
+	write( 0, 0xa8, 3 );
+	write( 0, 0x01, 50 ); 
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
@@ -676,6 +704,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 1, 8 );
 		if( strcmp( argv[k], "-am" )==0 )  am_test( ch );
 		if( strcmp( argv[k], "-amfreq" )==0 )  amfreq_test( ch );
+		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );
 	}
 
 //	ch[0].op[0].set_sl(15); 
