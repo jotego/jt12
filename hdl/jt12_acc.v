@@ -110,7 +110,8 @@ always @(*) begin
 		opsum <= next;
 	else begin
 		if( sum_en || (ch6op && pcm_en) )
-			opsum <= opsum10[9:1];
+			opsum <= opsum10[8:0]; // MSB is discarded according to
+			// YM3438 application notes
 		else
 			opsum <= total;
 	end

@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
 		continue
 	fi     
     if [[ $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am" 
-    	|| $1 = "-fnumorder" ]]; then
+    	|| $1 = "-fnumorder" || $1 = "-acc" ]]; then
     	EXTRA=$EXTRA" "$1
 		if [[ $1 = "-amfreq" ]]; then
 			echo "-amfreq: timer only"		

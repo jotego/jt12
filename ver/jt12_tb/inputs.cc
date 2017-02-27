@@ -686,6 +686,63 @@ void fnumorder_test( Ch ch[6] ) {
 	write( 0, 0x01, 50 ); 
 }
 
+void acc_test( Ch ch[6] ) {
+	cerr << "Prueba del acumulador\n"
+		<< "Al principio salen por orden cada operador al maximo\n"
+		<< "Deberia causar salidas erroneas por desborde\n"
+		<< "Luego corrijo el volumen para que salga bien\n";
+	write( 0, 0xa4, (3<<3) | 3 );
+	write( 0, 0xa0, 0xf0 );
+	write( 0, 0xb4, 3<<6 );
+	
+	for( int j=0; j<4; j++ ) {
+		ch[0].op[j].set_dr(0);
+		ch[0].op[j].set_sr(0);
+	}
+	
+	write( 0, 0xb0, 7 );
+	write( 0, 0x40, 0x0 );
+	write( 0, 0x44, 0x7f );
+	write( 0, 0x48, 0x7f );	
+	write( 0, 0x4C, 0x7f );
+	write( 0, 0x28, 0xf0 );	
+	write( 0, 0x01, 200 );
+	
+	write( 0, 0x44, 0x0 );
+	write( 0, 0x01, 200 );	
+
+
+	write( 0, 0x48, 0x0 );
+	write( 0, 0x01, 200 );	
+
+	write( 0, 0x4c, 0x0 );
+	write( 0, 0x01, 200 );	
+	// Ajuste
+	write( 0, 0x40, 0x8 );
+	write( 0, 0x44, 0x7f );
+	write( 0, 0x48, 0x7f );	
+	write( 0, 0x4C, 0x7f );	
+	write( 0, 0x01, 200 );	
+
+	write( 0, 0x44, 0x8 );
+	write( 0, 0x48, 0x7f );	
+	write( 0, 0x4C, 0x7f );	
+	write( 0, 0x01, 200 );	
+
+	write( 0, 0x40, 13 );
+	write( 0, 0x44, 13 );
+	write( 0, 0x48, 13 );	
+	write( 0, 0x4C, 0x7f );	
+	write( 0, 0x01, 200 );	
+
+	write( 0, 0x40, 16 );
+	write( 0, 0x44, 16 );
+	write( 0, 0x48, 16 );	
+	write( 0, 0x4C, 16 );	
+	write( 0, 0x01, 200 );	
+		
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
@@ -705,6 +762,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-am" )==0 )  am_test( ch );
 		if( strcmp( argv[k], "-amfreq" )==0 )  amfreq_test( ch );
 		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );
+		if( strcmp( argv[k], "-acc" )==0 )  acc_test( ch );
 	}
 
 //	ch[0].op[0].set_sl(15); 
