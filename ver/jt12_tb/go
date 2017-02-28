@@ -42,7 +42,8 @@ while [ $# -gt 0 ]; do
 		continue
 	fi     
     if [[ $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am" 
-    	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg" || $1 = "-tone00" ]]; then
+    	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg" 
+		|| $1 = "-tone00" || $1 = "-dac" ]]; then
     	EXTRA=$EXTRA" "$1
 		if [[ $1 = "-amfreq" ]]; then
 			echo "-amfreq: timer only"		
@@ -69,7 +70,7 @@ fi
 #exit 0
 
 rm -f s
-
+date
 if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
@@ -99,3 +100,4 @@ if [[ $DUMPSOUND = DUMPSOUND && -e s ]]; then
 	{ if( g==3 ) print $0 }
 	/DUMP START/ { if(g<2) g=2 }' > jt12_test.jt
 fi
+date

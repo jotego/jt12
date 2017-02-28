@@ -124,14 +124,15 @@ end
 wire			cnt_out; // = all_cnt_last[3*31-1:3*30];
 
 
-reg [7:0]	step_idx;
-reg	[2:0]	state_III, state_IV, state_V, state_VI, state_VII, state_VIII;
+reg  [7:0]	step_idx;
+reg	 [2:0]	state_III, state_IV, state_V, state_VI, state_VII, state_VIII;
 wire [2:0]	state_II;
 
 
 wire	ar_off_VI;
 reg		ar_off_III;
 
+//	Register Cycle I
 reg [8:0] ar_sum0;
 reg [9:0] ar_result, ar_sum;
 
@@ -150,7 +151,6 @@ always @(*) begin : ar_calculation
 end
 
 always @(posedge clk) begin
-	// I
 	if( d1l == 4'd15 )
 		d1level_II <= 5'h10; // 48dB 
 	else

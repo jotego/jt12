@@ -74,7 +74,7 @@ assign sample = ~sum_all;
 
 wire [8:0] buffer;
 reg  [8:0] buffer2;
-reg  [8:0] buf_mux_left;
+reg  [8:0] buf_mux;
 reg	 [1:0] rl2;
 reg		   last_s1;
 reg  [1:0] mux_cnt;
@@ -86,11 +86,17 @@ always @(posedge clk) begin : mux_dac_input
 	rl2     <= rl;
 	last_s1 <= s1_enters;
 	mux_cnt <= last_s1 && s3_enters ? 2'd01 : mux_cnt + 1'b1;
-	if( !mux_cnt[1] )
-		buf_mux_left <= rl2[1] ? buffer2 : 9'd0;
-	else begin
-		mux_left <= buf_mux_left;
-		mux_right <= rl[1] ? buffer : 9'd0;
+	if( mux_cnt==2'd0 ) begin
+		if( s1_enters || s3_enters ) begin
+			buf_mux <= buffer2;
+		end
+		else begin
+			buf_mux <= buffer;
+		end
+	end
+	if( mux_cnt==2'd1 ) begin
+		mux_left <= rl2[0] ? buf_mux : 9'd0;
+		mux_right<= rl2[1] ? buf_mux : 9'd0;
 	end
 	
 end
@@ -129,7 +135,7 @@ wire signed [9:0] opsum10 = next+total;
 always @(*) begin
 	next <= sum_en ? op_result : 9'd0;
 	if( s3_enters )
-		opsum <= (ch6op && pcm_en) ? pcm : next;
+		opsum <= (ch6op && pcm_en) ? { ~pcm[8], pcm[7:0] } : next;
 	else begin
 		if( sum_en && !(ch6op && pcm_en) )
 			opsum <= opsum10[8:0]; // MSB is discarded according to

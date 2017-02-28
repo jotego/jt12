@@ -343,6 +343,49 @@ sep24 #( .width(14), .pos0(13)) opsep
 	.ch5s4 (op_ch5s4)
 );
 
+wire signed [8:0] acc_ch0s1, acc_ch1s1, acc_ch2s1, acc_ch3s1,
+		 acc_ch4s1, acc_ch5s1, acc_ch0s2, acc_ch1s2,
+		 acc_ch2s2, acc_ch3s2, acc_ch4s2, acc_ch5s2,
+		 acc_ch0s3, acc_ch1s3, acc_ch2s3, acc_ch3s3,
+		 acc_ch4s3, acc_ch5s3, acc_ch0s4, acc_ch1s4,
+		 acc_ch2s4, acc_ch3s4, acc_ch4s4, acc_ch5s4;
+
+sep24 #( .width(9), .pos0(13)) accsep
+(
+	.clk	( clk_int	),
+	.mixed	( op_result_internal[13:5] ),
+	.mask	( 0			),
+	.cnt	( sep24_cnt	),	
+	
+	.ch0s1 (acc_ch0s1), 
+	.ch1s1 (acc_ch1s1), 
+	.ch2s1 (acc_ch2s1), 
+	.ch3s1 (acc_ch3s1), 
+	.ch4s1 (acc_ch4s1), 
+	.ch5s1 (acc_ch5s1), 
+
+	.ch0s2 (acc_ch0s2), 
+	.ch1s2 (acc_ch1s2), 
+	.ch2s2 (acc_ch2s2), 
+	.ch3s2 (acc_ch3s2), 
+	.ch4s2 (acc_ch4s2), 
+	.ch5s2 (acc_ch5s2), 
+
+	.ch0s3 (acc_ch0s3), 
+	.ch1s3 (acc_ch1s3), 
+	.ch2s3 (acc_ch2s3), 
+	.ch3s3 (acc_ch3s3), 
+	.ch4s3 (acc_ch4s3), 
+	.ch5s3 (acc_ch5s3), 
+
+	.ch0s4 (acc_ch0s4), 
+	.ch1s4 (acc_ch1s4), 
+	.ch2s4 (acc_ch2s4), 
+	.ch3s4 (acc_ch3s4), 
+	.ch4s4 (acc_ch4s4), 
+	.ch5s4 (acc_ch5s4)
+);
+
 wire signed [9:0] pm_ch0s1, pm_ch1s1, pm_ch2s1, pm_ch3s1,
 		 pm_ch4s1, pm_ch5s1, pm_ch0s2, pm_ch1s2,
 		 pm_ch2s2, pm_ch3s2, pm_ch4s2, pm_ch5s2,

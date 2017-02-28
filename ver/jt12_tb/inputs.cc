@@ -92,8 +92,8 @@ struct Ch {
 	Op op[4];
 	
 	void writecfg() {
-		write( chnum, 0xa0, fnum&0xff );
 		write( chnum, 0xa4, (block<<3) | (fnum>>8) );
+		write( chnum, 0xa0, fnum&0xff );
 		write( chnum, 0xb0, (fb<<3) | (alg&7) );
 		write( chnum, 0xb4, (rl<<6) | (ams<<3) | pms );
 		for( int k=0; k<4; k++ )
@@ -110,6 +110,7 @@ struct Ch {
 	void set_block( int a ) {
 		block = a;
 		write( chnum, 0xa4, (block<<3) | (fnum>>8) );
+		write( chnum, 0xa0, fnum&0xff );
 	}   
 	void set_fnumber( int a ) {
 		fnum = a;
@@ -149,8 +150,8 @@ void initial_clear( Ch ch[6] ) {
 			ch[k].op[j].ks = 0;
 			ch[k].op[j].ar = 31;
 			ch[k].op[j].am = 0;
-			ch[k].op[j].dr = 20; //ch[k].chnum+j*6-(ch[k].chnum>3?1:0);
-			ch[k].op[j].sr = 14;
+			ch[k].op[j].dr = 0; //ch[k].chnum+j*6-(ch[k].chnum>3?1:0);
+			ch[k].op[j].sr = 0;
 			ch[k].op[j].sl = 10;
 			ch[k].op[j].rr = 15;
 			ch[k].op[j].ssgen = 0;
@@ -178,25 +179,28 @@ void keyon( int ch, int op ) {
 
 void alg_test( Ch ch[6], int mask, int fb_max ) {
 	// ALG = 7
-	if (mask&0x80)
-	for( int fb=0; fb<fb_max; fb++ ) {	
+	if (mask&0x80) {
+	cerr << "Starting ALG=7"<<endl;
+	for( int fb=0; fb<fb_max; fb++ ) {
+		cerr << "FB="<<fb<<endl;	
 		for( int k=0; k<6; k++ ) {
 			ch[k].set_alg(7);
 			ch[k].set_fb(fb);
 			ch[k].set_rl(3);
 		}
-		for( int k=0; k<6; k++ ) {
-			for( int j=0; j<4; j++ ) {
-				ch[k].op[j].set_tl( 0 );
-				keyon( k, 1<<j );
-				for( int wait=0; wait<2; wait++ )
-					write( 0, 0x01, 255 ); // wait
+		for( int k=0; k<3; k++ ) {
+		for( int j=0; j<4; j++ ) {
+			ch[k].op[j].set_tl( 16 );
+			keyon( k, 1<<j );
+			write( 0, 0x01, 64 ); // wait
 			}
 			keyoff_all();
 		}
 	}	
+	}
 	// ALG = 6
-	if (mask&0x40)
+	if (mask&0x40) {
+	cerr << "Starting ALG=6"<<endl;
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(6);
 		ch[k].op[0].set_tl(20);
@@ -210,8 +214,10 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		
 		keyoff_all();
 	}  
+	}
 	// ALG = 5
-	if (mask&0x20)
+	if (mask&0x20) {
+	cerr << "Starting ALG=5"<<endl;
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(5);
 		ch[k].set_fb(0);
@@ -226,8 +232,10 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		
 		keyoff_all();
 	}  
+	}
 	// ALG = 4
-	if (mask&0x10)
+	if (mask&0x10) {
+	cerr << "Starting ALG=4"<<endl;
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(4);
 		ch[k].set_fb(k+1);
@@ -243,9 +251,10 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		
 		keyoff_all();
 	}	  	
-
+	}
 	// ALG = 3
-	if (mask&0x8)
+	if (mask&0x8) {
+	cerr << "Starting ALG=3"<<endl;
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(3);
 		ch[k].set_fb(k+1);
@@ -267,10 +276,11 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		
 		keyoff_all();
 	} 
-
+	}
 	// ALG = 2..0
-	for( int alg=2, m=4; alg>=0; alg--,m>>=1 )
-	if( mask& m )
+	for( int alg=2, m=4; alg>=0; alg--,m>>=1 ) 		
+	if( mask& m ) {
+	cerr << "Starting ALG="<<alg<<endl;
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(alg);
 		ch[k].set_fb(k+1);
@@ -295,6 +305,7 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		
 		keyoff_all();
 	}	 
+	}
 }
 
 void ssg_test( Ch ch[6] ) {
@@ -744,6 +755,23 @@ void acc_test( Ch ch[6] ) {
 		
 }
 
+void dacmux_test( Ch ch[6] ) {
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(7);
+		ch[k].set_fb(0);
+		ch[k].set_rl(3);
+	}
+	for( int k=0; k<6; k++ ) {
+	//for( int j=0; j<4; j++ ) {
+		int j=0;
+		ch[k].op[j].set_tl( 0 );
+		keyon( k, 1<<j );
+		write( 0, 0x01, 128 ); // wait
+//		}
+	}
+	keyoff_all();	
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
@@ -759,11 +787,12 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-timerB" )==0 )  timerb( ch );		
 		if( strcmp( argv[k], "-keyon" )==0 )  keyon_doble( ch );
 		if( strcmp( argv[k], "-tone00" )==0 )  tone00( ch );
-		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 1, 8 );
+		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 0x80, 1 );
 		if( strcmp( argv[k], "-am" )==0 )  am_test( ch );
 		if( strcmp( argv[k], "-amfreq" )==0 )  amfreq_test( ch );
 		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );
 		if( strcmp( argv[k], "-acc" )==0 )  acc_test( ch );
+		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
 	}
 
 //	ch[0].op[0].set_sl(15); 
