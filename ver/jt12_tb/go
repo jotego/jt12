@@ -24,7 +24,14 @@ while [ $# -gt 0 ]; do
     fi    
 	if [ $1 = "-fast" ]; then
 		echo "Only simulates 60ms"
-		LIMITTIME=-DLIMITTIME
+		LIMITTIME="-DLIMITTIME=60"
+		shift
+		continue
+	fi  	  
+	if [ $1 = "-time" ]; then
+		shift
+		echo "Only simulates " $1 "ms"
+		LIMITTIME="-DLIMITTIME="$1
 		shift
 		continue
 	fi  	  
@@ -35,7 +42,7 @@ while [ $# -gt 0 ]; do
 		continue
 	fi     
     if [[ $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am" 
-    	|| $1 = "-fnumorder" || $1 = "-acc" ]]; then
+    	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg" || $1 = "-tone00" ]]; then
     	EXTRA=$EXTRA" "$1
 		if [[ $1 = "-amfreq" ]]; then
 			echo "-amfreq: timer only"		

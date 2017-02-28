@@ -46,9 +46,14 @@ module jt12_acc
 	input	[2:0]		alg,
 	input				pcm_en,	// only enabled for channel 6
 	input	[8:0]		pcm,
+	// combined output
 	output reg signed	[11:0]	left,
 	output reg signed	[11:0]	right,
-	output 				sample
+	output 				sample,
+	// multiplexed output
+	output reg signed	[8:0]	mux_left,
+	output reg signed	[8:0]	mux_right,	
+	output				mux_sample
 );
 
 reg signed [11:0] pre_left, pre_right;
@@ -67,11 +72,33 @@ end
 reg sum_all;
 assign sample = ~sum_all;
 
+wire [8:0] buffer;
+reg  [8:0] buffer2;
+reg  [8:0] buf_mux_left;
+reg	 [1:0] rl2;
+reg		   last_s1;
+reg  [1:0] mux_cnt;
+
 wire signed [11:0] total_signext = { {3{total[8]}}, total };
 
+always @(posedge clk) begin : mux_dac_input
+	buffer2 <= buffer;
+	rl2     <= rl;
+	last_s1 <= s1_enters;
+	mux_cnt <= last_s1 && s3_enters ? 2'd01 : mux_cnt + 1'b1;
+	if( !mux_cnt[1] )
+		buf_mux_left <= rl2[1] ? buffer2 : 9'd0;
+	else begin
+		mux_left <= buf_mux_left;
+		mux_right <= rl[1] ? buffer : 9'd0;
+	end
+	
+end
+
 always @(posedge clk) begin
-	if( rst ) 
+	if( rst ) begin
 		sum_all <= 1'b0;
+	end
     else begin
 		if( s3_enters )  begin
     		sum_all <= 1'b1;
@@ -112,10 +139,16 @@ always @(*) begin
 	end
 end
 
-jt12_sh #(.width(9),.stages(6)) buffer(
+jt12_sh #(.width(9),.stages(6)) u_acc(
 	.clk	( clk	),
 	.din	( opsum	),
 	.drop	( total	)
+);
+
+jt12_sh #(.width(9),.stages(6)) u_buffer(
+	.clk	( clk	),
+	.din	( s3_enters ? total : buffer	),
+	.drop	( buffer	)
 );
 
 endmodule

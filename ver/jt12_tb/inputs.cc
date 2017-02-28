@@ -135,7 +135,7 @@ void initial_clear( Ch ch[6] ) {
 		if( k>=3 ) ch[k].chnum=k+1;
 		ch[k].fnum = 1024;
 		ch[k].block= 4;
-		ch[k].rl = 0;
+		ch[k].rl = 3;
 		ch[k].ams = 0;
 		ch[k].pms = 0;
 		ch[k].fb  = 0; //ch[k].chnum;
@@ -166,9 +166,9 @@ void initial_clear( Ch ch[6] ) {
 		int e = k>2 ? 1:0;
 		write(  0, 0x28, 0xf0 | (k+e) );
 	}
-	write( 0, 0x01, 255 ); // wait
+	write( 0, 0x01, 55 ); // wait
 	keyoff_all();
-	write( 0, 0x01, 255 ); // wait
+	write( 0, 0x01, 155 ); // wait
 }
 
 void keyon( int ch, int op ) {
@@ -183,6 +183,7 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		for( int k=0; k<6; k++ ) {
 			ch[k].set_alg(7);
 			ch[k].set_fb(fb);
+			ch[k].set_rl(3);
 		}
 		for( int k=0; k<6; k++ ) {
 			for( int j=0; j<4; j++ ) {
