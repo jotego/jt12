@@ -15,6 +15,7 @@ initial begin
 	$dumpfile("jt12_test.lxt");
 	$dumpvars(1, jt12_test.uut.u_op );
 	$dumpvars(1, jt12_test.uut.u_eg );
+	$dumpvars(1, jt12_test.uut.u_mmr.u_reg.u_kon );
 	$dumpon;
 end
 `endif
