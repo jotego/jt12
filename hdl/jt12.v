@@ -24,7 +24,9 @@
 
 	Author: Jose Tejada Gomez. Twitter: @topapate
 	Version: 1.0
-	Date: 27-1-2017
+	Date: 1-4-2017
+	
+	Use tab = 4 spaces
 
 */
 
@@ -38,9 +40,15 @@ module jt12(
 	input			wr_n,
 
 	output	[7:0]	dout,
+	// combined output
 	output	[11:0]	snd_right,
 	output	[11:0]	snd_left,
 	output			sample,
+	// multiplexed output
+	output signed	[8:0]	mux_left,
+	output signed	[8:0]	mux_right,	
+	output				mux_sample,
+		
 	output			irq_n
 );
 
@@ -267,7 +275,7 @@ jt12_lfo u_lfo(
 
 jt12_pg u_pg(
 	.clk		( clk_int		),
-    //.rst		( rst_int		),
+	//.rst		( rst_int		),
 	// Channel frequency
 	.fnum_I		( fnum_I		),
 	.block_I	( block_I		),
@@ -353,9 +361,14 @@ jt12_acc u_acc(
 	.pcm_en		( pcm_en	),	// only enabled for channel 6
 	.pcm		( pcm		),
 	.alg		( alg		),
+	// combined output
 	.left		( snd_left	),
 	.right		( snd_right	),
-	.sample		( sample	)
+	.sample		( sample	),
+	// muxed output
+	.mux_left	( mux_left	),
+	.mux_right	( mux_right ),
+	.mux_sample	( mux_sample)
 );
 
 `ifdef SIMULATION

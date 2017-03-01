@@ -91,7 +91,8 @@ always @(posedge clk)
         $finish;
      end
 
-wire	sample;
+wire	sample, mux_sample;
+wire signed [8:0] mux_left, mux_right;
 
 jt12 uut(
 	.rst	( rst	),
@@ -105,6 +106,12 @@ jt12 uut(
 	.snd_right	( right	),
 	.snd_left	( left	),
 	.sample	( sample	),
+	
+	// muxed output
+	.mux_left	( mux_left	),
+	.mux_right	( mux_right ),
+	.mux_sample	( mux_sample),
+	
     .irq_n	( irq_n	)
 );
 

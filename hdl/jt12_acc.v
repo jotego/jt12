@@ -53,7 +53,7 @@ module jt12_acc
 	// multiplexed output
 	output reg signed	[8:0]	mux_left,
 	output reg signed	[8:0]	mux_right,	
-	output				mux_sample
+	output reg			mux_sample
 );
 
 reg signed [11:0] pre_left, pre_right;
@@ -75,7 +75,7 @@ assign sample = ~sum_all;
 wire [8:0] buffer;
 reg  [8:0] buffer2;
 reg  [8:0] buf_mux;
-reg	 [1:0] rl2;
+reg	 [1:0] rl2,rl3;
 reg		   last_s1;
 reg  [1:0] mux_cnt;
 
@@ -86,19 +86,23 @@ always @(posedge clk) begin : mux_dac_input
 	rl2     <= rl;
 	last_s1 <= s1_enters;
 	mux_cnt <= last_s1 && s3_enters ? 2'd01 : mux_cnt + 1'b1;
-	if( mux_cnt==2'd0 ) begin
+	if( mux_cnt==2'b11 ) begin
 		if( s1_enters || s3_enters ) begin
 			buf_mux <= buffer2;
+			rl3		<= rl2;
 		end
 		else begin
 			buf_mux <= buffer;
+			rl3		<= rl;
 		end
 	end
-	if( mux_cnt==2'd1 ) begin
-		mux_left <= rl2[0] ? buf_mux : 9'd0;
-		mux_right<= rl2[1] ? buf_mux : 9'd0;
+	if( mux_cnt==2'd0 ) begin
+		mux_left <= rl3[0] ? buf_mux : 9'd0;
+		mux_right<= rl3[1] ? buf_mux : 9'd0;
+		mux_sample <= 1'b1;
 	end
-	
+	else
+		mux_sample <= 1'b0;	
 end
 
 always @(posedge clk) begin

@@ -771,6 +771,63 @@ void dacmux_test( Ch ch[6] ) {
 	}
 	write( 0, 0x21, 1<<3 ); // PG stop
 	write( 0, 0x01, 10 ); // wait
+	ch[0].set_rl(1);
+	ch[4].set_rl(1);
+	ch[2].set_rl(1);
+	ch[1].set_rl(1);
+	ch[5].set_rl(1);
+	ch[3].set_rl(1);
+	write( 0, 0x01, 10 ); // wait	
+	ch[0].set_rl(2);
+	ch[4].set_rl(2);
+	ch[2].set_rl(2);
+	ch[1].set_rl(2);
+	ch[5].set_rl(2);
+	ch[3].set_rl(2);
+	write( 0, 0x01, 10 ); // wait	
+	
+	// los enciendo de uno en uno
+	ch[0].set_rl(0);
+	ch[4].set_rl(0);
+	ch[2].set_rl(0);
+	ch[1].set_rl(0);
+	ch[5].set_rl(0);
+	ch[3].set_rl(0);
+	write( 0, 0x01, 20 ); // wait	
+	// todos apagados
+	ch[0].set_rl(1);	
+	write( 0, 0x01, 10 ); // wait	
+	ch[4].set_rl(1);
+	write( 0, 0x01, 5 ); // wait		
+	ch[2].set_rl(1);
+	write( 0, 0x01, 5 ); // wait		
+	ch[1].set_rl(1);
+	write( 0, 0x01, 5 ); // wait		
+	ch[5].set_rl(1);
+	write( 0, 0x01, 5 ); // wait		
+	ch[3].set_rl(1);
+	write( 0, 0x01, 5 ); // wait		
+	// los enciendo de uno en uno en el izquierdo
+	ch[0].set_rl(0);
+	ch[4].set_rl(0);
+	ch[2].set_rl(0);
+	ch[1].set_rl(0);
+	ch[5].set_rl(0);
+	ch[3].set_rl(0);
+	write( 0, 0x01, 20 ); // wait	
+	ch[0].set_rl(2);	
+	write( 0, 0x01, 10 ); // wait	
+	ch[4].set_rl(2);
+	write( 0, 0x01, 5 ); // wait		
+	ch[2].set_rl(2);
+	write( 0, 0x01, 5 ); // wait		
+	ch[1].set_rl(2);
+	write( 0, 0x01, 5 ); // wait		
+	ch[5].set_rl(2);
+	write( 0, 0x01, 5 ); // wait		
+	ch[3].set_rl(2);
+	write( 0, 0x01, 5 ); // wait			
+	
 }
 
 int main( int argc, char *argv[] ) {
