@@ -49,7 +49,6 @@ module jt12_reg(
 		
 	input			up_d1l,
 	input			up_ssgeg,
-   	input			up_kon,
 
 	output			busy,
 	output	reg		ch6op,	// 1 when the operator belongs to CH6
@@ -108,34 +107,22 @@ module jt12_reg(
 );
 
 
-reg	 [4:0] opch_I;
-wire [4:0] opch_II, opch_III, opch_IV, opch_V, opch_VI, opch_VII;
-reg	[4:0] next, cnt, cur;
-wire [2:0]	fb_I;
+reg	 [4:0] cnt;
+reg  [1:0] next_op, cur_op;
+reg  [2:0] next_ch, cur_ch;
+wire [2:0] fb_I;
 
 always @(posedge clk) begin
 	fb_II <= fb_I;
-	case( next)
-		5'h5, 5'hb, 5'h11,5'h17: ch6op <= 1'b1;
-		default: ch6op <= 1'b0;
-	endcase
+	ch6op <= next_ch==3'd6;
 end	
-
-always @(*) begin
-	case( op )
-		2'd0: opch_I <= ch;
-		2'd1: opch_I <= ch+4'd6;
-		2'd2: opch_I <= ch+4'd12;
-		2'd3: opch_I <= ch+5'd18;
-	endcase
-end
 
 // FNUM and BLOCK
 wire	[10:0]	fnum_I_raw;
 wire	[ 2:0]	block_I_raw;
-wire	effect_on_s1 = effect && (cur == 5'd02 );
-wire	effect_on_s3 = effect && (cur == 5'd08 );
-wire	effect_on_s2 = effect && (cur == 5'd14 );
+wire	effect_on_s1 = effect && (cur == {2'd0, 3'd2 } );
+wire	effect_on_s3 = effect && (cur == {2'd1, 3'd2 } ); 
+wire	effect_on_s2 = effect && (cur == {2'd2, 3'd2 } );
 wire	noeffect	 = ~|{effect_on_s1, effect_on_s3, effect_on_s2};
 assign fnum_I = ( {11{effect_on_s1}} & fnum_ch3op1 ) |
 				( {11{effect_on_s2}} & fnum_ch3op2 ) |
@@ -147,20 +134,22 @@ assign block_I =( {3{effect_on_s1}} & block_ch3op1 ) |
 				( {3{effect_on_s3}} & block_ch3op3 ) |
 				( {3{noeffect}}	 & block_I_raw  );
 				
-jt12_mod24 u_opch_II ( .base(opch_I), .extra(3'd1), .mod(opch_II)  );
-jt12_mod24 u_opch_III( .base(opch_I), .extra(3'd2), .mod(opch_III) );
-jt12_mod24 u_opch_IV ( .base(opch_I), .extra(3'd3), .mod(opch_IV)  );
-jt12_mod24 u_opch_V  ( .base(opch_I), .extra(3'd4), .mod(opch_V)   );
-jt12_mod24 u_opch_VI ( .base(opch_I), .extra(3'd5), .mod(opch_VI)  );
-jt12_mod24 u_opch_VII( .base(opch_I), .extra(3'd6), .mod(opch_VII) );
+wire [2:0] ch_II, ch_III, ch_IV, ch_V, ch_VI;
+				
+jt12_sumch u_opch_II ( .chin(ch),    .chout(ch_II)  );
+jt12_sumch u_opch_III( .chin(ch_II), .chout(ch_III) );
+jt12_sumch u_opch_IV ( .chin(ch_III),.chout(ch_IV)  );
+jt12_sumch u_opch_V  ( .chin(ch_IV), .chout(ch_V)   );
+jt12_sumch u_opch_VI ( .chin(ch_V ), .chout(ch_VI)  );
 
-wire update_op_I  = cur == opch_I;
-wire update_op_II = cur == opch_II;
-wire update_op_III= cur == opch_III;
+wire update_op_I  = cur == { op, ch     };
+wire update_op_II = cur == { op, ch_II  };
+wire update_op_III= cur == { op, ch_III };
 // wire update_op_IV = cur == opch_IV;
-wire update_op_V  = cur == opch_V;
+wire update_op_V  = cur == { op, ch_V   };
 // wire update_op_VI = cur == opch_VI;
-wire update_op_VII= cur == opch_VII;
+wire [2:0] op_plus1 = op+2'd1;
+wire update_op_VII= cur == { op_plus1[1:0], ch };
 
 // key on/off
 wire	[3:0]	keyon_op = din[7:4];
@@ -191,18 +180,10 @@ wire	[3:0]	ssg;
 
 reg			last;
 
-wire	update_ch_I  = cur == ch;
-//wire	update_ch_II = cur == ch+1;
-/*
-wire	update_ch_III= ch == ch_III;
-wire	update_ch_IV = ch == ch_IV;
-wire	update_ch_V  = ch == ch_V;
-wire	update_ch_VI = ch == ch_VI;
-*/
+wire	update_ch_I  = cur_ch == ch;
 
 wire up_alg_ch	= up_alg	& update_ch_I;
 wire up_block_ch= up_block	& update_ch_I;
-// wire up_fb_ch	= up_alg	& update_ch_II;
 wire up_fnumlo_ch=up_fnumlo & update_ch_I;
 wire up_pms_ch	= up_pms	& update_ch_I;
 
@@ -228,36 +209,46 @@ wire up_ssg_op	= up_ssgeg	& update_op_II;
 
 wire up = 	up_alg 	| up_block 	| up_fnumlo | up_pms |
 			up_dt1 	| up_tl 	| up_ks_ar	| up_amen_d1r | 
-			up_d2r	| up_d1l 	| up_ssgeg;
-
+			up_d2r	| up_d1l 	| up_ssgeg  | up_keyon;			
 
 always @(*) begin
-	next <= cur==5'd23 ? 5'd0 : cur +1'b1;
+	// next <= cur==5'd23 ? 5'd0 : cur +1'b1;
+	next_op <= cur_ch==3'd6 ? cur_op+1'b1 : cur_op;
+	next_ch <= cur_ch[1:0]==2'b10 ? cur_ch+2'd2 : cur_ch+1'd1;
 end
 
-reg		busy_op; 
-wire	busy_kon;
+wire [4:0] next = { next_op, next_ch };
+wire [4:0] cur  = {  cur_op,  cur_ch };
 
-assign	busy = busy_op | busy_kon;
+reg		busy_op; 
+reg		up_keyon_long;
+
+assign	busy = busy_op;
 
 
 always @(posedge clk) begin : up_counter
 	if( rst ) begin
 		cnt		<= 5'h0;
-		cur		<= 5'h0;
 		last	<= 1'b0;
-		zero	<= 1'b0;
+		zero	<= 1'b1;
 		busy_op	<= 1'b0;
+		up_keyon_long <= 1'b0;
+		cur_op  <= 2'd0;
+		cur_ch  <= 3'd0;
 	end
 	else begin
-		cur		<= next;
+		{ cur_op, cur_ch }	<= { next_op, next_ch };
 		zero 	<= next == 5'd0;
 		last	<= up;
 		if( up && !last ) begin
 			cnt		<= cur;
 			busy_op	<= 1'b1;
+			up_keyon_long <= up_keyon;
 		end
-		else if( cnt == cur ) busy_op <= 1'b0;
+		else if( cnt == cur ) begin
+			busy_op <= 1'b0;
+			up_keyon_long <= 1'b0;
+		end
 	end
 end
 
@@ -266,15 +257,14 @@ jt12_kon u_kon(
 	.clk		( clk		),
 	.keyon_op	( keyon_op	),
 	.keyon_ch	( keyon_ch	),
-	.next_slot	( next		),
-	.up_keyon	( up_keyon	),
+	.cur_op		( cur_op	),
+	.cur_ch		( cur_ch	),
+	.up_keyon	( up_keyon_long	),
 	.csm		( csm		),
 	.flag_A		( flag_A	),
 	.overflow_A	( overflow_A),
 	
-	.keyon_II	( keyon_II	),
-	.keyoff_II	( keyoff_II	),
-	.busy		( busy_kon	)
+	.keyon_II	( keyon_II	)
 );
 
 

@@ -11,10 +11,10 @@ int cont=0;
 
 void write( unsigned chnum, unsigned reg, unsigned val, bool addr1=false ) {
 	cout << "cfg[" << dec << cont++ << "] = { 1'b";
-    if( addr1 ) 
+    if( addr1 )
     	cout << '1';
     else {
-        if( chnum < 3 ) 
+        if( chnum < 3 )
 	        cout << '0';
         else
 	        cout << '1';
@@ -50,7 +50,7 @@ public:
 		write( chnum, 0x40+a, tl );
 		write( chnum, 0x50+a, (ks<<6)| ar );
 		// anyadir AM
-		write( chnum, 0x60+a, dr ); 
+		write( chnum, 0x60+a, dr );
 		write( chnum, 0x70+a, sr );
 		write( chnum, 0x80+a, (sl<<4)| rr );
 		write( chnum, 0x90+a, (ssgen<<3)| ssg );
@@ -58,7 +58,7 @@ public:
 	void set_mul( int a ) {
 		mul = a;
 		write( chnum, 0x30+a, (dt<<4)| mul );
-	}	
+	}
 	void set_tl( int a ) {
 		tl = a;
 		write( chnum, 0x40+reg_offset(), a );
@@ -70,19 +70,19 @@ public:
 	void set_ar( int a ) {
 		ar = a;
 		write( chnum, 0x50+a, (ks<<6)| ar );
-	}  		
+	}
 	void set_sr( int a ) {
 		sr = a;
 		write( chnum, 0x70+reg_offset(), a );
-	}  
+	}
 	void set_dr( int a ) {
 		dr = a;
 		write( chnum, 0x60+reg_offset(), a );
-	}  
+	}
 	void set_ssg( int a  ) {
 		ssg = a;
 		write( chnum, 0x90+reg_offset(), (ssgen<<3)| ssg );
-	}		 
+	}
 };
 
 struct Ch {
@@ -90,7 +90,7 @@ struct Ch {
 	int fnum, block;
 	int fb, alg, rl, ams, pms;
 	Op op[4];
-	
+
 	void writecfg() {
 		write( chnum, 0xa4, (block<<3) | (fnum>>8) );
 		write( chnum, 0xa0, fnum&0xff );
@@ -106,26 +106,26 @@ struct Ch {
 	void set_fb( int a ) {
 		fb = a;
 		write( chnum, 0xb0, (fb<<3) | (alg&7) );
-	}  
+	}
 	void set_block( int a ) {
 		block = a;
 		write( chnum, 0xa4, (block<<3) | (fnum>>8) );
 		write( chnum, 0xa0, fnum&0xff );
-	}   
+	}
 	void set_fnumber( int a ) {
 		fnum = a;
 		write( chnum, 0xa4, (block<<3) | (fnum>>8) );
 		write( chnum, 0xa0, fnum&0xff );
-	}   
+	}
 	void set_rl( int a ) {
 		rl = a;
 		write( chnum, 0xb4, (rl<<6) | (ams<<3) | pms );
-	}			  
+	}
 };
 
 void keyoff_all() {
 	for( int k=0; k<6; k++ ) {
-		int e = k>2 ? 1:0;	
+		int e = k>2 ? 1:0;
 		write(  0, 0x28, k+e );
 	}
 }
@@ -182,7 +182,7 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 	if (mask&0x80) {
 	cerr << "Starting ALG=7"<<endl;
 	for( int fb=0; fb<fb_max; fb++ ) {
-		cerr << "FB="<<fb<<endl;	
+		cerr << "FB="<<fb<<endl;
 		for( int k=0; k<6; k++ ) {
 			ch[k].set_alg(7);
 			ch[k].set_fb(fb);
@@ -196,7 +196,7 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 			}
 			keyoff_all();
 		}
-	}	
+	}
 	}
 	// ALG = 6
 	if (mask&0x40) {
@@ -211,9 +211,9 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		keyon( k, 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		
+
 		keyoff_all();
-	}  
+	}
 	}
 	// ALG = 5
 	if (mask&0x20) {
@@ -229,9 +229,9 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		keyon( k, 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		
+
 		keyoff_all();
-	}  
+	}
 	}
 	// ALG = 4
 	if (mask&0x10) {
@@ -243,14 +243,14 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		ch[k].op[2].set_tl(25);
 		ch[k].op[1].set_tl(0);
 		ch[k].op[3].set_tl(0);
-		for( int j=0; j<4; j++ )				
+		for( int j=0; j<4; j++ )
 			ch[k].op[j].set_dr(0);
 		keyon( k, 15 );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		
+
 		keyoff_all();
-	}	  	
+	}
 	}
 	// ALG = 3
 	if (mask&0x8) {
@@ -261,7 +261,7 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		ch[k].op[0].set_tl(20); // S1
 		ch[k].op[2].set_tl(25); // S3
 		ch[k].op[1].set_tl(20); // S2
-		ch[k].op[3].set_tl(0);						
+		ch[k].op[3].set_tl(0);
 		ch[k].op[0].set_dr(0);
 		ch[k].op[3].set_dr(0);
 		keyon( k, 0xc );
@@ -273,12 +273,12 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		keyon( k, 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		
+
 		keyoff_all();
-	} 
+	}
 	}
 	// ALG = 2..0
-	for( int alg=2, m=4; alg>=0; alg--,m>>=1 ) 		
+	for( int alg=2, m=4; alg>=0; alg--,m>>=1 )
 	if( mask& m ) {
 	cerr << "Starting ALG="<<alg<<endl;
 	for( int k=0; k<6; k++ ) {
@@ -287,7 +287,7 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		ch[k].op[0].set_tl(20); // S1
 		ch[k].op[2].set_tl(25); // S3
 		ch[k].op[1].set_tl(20); // S2
-		ch[k].op[3].set_tl(0);						
+		ch[k].op[3].set_tl(0);
 		ch[k].op[0].set_dr(0);
 		ch[k].op[3].set_dr(0);
 		keyon( k, 0x8 );
@@ -302,9 +302,9 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		keyon( k, 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		
+
 		keyoff_all();
-	}	 
+	}
 	}
 }
 
@@ -327,12 +327,12 @@ void ssg_test( Ch ch[6] ) {
 			write( 0, 0x01, 255 ); // wait
 
 		keyoff_all();
-	}	
-	for( int k=0; k<6; k++ ) 
+	}
+	for( int k=0; k<6; k++ )
 	for( int j=0; j<4; j++, ssg++ ) {
 		ch[k].op[j].ssgen = 0;
         ch[k].op[j].set_ssg(0);
-	}    
+	}
 }
 
 void tone00( Ch ch[6] ) {
@@ -357,14 +357,14 @@ void fnum_check( Ch ch[6] ) {
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( 0 );
 			ch[k].op[j].set_dr( 0 );
-		}		
+		}
 	}
 	for( int k=0; k<6; k++ ) {
 		keyon( k, 0xf );
-	}	   
+	}
 	for( int wait=0; wait<17; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	keyoff_all();		
+	keyoff_all();
 }
 
 void pcm_check( Ch ch[6] ) {
@@ -381,7 +381,7 @@ void pcm_check( Ch ch[6] ) {
 			ch[k].op[j].set_ar(0);
 			ch[k].op[j].set_sl(0);
 			ch[k].op[j].set_sr(0);
-			ch[k].op[j].set_dr(0);		
+			ch[k].op[j].set_dr(0);
 			ch[k].op[j].set_tl( k==5? 0 : 127 );
 		}
 		keyon( k, 15 );
@@ -407,13 +407,13 @@ void timer_test() {
 	write( 0, 0x27, 0x5 );
 	for( int wait=0; wait<4; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	write( 0, 0x27, 0x2 | (3<<2) | (3<<4) );		
+	write( 0, 0x27, 0x2 | (3<<2) | (3<<4) );
 	for( int wait=0; wait<4; wait++ )
 		write( 0, 0x01, 255 ); // wait
 }
 
 void ch3effect_test( Ch ch[6] ) {
-	write( 0, 0x27, 0x40 ); // Effect mode	 	
+	write( 0, 0x27, 0x40 ); // Effect mode
 	// block
 	write( 0, 0xAD, (0<<3) | 0 );
 	write( 0, 0xAC, (1<<3) | 1 );
@@ -423,21 +423,21 @@ void ch3effect_test( Ch ch[6] ) {
 	write( 0, 0xA9, 0x10 );
 	write( 0, 0xA8, 0x20 );
 	write( 0, 0xAA, 0x30 );
-	write( 0, 0xA2, 0x40 );	
+	write( 0, 0xA2, 0x40 );
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(7);
 		ch[k].set_fb(3);
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( 0 );
 			ch[k].op[j].set_dr( 0 );
-		}		
+		}
 	}
 	for( int k=0; k<6; k++ ) {
 		keyon( k, 0xf );
-	}	   
+	}
 	for( int wait=0; wait<2; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	keyoff_all(); 
+	keyoff_all();
 }
 
 void csm_test(Ch ch[6]) {
@@ -452,7 +452,7 @@ void csm_test(Ch ch[6]) {
 			ch[k].op[j].set_tl( 0 );
 			ch[k].op[j].set_dr( 0 );
 			ch[k].op[j].set_mul(1);
-		}		
+		}
 	}
 	unsigned faux = 925&0xff;
 	unsigned baux = (4<<3)|(925>>8);
@@ -463,14 +463,14 @@ void csm_test(Ch ch[6]) {
 	write( 0, 0xad, baux );
 	write( 0, 0xac, baux );
 	write( 0, 0xae, baux );
-	write( 0, 0xa6, baux );	
-	
+	write( 0, 0xa6, baux );
+
 	write( 0, 0x24, 120 );
 	write( 0, 0x25, 0 );
-	write( 0, 0x27, 0x75 ); // CSM	  
+	write( 0, 0x27, 0x75 ); // CSM
 	for( int wait=0; wait<8; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	keyoff_all(); 
+	keyoff_all();
 }
 
 void gng2( Ch *ch ) {
@@ -498,8 +498,8 @@ void gng2( Ch *ch ) {
     	write( 0, 0x30+k, patch_00[k] );
         write( 0, 0x30+k, patch_10[k], true );
     }
-    
-    int patch_freq_00[] = { 
+
+    int patch_freq_00[] = {
     	0xdd, 0x9c, 0x4b, 0x00,
         0x2a, 0x1b, 0x1c, 0x00,
         0x38, 0x2a, 0x2a, 0x00,
@@ -515,14 +515,14 @@ void gng2( Ch *ch ) {
         write( 0, 0xB0+k, patch_freq_00[k+8] );
         write( 0, 0xB0+k, patch_freq_10[k+8], true );
      }
-     
+
      for( int k=0; k<6; k++ ) {
      	keyon( k, 0xf );
 		for( int wait=0; wait<25; wait++ )
-			write( 0, 0x01, 255 ); // wait        
+			write( 0, 0x01, 255 ); // wait
         keyoff_all();
-        write( 0, 0x01, 55 ); // wait   
-     }	
+        write( 0, 0x01, 55 ); // wait
+     }
 }
 
 void test_bin( Ch ch[6] ) {
@@ -562,7 +562,7 @@ void test_bin( Ch ch[6] ) {
     // YM2612_reset();
     for ( k=0; k<sizeof(ymregs); k+=2 ) {
         write( 0, ymregs[k], ymregs[k+1]);
-    }	
+    }
 
 	for( int wait=0; wait<2; wait++ )
 		write( 0, 0x01, 255 ); // wait
@@ -584,7 +584,8 @@ void keyon_doble( Ch ch[6] ) {
     cerr << "En la tercera onda hay otra vez keyon antes de RELEASE, pero con AR=31\n";
     cerr << "En la cuarta onda, hay keyon y enseguida keyoff para entrar en RELEASE\n"
     	<<  "pero el RELEASE es muy lento. Entra un keyon durante el RELEASE y debe\n"
-        <<  "aceptarse, con reseteo de fase y amplitud a tope porque AR=31\n";
+        <<  "aceptarse, con reseteo de fase y amplitud a tope porque AR=31\n"
+        <<  "Tarda unos 5 minutos en correr\n";
 	write( 0, 0x40, 0 );
 	write( 0, 0x50, 18);
 	write( 0, 0xa4, 0xf );
@@ -603,7 +604,7 @@ void keyon_doble( Ch ch[6] ) {
 	write( 0, 0x28, 0 );
 	for( int wait=0; wait<3; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	write( 0, 0x28, 0x10 );	
+	write( 0, 0x28, 0x10 );
 	for( int wait=0; wait<3; wait++ )
 		write( 0, 0x01, 255 ); // wait
 	// AR=31
@@ -625,8 +626,8 @@ void keyon_doble( Ch ch[6] ) {
     write( 0, 0x80, 0x0 ); // RR
     write( 0, 0x28, 0x10 );
     write( 0, 0x01, 255 ); // espera
-	write( 0, 0x28, 0 );    
-    write( 0, 0x01, 255 ); // espera    
+	write( 0, 0x28, 0 );
+    write( 0, 0x01, 255 ); // espera
     write( 0, 0x28, 0x10 ); // Segundo keyon, deberiamos estar en release
 	for( int wait=0; wait<3; wait++ )
 		write( 0, 0x01, 255 ); // wait
@@ -648,7 +649,7 @@ void dr_check( Ch ch[6] ) {
 			ch[k].op[j].set_dr(0);
 		}
 		keyon( k, 15 );
-		write( 0, 0x01, 55 ); // wait		
+		write( 0, 0x01, 55 ); // wait
 	}
 	for( int wait=0; wait<1; wait++ )
 		write( 0, 0x01, 255 ); // wait for 8.5ms
@@ -660,14 +661,14 @@ void amfreq_test( Ch ch[6] ) {
 		write(	0, 0x22, 0 );
 		write(	0, 0x22, 8 | lfo_freq );
 		for( int wait=0; wait<29; wait++ )
-			write( 0, 0x01, 255 ); // wait for 8.5ms	
+			write( 0, 0x01, 255 ); // wait for 8.5ms
 	}
 }
 
 void am_test( Ch ch[6] ) {
 	//write(	0, 0x22, 0x80 | lfo_freq );
 	for( int wait=0; wait<1; wait++ )
-		write( 0, 0x01, 255 ); // wait for 8.5ms	
+		write( 0, 0x01, 255 ); // wait for 8.5ms
 }
 
 void fnumorder_test( Ch ch[6] ) {
@@ -695,7 +696,7 @@ void fnumorder_test( Ch ch[6] ) {
 	write( 0, 0xa9, 1 );
 	write( 0, 0xaa, 2 );
 	write( 0, 0xa8, 3 );
-	write( 0, 0x01, 50 ); 
+	write( 0, 0x01, 50 );
 }
 
 void acc_test( Ch ch[6] ) {
@@ -706,53 +707,53 @@ void acc_test( Ch ch[6] ) {
 	write( 0, 0xa4, (3<<3) | 3 );
 	write( 0, 0xa0, 0xf0 );
 	write( 0, 0xb4, 3<<6 );
-	
+
 	for( int j=0; j<4; j++ ) {
 		ch[0].op[j].set_dr(0);
 		ch[0].op[j].set_sr(0);
 	}
-	
+
 	write( 0, 0xb0, 7 );
 	write( 0, 0x40, 0x0 );
 	write( 0, 0x44, 0x7f );
-	write( 0, 0x48, 0x7f );	
+	write( 0, 0x48, 0x7f );
 	write( 0, 0x4C, 0x7f );
-	write( 0, 0x28, 0xf0 );	
+	write( 0, 0x28, 0xf0 );
 	write( 0, 0x01, 200 );
-	
+
 	write( 0, 0x44, 0x0 );
-	write( 0, 0x01, 200 );	
+	write( 0, 0x01, 200 );
 
 
 	write( 0, 0x48, 0x0 );
-	write( 0, 0x01, 200 );	
+	write( 0, 0x01, 200 );
 
 	write( 0, 0x4c, 0x0 );
-	write( 0, 0x01, 200 );	
+	write( 0, 0x01, 200 );
 	// Ajuste
 	write( 0, 0x40, 0x8 );
 	write( 0, 0x44, 0x7f );
-	write( 0, 0x48, 0x7f );	
-	write( 0, 0x4C, 0x7f );	
-	write( 0, 0x01, 200 );	
+	write( 0, 0x48, 0x7f );
+	write( 0, 0x4C, 0x7f );
+	write( 0, 0x01, 200 );
 
 	write( 0, 0x44, 0x8 );
-	write( 0, 0x48, 0x7f );	
-	write( 0, 0x4C, 0x7f );	
-	write( 0, 0x01, 200 );	
+	write( 0, 0x48, 0x7f );
+	write( 0, 0x4C, 0x7f );
+	write( 0, 0x01, 200 );
 
 	write( 0, 0x40, 13 );
 	write( 0, 0x44, 13 );
-	write( 0, 0x48, 13 );	
-	write( 0, 0x4C, 0x7f );	
-	write( 0, 0x01, 200 );	
+	write( 0, 0x48, 13 );
+	write( 0, 0x4C, 0x7f );
+	write( 0, 0x01, 200 );
 
 	write( 0, 0x40, 16 );
 	write( 0, 0x44, 16 );
-	write( 0, 0x48, 16 );	
-	write( 0, 0x4C, 16 );	
-	write( 0, 0x01, 200 );	
-		
+	write( 0, 0x48, 16 );
+	write( 0, 0x4C, 16 );
+	write( 0, 0x01, 200 );
+
 }
 
 void dacmux_test( Ch ch[6] ) {
@@ -777,15 +778,15 @@ void dacmux_test( Ch ch[6] ) {
 	ch[1].set_rl(1);
 	ch[5].set_rl(1);
 	ch[3].set_rl(1);
-	write( 0, 0x01, 10 ); // wait	
+	write( 0, 0x01, 10 ); // wait
 	ch[0].set_rl(2);
 	ch[4].set_rl(2);
 	ch[2].set_rl(2);
 	ch[1].set_rl(2);
 	ch[5].set_rl(2);
 	ch[3].set_rl(2);
-	write( 0, 0x01, 10 ); // wait	
-	
+	write( 0, 0x01, 10 ); // wait
+
 	// los enciendo de uno en uno
 	ch[0].set_rl(0);
 	ch[4].set_rl(0);
@@ -793,20 +794,20 @@ void dacmux_test( Ch ch[6] ) {
 	ch[1].set_rl(0);
 	ch[5].set_rl(0);
 	ch[3].set_rl(0);
-	write( 0, 0x01, 20 ); // wait	
+	write( 0, 0x01, 20 ); // wait
 	// todos apagados
-	ch[0].set_rl(1);	
-	write( 0, 0x01, 10 ); // wait	
+	ch[0].set_rl(1);
+	write( 0, 0x01, 10 ); // wait
 	ch[4].set_rl(1);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[2].set_rl(1);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[1].set_rl(1);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[5].set_rl(1);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[3].set_rl(1);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	// los enciendo de uno en uno en el izquierdo
 	ch[0].set_rl(0);
 	ch[4].set_rl(0);
@@ -814,26 +815,26 @@ void dacmux_test( Ch ch[6] ) {
 	ch[1].set_rl(0);
 	ch[5].set_rl(0);
 	ch[3].set_rl(0);
-	write( 0, 0x01, 20 ); // wait	
-	ch[0].set_rl(2);	
-	write( 0, 0x01, 10 ); // wait	
+	write( 0, 0x01, 20 ); // wait
+	ch[0].set_rl(2);
+	write( 0, 0x01, 10 ); // wait
 	ch[4].set_rl(2);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[2].set_rl(2);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[1].set_rl(2);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[5].set_rl(2);
-	write( 0, 0x01, 5 ); // wait		
+	write( 0, 0x01, 5 ); // wait
 	ch[3].set_rl(2);
-	write( 0, 0x01, 5 ); // wait			
-	
+	write( 0, 0x01, 5 ); // wait
+
 }
 
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
-	
+
 	for( int k=1; k<argc; k++ ) {
 		if( strcmp( argv[k], "-pcm" )==0 ) pcm_check( ch );
 		if( strcmp( argv[k], "-dr" )==0 || strcmp( argv[k], "-csm" )==0)
@@ -842,7 +843,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-fnum" )==0 )  fnum_check( ch );
 		if( strcmp( argv[k], "-ssg" )==0 )  ssg_test( ch );
 		if( strcmp( argv[k], "-ch3" )==0 )  ch3effect_test( ch );
-		if( strcmp( argv[k], "-timerB" )==0 )  timerb( ch );		
+		if( strcmp( argv[k], "-timerB" )==0 )  timerb( ch );
 		if( strcmp( argv[k], "-keyon" )==0 )  keyon_doble( ch );
 		if( strcmp( argv[k], "-tone00" )==0 )  tone00( ch );
 		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 0x80, 1 );
@@ -853,7 +854,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
 	}
 
-//	ch[0].op[0].set_sl(15); 
+//	ch[0].op[0].set_sl(15);
     // gng2( ch ); // 27 min en casa
   //  test_bin( ch );
 

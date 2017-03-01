@@ -21,7 +21,7 @@
 `timescale 1ns / 1ps
 
 module jt12_sh24 #(parameter width=5 )
-(	
+(
 	input 					clk,
 	input		[width-1:0]	din,
    	output reg [width-1:0]	st1,
@@ -29,7 +29,7 @@ module jt12_sh24 #(parameter width=5 )
    	output reg [width-1:0]	st3,
    	output reg [width-1:0]	st4,
    	output reg [width-1:0]	st5,
-   	output reg [width-1:0]	st6,				
+   	output reg [width-1:0]	st6,
    	output reg [width-1:0]	st7,
    	output reg [width-1:0]	st8,
    	output reg [width-1:0]	st9,
@@ -46,8 +46,8 @@ module jt12_sh24 #(parameter width=5 )
    	output reg [width-1:0]	st20,
    	output reg [width-1:0]	st21,
    	output reg [width-1:0]	st22,
-   	output reg [width-1:0]	st23,	
-   	output reg [width-1:0]	st24	
+   	output reg [width-1:0]	st23,
+   	output reg [width-1:0]	st24
 );
 
 always @(posedge clk) begin

@@ -8,8 +8,7 @@ jt12_test.v
 ../../hdl/jt12_kon.v
 ../../hdl/jt12_lfo.v
 ../../hdl/jt12_mmr.v
-../../hdl/jt12_mod24.v
-../../hdl/jt12_mod6.v
+../../hdl/jt12_sumch.v
 ../../hdl/jt12_opsync.v
 ../../hdl/jt12_op.v
 ../../hdl/jt12_pg.v

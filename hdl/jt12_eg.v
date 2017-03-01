@@ -12,27 +12,27 @@
 
     You should have received a copy of the GNU General Public License
     along with JT12.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	Author: Jose Tejada Gomez. Twitter: @topapate
 	Version: 1.0
 	Date: 14-2-2017
-	
+
 	The non SSG-EG section is basically that of JT51's jt51_envelope.v
 	adapted to 6 channels, instead of the eight.
-	
-	The SSG-EG is based on the works of Nemesis, published on 
+
+	The SSG-EG is based on the works of Nemesis, published on
 	http://gendev.spritesmind.net/forum/search.php?st=0&sk=t&sd=d&sr=posts&keywords=SSG-EG&t=386&sf=msgonly&ch=-1&start=15
-	
+
 	This module tries to replicate exactly the original YM2612 waveforms.
 	Nonetheless, the verilog code is not a replica of the original circuit
 	as there is no reverse engineering description of it.
-	
+
 	Questions:
 		-I latch the SSG enable bit on keyon. I have to do this in order to ignore the inversion bit before the keyon
 		-If SSG enable is set to 0 by software before issueing a keyoff it will be ignored
 		-However, the other SSG bits will have an effect if changed in the meantime between keyon and keyoff
 		-Was YM2612 like that?
-	
+
 	*/
 
 `timescale 1ns / 1ps
@@ -64,13 +64,12 @@ module jt12_eg (
 	input		[2:0]	ssg_eg_II,
 	// envelope operation
 	input				keyon_II,
-	input				keyoff_II,
 	// envelope number
 	input		[6:0]	am,
 	input		[6:0]	tl_VII,
 	input		[1:0]	ams_VII,
 	input				amsen_VII,
-	
+
 	output	reg	[9:0]	eg_IX,
 	output	reg			pg_rst_III
 );
@@ -95,7 +94,6 @@ wire	[9:0]	eg_II;
 
 reg 	step_V, step_VI;
 reg		sum_up;
-// reg		keyon_III, keyon_IV, keyon_V, keyon_VI;
 reg 	[5:0]	rate_V;
 reg		[5:1]	rate_VI;
 
@@ -140,7 +138,7 @@ reg [9:0] ar_result, ar_sum;
 always @(*) begin : ar_calculation
 	casex( rate_VI[5:2] )
 		default: ar_sum0 <= eg_VI[9:4] + 1'd1;
-		4'b1100: ar_sum0 <= eg_VI[9:4] + 1'd1;		
+		4'b1100: ar_sum0 <= eg_VI[9:4] + 1'd1;
 		4'b1101: ar_sum0 <= eg_VI[9:3] + 1'd1;
 		4'b111x: ar_sum0 <= eg_VI[9:2] + 1'd1;
 	endcase
@@ -153,21 +151,22 @@ end
 
 always @(posedge clk) begin
 	if( d1l == 4'd15 )
-		d1level_II <= 5'h10; // 48dB 
+		d1level_II <= 5'h10; // 48dB
 	else
 		d1level_II <= d1l;
 end
 
-//	Register Cycle II	
+//	Register Cycle II
 wire	ssg_invertion_II, ssg_invertion_VIII;
 reg		ssg_invertion_III;
 reg	[4:0] cfg_III;
 wire	ssg_pg_rst = eg_II>=10'h200 && ssg_en_II &&
 							 !( ssg_alt_II || ssg_hold_II );
 wire	ssg_en_out;
+wire	keyon_last_II;
 reg		ssg_en_in_II;
 
-always @(*) begin                             
+always @(*) begin
 	if( state_II==RELEASE )
     	ssg_en_in_II <= 1'b0;
     else
@@ -176,10 +175,13 @@ end
 
 wire	ar_off_II = arate_II == 5'h1f;
 
+wire	keyon_now_II  = !keyon_last_II && keyon_II;
+wire	keyoff_now_II = keyon_last_II && !keyon_II;
+
 always @(posedge clk) begin
 	// ar_off_III	<= arate_II == 5'h1f;
 	// trigger release
-	if( keyoff_II ) begin
+	if( keyoff_now_II ) begin
 		cfg_III <= { rrate_II, 1'b1 };
 		state_III <= RELEASE;
 		pg_rst_III	<= 1'b0;
@@ -187,7 +189,7 @@ always @(posedge clk) begin
 	end
 	else begin
 		// trigger 1st decay
-		if( keyon_II && state_II==RELEASE ) begin
+		if( keyon_now_II ) begin
 			cfg_III <= arate_II;
 			state_III <= ATTACK;
 			pg_rst_III <= 1'b1;
@@ -200,7 +202,7 @@ always @(posedge clk) begin
 					if( eg_II==10'd0 ) begin
 						state_III <= DECAY1;
 						cfg_III		 <= rate1_II;
-						ssg_invertion_III <= ssg_invertion_II;						
+						ssg_invertion_III <= ssg_invertion_II;
 					end
 					else begin
 						state_III <= state_II; // attack
@@ -215,28 +217,28 @@ always @(posedge clk) begin
 					end
 					else begin
 						cfg_III	<=	rate1_II;
-						state_III <= state_II;	// decay1				
+						state_III <= state_II;	// decay1
 					end
 					ssg_invertion_III <= ssg_invertion_II;
 					ar_off_III <= 1'b0;
 					end
-				DECAY2: 
+				DECAY2:
 					if( ssg_en_II && eg_II >= 10'h200 ) begin
-						ssg_invertion_III <= ssg_alt_II ^ ssg_invertion_II;	
+						ssg_invertion_III <= ssg_alt_II ^ ssg_invertion_II;
 						if( ssg_hold_II ) begin
 							cfg_III <= 5'd0;
 							state_III <= HOLD; // repeats!
-							ar_off_III <= 1'b0;							
+							ar_off_III <= 1'b0;
 						end
 						else begin
 							cfg_III	<=	rate2_II;
 							state_III <= ATTACK; // repeats!
 							ar_off_III <= 1'b1;
-						end						
+						end
 					end
 					else begin
 						cfg_III	<=	rate2_II;
-						state_III <= state_II;	// decay2			
+						state_III <= state_II;	// decay2
 						ssg_invertion_III <= ssg_invertion_II;
 						ar_off_III <= 1'b0;
 					end
@@ -255,7 +257,7 @@ always @(posedge clk) begin
 			endcase
 		end
 	end
-	
+
 	eg_III <= eg_II;
 end
 
@@ -289,34 +291,34 @@ always @(posedge clk) begin
 	eg_V <= eg_IV;
     if( state_IV == ATTACK )
 	    casex( rate_IV[5:2] )
-		    4'h0: cnt_V <= eg_cnt[13:11]; 
-		    4'h1: cnt_V <= eg_cnt[12:10]; 
-		    4'h2: cnt_V <= eg_cnt[11: 9]; 
-		    4'h3: cnt_V <= eg_cnt[10: 8]; 
-		    4'h4: cnt_V <= eg_cnt[ 9: 7]; 
-		    4'h5: cnt_V <= eg_cnt[ 8: 6]; 
-		    4'h6: cnt_V <= eg_cnt[ 7: 5]; 
-		    4'h7: cnt_V <= eg_cnt[ 6: 4]; 
-		    4'h8: cnt_V <= eg_cnt[ 5: 3]; 
-		    4'h9: cnt_V <= eg_cnt[ 4: 2]; 
-		    4'ha: cnt_V <= eg_cnt[ 3: 1]; 
-		    default: cnt_V <= eg_cnt[ 2: 0]; 
+		    4'h0: cnt_V <= eg_cnt[13:11];
+		    4'h1: cnt_V <= eg_cnt[12:10];
+		    4'h2: cnt_V <= eg_cnt[11: 9];
+		    4'h3: cnt_V <= eg_cnt[10: 8];
+		    4'h4: cnt_V <= eg_cnt[ 9: 7];
+		    4'h5: cnt_V <= eg_cnt[ 8: 6];
+		    4'h6: cnt_V <= eg_cnt[ 7: 5];
+		    4'h7: cnt_V <= eg_cnt[ 6: 4];
+		    4'h8: cnt_V <= eg_cnt[ 5: 3];
+		    4'h9: cnt_V <= eg_cnt[ 4: 2];
+		    4'ha: cnt_V <= eg_cnt[ 3: 1];
+		    default: cnt_V <= eg_cnt[ 2: 0];
 	    endcase
     else
 	    casex( rate_IV[5:2] )
-		    4'h0: cnt_V <= eg_cnt[14:12]; 
-		    4'h1: cnt_V <= eg_cnt[13:11]; 
-		    4'h2: cnt_V <= eg_cnt[12:10]; 
-		    4'h3: cnt_V <= eg_cnt[11: 9]; 
-		    4'h4: cnt_V <= eg_cnt[10: 8]; 
-		    4'h5: cnt_V <= eg_cnt[ 9: 7]; 
-		    4'h6: cnt_V <= eg_cnt[ 8: 6]; 
-		    4'h7: cnt_V <= eg_cnt[ 7: 5]; 
-		    4'h8: cnt_V <= eg_cnt[ 6: 4]; 
-		    4'h9: cnt_V <= eg_cnt[ 5: 3]; 
-		    4'ha: cnt_V <= eg_cnt[ 4: 2]; 
-		    4'hb: cnt_V <= eg_cnt[ 3: 1]; 
-		    default: cnt_V <= eg_cnt[ 2: 0]; 
+		    4'h0: cnt_V <= eg_cnt[14:12];
+		    4'h1: cnt_V <= eg_cnt[13:11];
+		    4'h2: cnt_V <= eg_cnt[12:10];
+		    4'h3: cnt_V <= eg_cnt[11: 9];
+		    4'h4: cnt_V <= eg_cnt[10: 8];
+		    4'h5: cnt_V <= eg_cnt[ 9: 7];
+		    4'h6: cnt_V <= eg_cnt[ 8: 6];
+		    4'h7: cnt_V <= eg_cnt[ 7: 5];
+		    4'h8: cnt_V <= eg_cnt[ 6: 4];
+		    4'h9: cnt_V <= eg_cnt[ 5: 3];
+		    4'ha: cnt_V <= eg_cnt[ 4: 2];
+		    4'hb: cnt_V <= eg_cnt[ 3: 1];
+		    default: cnt_V <= eg_cnt[ 2: 0];
 	    endcase
 end
 
@@ -343,16 +345,15 @@ always @(*) begin : rate_step
 			2'd1: step_idx <= 8'b11101010; // 5
 			2'd2: step_idx <= 8'b11101110; // 6
 			2'd3: step_idx <= 8'b11111110; // 7
-		endcase	
-	end 
+		endcase
+	end
 	// a rate_IV of zero keeps the level still
 	step_V <= rate_V[5:1]==5'd0 ? 1'b0 : step_idx[ cnt_V ];
 end
 
 always @(posedge clk) begin
-	state_VI <= state_V;	
+	state_VI <= state_V;
 	rate_VI <= rate_V[5:1];
-	// keyon_VI <= keyon_V;
 	eg_VI <= eg_V;
 	sum_up <= cnt_V[0] != cnt_out;
 	step_VI <= step_V;
@@ -387,8 +388,8 @@ always @(posedge clk) begin
 	else
 	if( state_VI == ATTACK ) begin
 		if( sum_up && eg_VI != 10'd0 )
-			if( rate_VI[5:1]==5'd31 ) 
-				eg_VII <= 10'd0; 
+			if( rate_VI[5:1]==5'd31 )
+				eg_VII <= 10'd0;
 			else
 				eg_VII <= ar_result;
 		else
@@ -396,7 +397,7 @@ always @(posedge clk) begin
 	end
 	else begin : DECAY_SUM
 		if( sum_up ) begin
-			if ( egatt_VI<= 10'd1023 ) 
+			if ( egatt_VI<= 10'd1023 )
 				eg_VII <= egatt_VI[9:0];
 			else eg_VII <= 10'h3FF;
 		end
@@ -421,12 +422,12 @@ always @(*) begin : sum_eg_and_tl
 		sum_eg_tl <= 11'd0;
 	else
 	`endif
-		sum_eg_tl <= { tl_VII,   3'd0 } 
-		           + eg_VII 
+		sum_eg_tl <= { tl_VII,   3'd0 }
+		           + eg_VII
 				   + { am_final, 1'b0 };
 end
 
-always @(posedge clk) begin	
+always @(posedge clk) begin
 	eg_internal <= sum_eg_tl[11:10] > 2'b0 ? {10{1'b1}} : sum_eg_tl[9:0];
 	state_VIII <= state_VII;
 end
@@ -458,7 +459,7 @@ jt12_sh24 #( .width(1) ) u_ssgen(
 	.clk	( clk		),
 	.din	( ssg_en_in_II ),
 	.st4	( ssg_en_VI	  ),
-	.st6	( ssg_en_VIII ), // note that din is *_II 
+	.st6	( ssg_en_VIII ), // note that din is *_II
 	.st24	( ssg_en_out  )
 );
 
@@ -489,7 +490,7 @@ jt12_sh #( .width(1), .stages(18) ) u_ssg2sh(
 
 
 /* Had 27 stages in JT51, for 32 operators
-   Has 19 stages here, for 24 operators 
+   Has 19 stages here, for 24 operators
    plus 1 extra stage. 20 stages does not work well.
    Maybe JT51 should be 26!! */
 jt12_sh #( .width(10), .stages(19) ) u_egsh(
@@ -504,6 +505,12 @@ jt12_sh #( .width(1), .stages(24) ) u_cntsh(
 	.clk	( clk		),
 	.din	( cnt_V[0]	),
 	.drop	( cnt_out	)
+);
+
+jt12_sh #( .width(1), .stages(24) ) u_konsh(
+	.clk	( clk		),
+	.din	( keyon_II	),
+	.drop	( keyon_last_II	)
 );
 
 /* Had 31 stages in JT51, for 32 operators
@@ -534,34 +541,34 @@ sep24 #( .width(3), .pos0(0) ) stsep
 	.clk	( clk_int	),
 	.mixed	( state_II	),
 	.mask	( 0			),
-	.cnt	( sep24_cnt	),	
-	
-	.ch0s1 (state_ch0s1), 
-	.ch1s1 (state_ch1s1), 
-	.ch2s1 (state_ch2s1), 
-	.ch3s1 (state_ch3s1), 
-	.ch4s1 (state_ch4s1), 
-	.ch5s1 (state_ch5s1), 
+	.cnt	( sep24_cnt	),
 
-	.ch0s2 (state_ch0s2), 
-	.ch1s2 (state_ch1s2), 
-	.ch2s2 (state_ch2s2), 
-	.ch3s2 (state_ch3s2), 
-	.ch4s2 (state_ch4s2), 
-	.ch5s2 (state_ch5s2), 
+	.ch0s1 (state_ch0s1),
+	.ch1s1 (state_ch1s1),
+	.ch2s1 (state_ch2s1),
+	.ch3s1 (state_ch3s1),
+	.ch4s1 (state_ch4s1),
+	.ch5s1 (state_ch5s1),
 
-	.ch0s3 (state_ch0s3), 
-	.ch1s3 (state_ch1s3), 
-	.ch2s3 (state_ch2s3), 
-	.ch3s3 (state_ch3s3), 
-	.ch4s3 (state_ch4s3), 
-	.ch5s3 (state_ch5s3), 
+	.ch0s2 (state_ch0s2),
+	.ch1s2 (state_ch1s2),
+	.ch2s2 (state_ch2s2),
+	.ch3s2 (state_ch3s2),
+	.ch4s2 (state_ch4s2),
+	.ch5s2 (state_ch5s2),
 
-	.ch0s4 (state_ch0s4), 
-	.ch1s4 (state_ch1s4), 
-	.ch2s4 (state_ch2s4), 
-	.ch3s4 (state_ch3s4), 
-	.ch4s4 (state_ch4s4), 
+	.ch0s3 (state_ch0s3),
+	.ch1s3 (state_ch1s3),
+	.ch2s3 (state_ch2s3),
+	.ch3s3 (state_ch3s3),
+	.ch4s3 (state_ch4s3),
+	.ch5s3 (state_ch5s3),
+
+	.ch0s4 (state_ch0s4),
+	.ch1s4 (state_ch1s4),
+	.ch2s4 (state_ch2s4),
+	.ch3s4 (state_ch3s4),
+	.ch4s4 (state_ch4s4),
 	.ch5s4 (state_ch5s4)
 );
 

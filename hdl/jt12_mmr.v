@@ -92,7 +92,6 @@ module jt12_mmr(
 	output	[2:0]	ssg_eg_II,
 
 	output			keyon_II,
-	output			keyoff_II,
 
 //	output	[ 1:0]	cur_op,
 	// Operator
@@ -107,23 +106,23 @@ reg [7:0]	selected_register;
 
 //reg		sch; // 0 => CH1~CH3 only available. 1=>CH4~CH6
 /*
-reg		irq_zero_en, irq_brdy_en, irq_eos_en, 
+reg		irq_zero_en, irq_brdy_en, irq_eos_en,
 		irq_tb_en, irq_ta_en;
 		*/
 reg		up_clr;
-reg 	up_alg; 
+reg 	up_alg;
 
-reg 	up_block; 
-reg 	up_fnumlo; 
-reg 	up_pms; 
-reg 	up_dt1; 
-reg 	up_tl; 
-reg 	up_ks_ar; 
-reg 	up_amen_d1r; 
-reg 	up_d2r; 
-reg		up_d1l; 
-reg		up_ssgeg; 
-reg		up_keyon; 
+reg 	up_block;
+reg 	up_fnumlo;
+reg 	up_pms;
+reg 	up_dt1;
+reg 	up_tl;
+reg 	up_ks_ar;
+reg 	up_amen_d1r;
+reg 	up_d2r;
+reg		up_d1l;
+reg		up_ssgeg;
+reg		up_keyon;
 
 wire			busy_reg;
 
@@ -163,18 +162,18 @@ always @(posedge clk) begin : memory_mapped_registers
 		busy				<= 1'b0;
 		up_ch				<= 3'd0;
 		up_op				<= 2'd0;
-		{ 	up_keyon,		up_alg, 	up_block, 	up_fnumlo, 
-			up_pms, 	up_dt1, 	up_tl, 		up_ks_ar, 
+		{ 	up_keyon,		up_alg, 	up_block, 	up_fnumlo,
+			up_pms, 	up_dt1, 	up_tl, 		up_ks_ar,
 			up_amen_d1r,up_d2r,		up_d1l,		up_ssgeg } <=  12'd0;
 		`ifdef TEST_SUPPORT
 		{ test_eg, test_op0 } <= 2'd0;
 		`endif
 		// IRQ Mask
-		/*{ irq_zero_en, irq_brdy_en, irq_eos_en, 
-			irq_tb_en, irq_ta_en } = 5'h1f; */			
+		/*{ irq_zero_en, irq_brdy_en, irq_eos_en,
+			irq_tb_en, irq_ta_en } = 5'h1f; */
 		// timers
 		{ value_A, value_B } <= 18'd0;
-		{ clr_flag_B, clr_flag_A, 
+		{ clr_flag_B, clr_flag_A,
 		enable_irq_B, enable_irq_A, load_B, load_A } <= 6'd0;
 		{ clr_run_A, clr_run_B, set_run_A, set_run_B } <= 4'b1100;
 		up_clr <= 1'b0;
@@ -200,7 +199,7 @@ always @(posedge clk) begin : memory_mapped_registers
 			busy <= 1'b1;
 			if( !addr[0] ) begin
 				selected_register <= din;
-				up_ch	<= din[1:0]+ (addr[1] ? 2'b11 : 2'b0);
+				up_ch	<= {addr[1], din[1:0]};
 				up_op	<= din[3:2]; // 0=S1,1=S3,2=S2,3=S4
 			end else begin
 				din_latch <= din;
@@ -221,9 +220,9 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_CLKA2:	value_A[1:0]<= din[1:0];
 					REG_CLKB:	value_B		<= din;
 					REG_TIMER: begin
-						effect	<= |din[7:6]; 
+						effect	<= |din[7:6];
 						csm		<= din[7:6] == 2'b01;
-						{ clr_flag_B, clr_flag_A, 
+						{ clr_flag_B, clr_flag_A,
 						  enable_irq_B, enable_irq_A,
 						  load_B, load_A } <= din[5:0];
 						  clr_run_A <= ~din[0];
@@ -241,10 +240,10 @@ always @(posedge clk) begin : memory_mapped_registers
 					/*
 					REG_IRQMASK: { sch, irq_zero_en,
 						irq_brdy_en,
-						irq_eos_en, 
+						irq_eos_en,
 						irq_tb_en, irq_ta_en } <= { din[7], din[4:0] }; */
 					endcase
-				end 
+				end
                 else if( selected_register[1:0]!=2'b11 ) begin
 					// channel registers
 					if( selected_register >= 8'hA0 ) begin
@@ -263,7 +262,7 @@ always @(posedge clk) begin : memory_mapped_registers
 							8'hB4, 8'hB5, 8'hB6:	up_pms		<= 1'b1;
 						endcase
 					end
-					else 
+					else
 					// operator registers
 					begin
 						case( selected_register[7:4] )
@@ -285,8 +284,8 @@ always @(posedge clk) begin : memory_mapped_registers
 			{ clr_flag_B, clr_flag_A, load_B, load_A } <= 4'd0;
 			{ clr_run_A, clr_run_B, set_run_A, set_run_B } <= 4'd0;
 			up_keyon <= 1'b0;
-			if( |{  up_keyon,	up_alg, 	up_block, 	up_fnumlo, 
-					up_pms, 	up_dt1, 	up_tl, 		up_ks_ar, 
+			if( |{  up_keyon,	up_alg, 	up_block, 	up_fnumlo,
+					up_pms, 	up_dt1, 	up_tl, 		up_ks_ar,
 					up_amen_d1r,up_d2r,		up_d1l,		up_ssgeg } == 1'b0 )
 				busy	<= busy_reg | write;
 			else
@@ -298,8 +297,8 @@ always @(posedge clk) begin : memory_mapped_registers
 			else begin
 				up_clr <= 1'b0;
 				if( up_clr	)
-  			 	 { 	up_alg, 	up_block, 	up_fnumlo, 
-					up_pms, 	up_dt1, 	up_tl, 		up_ks_ar, 
+  			 	 { 	up_alg, 	up_block, 	up_fnumlo,
+					up_pms, 	up_dt1, 	up_tl, 		up_ks_ar,
 					up_amen_d1r,up_d2r,		up_d1l,		up_ssgeg } <=  11'd0;
 			end
 		end
@@ -374,7 +373,6 @@ jt12_reg u_reg(
 	.fb_II		( fb_II		),
 	.alg		( alg		),
 	.keyon_II	( keyon_II	),
-	.keyoff_II	( keyoff_II	),
 
 	//.cur_op		( cur_op	),
 	.zero		( zero		),

@@ -73,8 +73,7 @@ wire	[ 1:0]	ks_III;
 wire			ssg_en_II;
 wire	[2:0]	ssg_eg_II;
 // envelope operation
-wire			keyon;
-wire			keyoff;
+wire			keyon_II;
 wire	[9:0]	eg_IX;
 wire			pg_rst_III;
 // Channel
@@ -119,7 +118,6 @@ wire	[7:0]	din_s;
 wire	[1:0]	addr_s;
 
 wire	busy, write, ch6op;
-wire	keyon_II, keyoff_II;
 
 jt12_clksync u_clksync(
 	.rst		( rst		),
@@ -231,7 +229,6 @@ jt12_mmr u_mmr(
 	.ssg_eg_II	( ssg_eg_II	),
 
 	.keyon_II	( keyon_II	),
-	.keyoff_II	( keyoff_II	),
 	// Operator
 	.zero		( zero		),
 	.s1_enters	( s1_enters	),
@@ -312,7 +309,6 @@ jt12_eg u_eg(
 	.ssg_eg_II		( ssg_eg_II		),
 	// envelope operation
 	.keyon_II		( keyon_II		),
-	.keyoff_II		( keyoff_II		),
 	// envelope number
 	.am				( lfo_mod		),
 	.tl_VII			( tl_VII		),
