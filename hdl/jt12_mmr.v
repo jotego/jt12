@@ -68,6 +68,7 @@ module jt12_mmr(
 	// PG
 	output	[10:0]	fnum_I,
 	output	[ 2:0]	block_I,
+	output	reg		pg_stop,
 	// REG
 	output	[ 1:0]	rl,
 	output	[ 2:0]	fb_II,
@@ -78,6 +79,7 @@ module jt12_mmr(
 	output	[ 2:0]	dt1_II,
 	output	[ 3:0]	mul_V,
 	output	[ 6:0]	tl_VII,
+	output	reg		eg_stop,
 
 	output	[ 4:0]	ar_II,
 	output	[ 4:0]	d1r_II,
@@ -189,6 +191,9 @@ always @(posedge clk) begin : memory_mapped_registers
 		set_n3		<= 1'b0;
 		set_n2		<= 1'b0;
 		// sch			<= 1'b0;
+		// Original test features
+		eg_stop		<=	1'b0;
+		pg_stop		<=	1'b0;
 	end else begin
 		// WRITE IN REGISTERS
 		if( write && !busy ) begin
@@ -207,6 +212,10 @@ always @(posedge clk) begin : memory_mapped_registers
 					`ifdef TEST_SUPPORT
 					REG_TEST2:	{ test_op0, test_eg } <= din[1:0];
 					`endif
+					REG_TESTYM: begin
+						eg_stop <= din[5];
+						pg_stop <= din[3];
+						end
 					REG_KON: 	up_keyon 	<= 1'b1;
 					REG_CLKA1:	value_A[9:2]<= din;
 					REG_CLKA2:	value_A[1:0]<= din[1:0];

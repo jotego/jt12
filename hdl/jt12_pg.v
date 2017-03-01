@@ -47,6 +47,7 @@ module jt12_pg(
 	// phase operation
 	input				pg_rst_III,
 	input				zero,
+	input				pg_stop,
 	
 	output  reg [ 4:0]  keycode_III,
 	output	reg	[ 9:0]	phase_VIII
@@ -218,7 +219,7 @@ jt12_sh #( .width(10), .stages(12-7) ) u_padding(
 */
 jt12_sh #( .width(20), .stages(24) ) u_phsh(
 	.clk	( clk		),
-	.din	( phase_in	),
+	.din	( pg_stop ? phase_drop : phase_in	),
 	.drop	( phase_drop)
 );
 

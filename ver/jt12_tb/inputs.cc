@@ -766,10 +766,11 @@ void dacmux_test( Ch ch[6] ) {
 		int j=0;
 		ch[k].op[j].set_tl( 0 );
 		keyon( k, 1<<j );
-		write( 0, 0x01, 128 ); // wait
+		write( 0, 0x01, 50 ); // wait
 //		}
 	}
-	keyoff_all();	
+	write( 0, 0x21, 1<<3 ); // PG stop
+	write( 0, 0x01, 10 ); // wait
 }
 
 int main( int argc, char *argv[] ) {

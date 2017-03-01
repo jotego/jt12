@@ -198,7 +198,8 @@ jt12_mmr u_mmr(
 	// PG
 	.fnum_I		( fnum_I	),
 	.block_I	( block_I	),
-	// REG
+	.pg_stop	( pg_stop	),
+	// EG
 	.rl			( rl		),
 	.fb_II		( fb_II		),
 	.alg		( alg		),
@@ -215,6 +216,8 @@ jt12_mmr u_mmr(
 	.rr_II		( rr_II		),
 	.d1l		( d1l		),
 	.ks_III		( ks_III	),
+
+	.eg_stop	( eg_stop	),	
 	// SSG operation
 	.ssg_en_II	( ssg_en_II	),
 	.ssg_eg_II	( ssg_eg_II	),
@@ -275,6 +278,7 @@ jt12_pg u_pg(
 	// phase operation
 	.pg_rst_III	( pg_rst_III	),
 	.zero		( zero			),
+	.pg_stop	( pg_stop		),
 	.keycode_III( keycode_III	),
 	.phase_VIII	( phase_VIII 	)
 );
@@ -286,6 +290,7 @@ jt12_eg u_eg(
 	.rst			( rst_int		),
 	.clk			( clk_int		),
 	.zero			( zero			),
+	.eg_stop		( eg_stop		),	
 	// envelope configuration
 	.keycode_III	( keycode_III	),
 	.arate_II		( ar_II			), // attack  rate

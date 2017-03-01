@@ -50,6 +50,7 @@ module jt12_eg (
 	input			 	rst,
 	input			 	clk,
 	input				zero,
+	input				eg_stop,
 	// envelope configuration
 	input		[4:0]	keycode_III,
 	input		[4:0]	arate_II, // attack  rate
@@ -362,7 +363,7 @@ end
 reg [3:0] 	preatt_VI;
 reg [5:0] 	att_VI;
 wire		ssg_en_VI;
-reg	[9:0]	eg_VII;
+reg	[9:0]	eg_VII, eg_stopped_VII;
 reg	[10:0]	egatt_VI;
 
 always @(*) begin
@@ -375,6 +376,7 @@ always @(*) begin
 	endcase
 	att_VI <= ssg_en_VI ? { preatt_VI, 2'd0 } : { 2'd0, preatt_VI };
     egatt_VI <= att_VI + eg_VI;
+	eg_stopped_VII <= eg_VI;
 end
 
 always @(posedge clk) begin
@@ -492,7 +494,7 @@ jt12_sh #( .width(1), .stages(18) ) u_ssg2sh(
    Maybe JT51 should be 26!! */
 jt12_sh #( .width(10), .stages(19) ) u_egsh(
 	.clk	( clk		),
-	.din	( eg_VII		),
+	.din	( eg_stop ? eg_stopped_VII : eg_VII		),
 	.drop	( eg_II	)
 );
 
