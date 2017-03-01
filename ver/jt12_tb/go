@@ -8,6 +8,7 @@ LIMITTIME=
 EXTRA=
 RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
+TEST_NAME=
 
 while [ $# -gt 0 ]; do
 	if [ $1 = "-w" ]; then
@@ -54,6 +55,10 @@ while [ $# -gt 0 ]; do
 			echo "-fnumorder: timer only"
 			TIMERONLY=TIMERONLY
 		fi
+		if [[ $1 = "-keyon" ]]; then
+			echo "-keyon: keep only waveforms of OP and EG"
+			TEST_NAME=KEYON_TEST
+		fi
         shift
         continue
     fi
@@ -75,7 +80,7 @@ if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
         -DSIMULATION -D$TIMERONLY -D$DUMPSOUND $LIMITTIME \
-		-D$DUMPLFO && sim -lxt > s
+		-D$DUMPLFO -D$TEST_NAME && sim -lxt > s
     #exit 0
     if [ $? -ne 0 ]; then
 	    cat s

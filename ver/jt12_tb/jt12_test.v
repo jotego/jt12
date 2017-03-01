@@ -5,8 +5,21 @@ module jt12_test;
 reg	rst;
 
 `ifndef DUMPLFO
+`ifndef KEYON_TEST
 `include "../common/dump.vh"
-`else
+`endif
+`endif
+
+`ifdef KEYON_TEST
+initial begin
+	$dumpfile("jt12_test.lxt");
+	$dumpvars(1, jt12_test.uut.u_op );
+	$dumpvars(1, jt12_test.uut.u_eg );
+	$dumpon;
+end
+`endif
+
+`ifdef DUMPLFO
 initial begin
 	$dumpfile("jt12_test.lxt");
 	$dumpvars(0, jt12_test.uut.u_lfo );
@@ -100,18 +113,18 @@ jt12 uut(
 	.din	( din	),
 	.addr	( addr	),
 	.cs_n	( cs_n	),
-	.wr_n	( wr_n	),	
-	
-	.dout	( dout	),	
+	.wr_n	( wr_n	),
+
+	.dout	( dout	),
 	.snd_right	( right	),
 	.snd_left	( left	),
 	.sample	( sample	),
-	
+
 	// muxed output
 	.mux_left	( mux_left	),
 	.mux_right	( mux_right ),
 	.mux_sample	( mux_sample),
-	
+
     .irq_n	( irq_n	)
 );
 
