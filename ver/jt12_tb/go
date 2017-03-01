@@ -8,7 +8,7 @@ LIMITTIME=
 EXTRA=
 RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
-TEST_NAME=
+TEST_NAME=NOTESTNAME
 
 while [ $# -gt 0 ]; do
 	if [ $1 = "-w" ]; then
@@ -44,7 +44,8 @@ while [ $# -gt 0 ]; do
 	fi
     if [[ $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am"
     	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg"
-		|| $1 = "-tone00" || $1 = "-dac" || $1 = "-keyon" ]]; then
+		|| $1 = "-tone00" || $1 = "-dac" || $1 = "-keyon"
+		|| $1 = "-keyon2" || $1 = "-mmr" ]]; then
     	EXTRA=$EXTRA" "$1
 		if [[ $1 = "-amfreq" ]]; then
 			echo "-amfreq: timer only"
@@ -55,8 +56,8 @@ while [ $# -gt 0 ]; do
 			echo "-fnumorder: timer only"
 			TIMERONLY=TIMERONLY
 		fi
-		if [[ $1 = "-keyon" ]]; then
-			echo "-keyon: keep only waveforms of OP and EG"
+		if [[ $1 = "-keyon2" ]]; then
+			echo "-keyon2: keep only waveforms of OP and EG"
 			TEST_NAME=KEYON_TEST
 		fi
         shift

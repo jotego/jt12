@@ -577,6 +577,15 @@ void timerb( Ch ch[6] ) {
     }
 }
 
+void keyon_simple( Ch ch[6] ) {
+	for( int k=0; k<6; k++ )
+	for( int j=0; j<4; j++ ) {
+		ch[k].op[j].set_tl(0);
+		keyon( k, 1<<j );
+		write( 0, 1, 20 );
+	}
+}
+
 void keyon_doble( Ch ch[6] ) {
 	cerr << "Prueba de keyon doble:\nEl keyon debe ignorarse en fases que no sean RELEASE\n";
     cerr << "En la primera onda hay un keyon antes de RELEASE, ha de ignorarse\n";
@@ -831,6 +840,18 @@ void dacmux_test( Ch ch[6] ) {
 
 }
 
+void mmr_test( Ch ch[6] ) {
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(k);
+		ch[k].set_fb(k);
+		for( int j=0; j<4; j++ ) {
+			int c = k;
+			if ( k>2 ) c++;
+			ch[k].op[j].set_tl( (j<<3) | c );
+		}
+	}
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
@@ -844,7 +865,8 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-ssg" )==0 )  ssg_test( ch );
 		if( strcmp( argv[k], "-ch3" )==0 )  ch3effect_test( ch );
 		if( strcmp( argv[k], "-timerB" )==0 )  timerb( ch );
-		if( strcmp( argv[k], "-keyon" )==0 )  keyon_doble( ch );
+		if( strcmp( argv[k], "-keyon2" )==0 )  keyon_doble( ch );
+		if( strcmp( argv[k], "-keyon" )==0 )  keyon_simple( ch );
 		if( strcmp( argv[k], "-tone00" )==0 )  tone00( ch );
 		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 0x80, 1 );
 		if( strcmp( argv[k], "-am" )==0 )  am_test( ch );
@@ -852,6 +874,8 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );
 		if( strcmp( argv[k], "-acc" )==0 )  acc_test( ch );
 		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
+		
+		if( strcmp( argv[k], "-mmr" )==0 )  mmr_test( ch );
 	}
 
 //	ch[0].op[0].set_sl(15);
