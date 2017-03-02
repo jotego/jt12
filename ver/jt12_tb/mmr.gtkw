@@ -1,0 +1,50 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Thu Mar  2 10:02:47 2017
+[*]
+[dumpfile] "/home/jtejada/jt12/ver/jt12_tb/jt12_test.lxt"
+[dumpfile_mtime] "Thu Mar  2 10:00:19 2017"
+[dumpfile_size] 10564524
+[savefile] "/home/jtejada/jt12/ver/jt12_tb/mmr.gtkw"
+[timestart] 17863250000
+[size] 1920 1123
+[pos] -1 -1
+*-22.097332 17881040000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] jt12_test.
+[treeopen] jt12_test.uut.
+[treeopen] jt12_test.uut.u_eg.
+[treeopen] jt12_test.uut.u_mmr.
+[treeopen] jt12_test.uut.u_mmr.u_reg.
+[sst_width] 264
+[signals_width] 142
+[sst_expanded] 1
+[sst_vpaned_height] 337
+@24
+[color] 2
+jt12_test.uut.u_mmr.u_reg.cur_ch[2:0]
+[color] 2
+jt12_test.uut.u_mmr.u_reg.cur_op[1:0]
+@200
+-
+@24
+jt12_test.uut.u_mmr.u_reg.ch[2:0]
+jt12_test.uut.u_mmr.u_reg.op[1:0]
+@200
+-
+@22
+[color] 2
+jt12_test.uut.u_mmr.u_reg.cur[4:0]
+@24
+jt12_test.uut.u_mmr.u_reg.alg[2:0]
+jt12_test.uut.u_mmr.u_reg.fb_I[2:0]
+@22
+jt12_test.uut.u_mmr.u_reg.d1r_II[4:0]
+jt12_test.uut.u_mmr.u_reg.d2r_II[4:0]
+@24
+jt12_test.uut.u_mmr.u_reg.dt1_II[2:0]
+@22
+jt12_test.uut.u_mmr.u_reg.mul_V[3:0]
+@25
+jt12_test.uut.u_mmr.u_reg.ssg_eg_II[2:0]
+[pattern_trace] 1
+[pattern_trace] 0

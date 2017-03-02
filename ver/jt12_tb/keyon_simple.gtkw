@@ -1,0 +1,94 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Thu Mar  2 10:50:48 2017
+[*]
+[dumpfile] "/home/jtejada/jt12/ver/jt12_tb/jt12_test.lxt"
+[dumpfile_mtime] "Thu Mar  2 10:43:30 2017"
+[dumpfile_size] 40395205
+[savefile] "/home/jtejada/jt12/ver/jt12_tb/keyon_simple.gtkw"
+[timestart] 32880000000
+[size] 1920 1003
+[pos] -3 -57
+*-31.540401 33325156540 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] jt12_test.
+[treeopen] jt12_test.uut.
+[treeopen] jt12_test.uut.u_eg.
+[treeopen] jt12_test.uut.u_mmr.
+[treeopen] jt12_test.uut.u_mmr.u_reg.
+[sst_width] 218
+[signals_width] 197
+[sst_expanded] 1
+[sst_vpaned_height] 625
+@8420
+jt12_test.uut.u_op.op_ch0s1[13:0]
+jt12_test.uut.u_op.op_ch0s2[13:0]
+jt12_test.uut.u_op.op_ch0s3[13:0]
+jt12_test.uut.u_op.op_ch0s4[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch1s1[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch1s2[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch1s3[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch1s4[13:0]
+jt12_test.uut.u_op.op_ch2s1[13:0]
+jt12_test.uut.u_op.op_ch2s2[13:0]
+jt12_test.uut.u_op.op_ch2s3[13:0]
+jt12_test.uut.u_op.op_ch2s4[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch3s1[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch3s2[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch3s3[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch3s4[13:0]
+jt12_test.uut.u_op.op_ch4s1[13:0]
+jt12_test.uut.u_op.op_ch4s2[13:0]
+jt12_test.uut.u_op.op_ch4s3[13:0]
+jt12_test.uut.u_op.op_ch4s4[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch5s1[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch5s2[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch5s3[13:0]
+[color] 3
+jt12_test.uut.u_op.op_ch5s4[13:0]
+@200
+-
+@25
+jt12_test.u_testdata.data_cnt[15:0]
+@8024
+jt12_test.u_testdata.waitcnt[15:0]
+@200
+-
+@28
+jt12_test.uut.u_eg.keyon_II[0]
+jt12_test.uut.u_eg.keyon_last_II[0]
+jt12_test.uut.u_eg.keyon_now_II[0]
+@24
+[color] 2
+jt12_test.uut.u_mmr.u_reg.cur_ch[2:0]
+[color] 2
+jt12_test.uut.u_mmr.u_reg.cur_op[1:0]
+@200
+-
+-
+@24
+jt12_test.uut.u_mmr.u_reg.ch[2:0]
+jt12_test.uut.u_mmr.u_reg.op[1:0]
+@28
+jt12_test.uut.u_mmr.u_reg.up_amen_d1r[0]
+jt12_test.uut.u_mmr.u_reg.up_d2r[0]
+@22
+jt12_test.uut.u_mmr.u_reg.d1r_in[4:0]
+jt12_test.uut.u_mmr.u_reg.d2r_in[4:0]
+@200
+-
+@22
+jt12_test.uut.u_mmr.u_reg.d1r_II[4:0]
+jt12_test.uut.u_mmr.u_reg.d2r_II[4:0]
+[pattern_trace] 1
+[pattern_trace] 0

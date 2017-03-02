@@ -581,8 +581,35 @@ void keyon_simple( Ch ch[6] ) {
 	for( int k=0; k<6; k++ )
 	for( int j=0; j<4; j++ ) {
 		ch[k].op[j].set_tl(0);
+		ch[k].op[j].set_ar(31);
+		ch[k].op[j].set_dr(0);
+		ch[k].op[j].set_sr(0);
+	}
+	write( 0, 1, 20 );
+	cerr << "Primero todos por orden\n";
+	for( int k=0; k<6; k++ )
+	for( int j=0; j<4; j++ ) {
+		ch[k].op[j].set_tl(0);
 		keyon( k, 1<<j );
 		write( 0, 1, 20 );
+	}
+	cerr << "Luego los apago todos\n";
+	keyoff_all();
+	write( 0, 1, 200 );
+	cerr << "Y ahora los enciendo aleatoriamente\n";
+	srand(0);
+	for( int k=0; k<30; k++ ) {
+		int opmask = rand()%16;
+		int chnum = rand()%6;
+		cerr << "Canal " << chnum << " -> ";
+		if ( opmask&1 ) cerr << "1"; else cerr << " ";
+		if ( opmask&2 ) cerr << "2"; else cerr << " ";
+		if ( opmask&4 ) cerr << "3"; else cerr << " ";
+		if ( opmask&8 ) cerr << "4"; else cerr << " ";
+		cerr << endl;
+		if( chnum>2) chnum++;
+		write( 0, 0x28, (opmask<<4)|chnum );
+		write( 0, 1, 200 );
 	}
 }
 
@@ -858,12 +885,16 @@ void mmr_test( Ch ch[6] ) {
 				default: op=0; break;
 			}
 			int n = (op<<3) | c;
+			ch[k].op[j].dt = op;
 			ch[k].op[j].set_tl( n );
+			ch[k].op[j].set_mul( c );
 			ch[k].op[j].set_ar( n );
 			ch[k].op[j].set_dr( n );
 			ch[k].op[j].set_sr( n );
+			ch[k].op[j].set_ssg( c );
 		}
 	}
+	write( 0, 1, 10 );
 }
 
 int main( int argc, char *argv[] ) {
@@ -888,7 +919,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );
 		if( strcmp( argv[k], "-acc" )==0 )  acc_test( ch );
 		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
-		
+
 		if( strcmp( argv[k], "-mmr" )==0 )  mmr_test( ch );
 	}
 

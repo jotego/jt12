@@ -56,7 +56,7 @@ while [ $# -gt 0 ]; do
 			echo "-fnumorder: timer only"
 			TIMERONLY=TIMERONLY
 		fi
-		if [[ $1 = "-keyon2" ]]; then
+		if [[ $1 = "-keyon" || $1 = "-keyon2" ]]; then
 			echo "-keyon2: keep only waveforms of OP and EG"
 			TEST_NAME=KEYON_TEST
 		fi
