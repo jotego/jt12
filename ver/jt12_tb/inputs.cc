@@ -57,7 +57,7 @@ public:
 	}
 	void set_mul( int a ) {
 		mul = a;
-		write( chnum, 0x30+a, (dt<<4)| mul );
+		write( chnum, 0x30+reg_offset(), (dt<<4)| mul );
 	}
 	void set_tl( int a ) {
 		tl = a;
@@ -69,7 +69,7 @@ public:
 	}
 	void set_ar( int a ) {
 		ar = a;
-		write( chnum, 0x50+a, (ks<<6)| ar );
+		write( chnum, 0x50+reg_offset(), (ks<<6)| ar );
 	}
 	void set_sr( int a ) {
 		sr = a;
@@ -841,13 +841,26 @@ void dacmux_test( Ch ch[6] ) {
 }
 
 void mmr_test( Ch ch[6] ) {
+	cerr << "MMR test\n";
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(k);
 		ch[k].set_fb(k);
 		for( int j=0; j<4; j++ ) {
 			int c = k;
 			if ( k>2 ) c++;
-			ch[k].op[j].set_tl( (j<<3) | c );
+			int op ;
+			switch(j) {
+				case 0: op=0; break;
+				case 1: op=2; break;
+				case 2: op=1; break;
+				case 3: op=3; break;
+				default: op=0; break;
+			}
+			int n = (op<<3) | c;
+			ch[k].op[j].set_tl( n );
+			ch[k].op[j].set_ar( n );
+			ch[k].op[j].set_dr( n );
+			ch[k].op[j].set_sr( n );
 		}
 	}
 }

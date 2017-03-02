@@ -135,18 +135,22 @@ assign block_I =( {3{effect_on_s1}} & block_ch3op1 ) |
 				( {3{noeffect}}	 & block_I_raw  );
 				
 wire [2:0] ch_II, ch_III, ch_IV, ch_V, ch_VI;
-				
-jt12_sumch u_opch_II ( .chin(ch),    .chout(ch_II)  );
-jt12_sumch u_opch_III( .chin(ch_II), .chout(ch_III) );
-jt12_sumch u_opch_IV ( .chin(ch_III),.chout(ch_IV)  );
-jt12_sumch u_opch_V  ( .chin(ch_IV), .chout(ch_V)   );
-jt12_sumch u_opch_VI ( .chin(ch_V ), .chout(ch_VI)  );
 
-wire update_op_I  = cur == { op, ch     };
-wire update_op_II = cur == { op, ch_II  };
-wire update_op_III= cur == { op, ch_III };
+wire [4:0] req_opch_I = { op, ch };
+wire [4:0] 	req_opch_II, req_opch_III, 
+			req_opch_IV, req_opch_V, req_opch_VI;
+				
+jt12_sumch u_opch_II ( .chin(req_opch_I  ), .chout(req_opch_II)  );
+jt12_sumch u_opch_III( .chin(req_opch_II ), .chout(req_opch_III) );
+jt12_sumch u_opch_IV ( .chin(req_opch_III), .chout(req_opch_IV)  );
+jt12_sumch u_opch_V  ( .chin(req_opch_IV ), .chout(req_opch_V)   );
+jt12_sumch u_opch_VI ( .chin(req_opch_V  ), .chout(req_opch_VI)  );
+
+wire update_op_I  = cur == req_opch_I;
+wire update_op_II = cur == req_opch_II;
+wire update_op_III= cur == req_opch_III;
 // wire update_op_IV = cur == opch_IV;
-wire update_op_V  = cur == { op, ch_V   };
+wire update_op_V  = cur == req_opch_V;
 // wire update_op_VI = cur == opch_VI;
 wire [2:0] op_plus1 = op+2'd1;
 wire update_op_VII= cur == { op_plus1[1:0], ch };
