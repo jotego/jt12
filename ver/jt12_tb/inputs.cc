@@ -843,11 +843,12 @@ void dacmux_test( Ch ch[6] ) {
 void mmr_test( Ch ch[6] ) {
 	cerr << "MMR test\n";
 	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(k);
-		ch[k].set_fb(k);
+		int c = k;
+		if ( k>2 ) c++;
+
+		ch[k].set_alg(c);
+		ch[k].set_fb(c);
 		for( int j=0; j<4; j++ ) {
-			int c = k;
-			if ( k>2 ) c++;
 			int op ;
 			switch(j) {
 				case 0: op=0; break;
