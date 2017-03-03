@@ -143,7 +143,9 @@ wire signed	[13:0]	preright;
 
 //wire signed [5:0] psgm = psg-6'h20;
 wire signed [8:0] psg_dac = psg<<<3;
-wire signed [12:0] psg_sum = {13{enable_psg}} & { 3'b0, psg_dac };
+
+//wire signed [12:0] psg_sum = {13{enable_psg}} & { 3'b0, psg_dac };
+wire signed [12:0] psg_sum = {13{enable_psg}} & { 2'b0, psg_dac, 1'b0 };
 
 
 assign preleft = {  fmleft [11], fmleft, 1'd0 } + psg_sum;
