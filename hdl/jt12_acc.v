@@ -57,7 +57,7 @@ module jt12_acc
 );
 
 reg signed [11:0] pre_left, pre_right;
-
+wire signed [8:0] total;
 reg sum_en;
 
 always @(*) begin
@@ -133,7 +133,6 @@ always @(posedge clk) begin
 end
 			
 reg  signed [8:0] next, opsum, prev;
-wire signed [8:0] total;
 wire signed [9:0] opsum10 = next+total;
 
 always @(*) begin

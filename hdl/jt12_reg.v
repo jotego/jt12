@@ -102,14 +102,17 @@ module jt12_reg(
 	output				amsen_VII,
 
 	// envelope operation
-	output			keyon_II,
-	output			keyoff_II
+	output			keyon_II
 );
 
 
 reg	 [4:0] cnt;
 reg  [1:0] next_op, cur_op;
 reg  [2:0] next_ch, cur_ch;
+
+wire [4:0] next = { next_op, next_ch };
+wire [4:0] cur  = {  cur_op,  cur_ch };
+
 wire [2:0] fb_I;
 
 always @(posedge clk) begin
@@ -220,9 +223,6 @@ always @(*) begin
 	next_op <= cur_ch==3'd6 ? cur_op+1'b1 : cur_op;
 	next_ch <= cur_ch[1:0]==2'b10 ? cur_ch+2'd2 : cur_ch+1'd1;
 end
-
-wire [4:0] next = { next_op, next_ch };
-wire [4:0] cur  = {  cur_op,  cur_ch };
 
 reg		busy_op; 
 reg		up_keyon_long;

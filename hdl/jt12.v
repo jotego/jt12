@@ -87,6 +87,8 @@ wire	[ 1:0]	ams_VII;
 // PCM
 wire			pcm_en;
 wire	[ 8:0]	pcm;
+// Test
+wire			pg_stop, eg_stop;
 
 // Timers
 wire	[9:0]	value_A;
@@ -106,6 +108,7 @@ wire			set_n2, set_n3, set_n6;
 wire			clk_int, rst_int;
 // LFO
 wire	[6:0]	lfo_mod;
+wire			lfo_rst;
 
 assign			clk_out = clk_int;
 
