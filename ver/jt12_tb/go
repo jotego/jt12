@@ -60,6 +60,9 @@ while [ $# -gt 0 ]; do
 			echo "-keyon2: keep only waveforms of OP and EG"
 			TEST_NAME=KEYON_TEST
 		fi
+		if [[ $1 = "-mmr" ]]; then
+			echo "It is not recommended to use -w with -mmr as the output is huge"
+		fi
         shift
         continue
     fi

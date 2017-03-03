@@ -146,6 +146,7 @@ void dump( ofstream& of, Ch ch[6] ) {
 	for( int o=0; o<4; o++ )
 	{
 		of << ch[c].block << '\t';
+		of << setfill('0') << setw(3);
 		of << ch[c].fnum  << '\t';
 		of << ch[c].rl    << '\t';
 		of << ch[c].fb    << '\t';
@@ -915,6 +916,7 @@ void dacmux_test( Ch ch[6] ) {
 
 void mmr_test( Ch ch[6] ) {
 	cerr << "MMR test\n";
+	cerr << "Tarda unos 25 minutos en el portatil\n";
 	for( int k=0; k<6; k++ ) {
 		int c = k;
 		if ( k>2 ) c++;
@@ -949,7 +951,7 @@ void mmr_test( Ch ch[6] ) {
 
 	ofstream of("mmr_ref.log");
 	dump( of, ch );
-	for( int i=0; i<30; i++ ) {
+	for( int i=0; i<800; i++ ) {
 		cout << "//Random set #" << i << "\n";
 		srand(i);
 		if( rand()%2 ) ch[rand()%6].set_alg( rand()%8 );
