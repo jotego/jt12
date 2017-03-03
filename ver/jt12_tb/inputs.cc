@@ -55,8 +55,14 @@ public:
 		write( chnum, 0x80+a, (sl<<4)| rr );
 		write( chnum, 0x90+a, (ssgen<<3)| ssg );
 	}
+	void set_dt( int a ) {
+		dt = a;
+		cout << "// DT= " << a << '\n';
+		write( chnum, 0x30+reg_offset(), (dt<<4)| mul );
+	}
 	void set_mul( int a ) {
 		mul = a;
+		cout << "// MUL= " << a << '\n';
 		write( chnum, 0x30+reg_offset(), (dt<<4)| mul );
 	}
 	void set_tl( int a ) {
@@ -74,6 +80,10 @@ public:
 	void set_sr( int a ) {
 		sr = a;
 		write( chnum, 0x70+reg_offset(), a );
+	}
+	void set_rr( int a ) {
+		rr = a;
+		write( chnum, 0x80+a, (sl<<4)| rr );
 	}
 	void set_dr( int a ) {
 		dr = a;
@@ -123,14 +133,13 @@ struct Ch {
 	}
 };
 
-void dump( Ch ch[6] ) {
+void dump( ofstream& of, Ch ch[6] ) {
  /* format in Verilog file:
 		"%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t",
 		block_ch0s1, fnum_ch0s1, rl_ch0s1, fb_ch0s1, alg_ch0s1,
 		dt1_ch0s1, mul_ch0s1, tl_ch0s1, ar_ch0s1, d1r_ch0s1,
 		d2r_ch0s1, rr_ch0s1, d1l_ch0s1, ks_ch0s1, ssg_ch0s1 );
 		*/
-	ofstream of("mmr_ref.log");
 	of << hex;
 	of << "-------------------------------\n";
 	for( int c=0; c<6; c++ )
@@ -140,7 +149,7 @@ void dump( Ch ch[6] ) {
 		of << ch[c].fnum  << '\t';
 		of << ch[c].rl    << '\t';
 		of << ch[c].fb    << '\t';
-		of << ch[c].alg   << '\t';
+		of << ch[c].alg   << ",\t";
 
 		of << ch[c].op[o].dt  << '\t';
 		of << ch[c].op[o].mul << '\t';
@@ -149,7 +158,7 @@ void dump( Ch ch[6] ) {
 		of << setw(2) << ch[c].op[o].tl  << '\t';
 		of << setw(2) << ch[c].op[o].ar  << '\t';
 		of << setw(2) << ch[c].op[o].dr  << '\t';
-		of << setw(2) << ch[c].op[o].sr  << '\t';
+		of << setw(2) << ch[c].op[o].sr  << ",\t";
 
 		of << setw(1);
 		of << ch[c].op[o].rr  << '\t';
@@ -937,7 +946,30 @@ void mmr_test( Ch ch[6] ) {
 	write( 0, 1, 10 );
 	write( 0, 2, 4 ); // dump MMR data
 	cerr << "Reference data dumped\n";
-	dump(ch);
+
+	ofstream of("mmr_ref.log");
+	dump( of, ch );
+	for( int i=0; i<30; i++ ) {
+		cout << "//Random set #" << i << "\n";
+		srand(i);
+		if( rand()%2 ) ch[rand()%6].set_alg( rand()%8 );
+		if( rand()%2 ) ch[rand()%6].set_fb( rand()%8 );
+		if( rand()%2 ) ch[rand()%6].set_rl( rand()%4 );
+		if( rand()%2 ) ch[rand()%6].set_block( rand()%8 );
+		if( rand()%2 ) ch[rand()%6].set_fnumber( rand()%2048 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_dt( rand()%8 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_tl( rand()%128 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_mul( rand()%16 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_ar( rand()%32 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_dr( rand()%32 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_sr( rand()%32 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_sr( rand()%16 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_ssg( rand()%8 );
+		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_sl( rand()%16 );
+		write( 0, 1, 24 );
+		write( 0, 2, 4 ); // dump MMR data
+		dump( of, ch );
+	}
 }
 
 int main( int argc, char *argv[] ) {
