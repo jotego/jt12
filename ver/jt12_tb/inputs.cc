@@ -123,6 +123,43 @@ struct Ch {
 	}
 };
 
+void dump( Ch ch[6] ) {
+ /* format in Verilog file:
+		"%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t%x\t",
+		block_ch0s1, fnum_ch0s1, rl_ch0s1, fb_ch0s1, alg_ch0s1,
+		dt1_ch0s1, mul_ch0s1, tl_ch0s1, ar_ch0s1, d1r_ch0s1,
+		d2r_ch0s1, rr_ch0s1, d1l_ch0s1, ks_ch0s1, ssg_ch0s1 );
+		*/
+	ofstream of("mmr_ref.log");
+	of << hex;
+	of << "-------------------------------\n";
+	for( int c=0; c<6; c++ )
+	for( int o=0; o<4; o++ )
+	{
+		of << ch[c].block << '\t';
+		of << ch[c].fnum  << '\t';
+		of << ch[c].rl    << '\t';
+		of << ch[c].fb    << '\t';
+		of << ch[c].alg   << '\t';
+
+		of << ch[c].op[o].dt  << '\t';
+		of << ch[c].op[o].mul << '\t';
+
+		of << setfill('0') << setw(2);
+		of << setw(2) << ch[c].op[o].tl  << '\t';
+		of << setw(2) << ch[c].op[o].ar  << '\t';
+		of << setw(2) << ch[c].op[o].dr  << '\t';
+		of << setw(2) << ch[c].op[o].sr  << '\t';
+
+		of << setw(1);
+		of << ch[c].op[o].rr  << '\t';
+		of << ch[c].op[o].sl  << '\t';
+		of << ch[c].op[o].ks  << '\t';
+		of << ch[c].op[o].ssg << '\t';
+		of << '\n';
+	}
+}
+
 void keyoff_all() {
 	for( int k=0; k<6; k++ ) {
 		int e = k>2 ? 1:0;
@@ -875,6 +912,8 @@ void mmr_test( Ch ch[6] ) {
 
 		ch[k].set_alg(c);
 		ch[k].set_fb(c);
+		ch[k].set_rl(c&3);
+		ch[k].set_block(c);
 		for( int j=0; j<4; j++ ) {
 			int op ;
 			switch(j) {
@@ -892,9 +931,13 @@ void mmr_test( Ch ch[6] ) {
 			ch[k].op[j].set_dr( n );
 			ch[k].op[j].set_sr( n );
 			ch[k].op[j].set_ssg( c );
+			ch[k].op[j].set_sl( c );
 		}
 	}
 	write( 0, 1, 10 );
+	write( 0, 2, 4 ); // dump MMR data
+	cerr << "Reference data dumped\n";
+	dump(ch);
 }
 
 int main( int argc, char *argv[] ) {
