@@ -62,6 +62,10 @@ while [ $# -gt 0 ]; do
 		fi
 		if [[ $1 = "-mmr" ]]; then
 			echo "It is not recommended to use -w with -mmr as the output is huge"
+			# skip the argument of number of cases
+			shift
+			EXTRA=$EXTRA" "$1
+			TEST_NAME=MMR_TEST
 		fi
         shift
         continue
@@ -110,3 +114,7 @@ if [[ $DUMPSOUND = DUMPSOUND && -e s ]]; then
 	/DUMP START/ { if(g<2) g=2 }' > jt12_test.jt
 fi
 date
+
+if [[ $TEST_NAME = MMR_TEST ]]; then
+	diff mmr_*log
+fi

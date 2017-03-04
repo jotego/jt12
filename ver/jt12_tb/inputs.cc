@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <cstdlib>
 #include <cstring>
@@ -42,7 +43,8 @@ private:
 		return a;
 	}
 public:
-	int opnum, chnum;
+	int opnum, chnum;	
+	int kon;
 	int dt, mul, tl, ks, ar, am, dr, sr, sl, rr, ssgen, ssg;
 	void writecfg() {
 		int a=reg_offset();
@@ -93,6 +95,7 @@ public:
 		ssg = a;
 		write( chnum, 0x90+reg_offset(), (ssgen<<3)| ssg );
 	}
+	Op() { kon=0; }
 };
 
 struct Ch {
@@ -131,6 +134,15 @@ struct Ch {
 		rl = a;
 		write( chnum, 0xb4, (rl<<6) | (ams<<3) | pms );
 	}
+	void keyon( int x ) {
+		int c2=chnum;
+		if( chnum>2 ) c2++;
+		op[0].kon = x&1;
+		op[1].kon = x&2?1:0;
+		op[2].kon = x&4?1:0;
+		op[3].kon = x&8?1:0;		
+		write(  0, 0x28, (x<<4) | (c2) );
+	}	
 };
 
 void dump( ofstream& of, Ch ch[6] ) {
@@ -145,33 +157,35 @@ void dump( ofstream& of, Ch ch[6] ) {
 	for( int c=0; c<6; c++ )
 	for( int o=0; o<4; o++ )
 	{
-		of << ch[c].block << '\t';
+		of << ch[c].block << ' ' ;
 		of << setfill('0') << setw(3);
-		of << ch[c].fnum  << '\t';
-		of << ch[c].rl    << '\t';
-		of << ch[c].fb    << '\t';
-		of << ch[c].alg   << ",\t";
+		of << ch[c].fnum  << ' ' ;
+		of << ch[c].rl    << ' ' ;
+		of << ch[c].fb    << ' ' ;
+		of << ch[c].alg   << ", ";
 
-		of << ch[c].op[o].dt  << '\t';
-		of << ch[c].op[o].mul << '\t';
+		of << ch[c].op[o].dt  << ' ' ;
+		of << ch[c].op[o].mul << ' ' ;
 
 		of << setfill('0') << setw(2);
-		of << setw(2) << ch[c].op[o].tl  << '\t';
-		of << setw(2) << ch[c].op[o].ar  << '\t';
-		of << setw(2) << ch[c].op[o].dr  << '\t';
-		of << setw(2) << ch[c].op[o].sr  << ",\t";
+		of << setw(2) << ch[c].op[o].tl  << ' ' ;
+		of << setw(2) << ch[c].op[o].ar  << ' ' ;
+		of << setw(2) << ch[c].op[o].dr  << ' ' ;
+		of << setw(2) << ch[c].op[o].sr  << ", ";
 
 		of << setw(1);
-		of << ch[c].op[o].rr  << '\t';
-		of << ch[c].op[o].sl  << '\t';
-		of << ch[c].op[o].ks  << '\t';
-		of << ch[c].op[o].ssg << '\t';
+		of << ch[c].op[o].rr  << ' ' ;
+		of << ch[c].op[o].sl  << ' ' ;
+		of << ch[c].op[o].ks  << ' ' ;
+		of << ch[c].op[o].ssg << ' ' ;
+		of << ch[c].op[o].kon;
 		of << '\n';
 	}
 }
 
-void keyoff_all() {
+void keyoff_all( Ch ch[6] ) {
 	for( int k=0; k<6; k++ ) {
+		for( int j=0; j<4; j++ ) ch[k].op[j].kon = 0;
 		int e = k>2 ? 1:0;
 		write(  0, 0x28, k+e );
 	}
@@ -215,13 +229,12 @@ void initial_clear( Ch ch[6] ) {
 		write(  0, 0x28, 0xf0 | (k+e) );
 	}
 	write( 0, 0x01, 55 ); // wait
-	keyoff_all();
+	keyoff_all(ch);
 	write( 0, 0x01, 155 ); // wait
 }
 
-void keyon( int ch, int op ) {
-	if( ch>2 ) ch++;
-	write(  0, 0x28, (op<<4) | (ch) );
+void keyon( Ch ch[], int c, int op ) {
+	ch[c].keyon(op);
 }
 
 void alg_test( Ch ch[6], int mask, int fb_max ) {
@@ -238,10 +251,10 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		for( int k=0; k<3; k++ ) {
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( 16 );
-			keyon( k, 1<<j );
+			ch[k].keyon( 1<<j );
 			write( 0, 0x01, 64 ); // wait
 			}
-			keyoff_all();
+			keyoff_all(ch);
 		}
 	}
 	}
@@ -255,11 +268,11 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		for( int j=1; j<4; j++ ) {
 			ch[k].op[j].set_tl( 0 );
 		}
-		keyon( k, 0xf );
+		ch[k].keyon( 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
 
-		keyoff_all();
+		keyoff_all(ch);
 	}
 	}
 	// ALG = 5
@@ -273,11 +286,11 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		for( int j=1; j<4; j++ ) {
 			ch[k].op[j].set_tl( 0 );
 		}
-		keyon( k, 0xf );
+		ch[k].keyon( 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
 
-		keyoff_all();
+		keyoff_all(ch);
 	}
 	}
 	// ALG = 4
@@ -292,11 +305,11 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		ch[k].op[3].set_tl(0);
 		for( int j=0; j<4; j++ )
 			ch[k].op[j].set_dr(0);
-		keyon( k, 15 );
+		ch[k].keyon( 15 );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
 
-		keyoff_all();
+		keyoff_all(ch);
 	}
 	}
 	// ALG = 3
@@ -311,17 +324,17 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		ch[k].op[3].set_tl(0);
 		ch[k].op[0].set_dr(0);
 		ch[k].op[3].set_dr(0);
-		keyon( k, 0xc );
+		ch[k].keyon( 0xc );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		keyon( k, 0xb );
+		ch[k].keyon( 0xb );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		keyon( k, 0xf );
+		ch[k].keyon( 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
 
-		keyoff_all();
+		keyoff_all(ch);
 	}
 	}
 	// ALG = 2..0
@@ -337,20 +350,20 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 		ch[k].op[3].set_tl(0);
 		ch[k].op[0].set_dr(0);
 		ch[k].op[3].set_dr(0);
-		keyon( k, 0x8 );
+		ch[k].keyon( 0x8 );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		keyon( k, 0xc );
+		ch[k].keyon( 0xc );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		keyon( k, 0xe );
+		ch[k].keyon( 0xe );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		keyon( k, 0xf );
+		ch[k].keyon( 0xf );
 		for( int wait=0; wait<3; wait++ )
 			write( 0, 0x01, 255 ); // wait
 
-		keyoff_all();
+		keyoff_all(ch);
 	}
 	}
 }
@@ -369,11 +382,11 @@ void ssg_test( Ch ch[6] ) {
 			ch[k].op[j].set_sr( 25 );
 			ch[k].op[j].set_dr( 28 );
 		}
-		keyon( k, 0xf );
+		ch[k].keyon( 0xf );
 		for( int wait=0; wait<7; wait++ )
 			write( 0, 0x01, 255 ); // wait
 
-		keyoff_all();
+		keyoff_all(ch);
 	}
 	for( int k=0; k<6; k++ )
 	for( int j=0; j<4; j++, ssg++ ) {
@@ -386,11 +399,11 @@ void tone00( Ch ch[6] ) {
 	ch[0].op[0].set_sl(15);
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(7);
-		keyon( k, 15 );
-		keyon( k, 0 );
+		ch[k].keyon( 15 );
+		ch[k].keyon( 0 );
 	}
 	ch[0].op[0].set_tl( 0 );
-			keyon( 0, 1 );
+			keyon( ch, 0, 1 );
 	for( int wait=0; wait<2; wait++ )
 		write( 0, 0x01, 255 ); // wait
 }
@@ -407,11 +420,11 @@ void fnum_check( Ch ch[6] ) {
 		}
 	}
 	for( int k=0; k<6; k++ ) {
-		keyon( k, 0xf );
+		ch[k].keyon( 0xf );
 	}
 	for( int wait=0; wait<17; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	keyoff_all();
+	keyoff_all(ch);
 }
 
 void pcm_check( Ch ch[6] ) {
@@ -422,8 +435,8 @@ void pcm_check( Ch ch[6] ) {
 	cerr << "on both channels\n";
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(7);
-		keyon( k, 15 );
-		keyon( k, 0 );
+		ch[k].keyon( 15 );
+		ch[k].keyon( 0 );
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_ar(0);
 			ch[k].op[j].set_sl(0);
@@ -431,7 +444,7 @@ void pcm_check( Ch ch[6] ) {
 			ch[k].op[j].set_dr(0);
 			ch[k].op[j].set_tl( k==5? 0 : 127 );
 		}
-		keyon( k, 15 );
+		ch[k].keyon( 15 );
 	}
 	for( int wait=0; wait<2; wait++ )
 		write( 0, 0x01, 255 ); // wait
@@ -480,11 +493,11 @@ void ch3effect_test( Ch ch[6] ) {
 		}
 	}
 	for( int k=0; k<6; k++ ) {
-		keyon( k, 0xf );
+		ch[k].keyon( 0xf );
 	}
 	for( int wait=0; wait<2; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	keyoff_all();
+	keyoff_all(ch);
 }
 
 void csm_test(Ch ch[6]) {
@@ -517,7 +530,7 @@ void csm_test(Ch ch[6]) {
 	write( 0, 0x27, 0x75 ); // CSM
 	for( int wait=0; wait<8; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	keyoff_all();
+	keyoff_all(ch);
 }
 
 void gng2( Ch *ch ) {
@@ -564,10 +577,10 @@ void gng2( Ch *ch ) {
      }
 
      for( int k=0; k<6; k++ ) {
-     	keyon( k, 0xf );
+     	ch[k].keyon( 0xf );
 		for( int wait=0; wait<25; wait++ )
 			write( 0, 0x01, 255 ); // wait
-        keyoff_all();
+        keyoff_all(ch);
         write( 0, 0x01, 55 ); // wait
      }
 }
@@ -637,11 +650,11 @@ void keyon_simple( Ch ch[6] ) {
 	for( int k=0; k<6; k++ )
 	for( int j=0; j<4; j++ ) {
 		ch[k].op[j].set_tl(0);
-		keyon( k, 1<<j );
+		ch[k].keyon( 1<<j );
 		write( 0, 1, 20 );
 	}
 	cerr << "Luego los apago todos\n";
-	keyoff_all();
+	keyoff_all(ch);
 	write( 0, 1, 200 );
 	cerr << "Y ahora los enciendo aleatoriamente\n";
 	srand(0);
@@ -731,7 +744,7 @@ void dr_check( Ch ch[6] ) {
 			ch[k].op[j].set_ar(31);
 			ch[k].op[j].set_dr(0);
 		}
-		keyon( k, 15 );
+		ch[k].keyon( 15 );
 		write( 0, 0x01, 55 ); // wait
 	}
 	for( int wait=0; wait<1; wait++ )
@@ -849,7 +862,7 @@ void dacmux_test( Ch ch[6] ) {
 	//for( int j=0; j<4; j++ ) {
 		int j=0;
 		ch[k].op[j].set_tl( 0 );
-		keyon( k, 1<<j );
+		ch[k].keyon( 1<<j );
 		write( 0, 0x01, 50 ); // wait
 //		}
 	}
@@ -914,9 +927,10 @@ void dacmux_test( Ch ch[6] ) {
 
 }
 
-void mmr_test( Ch ch[6] ) {
+void mmr_test( Ch ch[6], int rnd_cases=3 ) {
 	cerr << "MMR test\n";
-	cerr << "Tarda unos 25 minutos en el portatil\n";
+	cerr << "Tarda unos 25 minutos en el portatil en hacer 800 casos\n";
+	cerr << "Tarda unos 45 minutos en el despacho en hacer 2000 casos\n";
 	for( int k=0; k<6; k++ ) {
 		int c = k;
 		if ( k>2 ) c++;
@@ -926,7 +940,7 @@ void mmr_test( Ch ch[6] ) {
 		ch[k].set_rl(c&3);
 		ch[k].set_block(c);
 		for( int j=0; j<4; j++ ) {
-			int op ;
+			int op=j ;
 			switch(j) {
 				case 0: op=0; break;
 				case 1: op=2; break;
@@ -934,7 +948,8 @@ void mmr_test( Ch ch[6] ) {
 				case 3: op=3; break;
 				default: op=0; break;
 			}
-			int n = (op<<3) | c;
+			int n = (op<<2) | (c&3);
+			if( k>2 ) n |= 0x10;
 			ch[k].op[j].dt = op;
 			ch[k].op[j].set_tl( n );
 			ch[k].op[j].set_mul( c );
@@ -951,7 +966,7 @@ void mmr_test( Ch ch[6] ) {
 
 	ofstream of("mmr_ref.log");
 	dump( of, ch );
-	for( int i=0; i<800; i++ ) {
+	for( int i=0; i<rnd_cases; i++ ) {
 		cout << "//Random set #" << i << "\n";
 		srand(i);
 		if( rand()%2 ) ch[rand()%6].set_alg( rand()%8 );
@@ -968,7 +983,8 @@ void mmr_test( Ch ch[6] ) {
 		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_sr( rand()%16 );
 		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_ssg( rand()%8 );
 		if( rand()%2 ) ch[rand()%6].op[rand()%4].set_sl( rand()%16 );
-		write( 0, 1, 24 );
+		ch[rand()%6].keyon( rand()%16 );
+		write( 0, 1, 24+(rand()%4) );
 		write( 0, 2, 4 ); // dump MMR data
 		dump( of, ch );
 	}
@@ -997,7 +1013,21 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-acc" )==0 )  acc_test( ch );
 		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
 
-		if( strcmp( argv[k], "-mmr" )==0 )  mmr_test( ch );
+		if( strcmp( argv[k], "-mmr" )==0 )  {
+			k++;
+			int cases=3;
+			if( k==argc ) {
+				cerr << "Use\n\t-mmr <number of random cases>\n";
+				cerr << "Running 3 cases by default\n";
+				
+			}
+			else {
+				stringstream s(argv[k]);
+				s >> cases;
+				cerr << "Running " << cases << " random cases\n";
+			}
+			mmr_test( ch, cases );
+		}
 	}
 
 //	ch[0].op[0].set_sl(15);
