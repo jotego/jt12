@@ -135,13 +135,12 @@ struct Ch {
 		write( chnum, 0xb4, (rl<<6) | (ams<<3) | pms );
 	}
 	void keyon( int x ) {
-		int c2=chnum;
-		if( chnum>2 ) c2++;
 		op[0].kon = x&1;
 		op[1].kon = x&2?1:0;
 		op[2].kon = x&4?1:0;
-		op[3].kon = x&8?1:0;		
-		write(  0, 0x28, (x<<4) | (c2) );
+		op[3].kon = x&8?1:0;	
+		//cout << "// keyon for chnum=" << chnum << '\n';	
+		write(  0, 0x28, (x<<4) | (chnum) );
 	}	
 };
 
