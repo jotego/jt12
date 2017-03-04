@@ -247,9 +247,10 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 			ch[k].set_fb(fb);
 			ch[k].set_rl(3);
 		}
-		for( int k=0; k<3; k++ ) {
+		for( int k=0; k<6; k++ ) {
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( 16 );
+			ch[k].op[j].set_rr( 15 );
 			ch[k].keyon( 1<<j );
 			write( 0, 0x01, 64 ); // wait
 			}

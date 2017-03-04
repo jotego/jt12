@@ -110,6 +110,11 @@ reg	 [4:0] cnt;
 reg  [1:0] next_op, cur_op;
 reg  [2:0] next_ch, cur_ch;
 
+assign s1_enters = cur_op == 2'b00;
+assign s3_enters = cur_op == 2'b01;
+assign s2_enters = cur_op == 2'b10;
+assign s4_enters = cur_op == 2'b11;
+
 wire [4:0] next = { next_op, next_ch };
 wire [4:0] cur  = {  cur_op,  cur_ch };
 
@@ -270,17 +275,6 @@ jt12_kon u_kon(
 	
 	.keyon_II	( keyon_II	)
 );
-
-
-jt12_opsync u_opsync(
-	.rst	( rst		),
-	.clk	( clk		),
-	.next	( next 		),
-	.s1_enters	( s1_enters ),
-	.s2_enters	( s2_enters ),
-	.s3_enters	( s3_enters ),
-	.s4_enters	( s4_enters )
-);	
 
 jt12_fm u_fm(
 	.alg_I		( alg		),
