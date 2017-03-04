@@ -989,6 +989,34 @@ void mmr_test( Ch ch[6], int rnd_cases=3 ) {
 	}
 }
 
+void burst_test( Ch ch[6] ) {
+	srand(0);
+	for( int k=0; k<10; k++ ) {
+		Ch* c = &ch[rand()%6];
+		c->set_fnumber( 0x25e );
+		c->set_block( 4 );
+		c->set_alg(0);
+		c->set_fb(4);
+		c->set_rl(3);
+		for( int j=0; j<4; j++ ) {
+			c->op[j].set_tl(0x16);
+			c->op[j].set_ar( 0x1f );
+			c->op[j].set_sl( 0xf );
+			c->op[j].set_sr(6);
+			c->op[j].set_rr(0xf);
+			c->op[j].set_dt(3);
+			c->op[j].set_mul(5);
+		}
+		for( int j=0; j<5; j++ ) {
+			int opmask = rand()%15;
+			c->keyon( (~opmask)&0xf );
+			write(0, 1, rand()%10 );
+			c->keyon( ( opmask) );
+			write(0, 1, 20+rand()%10 );
+		}
+	}
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
@@ -1011,6 +1039,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );
 		if( strcmp( argv[k], "-acc" )==0 )  acc_test( ch );
 		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
+		if( strcmp( argv[k], "-burst" )==0 )  burst_test( ch );
 
 		if( strcmp( argv[k], "-mmr" )==0 )  {
 			k++;

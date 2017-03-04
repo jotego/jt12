@@ -45,7 +45,8 @@ while [ $# -gt 0 ]; do
     if [[ $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am"
     	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg"
 		|| $1 = "-tone00" || $1 = "-dac" || $1 = "-keyon"
-		|| $1 = "-keyon2" || $1 = "-mmr" || $1 = "-fnum" ]]; then
+		|| $1 = "-keyon2" || $1 = "-mmr" || $1 = "-fnum" 
+		|| $1 = "-burst" ]]; then
     	EXTRA=$EXTRA" "$1
 		if [[ $1 = "-amfreq" ]]; then
 			echo "-amfreq: timer only"
