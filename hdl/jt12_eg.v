@@ -80,7 +80,7 @@ module jt12_eg (
 
 reg		[9:0]	eg_internal;
 
-wire ssg_att_II  = ssg_eg_II[2] & ssg_en_II;
+wire ssg_inv_II  = ssg_eg_II[2] & ssg_en_II;
 wire ssg_alt_II  = ssg_eg_II[1] & ssg_en_II;
 wire ssg_hold_II = ssg_eg_II[0] & ssg_en_II;
 
@@ -434,10 +434,10 @@ end
 
 //////////////////////////////////////////////////////////////
 // Register cycle VIII
-wire ssg_att_VIII, ssg_en_VIII;
+wire ssg_inv_VIII, ssg_en_VIII;
 //reg	[9:0] eg_IX;
 always @(posedge clk)
-	if( ssg_en_VIII && (ssg_invertion_VIII ^^ ssg_att_VIII) )
+	if( ssg_en_VIII && (ssg_invertion_VIII ^^ ssg_inv_VIII) )
 		eg_IX <= eg_internal>=10'h200 ? 10'h0 : (10'h200 - eg_internal);
 	else
 		eg_IX <= eg_internal;
@@ -465,8 +465,8 @@ jt12_sh24 #( .width(1) ) u_ssgen(
 
 jt12_sh #( .width(1), .stages(6) ) u_ssgattsh(
 	.clk	( clk		),
-	.din	( ssg_att_II	),
-	.drop	( ssg_att_VIII	)
+	.din	( ssg_inv_II	),
+	.drop	( ssg_inv_VIII	)
 );
 
 jt12_sh #( .width(1), .stages(3) ) u_aroffsh(

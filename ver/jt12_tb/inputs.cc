@@ -75,6 +75,10 @@ public:
 		sl = a;
 		write( chnum, 0x80+reg_offset(), (sl<<4)| rr );
 	}
+	void set_ks( int a ) {
+		ks = a;
+		write( chnum, 0x50+reg_offset(), (ks<<6)| ar );
+	}	
 	void set_ar( int a ) {
 		ar = a;
 		write( chnum, 0x50+reg_offset(), (ks<<6)| ar );
@@ -95,6 +99,12 @@ public:
 		ssg = a;
 		write( chnum, 0x90+reg_offset(), (ssgen<<3)| ssg );
 	}
+	void set_ssg4( int a  ) {
+		ssg = a&7;
+		ssgen=(a>>3)&1;
+		write( chnum, 0x90+reg_offset(), (ssgen<<3)| ssg );
+	}
+
 	Op() { kon=0; }
 };
 
@@ -371,28 +381,32 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 void ssg_test( Ch ch[6] ) {
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(7);
-		ch[k].set_fb(4);
+		ch[k].set_fb(0);
 	}
+	ch[0].set_rl(1);
+	ch[1].set_rl(2);
 	int ssg=0;
-	for( int k=0; k<6; k++ ) {
-		for( int j=0; j<4; j++, ssg++ ) {
+	for( int j=0; j<4; j++ ) {
+	for( int k=0; k<2; k++, ssg++ ) {
 			ch[k].op[j].ssgen = 1;
 			ch[k].op[j].set_ssg( ssg%8 );
-			ch[k].op[j].set_tl( 0 );
-			ch[k].op[j].set_sr( 25 );
-			ch[k].op[j].set_dr( 28 );
+			ch[k].op[j].set_mul( 1 );
+			ch[k].op[j].set_tl( 12 );
+			ch[k].op[j].set_sr( 20 ); //  25
+			ch[k].op[j].set_dr( 24 ); // 28
+			ch[k].keyon( 1<<j );
 		}
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<7; wait++ )
+		for( int wait=0; wait<5; wait++ )
 			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
+		keyoff_all(ch);			
 	}
+	
+	/*
 	for( int k=0; k<6; k++ )
 	for( int j=0; j<4; j++, ssg++ ) {
 		ch[k].op[j].ssgen = 0;
         ch[k].op[j].set_ssg(0);
-	}
+	}*/
 }
 
 void tone00( Ch ch[6] ) {
@@ -1018,6 +1032,29 @@ void burst_test( Ch ch[6] ) {
 	}
 }
 
+void ssg2_test( Ch ch[6] ) {
+	cerr << "This is Nemesis' SSG test\n";
+	ch[2].set_alg(7);
+	ch[2].set_rl(3);
+	Op& op = ch[2].op[3];	
+	op.set_mul(1);
+	op.set_tl(2);
+	op.set_ks(0);
+	op.set_ar(31); // de momento 31, el original usa un 2
+	op.set_dr(8);
+	op.set_sr(8);
+	op.set_sl(0xd);
+	op.set_rr(15); // 4 en el original
+	
+	for( int ssg=7; ssg<16; ssg++ ) {
+		op.set_ssg4( ssg );
+		ch[2].keyon(8);
+		write(0,1,100);
+		ch[2].keyon(0);
+		write(0,1,50);
+	}
+}
+
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
 	initial_clear( ch );
@@ -1029,6 +1066,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-csm" )==0 )  csm_test( ch );
 		if( strcmp( argv[k], "-fnum" )==0 )  fnum_check( ch );
 		if( strcmp( argv[k], "-ssg" )==0 )  ssg_test( ch );
+		if( strcmp( argv[k], "-ssg2" )==0 )  ssg2_test( ch );
 		if( strcmp( argv[k], "-ch3" )==0 )  ch3effect_test( ch );
 		if( strcmp( argv[k], "-timerB" )==0 )  timerb( ch );
 		if( strcmp( argv[k], "-keyon2" )==0 )  keyon_doble( ch );

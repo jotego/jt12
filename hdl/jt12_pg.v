@@ -367,6 +367,49 @@ sep24 #( .width(11), .pos0(3+1)) fnsep
 	.ch5s4 (fnum_ch5s4)
 );
 
+wire pgrst_III_ch0s1, pgrst_III_ch1s1, pgrst_III_ch2s1, pgrst_III_ch3s1,
+		 pgrst_III_ch4s1, pgrst_III_ch5s1, pgrst_III_ch0s2, pgrst_III_ch1s2,
+		 pgrst_III_ch2s2, pgrst_III_ch3s2, pgrst_III_ch4s2, pgrst_III_ch5s2,
+		 pgrst_III_ch0s3, pgrst_III_ch1s3, pgrst_III_ch2s3, pgrst_III_ch3s3,
+		 pgrst_III_ch4s3, pgrst_III_ch5s3, pgrst_III_ch0s4, pgrst_III_ch1s4,
+		 pgrst_III_ch2s4, pgrst_III_ch3s4, pgrst_III_ch4s4, pgrst_III_ch5s4;
+
+sep24 #( .width(1), .pos0(23)) pgrstsep
+(
+	.clk	( clk_int	),
+	.mixed	( pg_rst_III),
+	.mask	( 0			),
+	.cnt	( sep24_cnt	),	
+	
+	.ch0s1 (pgrst_III_ch0s1), 
+	.ch1s1 (pgrst_III_ch1s1), 
+	.ch2s1 (pgrst_III_ch2s1), 
+	.ch3s1 (pgrst_III_ch3s1), 
+	.ch4s1 (pgrst_III_ch4s1), 
+	.ch5s1 (pgrst_III_ch5s1), 
+
+	.ch0s2 (pgrst_III_ch0s2), 
+	.ch1s2 (pgrst_III_ch1s2), 
+	.ch2s2 (pgrst_III_ch2s2), 
+	.ch3s2 (pgrst_III_ch3s2), 
+	.ch4s2 (pgrst_III_ch4s2), 
+	.ch5s2 (pgrst_III_ch5s2), 
+
+	.ch0s3 (pgrst_III_ch0s3), 
+	.ch1s3 (pgrst_III_ch1s3), 
+	.ch2s3 (pgrst_III_ch2s3), 
+	.ch3s3 (pgrst_III_ch3s3), 
+	.ch4s3 (pgrst_III_ch4s3), 
+	.ch5s3 (pgrst_III_ch5s3), 
+
+	.ch0s4 (pgrst_III_ch0s4), 
+	.ch1s4 (pgrst_III_ch1s4), 
+	.ch2s4 (pgrst_III_ch2s4), 
+	.ch3s4 (pgrst_III_ch3s4), 
+	.ch4s4 (pgrst_III_ch4s4), 
+	.ch5s4 (pgrst_III_ch5s4)
+);
+
 
 `endif
 
