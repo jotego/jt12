@@ -9,6 +9,7 @@ EXTRA=
 RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
 TEST_NAME=NOTESTNAME
+SSG_TEST=NOSSG_TEST
 
 while [ $# -gt 0 ]; do
 	if [ $1 = "-w" ]; then
@@ -54,6 +55,9 @@ while [ $# -gt 0 ]; do
 			TIMERONLY=TIMERONLY
 			DUMPLFO=DUMPLFO
 		fi
+		if [[ $1 = "-ssg" || $1 = "-ssg2" ]]; then
+			SSG_TEST=SSG_TEST
+		fi		
 		if [[ $1 = "-fnumorder" || $1 = "-timerB" ]]; then
 			echo "Dump only timers"
 			TIMERONLY=TIMERONLY
@@ -90,7 +94,7 @@ if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
         -DSIMULATION -D$TIMERONLY -D$DUMPSOUND $LIMITTIME \
-		-D$DUMPLFO -D$TEST_NAME && sim -lxt > s
+		-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST && sim -lxt > s
     #exit 0
     if [ $? -ne 0 ]; then
 	    cat s
@@ -100,7 +104,7 @@ if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
 else
 	ncverilog -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
     	+define+NCVERILOG+DISPLAY_STEP+$DUMPSIGNALS+TEST_SUPPORT+RANDWAIT=$RANDWAIT \
-        +define+SIMULATION+$TIMERONLY+$DUMPSOUND > s
+        +define+SIMULATION+$TIMERONLY+$DUMPSOUND+$SSG_TEST > s
 	if [ $? -ne 0 ]; then
 		cat s
 		rm s

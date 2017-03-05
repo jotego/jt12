@@ -6,7 +6,9 @@ reg	rst;
 
 `ifndef DUMPLFO
 `ifndef KEYON_TEST
+`ifndef SSG_TEST
 `include "../common/dump.vh"
+`endif
 `endif
 `endif
 
@@ -27,6 +29,17 @@ initial begin
 	$dumpon;
 end
 `endif
+
+`ifdef SSG_TEST
+initial begin
+	$dumpfile("ssg.lxt");
+	$dumpvars(1, jt12_test.uut.u_op );
+	$dumpvars(1, jt12_test.uut.u_eg );
+	$dumpvars(1, jt12_test.uut.u_mmr.ssg_ch2s4 );
+	$dumpon;
+end
+`endif
+
 
 /*
 reg	clk;
@@ -115,6 +128,8 @@ jt12 uut(
 	.addr	( addr	),
 	.cs_n	( cs_n	),
 	.wr_n	( wr_n	),
+	
+	.limiter_en( 1'b1 ),
 
 	.dout	( dout	),
 	.snd_right	( right	),

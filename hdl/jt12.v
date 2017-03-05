@@ -38,6 +38,7 @@ module jt12(
 	input	[1:0]	addr,
 	input			cs_n,
 	input			wr_n,
+	input			limiter_en,
 
 	output	[7:0]	dout,
 	// combined output
@@ -340,7 +341,7 @@ jt12_acc u_acc(
 	.clk		( clk_int	),
 	.op_result	( op_result	),
 	.rl			( rl		),
-	.limiter_en	( 1'b1		),
+	.limiter_en	( limiter_en),
 	// note that the order changes to deal 
 	// with the operator pipeline delay
 	.s1_enters	( s2_enters ),
