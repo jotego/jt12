@@ -36,6 +36,11 @@ module jt12_acc
     input				clk,
 	input signed [8:0]	op_result,
 	input		 [ 1:0]	rl,
+	input				limiter_en, // enables the limiter on
+	// the accumulator to prevent overfow. 
+	// I reckon that:
+	// YM2612 had a limiter
+	// YM3438 did not
 	// note that the order changes to deal 
 	// with the operator pipeline delay
 	input 				s1_enters,
@@ -141,8 +146,18 @@ always @(*) begin
 		opsum <= (ch6op && pcm_en) ? { ~pcm[8], pcm[7:0] } : next;
 	else begin
 		if( sum_en && !(ch6op && pcm_en) )
-			opsum <= opsum10[8:0]; // MSB is discarded according to
-			// YM3438 application notes
+			if( limiter_en ) begin
+				if( opsum10[9]==opsum10[8] )
+					opsum <= opsum10[8:0];
+				else begin
+					opsum <= opsum10[9] ? 9'h100 : 9'h0ff;
+				end
+			end
+			else begin
+				// MSB is discarded according to
+				// YM3438 application notes
+				opsum <= opsum10[8:0]; 
+			end
 		else
 			opsum <= total;
 	end

@@ -340,6 +340,7 @@ jt12_acc u_acc(
 	.clk		( clk_int	),
 	.op_result	( op_result	),
 	.rl			( rl		),
+	.limiter_en	( 1'b1		),
 	// note that the order changes to deal 
 	// with the operator pipeline delay
 	.s1_enters	( s2_enters ),
