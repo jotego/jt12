@@ -63,7 +63,7 @@ timer_A(
 	.overflow	( overflow_A)
 );
 
-jt12_timer #(.mult_width(4), .mult_max(16), .counter_width(8)) 
+jt12_timer #(.mult_width(4), .mult_max(15), .counter_width(8)) 
 timer_B(
 	.clk		( clk		), 
 	.rst		( rst		),

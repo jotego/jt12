@@ -46,15 +46,15 @@ while [ $# -gt 0 ]; do
     	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg"
 		|| $1 = "-tone00" || $1 = "-dac" || $1 = "-keyon"
 		|| $1 = "-keyon2" || $1 = "-mmr" || $1 = "-fnum" 
-		|| $1 = "-burst" || $1 = "-csm" ]]; then
+		|| $1 = "-burst" || $1 = "-csm" || $1 = "-timerB" ]]; then
     	EXTRA=$EXTRA" "$1
 		if [[ $1 = "-amfreq" ]]; then
 			echo "-amfreq: timer only"
 			TIMERONLY=TIMERONLY
 			DUMPLFO=DUMPLFO
 		fi
-		if [[ $1 = "-fnumorder" ]]; then
-			echo "-fnumorder: timer only"
+		if [[ $1 = "-fnumorder" || $1 = "-timerB" ]]; then
+			echo "Dump only timers"
 			TIMERONLY=TIMERONLY
 		fi
 		if [[ $1 = "-keyon" || $1 = "-keyon2" ]]; then
