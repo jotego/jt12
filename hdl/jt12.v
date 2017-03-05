@@ -99,6 +99,7 @@ wire			clr_flag_A, clr_flag_B;
 wire			clr_run_A, clr_run_B;
 wire			set_run_A, set_run_B;
 wire			flag_A, flag_B;
+wire			overflow_A;
 // Operator
 wire			use_internal_x, use_internal_y;
 wire			use_prevprev1, use_prev2, use_prev1;
@@ -145,20 +146,6 @@ jt12_clksync u_clksync(
 	.write		( write		)
 );
 
-wire	overflow_A;
-reg  	ovA;
-reg		ovA_long;
-
-always @(posedge clk) begin
-	ovA <= overflow_A;
-	ovA_long <= |{ovA, overflow_A};
-end
-
-reg ovA_int;
-
-always @(posedge clk_int)
-	ovA_int <= ovA_long;
-
 jt12_mmr u_mmr(
 	.rst		( rst_int	),
 	.clk		( clk_int	),		// Phi 1
@@ -188,7 +175,8 @@ jt12_mmr u_mmr(
 	.set_run_A	( set_run_A		),
 	.set_run_B	( set_run_B		),
 	.flag_A		( flag_A		),
-	.overflow_A	( ovA_int		),
+	.overflow_A	( overflow_A	),
+	.fast_timers( fast_timers	),
 	// PCM
 	.pcm		( pcm			),
 	.pcm_en		( pcm_en		),
@@ -241,8 +229,10 @@ jt12_mmr u_mmr(
 );
 
 jt12_timers u_timers( 
-	.clk		( clk			),
+	.clk		( clk_int		),
 	.rst   		( rst_int		),
+	.clk_en		( zero			),
+	.fast_timers( fast_timers	),
 	.value_A	( value_A		),
 	.value_B	( value_B		),
 	.load_A		( load_A		),

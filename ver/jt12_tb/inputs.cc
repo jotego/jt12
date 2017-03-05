@@ -501,36 +501,36 @@ void ch3effect_test( Ch ch[6] ) {
 }
 
 void csm_test(Ch ch[6]) {
-	initial_clear( ch );
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(7);
-		ch[k].set_fb(0);
-		ch[k].set_fnumber(925);
-		ch[k].set_block(4);
-		ch[k].set_rl(3);
-		for( int j=0; j<4; j++ ) {
-			ch[k].op[j].set_tl( 0 );
-			ch[k].op[j].set_dr( 0 );
-			ch[k].op[j].set_mul(1);
-		}
+	cerr << "CSM test\n";
+	//initial_clear( ch );
+	ch[2].set_alg(7);
+	ch[2].set_fb(0);
+	ch[2].set_fnumber(925);
+	ch[2].set_block(4);
+	ch[2].set_rl(3);
+	for( int j=0; j<4; j++ ) {
+		ch[2].op[j].set_tl( 0 );
+		ch[2].op[j].set_dr( 0 );
+		ch[2].op[j].set_rr( 15 );
+		ch[2].op[j].set_mul(1);
 	}
 	unsigned faux = 925&0xff;
 	unsigned baux = (4<<3)|(925>>8);
-	write( 0, 0xa9, faux );
-	write( 0, 0xa8, faux );
-	write( 0, 0xaa, faux );
-	write( 0, 0xa2, faux );
 	write( 0, 0xad, baux );
 	write( 0, 0xac, baux );
 	write( 0, 0xae, baux );
 	write( 0, 0xa6, baux );
-
+	write( 0, 0xa9, faux );
+	write( 0, 0xa8, faux );
+	write( 0, 0xaa, faux );
+	write( 0, 0xa2, faux );
+	
 	write( 0, 0x24, 120 );
 	write( 0, 0x25, 0 );
-	write( 0, 0x27, 0x75 ); // CSM
-	for( int wait=0; wait<8; wait++ )
+	write( 0, 0x27, 0xb5 ); // CSM
+	for( int wait=0; wait<4; wait++ )
 		write( 0, 0x01, 255 ); // wait
-	keyoff_all(ch);
+	//keyoff_all(ch);
 }
 
 void gng2( Ch *ch ) {

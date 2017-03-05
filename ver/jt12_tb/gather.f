@@ -9,7 +9,6 @@ jt12_test.v
 ../../hdl/jt12_lfo.v
 ../../hdl/jt12_mmr.v
 ../../hdl/jt12_sumch.v
-../../hdl/jt12_opsync.v
 ../../hdl/jt12_op.v
 ../../hdl/jt12_pg.v
 ../../hdl/jt12_reg.v

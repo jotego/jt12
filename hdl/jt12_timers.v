@@ -27,6 +27,8 @@
 module jt12_timers(
   input			clk,
   input			rst,
+  input			clk_en,	// clock enable
+  input			fast_timers,
   input [9:0]	value_A,
   input [7:0]	value_B,
   input 		load_A,
@@ -47,10 +49,11 @@ module jt12_timers(
 
 assign irq_n = ~( (flag_A&enable_irq_A) | (flag_B&enable_irq_B) );
 
-jt12_timer #(.mult_width(8), .mult_max(144), .counter_width(10)) 
+jt12_timer #(.mult_width(1), .mult_max(0), .counter_width(10)) 
 timer_A(
 	.clk		( clk		), 
 	.rst		( rst		),
+	.clk_en		( clk_en | fast_timers	),
 	.start_value( value_A	),
 	.load		( load_A   	),
 	.clr_flag   ( clr_flag_A),
@@ -60,10 +63,11 @@ timer_A(
 	.overflow	( overflow_A)
 );
 
-jt12_timer #(.mult_width(12), .mult_max(2304), .counter_width(8)) 
+jt12_timer #(.mult_width(4), .mult_max(16), .counter_width(8)) 
 timer_B(
 	.clk		( clk		), 
 	.rst		( rst		),
+	.clk_en		( clk_en | fast_timers	),
 	.start_value( value_B	),
 	.load		( load_B   	),
 	.clr_flag   ( clr_flag_B),
@@ -79,6 +83,7 @@ module jt12_timer #(parameter counter_width = 10, mult_width=5, mult_max=4 )
 (
 	input	clk, 
 	input	rst,
+	input	clk_en,
 	input	[counter_width-1:0] start_value,
 	input	load,
 	input	clr_flag,
@@ -112,12 +117,12 @@ always @(*) begin
 	init <= { start_value, {mult_width{1'b0}} };
 end
 
-always @(posedge clk) begin : counter
+always @(posedge clk) 
 	if( load ) begin
 	  mult <= { (mult_width){1'b0} };
 	  cnt  <= start_value;
 	end
-	else if( run )
+	else if( clk_en && run )
 	  { cnt, mult } <= overflow ? init : next;
-end
+
 endmodule

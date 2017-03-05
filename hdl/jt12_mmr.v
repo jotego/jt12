@@ -48,8 +48,9 @@ module jt12_mmr(
 	output	reg			clr_run_B,
 	output	reg			set_run_A,
 	output	reg			set_run_B,
+	output	reg			fast_timers,
 	input				flag_A,
-	input				overflow_A,
+	input				overflow_A,	
 	// PCM
 	output	reg	[8:0]	pcm,
 	output	reg			pcm_en,
@@ -179,6 +180,7 @@ always @(posedge clk) begin : memory_mapped_registers
 		enable_irq_B, enable_irq_A, load_B, load_A } <= 6'd0;
 		{ clr_run_A, clr_run_B, set_run_A, set_run_B } <= 4'b1100;
 		up_clr <= 1'b0;
+		fast_timers <= 1'b0;
 		// LFO
 		lfo_freq	<= 3'd0;
 		lfo_en		<= 1'b0;
@@ -219,6 +221,7 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_TESTYM: begin
 						eg_stop <= din[5];
 						pg_stop <= din[3];
+						fast_timers <= din[2];
 						end
 					REG_KON: 	up_keyon 	<= 1'b1;
 					REG_CLKA1:	value_A[9:2]<= din;
@@ -226,7 +229,7 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_CLKB:	value_B		<= din;
 					REG_TIMER: begin
 						effect	<= |din[7:6];
-						csm		<= din[7:6] == 2'b01;
+						csm		<= din[7:6] == 2'b10;
 						{ clr_flag_B, clr_flag_A,
 						  enable_irq_B, enable_irq_A,
 						  load_B, load_A } <= din[5:0];

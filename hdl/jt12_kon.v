@@ -45,7 +45,8 @@ wire drop;
 
 reg [3:0] cur_op_hot;
 
-always @(posedge clk) keyon_II <= drop;
+always @(posedge clk) 
+	keyon_II <= (csm&&cur_ch==2'd2&&overflow_A) || drop;
 
 always @(*) begin
 	case( cur_op )
