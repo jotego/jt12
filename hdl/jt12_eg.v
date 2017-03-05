@@ -151,7 +151,7 @@ end
 
 always @(posedge clk) begin
 	if( d1l == 4'd15 )
-		d1level_II <= 5'h10; // 48dB
+		d1level_II <= 5'h1f; // 93dB
 	else
 		d1level_II <= d1l;
 end
