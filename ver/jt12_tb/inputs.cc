@@ -1034,6 +1034,7 @@ void burst_test( Ch ch[6] ) {
 
 void ssg2_test( Ch ch[6] ) {
 	cerr << "This is Nemesis' SSG test\n";
+	cerr << "Tarda 50 minutos en el despacho\n";
 	ch[2].set_alg(7);
 	ch[2].set_rl(3);
 	Op& op = ch[2].op[3];	
@@ -1041,17 +1042,17 @@ void ssg2_test( Ch ch[6] ) {
 	op.set_tl(2);
 	op.set_ks(0);
 	op.set_ar(31); // de momento 31, el original usa un 2
-	op.set_dr(12); // 8 en el original
-	op.set_sr(12); // 8 en el original
+	op.set_dr(18); // 8 en el original
+	op.set_sr(18); // 8 en el original
 	op.set_sl(0xd);
 	op.set_rr(15); // 4 en el original
 	
 	for( int ssg=7; ssg<16; ssg++ ) {
 		op.set_ssg4( ssg );
 		ch[2].keyon(8);
-		for( int j=0; j<20;j++ ) write(0,1,255);
+		for( int j=0; j<30;j++ ) write(0,1,255);
 		ch[2].keyon(0);
-		write(0,1,60);
+		write(0,1,70);
 	}
 }
 
