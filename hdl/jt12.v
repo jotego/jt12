@@ -256,7 +256,7 @@ jt12_lfo u_lfo(
 	.rst		( rst_int	),
 	.clk		( clk_int	),
 	.zero		( zero		),
-	.lfo_rst	( lfo_rst	),
+	.lfo_rst	( 1'b0		),
 	.lfo_en		( lfo_en	),
 	.lfo_freq	( lfo_freq	),
 	.lfo_mod	( lfo_mod	)
@@ -266,7 +266,7 @@ jt12_lfo u_lfo(
 
 jt12_pg u_pg(
 	.clk		( clk_int		),
-	//.rst		( rst_int		),
+	.rst		( rst_int		),
 	// Channel frequency
 	.fnum_I		( fnum_I		),
 	.block_I	( block_I		),

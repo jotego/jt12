@@ -58,7 +58,7 @@ always @(*)
 
 // n=2
 // Generate internal clock and synchronous reset for it.
-reg	rst_int_aux;
+reg	[1:0] rst_int_aux;
 
 always @(posedge clk or posedge rst) 
 	clk_n2 	<= rst ? 1'b0 : ~clk_n2;
@@ -82,12 +82,11 @@ wire [3:0] delay;
 
 always @(posedge clk_n6 or posedge rst) 
 	if( rst ) begin
-		rst_int_aux	<= 1'b1;
+		rst_int_aux	<= 2'b11;
 		rst_int		<= 1'b1;
 	end
-	else begin
-		rst_int_aux	<= 1'b0;
-		rst_int		<= rst_int_aux;
+	else begin		
+		{ rst_int, rst_int_aux } <= { rst_int_aux, 1'b0 };
 	end
 
 	

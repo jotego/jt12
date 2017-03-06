@@ -34,6 +34,7 @@ http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc
 
 module jt12_pg(
 	input			 	clk,
+	input				rst,
 	// Channel frequency
 	input		[10:0]	fnum_I,
 	input		[ 2:0]	block_I,
@@ -217,8 +218,9 @@ jt12_sh #( .width(10), .stages(12-7) ) u_padding(
 	.drop	( phase_XII	)
 );
 */
-jt12_sh #( .width(20), .stages(24) ) u_phsh(
+jt12_sh_rst #( .width(20), .stages(24) ) u_phsh(
 	.clk	( clk		),
+	.rst	( rst		),
 	.din	( pg_stop ? phase_drop : phase_in	),
 	.drop	( phase_drop)
 );

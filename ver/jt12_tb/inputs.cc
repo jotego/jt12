@@ -1122,6 +1122,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-acc" )==0 )  acc_test( ch );
 		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
 		if( strcmp( argv[k], "-burst" )==0 )  burst_test( ch );
+		if( strcmp( argv[k], "-powerup" )==0 )  wait(1000);
 
 		if( strcmp( argv[k], "-mmr" )==0 )  {
 			k++;

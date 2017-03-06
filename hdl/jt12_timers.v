@@ -118,7 +118,7 @@ always @(*) begin
 end
 
 always @(posedge clk) 
-	if( load ) begin
+	if( load || rst) begin
 	  mult <= { (mult_width){1'b0} };
 	  cnt  <= start_value;
 	end

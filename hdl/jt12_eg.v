@@ -78,24 +78,19 @@ module jt12_eg (
 		// eg[5:0] -> mantisa attenuation (uses LUT)
 		// 1 LSB of eg is -0.09257 dB
 
-reg		[9:0]	eg_internal;
-
 wire ssg_inv_II  = ssg_eg_II[2] & ssg_en_II;
 wire ssg_alt_II  = ssg_eg_II[1] & ssg_en_II;
 wire ssg_hold_II = ssg_eg_II[0] & ssg_en_II;
 
-parameter ATTACK=3'd0, DECAY1=3'd1, DECAY2=3'd2, RELEASE=3'd3, HOLD=3'd4;
+parameter ATTACK=3'd0, DECAY1=3'd1, DECAY2=3'd2, RELEASE=3'd7, HOLD=3'd3;
 
 reg		[4:0]	d1level_II;
-reg		[2:0]	cnt_V;
-reg		[5:0]	rate_IV;
-reg		[9:0]	eg_III, eg_IV, eg_V, eg_VI;
+reg		[9:0]	eg_III, eg_IV, eg_V;
 wire	[9:0]	eg_II;
 
-reg 	step_V, step_VI;
+reg 	step_V;
 reg		sum_up;
 reg 	[5:0]	rate_V;
-reg		[5:1]	rate_VI;
 
 // remember: { log_msb, pow_addr } <= log_val[11:0] + { tl, 5'd0 } + { eg, 2'd0 };
 
@@ -132,22 +127,6 @@ wire	ar_off_VI;
 reg		ar_off_III;
 
 //	Register Cycle I
-reg [8:0] ar_sum0;
-reg [9:0] ar_result, ar_sum;
-
-always @(*) begin : ar_calculation
-	casex( rate_VI[5:2] )
-		default: ar_sum0 <= eg_VI[9:4] + 1'd1;
-		4'b1100: ar_sum0 <= eg_VI[9:4] + 1'd1;
-		4'b1101: ar_sum0 <= eg_VI[9:3] + 1'd1;
-		4'b111x: ar_sum0 <= eg_VI[9:2] + 1'd1;
-	endcase
-	if( rate_VI[5:4] == 2'b11 )
-		ar_sum <= step_VI ? { ar_sum0, 1'b0 } : { 1'b0, ar_sum0 };
-	else
-		ar_sum <= step_VI ? { 1'b0, ar_sum0 } : 10'd0;
-	ar_result <= ar_sum<eg_VI ? eg_VI-ar_sum : 10'd0;
-end
 
 always @(posedge clk) begin
 	if( d1l == 4'd15 )
@@ -264,6 +243,7 @@ end
 ///////////////////////////////////////////////////////////////////
 //	Register Cycle III
 reg		[6:0]	pre_rate_III;
+reg		[5:0]	rate_IV;
 
 always @(*) begin : pre_rate_calc
 	if( cfg_III == 5'd0 )
@@ -277,7 +257,13 @@ always @(*) begin : pre_rate_calc
 		endcase
 end
 
-always @(posedge clk) begin
+always @(posedge clk) 
+if( rst ) begin
+	state_IV <= RELEASE;
+	eg_IV <= 10'h3ff;
+	rate_IV <= 5'h1F;
+end
+else begin
 	state_IV <= state_III;
 	eg_IV <= eg_III;
 	rate_IV <= pre_rate_III[6] ? 6'd63 : pre_rate_III[5:0];
@@ -285,7 +271,16 @@ end
 
 ///////////////////////////////////////////////////////////////////
 //	Register Cycle IV
-always @(posedge clk) begin
+reg		[2:0]	cnt_V;
+
+always @(posedge clk) 
+if( rst ) begin
+	state_V	<= RELEASE;
+	rate_V <= 5'h1f;
+	eg_V <= 10'h3ff;
+	cnt_V<= 3'd0;
+end
+else begin
 	state_V	<= state_IV;
 	rate_V <= rate_IV;
 	eg_V <= eg_IV;
@@ -351,7 +346,19 @@ always @(*) begin : rate_step
 	step_V <= rate_V[5:1]==5'd0 ? 1'b0 : step_idx[ cnt_V ];
 end
 
-always @(posedge clk) begin
+reg	[5:1]	rate_VI;
+reg [9:0]	eg_VI;
+reg			step_VI;
+
+always @(posedge clk) 
+if( rst ) begin
+	state_VI <= RELEASE;
+	rate_VI <= 5'd1;
+	eg_VI <= 10'h3ff;
+	sum_up <= 1'b0;
+	step_VI <= 1'b0;
+end
+else begin
 	state_VI <= state_V;
 	rate_VI <= rate_V[5:1];
 	eg_VI <= eg_V;
@@ -380,7 +387,29 @@ always @(*) begin
 	eg_stopped_VII <= eg_VI;
 end
 
-always @(posedge clk) begin
+reg [8:0] ar_sum0;
+reg [9:0] ar_result, ar_sum;
+
+always @(*) begin : ar_calculation
+	casex( rate_VI[5:2] )
+		default: ar_sum0 <= eg_VI[9:4] + 1'd1;
+		4'b1100: ar_sum0 <= eg_VI[9:4] + 1'd1;
+		4'b1101: ar_sum0 <= eg_VI[9:3] + 1'd1;
+		4'b111x: ar_sum0 <= eg_VI[9:2] + 1'd1;
+	endcase
+	if( rate_VI[5:4] == 2'b11 )
+		ar_sum <= step_VI ? { ar_sum0, 1'b0 } : { 1'b0, ar_sum0 };
+	else
+		ar_sum <= step_VI ? { 1'b0, ar_sum0 } : 10'd0;
+	ar_result <= ar_sum<eg_VI ? eg_VI-ar_sum : 10'd0;
+end
+
+always @(posedge clk) 
+if( rst ) begin
+	eg_VII <= 10'h3ff;
+	state_VII <= RELEASE;
+end
+else begin
 	if( ar_off_VI ) begin
 		// eg_VII <= ssg_en_II ? 10'h200 : 10'd0;
 		eg_VII <= 10'd0;
@@ -407,6 +436,7 @@ always @(posedge clk) begin
 end
 //////////////////////////////////////////////////////////////
 // Register cycle VII
+reg		[9:0]	eg_internal_VIII;
 reg		[8:0]	am_final;
 reg		[11:0]	sum_eg_tl;
 
@@ -427,8 +457,13 @@ always @(*) begin : sum_eg_and_tl
 				   + { am_final, 1'b0 };
 end
 
-always @(posedge clk) begin
-	eg_internal <= sum_eg_tl[11:10] > 2'b0 ? {10{1'b1}} : sum_eg_tl[9:0];
+always @(posedge clk) 
+if( rst ) begin
+	eg_internal_VIII <= 10'h3ff;
+	state_VIII <= RELEASE;
+end
+else begin
+	eg_internal_VIII <= sum_eg_tl[11:10] > 2'b0 ? {10{1'b1}} : sum_eg_tl[9:0];
 	state_VIII <= state_VII;
 end
 
@@ -437,10 +472,14 @@ end
 wire ssg_inv_VIII, ssg_en_VIII;
 //reg	[9:0] eg_IX;
 always @(posedge clk)
+if( rst )
+	eg_IX <= 10'h3ff;
+else begin
 	if( ssg_en_VIII && (ssg_invertion_VIII ^^ ssg_inv_VIII) )
-		eg_IX <= eg_internal>=10'h200 ? 10'h0 : (10'h200 - eg_internal);
+		eg_IX <= eg_internal_VIII>=10'h200 ? 10'h0 : (10'h200 - eg_internal_VIII);
 	else
-		eg_IX <= eg_internal;
+		eg_IX <= eg_internal_VIII;
+end
 
 //////////////////////////////////////////////////////////////
 // Register cycle IX-XII
@@ -493,32 +532,36 @@ jt12_sh #( .width(1), .stages(18) ) u_ssg2sh(
    Has 19 stages here, for 24 operators
    plus 1 extra stage. 20 stages does not work well.
    Maybe JT51 should be 26!! */
-jt12_sh #( .width(10), .stages(19) ) u_egsh(
+jt12_sh_rst #( .width(10), .stages(19), .rstval(1'b1) ) u_egsh(
 	.clk	( clk		),
+	.rst	( rst		),
 	.din	( eg_stop ? eg_stopped_VII : eg_VII		),
 	.drop	( eg_II	)
 );
 
 /* Had 32 stages in JT51, for 32 operators
    Has 24 stages here, for 24 operators */
-jt12_sh #( .width(1), .stages(24) ) u_cntsh(
+jt12_sh_rst #( .width(1), .stages(24) ) u_cntsh(
 	.clk	( clk		),
+	.rst	( rst		),	
 	.din	( cnt_V[0]	),
 	.drop	( cnt_out	)
 );
 
-jt12_sh #( .width(1), .stages(24) ) u_konsh(
+jt12_sh_rst #( .width(1), .stages(24) ) u_konsh(
 	.clk	( clk		),
+	.rst	( rst		),	
 	.din	( keyon_II	),
 	.drop	( keyon_last_II	)
 );
 
 /* Had 31 stages in JT51, for 32 operators
    Has 23 stages here, for 24 operators */
-jt12_sh #( .width(3), .stages(18) ) u_statesh(
+jt12_sh_rst #( .width(3), .stages(18), .rstval(1'b1) ) u_statesh(
 	.clk	( clk		),
-	.din	( state_VIII	),
-	.drop	( state_II )
+	.rst	( rst		),
+	.din	( state_VIII),
+	.drop	( state_II	)
 );
 
 `ifdef SIMULATION
