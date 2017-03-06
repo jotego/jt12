@@ -1,0 +1,116 @@
+`timescale 1ns / 1ps
+
+module jt12_fir(
+	input	clk,	// Use clk_out from jt12, this is x24 higher than 
+	input	[11:0] din,
+	output	[11:0] dout
+);
+
+reg [8:0] coeff[0:100];
+reg [11:0] delay[0:200];
+
+always @(posedge clk)
+
+initial begin
+        coeff[0] <= 9'd2;
+        coeff[1] <= 9'd2;
+        coeff[2] <= 9'd2;
+        coeff[3] <= 9'd2;
+        coeff[4] <= 9'd2;
+        coeff[5] <= 9'd2;
+        coeff[6] <= 9'd2;
+        coeff[7] <= 9'd2;
+        coeff[8] <= 9'd2;
+        coeff[9] <= 9'd2;
+        coeff[10] <= 9'd2;
+        coeff[11] <= 9'd2;
+        coeff[12] <= 9'd2;
+        coeff[13] <= 9'd2;
+        coeff[14] <= 9'd2;
+        coeff[15] <= 9'd2;
+        coeff[16] <= 9'd2;
+        coeff[17] <= 9'd1;
+        coeff[18] <= 9'd1;
+        coeff[19] <= 9'd1;
+        coeff[20] <= 9'd0;
+        coeff[21] <= 9'd0;
+        coeff[22] <= 9'd-1;
+        coeff[23] <= 9'd-1;
+        coeff[24] <= 9'd-2;
+        coeff[25] <= 9'd-3;
+        coeff[26] <= 9'd-4;
+        coeff[27] <= 9'd-5;
+        coeff[28] <= 9'd-6;
+        coeff[29] <= 9'd-7;
+        coeff[30] <= 9'd-8;
+        coeff[31] <= 9'd-9;
+        coeff[32] <= 9'd-11;
+        coeff[33] <= 9'd-12;
+        coeff[34] <= 9'd-13;
+        coeff[35] <= 9'd-15;
+        coeff[36] <= 9'd-16;
+        coeff[37] <= 9'd-17;
+        coeff[38] <= 9'd-19;
+        coeff[39] <= 9'd-20;
+        coeff[40] <= 9'd-21;
+        coeff[41] <= 9'd-23;
+        coeff[42] <= 9'd-24;
+        coeff[43] <= 9'd-25;
+        coeff[44] <= 9'd-25;
+        coeff[45] <= 9'd-26;
+        coeff[46] <= 9'd-27;
+        coeff[47] <= 9'd-27;
+        coeff[48] <= 9'd-27;
+        coeff[49] <= 9'd-27;
+        coeff[50] <= 9'd-26;
+        coeff[51] <= 9'd-26;
+        coeff[52] <= 9'd-25;
+        coeff[53] <= 9'd-23;
+        coeff[54] <= 9'd-22;
+        coeff[55] <= 9'd-20;
+        coeff[56] <= 9'd-17;
+        coeff[57] <= 9'd-14;
+        coeff[58] <= 9'd-11;
+        coeff[59] <= 9'd-8;
+        coeff[60] <= 9'd-4;
+        coeff[61] <= 9'd1;
+        coeff[62] <= 9'd6;
+        coeff[63] <= 9'd11;
+        coeff[64] <= 9'd16;
+        coeff[65] <= 9'd22;
+        coeff[66] <= 9'd29;
+        coeff[67] <= 9'd35;
+        coeff[68] <= 9'd43;
+        coeff[69] <= 9'd50;
+        coeff[70] <= 9'd58;
+        coeff[71] <= 9'd66;
+        coeff[72] <= 9'd74;
+        coeff[73] <= 9'd82;
+        coeff[74] <= 9'd91;
+        coeff[75] <= 9'd100;
+        coeff[76] <= 9'd109;
+        coeff[77] <= 9'd118;
+        coeff[78] <= 9'd127;
+        coeff[79] <= 9'd135;
+        coeff[80] <= 9'd144;
+        coeff[81] <= 9'd153;
+        coeff[82] <= 9'd162;
+        coeff[83] <= 9'd171;
+        coeff[84] <= 9'd179;
+        coeff[85] <= 9'd187;
+        coeff[86] <= 9'd195;
+        coeff[87] <= 9'd203;
+        coeff[88] <= 9'd210;
+        coeff[89] <= 9'd217;
+        coeff[90] <= 9'd223;
+        coeff[91] <= 9'd229;
+        coeff[92] <= 9'd234;
+        coeff[93] <= 9'd239;
+        coeff[94] <= 9'd243;
+        coeff[95] <= 9'd246;
+        coeff[96] <= 9'd249;
+        coeff[97] <= 9'd252;
+        coeff[98] <= 9'd253;
+        coeff[99] <= 9'd254;
+        coeff[100] <= 9'd255;
+end
