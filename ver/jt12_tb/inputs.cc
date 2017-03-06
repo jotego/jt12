@@ -419,15 +419,19 @@ void ssg_test( Ch ch[6] ) {
 
 void tone00( Ch ch[6] ) {
 	ch[0].op[0].set_sl(15);
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(7);
-		ch[k].keyon( 15 );
-		ch[k].keyon( 0 );
-	}
-	ch[0].op[0].set_tl( 0 );
-			keyon( ch, 0, 1 );
-	for( int wait=0; wait<2; wait++ )
-		write( 0, 0x01, 255 ); // wait
+	ch[0].set_alg(7);
+	ch[0].keyon( 15 );
+    ch[0].set_rl(3);
+	ch[0].keyon( 0 );
+    ch[0].set_block(4);
+    ch[0].set_fnumber(512);
+	
+    Op& op = ch[0].op[0];
+	op.set_tl( 0 );
+    op.set_ar( 31 );
+    op.set_dr( 0 );
+	ch[0].keyon( 1 );
+    wait( 40 );
 }
 
 void fnum_check( Ch ch[6] ) {
@@ -1089,17 +1093,25 @@ void ssg2_test( Ch ch[6] ) {
     for ( k=0; k<sizeof(ymregs); k+=2 ) {
         write( 0, ymregs[k], ymregs[k+1]);
     }  
-    for( int ssg=0; ssg<5; ssg++ ) {
+    for( int ssg=0; ssg<8; ssg++ ) {
         write( 0, 0x28, 0x82 );
-        write( 0, 0x28, 0x02 );
 		wait( 10000 );
+        write( 0, 0x28, 0x02 );        
         write( 0, 0x9e, 0x08 | (ssg&7) );
-		wait( 100 );
+		wait( 300 );
     }
 }
 
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
+	for( int k=0, slot=0; k<6; k++ ) {
+		if( k<3  ) ch[k].chnum=k;
+		if( k>=3 ) ch[k].chnum=k+1;
+		for( int j=0; j<4; j++ ) {
+			ch[k].op[j].opnum = j;
+			ch[k].op[j].chnum = ch[k].chnum;
+        }
+    }
 	// initial_clear( ch );
 
 	for( int k=1; k<argc; k++ ) {

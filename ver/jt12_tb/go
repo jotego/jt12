@@ -4,7 +4,7 @@ TOP=jt12_test
 DUMPSIGNALS=DONT
 DUMPSOUND=DONTDUMPSOUND
 DUMPLFO=DONTDUMPLFO
-LIMITTIME=
+LIMITTIME="LIMITTIME=100000"
 EXTRA=
 RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
@@ -24,16 +24,10 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
     fi
-	if [ $1 = "-fast" ]; then
-		echo "Only simulates 60ms"
-		LIMITTIME="-DLIMITTIME=60"
-		shift
-		continue
-	fi
 	if [ $1 = "-time" ]; then
 		shift
 		echo "Only simulates " $1 "ms"
-		LIMITTIME="-DLIMITTIME="$1
+		LIMITTIME="LIMITTIME="$1
 		shift
 		continue
 	fi
@@ -93,7 +87,7 @@ date
 if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
-        -DSIMULATION -D$TIMERONLY -D$DUMPSOUND $LIMITTIME \
+        -DSIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 		-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST && sim -lxt > s
     #exit 0
     if [ $? -ne 0 ]; then
@@ -102,9 +96,10 @@ if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
 	    exit 1
     fi
 else
-	ncverilog -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
+	ncverilog -64BIT -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
     	+define+NCVERILOG+DISPLAY_STEP+$DUMPSIGNALS+TEST_SUPPORT+RANDWAIT=$RANDWAIT \
-        +define+SIMULATION+$TIMERONLY+$DUMPSOUND+$SSG_TEST > s
+        +define+SIMULATION+$TIMERONLY+$DUMPSOUND+$SSG_TEST \
+        +define+$LIMITTIME > s
 	if [ $? -ne 0 ]; then
 		cat s
 		rm s

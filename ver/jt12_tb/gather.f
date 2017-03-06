@@ -20,3 +20,4 @@ jt12_test.v
 ../../hdl/jt12.v
 ../common/sep24.v
 ../common/jt12_testdata.v
+../common/hybrid_pwm_sd.v

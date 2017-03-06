@@ -377,7 +377,7 @@ sep24 #( .width(10), .pos0(5'd0)) egsep
 (
 	.clk	( clk_int	),
 	.mixed	( eg_IX		),
-	.mask	( 0			),
+	.mask	( 10'd0		),
 	.cnt	( sep24_cnt	),
 
 	.ch0s1 (eg_ch0s1), 

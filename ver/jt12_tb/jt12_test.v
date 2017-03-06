@@ -4,42 +4,7 @@ module jt12_test;
 
 reg	rst;
 
-`ifndef DUMPLFO
-`ifndef KEYON_TEST
-`ifndef SSG_TEST
 `include "../common/dump.vh"
-`endif
-`endif
-`endif
-
-`ifdef KEYON_TEST
-initial begin
-	$dumpfile("jt12_test.lxt");
-	$dumpvars(1, jt12_test.uut.u_op );
-	$dumpvars(1, jt12_test.uut.u_eg );
-	$dumpvars(1, jt12_test.uut.u_mmr.u_reg.u_kon );
-	$dumpon;
-end
-`endif
-
-`ifdef DUMPLFO
-initial begin
-	$dumpfile("jt12_test.lxt");
-	$dumpvars(0, jt12_test.uut.u_lfo );
-	$dumpon;
-end
-`endif
-
-`ifdef SSG_TEST
-initial begin
-	$dumpfile("ssg.lxt");
-	$dumpvars(1, jt12_test.uut.u_op );
-	$dumpvars(1, jt12_test.uut.u_eg );
-	$dumpvars(1, jt12_test.uut.u_mmr.ssg_ch2s4 );
-	$dumpon;
-end
-`endif
-
 
 /*
 reg	clk;
@@ -49,7 +14,7 @@ initial begin
 end
 */
 
-reg mclk;
+reg mclk; // 54MHz clock
 
 initial begin
 	mclk = 0;
@@ -81,14 +46,17 @@ always @(posedge mclk or posedge rst0)
 
 wire clk = vclk;
 
-
+integer limit_time_cnt;
 
 initial begin
 	rst = 0;
+    limit_time_cnt=0;
     #500 rst = 1;
     #600 rst = 0;
 	`ifdef LIMITTIME
-	#(`LIMITTIME*1000*1000) $finish;
+    for( limit_time_cnt=`LIMITTIME; limit_time_cnt>0; limit_time_cnt=limit_time_cnt-1 )
+		#(1000*1000);
+	$finish;
     `endif
 end
 
@@ -121,9 +89,12 @@ always @(posedge clk)
 wire	sample, mux_sample;
 wire signed [8:0] mux_left, mux_right;
 
+wire	clk_out;
+
 jt12 uut(
 	.rst	( rst	),
 	.clk	( clk	),
+    .clk_out( clk_out ),
 	.din	( din	),
 	.addr	( addr	),
 	.cs_n	( cs_n	),
@@ -144,40 +115,63 @@ jt12 uut(
     .irq_n	( irq_n	)
 );
 
-wire signed [15:0] ampleft7, ampright7;
-
-reg [2:0] vol;
-
-initial begin
-	vol = 0;
-	forever #10000000 vol=vol+1;
-end
-
-jt12_amp_stereo amp7(
-	.clk	( clk 		),
-	.sample	( sample	),
-	.fmleft	( left		),
-	.fmright( right		),
-	.enable_psg( 1'b0 	),
-	.psg	( 5'd0 		),
-	.postleft( ampleft7	),
-	.postright( ampright7	),
-	.volume	( vol 		)
-);
-
-wire signed [15:0] ampleft4, ampright4;
+wire signed [15:0] ampleft, ampright;
 
 jt12_amp_stereo amp(
 	.clk	( clk 		),
+    .rst	( rst		),
 	.sample	( sample	),
 	.fmleft	( left		),
 	.fmright( right		),
 	.enable_psg( 1'b0 	),
-	.psg	( 5'd0 		),
-	.postleft( ampleft4	),
-	.postright( ampright4	),
-	.volume	( ~vol 		)
+	.psg	( 6'd0 		),
+	.postleft( ampleft	),
+	.postright( ampright	),
+	.volume	( 3'd7 		)
 );
+
+wire dacleft;
+reg dacrst;
+
+initial begin
+	dacrst=1;
+    #80000 dacrst=0;
+end
+
+wire [15:0] dacin_left = { ~ampleft[15], ampleft[14:0]};
+
+hybrid_pwm_sd dac(
+	.clk	( mclk		),
+    .n_reset( ~dacrst		),
+    .din	( dacin_left	),
+    .dout	( dacleft	)
+);
+
+real filter_left;
+// real tau=5e-6;
+
+always @(posedge mclk) 
+if ( dacrst )
+	filter_left <= 0;
+else begin
+	if( dacleft )
+    	filter_left <= filter_left + 9.26e-9/5e-6 * (1.0-filter_left);
+	else
+	    filter_left <= filter_left - 9.26e-9/5e-6 * filter_left;
+end
+
+real speaker_left;
+
+reg audio_clk;
+
+initial begin
+	audio_clk = 0;
+    forever #22700 audio_clk = ~audio_clk;
+end
+
+always @(posedge audio_clk)
+	speaker_left <= filter_left;
+
 
 `ifdef DUMPSOUND
 initial $display("DUMP START");
