@@ -24,6 +24,14 @@ void write( unsigned chnum, unsigned reg, unsigned val, bool addr1=false ) {
 	cout << dec;
 }
 
+void wait( float ms ) {
+	int x = ms/8.5*255.0;
+	cout << "// Wait for " << ms << "ms\n";
+	for( int k=0; k<(x/255); k++ )
+		write( 0, 1, 255 );
+	write( 0, 1, x%255 );
+}
+
 void write_allop(  int chnum, int reg, int val ) {
 	for( int k=0; k<4; k++ )
 		write( chnum, reg + (k<<2), val );
@@ -1031,7 +1039,7 @@ void burst_test( Ch ch[6] ) {
 		}
 	}
 }
-
+/*
 void ssg2_test( Ch ch[6] ) {
 	cerr << "This is Nemesis' SSG test\n";
 	cerr << "Tarda 50 minutos en el despacho\n";
@@ -1055,10 +1063,44 @@ void ssg2_test( Ch ch[6] ) {
 		write(0,1,70);
 	}
 }
+*/
+void ssg2_test( Ch ch[6] ) {
+	cerr << "This is Nemesis' SSG test\n";
+	cerr << "1s de simulacion tarda 20m y ocupa 38MB\n";
+	//cerr << "Tarda 50 minutos en el despacho\n";
+
+    char ymregs[] = {
+        0xb2, 0x07,
+        0xb6, 0xc0,
+        0x3e, 0x01,
+        0x4e, 0x02,
+        0x5e, 0x1f, // AR
+        0x6e, 0x08, // DR
+        0x7e, 0x08, // SR
+
+        0x8e, 0xf4, // SL+RR
+        0x9e, 0x00, // SSG
+        0xa6, 0x34,
+        0xa2, 0x43,
+        0x9e, 0x7 // SSG
+    };
+    int k;
+    // YM2612_reset();
+    for ( k=0; k<sizeof(ymregs); k+=2 ) {
+        write( 0, ymregs[k], ymregs[k+1]);
+    }  
+    for( int ssg=0; ssg<5; ssg++ ) {
+        write( 0, 0x28, 0x82 );
+        write( 0, 0x28, 0x02 );
+		wait( 10000 );
+        write( 0, 0x9e, 0x08 | (ssg&7) );
+		wait( 100 );
+    }
+}
 
 int main( int argc, char *argv[] ) {
 	Ch ch[6];
-	initial_clear( ch );
+	// initial_clear( ch );
 
 	for( int k=1; k<argc; k++ ) {
 		if( strcmp( argv[k], "-pcm" )==0 ) pcm_check( ch );
