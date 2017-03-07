@@ -99,7 +99,6 @@ if( rst ) begin
 	cnt <= 6'd0;
 	rev <= 6'd0;
 	acc <= {acc_width{1'b0}};
-	mac <= {acc_width{1'b0}};
 	left_out<= {data_width+extra{1'b0}};
 	right_out<= {data_width+extra{1'b0}};
 	sample_out <= 1'b0;
@@ -111,7 +110,6 @@ end else begin
 				cnt <= 6'd0;
 				rev <= stages-1;
 				acc <= {acc_width{1'b0}};
-				mac <= {acc_width{1'b0}};
 				state <= LEFT;
 			end
 			sample_out <= 1'b0;
@@ -121,7 +119,6 @@ end else begin
 					cnt <= 6'd0;
 					rev <= stages-1;
 					acc <= {acc_width{1'b0}};
-					mac <= {acc_width{1'b0}};
 					left_out <= acc+mac;
 					state <= RIGHT;
 				end
@@ -136,7 +133,6 @@ end else begin
 					cnt <= 6'd0;
 					rev <= stages-1;
 					acc <= {acc_width{1'b0}};
-					mac <= {acc_width{1'b0}};
 					right_out <= acc+mac;
 					sample_out <= 1'b1;
 					state <= IDLE;

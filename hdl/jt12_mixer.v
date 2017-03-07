@@ -27,12 +27,19 @@ module jt12_mixer(
 	input	signed [8:0] left_in,
 	input	signed [8:0] right_in,
 	input	[ 5:0]	psg,
-	input	enable_psg
+	input	enable_psg,
+	output	signed [15:0] left_out,
+	output	signed [15:0] right_out
 );
 
 wire signed [19:0] fir6_left, fir6_right;
 wire fir6_sample;
 wire signed [19:0] psg_fir6;
+
+wire [19:0] fir4_left, fir4_right;
+
+assign left_out = fir4_left[17:2];
+assign right_out = fir4_right[17:2];
 
 // Change sampling frequency from 54kHz to 321kHz
 // interpolating by 6. This is done using the multiplexed output
@@ -64,7 +71,6 @@ jt12_fir u_fir6_psg (
 // With that oversampling ratio, a 2nd order sigma delta
 // has 11.5bit resolution even with a 1-bit quantizer
 
-wire [19:0] fir4_left, fir4_right;
 wire	fir4_sample;
 
 jt12_interpol u_interpol(
