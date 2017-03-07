@@ -99,7 +99,7 @@ jt12 uut(
 	.addr	( addr	),
 	.cs_n	( cs_n	),
 	.wr_n	( wr_n	),
-	
+
 	.limiter_en( 1'b1 ),
 
 	.dout	( dout	),
@@ -113,6 +113,17 @@ jt12 uut(
 	.mux_sample	( mux_sample),
 
     .irq_n	( irq_n	)
+);
+
+wire [19:0] fir_left;
+
+jt12_fir u_fir
+(
+	.clk( mclk ),
+	.rst( rst  ),
+	.sample( mux_sample ),
+	.din( mux_left ),
+	.dout( fir_left )
 );
 
 wire signed [15:0] ampleft, ampright;
@@ -150,7 +161,7 @@ hybrid_pwm_sd dac(
 real filter_left;
 // real tau=5e-6;
 
-always @(posedge mclk) 
+always @(posedge mclk)
 if ( dacrst )
 	filter_left <= 0;
 else begin

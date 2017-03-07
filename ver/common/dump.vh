@@ -13,7 +13,8 @@ initial begin
         $shm_probe(jt12_test.speaker_left);
 	`else
 		$dumpfile("jt12_test.lxt");
-		$dumpvars();
+		// $dumpvars( 1, jt12_test.uut );
+		$dumpvars;
 		$dumpon;
 	`endif
 `endif

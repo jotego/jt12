@@ -51,7 +51,7 @@ private:
 		return a;
 	}
 public:
-	int opnum, chnum;	
+	int opnum, chnum;
 	int kon;
 	int dt, mul, tl, ks, ar, am, dr, sr, sl, rr, ssgen, ssg;
 	void writecfg() {
@@ -86,7 +86,7 @@ public:
 	void set_ks( int a ) {
 		ks = a;
 		write( chnum, 0x50+reg_offset(), (ks<<6)| ar );
-	}	
+	}
 	void set_ar( int a ) {
 		ar = a;
 		write( chnum, 0x50+reg_offset(), (ks<<6)| ar );
@@ -156,10 +156,10 @@ struct Ch {
 		op[0].kon = x&1;
 		op[1].kon = x&2?1:0;
 		op[2].kon = x&4?1:0;
-		op[3].kon = x&8?1:0;	
-		//cout << "// keyon for chnum=" << chnum << '\n';	
+		op[3].kon = x&8?1:0;
+		//cout << "// keyon for chnum=" << chnum << '\n';
 		write(  0, 0x28, (x<<4) | (chnum) );
-	}	
+	}
 };
 
 void dump( ofstream& of, Ch ch[6] ) {
@@ -406,9 +406,9 @@ void ssg_test( Ch ch[6] ) {
 		}
 		for( int wait=0; wait<5; wait++ )
 			write( 0, 0x01, 255 ); // wait
-		keyoff_all(ch);			
+		keyoff_all(ch);
 	}
-	
+
 	/*
 	for( int k=0; k<6; k++ )
 	for( int j=0; j<4; j++, ssg++ ) {
@@ -425,7 +425,7 @@ void tone00( Ch ch[6] ) {
 	ch[0].keyon( 0 );
     ch[0].set_block(4);
     ch[0].set_fnumber(512);
-	
+
     Op& op = ch[0].op[0];
 	op.set_tl( 0 );
     op.set_ar( 31 );
@@ -550,7 +550,7 @@ void csm_test(Ch ch[6]) {
 	write( 0, 0xa8, faux );
 	write( 0, 0xaa, faux );
 	write( 0, 0xa2, faux );
-	
+
 	write( 0, 0x24, 120 );
 	write( 0, 0x25, 0 );
 	write( 0, 0x27, 0xb5 ); // CSM
@@ -879,6 +879,7 @@ void acc_test( Ch ch[6] ) {
 }
 
 void dacmux_test( Ch ch[6] ) {
+	initial_clear( ch );
 	for( int k=0; k<6; k++ ) {
 		ch[k].set_alg(7);
 		ch[k].set_fb(0);
@@ -1049,7 +1050,7 @@ void ssg2_test( Ch ch[6] ) {
 	cerr << "Tarda 50 minutos en el despacho\n";
 	ch[2].set_alg(7);
 	ch[2].set_rl(3);
-	Op& op = ch[2].op[3];	
+	Op& op = ch[2].op[3];
 	op.set_mul(1);
 	op.set_tl(2);
 	op.set_ks(0);
@@ -1058,7 +1059,7 @@ void ssg2_test( Ch ch[6] ) {
 	op.set_sr(18); // 8 en el original
 	op.set_sl(0xd);
 	op.set_rr(15); // 4 en el original
-	
+
 	for( int ssg=7; ssg<16; ssg++ ) {
 		op.set_ssg4( ssg );
 		ch[2].keyon(8);
@@ -1092,11 +1093,11 @@ void ssg2_test( Ch ch[6] ) {
     // YM2612_reset();
     for ( k=0; k<sizeof(ymregs); k+=2 ) {
         write( 0, ymregs[k], ymregs[k+1]);
-    }  
+    }
     for( int ssg=0; ssg<8; ssg++ ) {
         write( 0, 0x28, 0x82 );
 		wait( 10000 );
-        write( 0, 0x28, 0x02 );        
+        write( 0, 0x28, 0x02 );
         write( 0, 0x9e, 0x08 | (ssg&7) );
 		wait( 300 );
     }
@@ -1142,7 +1143,7 @@ int main( int argc, char *argv[] ) {
 			if( k==argc ) {
 				cerr << "Use\n\t-mmr <number of random cases>\n";
 				cerr << "Running 3 cases by default\n";
-				
+
 			}
 			else {
 				stringstream s(argv[k]);
