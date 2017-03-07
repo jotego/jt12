@@ -57,28 +57,26 @@ generate
 	end
 endgenerate
 
-parameter acc_width=data_width*2+7;
 parameter mac_width=data_width+coeff_width+1;
-//reg	signed [acc_width-1:0] acc;
-//reg signed [mac_width-1:0] mac;
-integer acc,mac;
+parameter acc_width=mac_width+3;
+reg	signed [acc_width-1:0] acc;
+reg signed [mac_width-1:0] mac;
+//integer acc,mac;
 reg [5:0] 	cnt;
 reg [6:0]   rev;
 reg	[1:0]	state;
 
 parameter IDLE=2'b00, BUSY=2'b01, RELEASE=2'b10;
 
-//reg signed [data_width:0] sum;
-integer sum, gain;
+reg signed [data_width:0] sum;
 
 wire last_stage = cnt==(stages-1)/2;
 
 //integer a,b;
 
 always @(*) begin
-	sum <= $signed(chain[cnt] +
-			( last_stage ? {data_width{1'b0}}:chain[rev]));
-	gain <= coeff[cnt];
+	sum <= chain[cnt] +
+			( last_stage ? {data_width{1'b0}}:chain[rev]);
 	mac <= coeff[cnt]*sum;
 end
 

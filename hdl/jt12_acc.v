@@ -102,8 +102,8 @@ always @(posedge clk) begin : mux_dac_input
 		end
 	end
 	if( mux_cnt==2'd0 ) begin
-		mux_left <= rl3[0] ? buf_mux : 9'd0;
-		mux_right<= rl3[1] ? buf_mux : 9'd0;
+		mux_left <= rl3[1] ? buf_mux : 9'd0;
+		mux_right<= rl3[0] ? buf_mux : 9'd0;
 		mux_sample <= 1'b1;
 	end
 	else

@@ -97,7 +97,7 @@ public:
 	}
 	void set_rr( int a ) {
 		rr = a;
-		write( chnum, 0x80+a, (sl<<4)| rr );
+		write( chnum, 0x80+reg_offset(), (sl<<4)| rr );
 	}
 	void set_dr( int a ) {
 		dr = a;
@@ -559,6 +559,56 @@ void csm_test(Ch ch[6]) {
 	//keyoff_all(ch);
 }
 
+void maxtl_test(Ch ch[6]) {
+	cerr << "Dynamic range test\n";
+	//initial_clear( ch );
+	write( 0, 0x21, 1<<3 ); // PG stop
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(7);
+		ch[k].set_fb(0);
+		ch[k].set_fnumber(925);
+		ch[k].set_block(3);
+		ch[k].set_rl(3);
+		for( int j=0; j<4; j++ ) {
+			ch[k].op[j].set_tl( 0 );
+			ch[k].op[j].set_ar( 31 );			
+			ch[k].op[j].set_sr( 0 );
+			ch[k].op[j].set_dr( 0 );
+			ch[k].op[j].set_rr( 15 );
+			ch[k].op[j].set_mul(1);
+			ch[k].op[j].set_ssg4(0);
+		}
+		ch[k].keyon(0xf);		
+	}
+	write( 0, 0x21, 0<<3 ); // PG on
+	wait( 30 );
+}
+
+void dr_test(Ch ch[6]) {
+	cerr << "Dynamic range test\n";
+	//initial_clear( ch );
+	write( 0, 0x21, 1<<3 ); // PG stop
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(7);
+		ch[k].set_fb(0);
+		ch[k].set_fnumber(925);
+		ch[k].set_block(3);
+		ch[k].set_rl(3);
+		for( int j=0; j<4; j++ ) {
+			ch[k].op[j].set_tl( j==0 ? 0 : 127);
+			ch[k].op[j].set_ar( 31 );			
+			ch[k].op[j].set_sr( 0 );
+			ch[k].op[j].set_dr( 0 );
+			ch[k].op[j].set_rr( 15 );
+			ch[k].op[j].set_mul(1);
+			ch[k].op[j].set_ssg4(0);
+		}
+		ch[k].keyon(0xf);		
+	}
+	write( 0, 0x21, 0<<3 ); // PG on
+	wait( 30 );
+}
+
 void gng2( Ch *ch ) {
     int patch_00[] = {
 0x02, 0x01, 0x31, 0x00, 0x02, 0x01, 0x32, 0x00, 0x02, 0x01, 0x39, 0x00, 0x01, 0x01, 0x34, 0x00, // 30
@@ -893,7 +943,7 @@ void dacmux_test( Ch ch[6] ) {
 		write( 0, 0x01, 50 ); // wait
 //		}
 	}
-	write( 0, 0x21, 1<<3 ); // PG stop
+	//write( 0, 0x21, 1<<3 ); // PG stop
 	write( 0, 0x01, 10 ); // wait
 	ch[0].set_rl(1);
 	ch[4].set_rl(1);
@@ -1117,8 +1167,9 @@ int main( int argc, char *argv[] ) {
 
 	for( int k=1; k<argc; k++ ) {
 		if( strcmp( argv[k], "-pcm" )==0 ) pcm_check( ch );
-		if( strcmp( argv[k], "-dr" )==0 || strcmp( argv[k], "-csm" )==0)
-			csm_test( ch );
+		if( strcmp( argv[k], "-csm" )==0) csm_test( ch );
+		if( strcmp( argv[k], "-dr" )==0 ) dr_test( ch );
+		if( strcmp( argv[k], "-maxtl" )==0 ) maxtl_test( ch );
 		if( strcmp( argv[k], "-csm" )==0 )  csm_test( ch );
 		if( strcmp( argv[k], "-fnum" )==0 )  fnum_check( ch );
 		if( strcmp( argv[k], "-ssg" )==0 )  ssg_test( ch );

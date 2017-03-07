@@ -199,7 +199,8 @@ reg  [19:0] phase_in;
 reg  [ 9:0] phase_VII;
 
 always @(*)
-	phase_in <=  pg_rst_VI ? 20'd0 : phase_drop + phinc_VI;
+	phase_in <=  pg_rst_VI ? 20'd0 : 
+		( pg_stop ? phase_drop : phase_drop + phinc_VI);
 
 always @(posedge clk) begin : phase_calculation_VI
 	phase_VII <= phase_in[19:10];
@@ -221,7 +222,7 @@ jt12_sh #( .width(10), .stages(12-7) ) u_padding(
 jt12_sh_rst #( .width(20), .stages(24) ) u_phsh(
 	.clk	( clk		),
 	.rst	( rst		),
-	.din	( pg_stop ? phase_drop : phase_in	),
+	.din	( phase_in	),
 	.drop	( phase_drop)
 );
 
