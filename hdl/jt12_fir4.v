@@ -20,7 +20,7 @@
 
 `timescale 1ns / 1ps
 
-module jt12_fir
+module jt12_fir4
 #(parameter data_width=9, extra=3)
 (
 	input	clk,	// Use clk_out from jt12, this is x24 higher than
@@ -34,28 +34,18 @@ module jt12_fir
 );
 
 parameter coeff_width=9;
-parameter stages=73;
+parameter stages=11;
 
 reg signed [coeff_width-1:0] coeff[0:(stages-1)/2];
 reg signed [11:0] chain_left[0:stages-1];
 reg signed [11:0] chain_right[0:stages-1];
-
-reg update, last_sample;
-
-always @(posedge clk)
-	if( rst )
-		{ update, last_sample } <= 2'b00;
-	else begin
-		last_sample <= sample;
-		update <= sample && !last_sample;
-	end
 
 // shift register
 genvar i;
 generate
 	for (i=0; i < stages; i=i+1) begin: bit_shifter
 		always @(posedge clk)
-			if( update )
+			if( sample )
 				if(i>0) begin
 					chain_left[i] <= chain_left[i-1];
 					chain_right[i] <= chain_right[i-1];
@@ -68,7 +58,7 @@ generate
 endgenerate
 
 parameter mac_width=data_width+coeff_width+1;
-parameter acc_width=mac_width+3;
+parameter acc_width=mac_width+2;
 reg	signed [acc_width-1:0] acc;
 reg signed [mac_width-1:0] mac;
 //integer acc,mac;
@@ -107,7 +97,7 @@ if( rst ) begin
 end else begin
 	case(state)
 		default: begin
-			if( update ) begin
+			if( sample ) begin
 				cnt <= 6'd0;
 				rev <= stages-1;
 				acc <= {acc_width{1'b0}};
@@ -152,43 +142,12 @@ end
 
 
 initial begin
-        coeff[0] <= -9'd0;
-        coeff[1] <= -9'd1;
-        coeff[2] <= -9'd1;
-        coeff[3] <= -9'd2;
-        coeff[4] <= -9'd3;
-        coeff[5] <= -9'd3;
-        coeff[6] <= -9'd4;
-        coeff[7] <= -9'd4;
-        coeff[8] <= -9'd3;
-        coeff[9] <= -9'd1;
-        coeff[10] <= 9'd1;
-        coeff[11] <= 9'd3;
-        coeff[12] <= 9'd7;
-        coeff[13] <= 9'd10;
-        coeff[14] <= 9'd12;
-        coeff[15] <= 9'd13;
-        coeff[16] <= 9'd12;
-        coeff[17] <= 9'd9;
-        coeff[18] <= 9'd3;
-        coeff[19] <= -9'd5;
-        coeff[20] <= -9'd14;
-        coeff[21] <= -9'd24;
-        coeff[22] <= -9'd33;
-        coeff[23] <= -9'd40;
-        coeff[24] <= -9'd43;
-        coeff[25] <= -9'd39;
-        coeff[26] <= -9'd29;
-        coeff[27] <= -9'd12;
-        coeff[28] <= 9'd13;
-        coeff[29] <= 9'd44;
-        coeff[30] <= 9'd80;
-        coeff[31] <= 9'd119;
-        coeff[32] <= 9'd157;
-        coeff[33] <= 9'd192;
-        coeff[34] <= 9'd222;
-        coeff[35] <= 9'd243;
-        coeff[36] <= 9'd255;
+        coeff[0] <= 9'd19;
+        coeff[1] <= 9'd42;
+        coeff[2] <= 9'd100;
+        coeff[3] <= 9'd172;
+        coeff[4] <= 9'd232;
+        coeff[5] <= 9'd255;
 end
 
 endmodule

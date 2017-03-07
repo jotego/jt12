@@ -2,6 +2,9 @@ jt12_test.v
 ../../hdl/jt12_amp.v
 ../../hdl/jt12_acc.v
 ../../hdl/jt12_fir.v
+../../hdl/jt12_fir4.v
+../../hdl/jt12_interpol.v
+../../hdl/jt12_mixer.v
 ../../hdl/jt12_clksync.v
 ../../hdl/jt12_clk.v
 ../../hdl/jt12_eg.v

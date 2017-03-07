@@ -115,15 +115,14 @@ jt12 uut(
     .irq_n	( irq_n	)
 );
 
-wire [19:0] fir_left;
-
-jt12_fir u_fir
-(
-	.clk( mclk ),
-	.rst( rst  ),
-	.sample( mux_sample ),
-	.din( mux_left ),
-	.dout( fir_left )
+jt12_mixer u_mixer(
+	.clk	( mclk 			),
+	.rst	( rst  			),
+	.sample	( mux_sample 	),
+	.left_in( mux_left 		),
+	.right_in( mux_right 	),
+	.psg	( 5'd10			),
+	.enable_psg( 1'b1		)
 );
 
 wire signed [15:0] ampleft, ampright;
