@@ -571,14 +571,14 @@ void maxtl_test(Ch ch[6]) {
 		ch[k].set_rl(3);
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( 0 );
-			ch[k].op[j].set_ar( 31 );			
+			ch[k].op[j].set_ar( 31 );
 			ch[k].op[j].set_sr( 0 );
 			ch[k].op[j].set_dr( 0 );
 			ch[k].op[j].set_rr( 15 );
 			ch[k].op[j].set_mul(1);
 			ch[k].op[j].set_ssg4(0);
 		}
-		ch[k].keyon(0xf);		
+		ch[k].keyon(0xf);
 	}
 	write( 0, 0x21, 0<<3 ); // PG on
 	wait( 30 );
@@ -596,14 +596,14 @@ void dr_test(Ch ch[6]) {
 		ch[k].set_rl(3);
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( j==0 ? 0 : 127);
-			ch[k].op[j].set_ar( 31 );			
+			ch[k].op[j].set_ar( 31 );
 			ch[k].op[j].set_sr( 0 );
 			ch[k].op[j].set_dr( 0 );
 			ch[k].op[j].set_rr( 15 );
 			ch[k].op[j].set_mul(1);
 			ch[k].op[j].set_ssg4(0);
 		}
-		ch[k].keyon(0xf);		
+		ch[k].keyon(0xf);
 	}
 	write( 0, 0x21, 0<<3 ); // PG on
 	wait( 30 );
@@ -1005,6 +1005,7 @@ void dacmux_test( Ch ch[6] ) {
 }
 
 void mmr_test( Ch ch[6], int rnd_cases=3 ) {
+	initial_clear( ch );
 	cerr << "MMR test\n";
 	cerr << "Tarda unos 25 minutos en el portatil en hacer 800 casos\n";
 	cerr << "Tarda unos 45 minutos en el despacho en hacer 2000 casos\n";
