@@ -1147,7 +1147,7 @@ void ssg2_test( Ch ch[6] ) {
     }
     for( int ssg=0; ssg<8; ssg++ ) {
         write( 0, 0x28, 0x82 );
-		wait( 10000 );
+		wait( 5000 );
         write( 0, 0x28, 0x02 );
         write( 0, 0x9e, 0x08 | (ssg&7) );
 		wait( 300 );

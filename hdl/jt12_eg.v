@@ -1,17 +1,17 @@
 /*  This file is part of JT12.
 
-    JT12 is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	JT12 is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    JT12 is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	JT12 is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with JT12.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with JT12.  If not, see <http://www.gnu.org/licenses/>.
 
 	Author: Jose Tejada Gomez. Twitter: @topapate
 	Version: 1.0
@@ -147,8 +147,8 @@ reg		ssg_en_in_II;
 
 always @(*) begin
 	if( state_II==RELEASE )
-    	ssg_en_in_II <= 1'b0;
-    else
+		ssg_en_in_II <= 1'b0;
+	else
 		ssg_en_in_II <= keyon_II ? ssg_en_II : ssg_en_out;
 end
 
@@ -176,64 +176,62 @@ always @(posedge clk) begin
 		end
 		else begin : sel_rate
 			pg_rst_III <= (eg_II==10'h3FF) ||ssg_pg_rst;
-			case ( state_II )
-				ATTACK: begin
-					if( eg_II==10'd0 ) begin
-						state_III <= DECAY1;
-						cfg_III		 <= rate1_II;
-						ssg_invertion_III <= ssg_invertion_II;
-					end
-					else begin
-						state_III <= state_II; // attack
-						cfg_III		 <= arate_II;
-					end
+			if( (state_II==DECAY1 ||state_II==DECAY2) && ssg_en_II && eg_II >= 10'h200 ) begin
+				ssg_invertion_III <= ssg_alt_II ^ ssg_invertion_II;
+				if( ssg_hold_II ) begin
+					cfg_III <= 5'd0;
+					state_III <= HOLD; // repeats!
 					ar_off_III <= 1'b0;
-					end
-				DECAY1: begin
-					if( eg_II[9:5] >= d1level_II ) begin
-						cfg_III <= rate2_II;
-						state_III <= DECAY2;
-					end
-					else begin
-						cfg_III	<=	rate1_II;
-						state_III <= state_II;	// decay1
-					end
-					ssg_invertion_III <= ssg_invertion_II;
-					ar_off_III <= 1'b0;
-					end
-				DECAY2:
-					if( ssg_en_II && eg_II >= 10'h200 ) begin
-						ssg_invertion_III <= ssg_alt_II ^ ssg_invertion_II;
-						if( ssg_hold_II ) begin
+				end
+				else begin
+					cfg_III	<=	rate2_II;
+					state_III <= ATTACK; // repeats!
+					ar_off_III <= 1'b1;
+				end
+			end
+			else begin
+				ssg_invertion_III <= state_II==RELEASE ? 1'b0 : ssg_invertion_II;
+				case ( state_II )
+					ATTACK: begin
+						if( eg_II==10'd0 ) begin
+							state_III <= DECAY1;
+							cfg_III		 <= rate1_II;
+						end
+						else begin
+							state_III <= state_II; // attack
+							cfg_III		 <= arate_II;
+						end
+						ar_off_III <= 1'b0;
+						end
+					DECAY1: begin
+						if( eg_II[9:5] >= d1level_II ) begin
+							cfg_III <= rate2_II;
+							state_III <= DECAY2;
+						end
+						else begin
+							cfg_III	<=	rate1_II;
+							state_III <= state_II;	// decay1
+						end
+						ar_off_III <= 1'b0;
+						end
+					DECAY2:
+						begin
+							cfg_III	<=	rate2_II;
+							state_III <= state_II;	// decay2
+							ar_off_III <= 1'b0;
+						end
+					RELEASE: begin
+							cfg_III	<=	{ rrate_II, 1'b1 };
+							state_III <= state_II;	// release
+							ar_off_III <= 1'b0;
+						end
+					HOLD: begin
 							cfg_III <= 5'd0;
 							state_III <= HOLD; // repeats!
 							ar_off_III <= 1'b0;
 						end
-						else begin
-							cfg_III	<=	rate2_II;
-							state_III <= ATTACK; // repeats!
-							ar_off_III <= 1'b1;
-						end
-					end
-					else begin
-						cfg_III	<=	rate2_II;
-						state_III <= state_II;	// decay2
-						ssg_invertion_III <= ssg_invertion_II;
-						ar_off_III <= 1'b0;
-					end
-				RELEASE: begin
-						cfg_III	<=	{ rrate_II, 1'b1 };
-						state_III <= state_II;	// release
-						ssg_invertion_III <= 1'b0;
-						ar_off_III <= 1'b0;
-					end
-				HOLD: begin
-						cfg_III <= 5'd0;
-						ssg_invertion_III <= ssg_invertion_II;
-						state_III <= HOLD; // repeats!
-						ar_off_III <= 1'b0;
-					end
-			endcase
+				endcase
+			end
 		end
 	end
 
@@ -284,37 +282,37 @@ else begin
 	state_V	<= state_IV;
 	rate_V <= rate_IV;
 	eg_V <= eg_IV;
-    if( state_IV == ATTACK )
-	    casex( rate_IV[5:2] )
-		    4'h0: cnt_V <= eg_cnt[13:11];
-		    4'h1: cnt_V <= eg_cnt[12:10];
-		    4'h2: cnt_V <= eg_cnt[11: 9];
-		    4'h3: cnt_V <= eg_cnt[10: 8];
-		    4'h4: cnt_V <= eg_cnt[ 9: 7];
-		    4'h5: cnt_V <= eg_cnt[ 8: 6];
-		    4'h6: cnt_V <= eg_cnt[ 7: 5];
-		    4'h7: cnt_V <= eg_cnt[ 6: 4];
-		    4'h8: cnt_V <= eg_cnt[ 5: 3];
-		    4'h9: cnt_V <= eg_cnt[ 4: 2];
-		    4'ha: cnt_V <= eg_cnt[ 3: 1];
-		    default: cnt_V <= eg_cnt[ 2: 0];
-	    endcase
-    else
-	    casex( rate_IV[5:2] )
-		    4'h0: cnt_V <= eg_cnt[14:12];
-		    4'h1: cnt_V <= eg_cnt[13:11];
-		    4'h2: cnt_V <= eg_cnt[12:10];
-		    4'h3: cnt_V <= eg_cnt[11: 9];
-		    4'h4: cnt_V <= eg_cnt[10: 8];
-		    4'h5: cnt_V <= eg_cnt[ 9: 7];
-		    4'h6: cnt_V <= eg_cnt[ 8: 6];
-		    4'h7: cnt_V <= eg_cnt[ 7: 5];
-		    4'h8: cnt_V <= eg_cnt[ 6: 4];
-		    4'h9: cnt_V <= eg_cnt[ 5: 3];
-		    4'ha: cnt_V <= eg_cnt[ 4: 2];
-		    4'hb: cnt_V <= eg_cnt[ 3: 1];
-		    default: cnt_V <= eg_cnt[ 2: 0];
-	    endcase
+	if( state_IV == ATTACK )
+		casex( rate_IV[5:2] )
+			4'h0: cnt_V <= eg_cnt[13:11];
+			4'h1: cnt_V <= eg_cnt[12:10];
+			4'h2: cnt_V <= eg_cnt[11: 9];
+			4'h3: cnt_V <= eg_cnt[10: 8];
+			4'h4: cnt_V <= eg_cnt[ 9: 7];
+			4'h5: cnt_V <= eg_cnt[ 8: 6];
+			4'h6: cnt_V <= eg_cnt[ 7: 5];
+			4'h7: cnt_V <= eg_cnt[ 6: 4];
+			4'h8: cnt_V <= eg_cnt[ 5: 3];
+			4'h9: cnt_V <= eg_cnt[ 4: 2];
+			4'ha: cnt_V <= eg_cnt[ 3: 1];
+			default: cnt_V <= eg_cnt[ 2: 0];
+		endcase
+	else
+		casex( rate_IV[5:2] )
+			4'h0: cnt_V <= eg_cnt[14:12];
+			4'h1: cnt_V <= eg_cnt[13:11];
+			4'h2: cnt_V <= eg_cnt[12:10];
+			4'h3: cnt_V <= eg_cnt[11: 9];
+			4'h4: cnt_V <= eg_cnt[10: 8];
+			4'h5: cnt_V <= eg_cnt[ 9: 7];
+			4'h6: cnt_V <= eg_cnt[ 8: 6];
+			4'h7: cnt_V <= eg_cnt[ 7: 5];
+			4'h8: cnt_V <= eg_cnt[ 6: 4];
+			4'h9: cnt_V <= eg_cnt[ 5: 3];
+			4'ha: cnt_V <= eg_cnt[ 4: 2];
+			4'hb: cnt_V <= eg_cnt[ 3: 1];
+			default: cnt_V <= eg_cnt[ 2: 0];
+		endcase
 end
 
 //////////////////////////////////////////////////////////////
@@ -383,7 +381,7 @@ always @(*) begin
 		default: preatt_VI <= { step_VI, 1'b0 };
 	endcase
 	att_VI <= ssg_en_VI ? { preatt_VI, 2'd0 } : { 2'd0, preatt_VI };
-    egatt_VI <= att_VI + eg_VI;
+	egatt_VI <= att_VI + eg_VI;
 	eg_stopped_VII <= eg_VI;
 end
 
@@ -445,7 +443,7 @@ always @(*) begin : sum_eg_and_tl
 		3'b0xx,3'b100: am_final <= 9'd0;
 		3'b101: am_final <= { 2'b00, am };
 		3'b110: am_final <= { 1'b0, am, 1'b0};
-		3'b111: am_final <= { am, 2'b0      };
+		3'b111: am_final <= { am, 2'b0	  };
 	endcase
 	`ifdef TEST_SUPPORT
 	if( test_eg && tl_VII!=7'd0 )
@@ -453,7 +451,7 @@ always @(*) begin : sum_eg_and_tl
 	else
 	`endif
 		sum_eg_tl <= { tl_VII,   3'd0 }
-		           + eg_VII
+				   + eg_VII
 				   + { am_final, 1'b0 };
 end
 

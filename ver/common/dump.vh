@@ -10,7 +10,9 @@ initial begin
 //		$shm_probe(jt12_test,"AS");
 		$shm_probe(jt12_test.uut,"AS");
         $shm_probe(jt12_test.u_testdata,"A");
-        $shm_probe(jt12_test.speaker_left);
+        `ifdef POSTPROC
+        	$shm_probe(jt12_test.speaker_left);
+        `endif
 	`else
 		$dumpfile("jt12_test.lxt");
 		// $dumpvars( 1, jt12_test.uut );
@@ -49,8 +51,10 @@ initial begin
 		$shm_probe(jt12_test.uut.u_op,"A");
         $shm_probe(jt12_test.uut.u_eg,"A");
         $shm_probe(jt12_test.uut.u_mmr.ssg_ch2s4);
-        $shm_probe(jt12_test.speaker_left);
-        //$shm_probe(jt12_test.filter_left);
+        `ifdef POSTPROC
+	        $shm_probe(jt12_test.speaker_left);
+	        //$shm_probe(jt12_test.filter_left);
+        `endif
     `else
 		$dumpfile("ssg.lxt");
 		$dumpvars(1, jt12_test.uut.u_op );

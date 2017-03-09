@@ -115,6 +115,8 @@ jt12 uut(
     .irq_n	( irq_n	)
 );
 
+`ifdef POSTPROC
+
 jt12_mixer u_mixer(
 	.clk	( mclk 			),
 	.rst	( rst  			),
@@ -181,7 +183,7 @@ end
 
 always @(posedge audio_clk)
 	speaker_left <= filter_left;
-
+`endif
 
 `ifdef DUMPSOUND
 initial $display("DUMP START");
