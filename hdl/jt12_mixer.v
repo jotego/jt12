@@ -86,7 +86,7 @@ jt12_fir u_fir6_psg (
 // has 11.5bit resolution even with a 1-bit quantizer
 
 wire	fir4_sample;
-wire [8:0] pst_att = psg_fir6>>>2;
+wire [8:0] psg_att = psg_fir6>>>2;
 
 jt12_interpol u_interpol(
 	.clk		( clk 			),
