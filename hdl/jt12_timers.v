@@ -57,8 +57,10 @@ timer_A(
 	.start_value( value_A	),
 	.load		( load_A   	),
 	.clr_flag   ( clr_flag_A),
-	.set_run	( set_run_A	),
-	.clr_run	( clr_run_A ),
+//	.set_run	( set_run_A	),
+//	.clr_run	( clr_run_A ),
+	.set_run	( 1'b1		),
+	.clr_run	( 1'b0		),
 	.flag		( flag_A	),
 	.overflow	( overflow_A)
 );
@@ -71,8 +73,10 @@ timer_B(
 	.start_value( value_B	),
 	.load		( load_B   	),
 	.clr_flag   ( clr_flag_B),
-	.set_run	( set_run_B	),
-	.clr_run	( clr_run_B ),
+//	.set_run	( set_run_B	),
+//	.clr_run	( clr_run_B ),
+	.set_run	( 1'b1		),
+	.clr_run	( 1'b0		),
 	.flag		( flag_B	),
 	.overflow	(			)
 );

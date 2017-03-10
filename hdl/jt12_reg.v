@@ -291,14 +291,13 @@ jt12_fm u_fm(
 );
 
 // memory for OP registers
-parameter regop_width=44;
+parameter regop_width=37;
 
 wire [regop_width-1:0] regop_in, regop_out;
 
 assign regop_in = {
 	up_dt1_op	? dt1_in : dt1_II,	// 3
 	up_mul_op	? mul_in : mul_V,	// 4 - 7
-	up_tl_op	? tl_in	 : tl_VII,	// 7 - 14
 	up_ks_op	? ks_in	 : ks_III,	// 2 - 16
 	up_ar_op	? ar_in	 : ar_II,	// 5 - 21
 	up_amen_op	? amen_in: amsen_VII,// 1 - 22
@@ -310,7 +309,7 @@ assign regop_in = {
 	up_ssg_op	? ssg_in[2:0] : ssg_eg_II	// 3 - 42
 };
 
-assign { 	dt1_II, mul_V,	tl_VII, ks_III, 
+assign { 	dt1_II, mul_V, ks_III, 
 			ar_II,	amsen_VII, d1r_II, d2r_II, d1l, rr_II,
 			ssg_en_II,	ssg_eg_II 				} = regop_out;
 
@@ -320,6 +319,16 @@ jt12_sh_rst #(.width(regop_width),.stages(24)) u_regop(
 	.din	( regop_in	),
 	.drop	( regop_out	)
 );
+
+// TL is on a different register to 
+// have the reset to 1
+
+jt12_sh_rst #(.width(7),.stages(24), .rstval(1'b1) ) u_regtl(
+	.clk	( clk		),
+	.rst	( rst		),
+	.din	( up_tl_op	? tl_in	 : tl_VII	),
+	.drop	( tl_VII	)
+);	
 
 wire [2:0] block_latch, fnum_latch;
 
@@ -345,7 +354,7 @@ jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 	.drop	( regch_out	)
 );
 
-// RL are on a different register to 
+// RL is on a different register to 
 // have the reset to 1
 jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
 	.clk	( clk		),
