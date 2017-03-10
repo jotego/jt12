@@ -1,5 +1,5 @@
 jt12_test.v
-../../hdl/jt12_amp.v
+../../hdl/jt12_limitamp.v
 ../../hdl/jt12_acc.v
 ../../hdl/jt12_fir.v
 ../../hdl/jt12_fir4.v

@@ -117,29 +117,19 @@ jt12 uut(
 
 `ifdef POSTPROC
 
+wire [15:0] mixed_left;
+
 jt12_mixer u_mixer(
-	.clk	( mclk 			),
-	.rst	( rst  			),
-	.sample	( mux_sample 	),
-	.left_in( mux_left 		),
-	.right_in( mux_right 	),
-	.psg	( 5'd10			),
-	.enable_psg( 1'b1		)
-);
-
-wire signed [15:0] ampleft, ampright;
-
-jt12_amp_stereo amp(
-	.clk	( clk 		),
-    .rst	( rst		),
-	.sample	( sample	),
-	.fmleft	( left		),
-	.fmright( right		),
-	.enable_psg( 1'b0 	),
-	.psg	( 6'd0 		),
-	.postleft( ampleft	),
-	.postright( ampright	),
-	.volume	( 3'd7 		)
+	.clk		( mclk 			),
+	.rst		( rst  			),
+	.sample		( mux_sample 	),
+	.left_in	( mux_left 		),
+	.right_in	( mux_right 	),
+	.psg		( 5'd10			),
+	.enable_psg	( 1'b1			),
+	.enable_fm	( 1'b1			),
+	.volume		( 3'd4			),
+	.left_out	( mixed_left	)
 );
 
 wire dacleft;
@@ -150,7 +140,7 @@ initial begin
     #80000 dacrst=0;
 end
 
-wire [15:0] dacin_left = { ~ampleft[15], ampleft[14:0]};
+wire [15:0] dacin_left = { ~mixed_left, mixed_left[14:0]};
 
 hybrid_pwm_sd dac(
 	.clk	( mclk		),
