@@ -6,6 +6,7 @@ DUMPSOUND=DONTDUMPSOUND
 DUMPLFO=DONTDUMPLFO
 LIMITTIME="LIMITTIME=100000"
 EXTRA=
+POSTPROC=NOTPOSTPROC
 RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
 TEST_NAME=NOTESTNAME
@@ -21,6 +22,12 @@ while [ $# -gt 0 ]; do
 	if [ $1 = "-timeronly" ]; then
 		echo "Timer only"
 		TIMERONLY=TIMERONLY
+		shift
+		continue
+    fi
+	if [ $1 = "-post" ]; then
+		echo "Post-processing will be included"
+		POSTPROC=POSTPROC
 		shift
 		continue
     fi
@@ -88,7 +95,8 @@ if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
         -DSIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
-		-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST && sim -lxt > s
+		-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
+		-D$POSTPROC && sim -lxt > s
     #exit 0
     if [ $? -ne 0 ]; then
 	    cat s
@@ -99,7 +107,7 @@ else
 	ncverilog -64BIT -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
     	+define+NCVERILOG+DISPLAY_STEP+$DUMPSIGNALS+TEST_SUPPORT+RANDWAIT=$RANDWAIT \
         +define+SIMULATION+$TIMERONLY+$DUMPSOUND+$SSG_TEST \
-        +define+$LIMITTIME > s
+        +define+$LIMITTIME+define+$POSTPROC > s
 	if [ $? -ne 0 ]; then
 		cat s
 		rm s
