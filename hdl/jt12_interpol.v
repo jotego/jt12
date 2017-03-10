@@ -60,7 +60,7 @@ if( rst ) begin
 	cnt	  <= 6'd0;
 end else begin
 	if( cnt==6'd41 ) begin
-		cnt	  <= 6'd1;
+		cnt	  <= 6'd0;
 		state <= state+1'b1;
 		fir_sample_in <= 1'b1;
 	end

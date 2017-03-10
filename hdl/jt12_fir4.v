@@ -86,11 +86,6 @@ end
 
 always @(posedge clk)
 if( rst ) begin
-	cnt <= 6'd0;
-	rev <= 6'd0;
-	acc <= {acc_width{1'b0}};
-	left_out<= {data_width+extra{1'b0}};
-	right_out<= {data_width+extra{1'b0}};
 	sample_out <= 1'b0;
 	state	<= IDLE;
 end else begin
