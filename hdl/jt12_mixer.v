@@ -39,7 +39,6 @@ wire fir6_sample;
 wire signed [19:0] psg_fir6;
 
 wire signed [19:0] fir4_left, fir4_right;
-reg signed [19:0] amp_left, amp_right;
 
 
 // Change sampling frequency from 54kHz to 321kHz
@@ -78,7 +77,8 @@ wire signed [8:0] psg_att = psg_fir6>>>2;
 wire signed [8:0] fm_gated_left  = {9{enable_fm}} & fir6_left[19:11];
 wire signed [8:0] fm_gated_right = {9{enable_fm}} & fir6_right[19:11];
 
-wire signed [19:0] amp5_left, amp5_right, amp4_left, amp4_right,
+reg signed [15:0] amp_left, amp_right;
+wire signed [15:0] amp5_left, amp5_right, amp4_left, amp4_right,
 	amp3_left, amp3_right, amp2_left, amp2_right,
 	amp1_left, amp1_right;
 
@@ -97,37 +97,37 @@ jt12_interpol u_interpol(
 	.sample_out	( fir4_sample	)
 );
 
-jt12_limitamp #( .width(20), .shift(5) ) amp5 (
-	.left_in	( fir4_left	),
-	.right_in	( fir4_right),
+jt12_limitamp #( .width(16), .shift(5) ) amp5 (
+	.left_in	( fir4_left[19:4]),
+	.right_in	( fir4_right[19:4]),
 	.left_out	( amp5_left	),
 	.right_out	( amp5_right)
 );
 
-jt12_limitamp #( .width(20), .shift(4) ) amp4 (
-	.left_in	( fir4_left	),
-	.right_in	( fir4_right),
+jt12_limitamp #( .width(16), .shift(4) ) amp4 (
+	.left_in	( fir4_left[19:4]),
+	.right_in	( fir4_right[19:4]),
 	.left_out	( amp4_left	),
 	.right_out	( amp4_right)
 );
 
-jt12_limitamp #( .width(20), .shift(3) ) amp3 (
-	.left_in	( fir4_left	),
-	.right_in	( fir4_right),
+jt12_limitamp #( .width(16), .shift(3) ) amp3 (
+	.left_in	( fir4_left[19:4]),
+	.right_in	( fir4_right[19:4]),
 	.left_out	( amp3_left	),
 	.right_out	( amp3_right)
 );
 
-jt12_limitamp #( .width(20), .shift(2) ) amp2 (
-	.left_in	( fir4_left	),
-	.right_in	( fir4_right),
+jt12_limitamp #( .width(16), .shift(2) ) amp2 (
+	.left_in	( fir4_left[19:4]),
+	.right_in	( fir4_right[19:4]),
 	.left_out	( amp2_left	),
 	.right_out	( amp2_right)
 );
 
-jt12_limitamp #( .width(20), .shift(1) ) amp1 (
-	.left_in	( fir4_left	),
-	.right_in	( fir4_right),
+jt12_limitamp #( .width(16), .shift(1) ) amp1 (
+	.left_in	( fir4_left[19:4]),
+	.right_in	( fir4_right[19:4]),
 	.left_out	( amp1_left	),
 	.right_out	( amp1_right)
 );
@@ -145,7 +145,7 @@ always @(posedge clk) begin
 	endcase
 end
 
-assign left_out  = amp_left[19:4];
-assign right_out = amp_right[19:4];
+assign left_out  = amp_left;
+assign right_out = amp_right;
 
 endmodule

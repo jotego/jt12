@@ -49,7 +49,7 @@ always @(posedge clk)
 if( rst ) begin
 	cnt <= 3'd0;
 	cnt	  <= 6'd0;
-end else begin
+end else 
 		if( update ) begin
 			case( cnt ) 
 				3'd0: fir_in <= ch0;
@@ -60,8 +60,7 @@ end else begin
 			endcase
 			cnt <= cnt==3'd5 ? 3'd0 : cnt+1'b1;
 		end
-	endcase	
-end
+
 
 jt12_fir4 u_fir4 (
 	.clk		( clk 			),
