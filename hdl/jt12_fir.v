@@ -69,39 +69,44 @@ endgenerate
 
 parameter mac_width=data_width+coeff_width+1;
 parameter acc_width=mac_width+3;
-reg	signed [acc_width-1:0] acc;
+reg	signed [acc_width-1:0] acc_left, acc_right;
 reg signed [mac_width-1:0] mac;
 //integer acc,mac;
-reg [5:0] 	cnt;
+reg [5:0] 	cnt, next;
 reg [6:0]   rev;
 reg	[1:0]	state;
 
 parameter IDLE=2'b00, LEFT=2'b01, RIGHT=2'b10;
 
 reg signed [data_width:0] sum;
+reg signed [coeff_width-1:0] gain;
+reg signed [data_width-1:0] prev;
 
 wire last_stage = cnt==(stages-1)/2;
 
 //integer a,b;
 
 always @(*) begin
-	if( state==LEFT)
-//		sum <= chain_left[cnt] +
-//				( last_stage ? {data_width{1'b0}}:chain_left[rev]);
-		begin	
+	if( state==LEFT) begin	
+		prev <= chain_left[rev];
 		if( last_stage )
-			sum <= chain_left[cnt];
+			sum <= buffer_left;
 		else
-			sum <= chain_left[cnt] + chain_left[rev];
+			sum <= buffer_left + chain_left[rev];
 		end
 	else begin
+		prev <= chain_right[rev];
 		if( last_stage )
-			sum <= chain_right[cnt];
+			sum <= buffer_right;
 		else
-			sum <= chain_right[cnt] + chain_right[rev];
+			sum <= buffer_right + chain_right[rev];
 	end
-	mac <= coeff[cnt]*sum;
+	gain <= coeff[cnt];
+	mac <= gain*sum;
+	next <= cnt+1'b1;
 end
+
+reg signed [data_width-1:0] buffer_left, buffer_right;
 
 always @(posedge clk)
 if( rst ) begin
@@ -113,39 +118,30 @@ end else begin
 			if( update ) begin
 				cnt <= 6'd0;
 				rev <= stages-1;
-				acc <= {acc_width{1'b0}};
+				acc_left <= {acc_width{1'b0}};
+				acc_right <= {acc_width{1'b0}};
 				state <= LEFT;
+				buffer_left <= left_in;
 			end
 			sample_out <= 1'b0;
 		end
 		LEFT: begin
-				if( cnt==(stages-1)/2 ) begin
-					cnt <= 6'd0;
-					rev <= stages-1;
-					acc <= {acc_width{1'b0}};
-					left_out <= acc+mac;
-					state <= RIGHT;
-				end
-				else begin
-					acc <= acc + mac;
-					cnt<=cnt+1'b1;
-					rev<=rev-1'b1;
-				end
+				acc_left <= acc_left + mac;
+				buffer_right <= chain_right[cnt];
+				state <= RIGHT;
 			end
-		RIGHT: begin
-				if( cnt==(stages-1)/2 ) begin
-					cnt <= 6'd0;
-					rev <= stages-1;
-					acc <= {acc_width{1'b0}};
-					right_out <= acc+mac;
-					sample_out <= 1'b1;
-					state <= IDLE;
-				end
-				else begin
-					acc <= acc + mac;
-					cnt<=cnt+1'b1;
-					rev<=rev-1'b1;
-				end
+		RIGHT:
+			if( cnt==(stages-1)/2 ) begin
+				left_out  <= acc_left;
+				right_out <= acc_right+mac;
+				sample_out <= 1'b1;
+				state <= IDLE;
+			end else begin
+				acc_right <= acc_right + mac;
+				buffer_left <= chain_left[next];
+				cnt<=next;
+				rev<=rev-1'b1;
+				state <= LEFT;
 			end
 	endcase
 end
