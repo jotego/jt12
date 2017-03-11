@@ -87,7 +87,7 @@ module jt12_timer #(parameter counter_width = 10, mult_width=5, mult_max=4 )
 (
 	input	clk, 
 	input	rst,
-	input	clk_en,
+(* direct_enable *) input	clk_en,
 	input	[counter_width-1:0] start_value,
 	input	load,
 	input	clr_flag,

@@ -29,7 +29,7 @@ module jt12_fir_ram
 	output [(data_width-1):0] q
 );
 
-	reg [data_width-1:0] ram[2**addr_width-1:0];
+(* ramstyle = "M-RAM, no_rw_check" *) reg [data_width-1:0] ram[2**addr_width-1:0];
 
 	always @ (posedge clk)
 		if (we)

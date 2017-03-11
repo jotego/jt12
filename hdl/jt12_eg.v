@@ -283,7 +283,7 @@ else begin
 	rate_V <= rate_IV;
 	eg_V <= eg_IV;
 	if( state_IV == ATTACK )
-		casex( rate_IV[5:2] )
+		case( rate_IV[5:2] )
 			4'h0: cnt_V <= eg_cnt[13:11];
 			4'h1: cnt_V <= eg_cnt[12:10];
 			4'h2: cnt_V <= eg_cnt[11: 9];
@@ -298,7 +298,7 @@ else begin
 			default: cnt_V <= eg_cnt[ 2: 0];
 		endcase
 	else
-		casex( rate_IV[5:2] )
+		case( rate_IV[5:2] )
 			4'h0: cnt_V <= eg_cnt[14:12];
 			4'h1: cnt_V <= eg_cnt[13:11];
 			4'h2: cnt_V <= eg_cnt[12:10];

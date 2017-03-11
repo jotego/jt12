@@ -96,7 +96,7 @@ if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
         -DSIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 		-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
-		-D$POSTPROC && sim -lxt > s
+		-D$POSTPROC -DICARUS && sim -lxt > s
     #exit 0
     if [ $? -ne 0 ]; then
 	    cat s

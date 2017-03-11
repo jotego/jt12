@@ -51,7 +51,7 @@ always @(posedge clk)
 parameter mac_width=data_width+coeff_width+1;
 parameter acc_width=mac_width+3;
 reg	signed [acc_width-1:0] acc_left, acc_right;
-reg signed [mac_width-1:0] mac;
+(* multstyle = "dsp" *) reg signed [mac_width-1:0] mac;
 //integer acc,mac;
 reg [5:0] 	cnt, next;
 
