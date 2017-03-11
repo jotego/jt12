@@ -37,8 +37,10 @@ parameter coeff_width=9;
 parameter stages=73;
 
 reg signed [coeff_width-1:0] coeff[0:(stages-1)/2];
-reg signed [data_width-1:0] chain_left[0:stages-1];
-reg signed [data_width-1:0] chain_right[0:stages-1];
+//reg signed [data_width-1:0] chain_left[0:stages-1];
+//reg signed [data_width-1:0] chain_right[0:stages-1];
+reg signed [data_width-1:0] chain_left[0:127];
+reg signed [data_width-1:0] chain_right[0:127];
 
 reg update, last_sample;
 
@@ -50,31 +52,15 @@ always @(posedge clk)
 		update <= sample && !last_sample;
 	end
 
-// shift register
-genvar i;
-generate
-	for (i=0; i < stages; i=i+1) begin: bit_shifter
-		always @(posedge clk)
-			if( update )
-				if(i>0) begin
-					chain_left[i] <= chain_left[i-1];
-					chain_right[i] <= chain_right[i-1];
-				end
-				else begin
-					chain_left[0] <= left_in;
-					chain_right[0] <= right_in;
-				end
-	end
-endgenerate
-
 parameter mac_width=data_width+coeff_width+1;
 parameter acc_width=mac_width+3;
 reg	signed [acc_width-1:0] acc_left, acc_right;
 reg signed [mac_width-1:0] mac;
 //integer acc,mac;
 reg [5:0] 	cnt, next;
-reg [6:0]   rev;
 reg	[1:0]	state;
+
+reg [6:0]	forward, rev, in_pointer;
 
 parameter IDLE=2'b00, LEFT=2'b01, RIGHT=2'b10;
 
@@ -112,22 +98,28 @@ always @(posedge clk)
 if( rst ) begin
 	sample_out <= 1'b0;
 	state	<= IDLE;
+	in_pointer <= 7'd0;
 end else begin
 	case(state)
 		default: begin
 			if( update ) begin
 				cnt <= 6'd0;
-				rev <= stages-1;
 				acc_left <= {acc_width{1'b0}};
 				acc_right <= {acc_width{1'b0}};
 				state <= LEFT;
 				buffer_left <= left_in;
+				chain_left[in_pointer]  <= left_in;
+				chain_right[in_pointer] <= right_in;
+				in_pointer  <= in_pointer - 1'b1;
+				rev <= in_pointer+stages;
+				forward <= in_pointer-1'b1;
 			end
 			sample_out <= 1'b0;
 		end
 		LEFT: begin
 				acc_left <= acc_left + mac;
-				buffer_right <= chain_right[cnt];
+				buffer_right <= chain_right[forward];
+				forward<=forward + 1'b1;
 				state <= RIGHT;
 			end
 		RIGHT:
@@ -138,7 +130,7 @@ end else begin
 				state <= IDLE;
 			end else begin
 				acc_right <= acc_right + mac;
-				buffer_left <= chain_left[next];
+				buffer_left <= chain_left[forward];
 				cnt<=next;
 				rev<=rev-1'b1;
 				state <= LEFT;
