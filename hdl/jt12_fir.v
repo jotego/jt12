@@ -37,8 +37,8 @@ parameter coeff_width=9;
 parameter stages=73;
 
 reg signed [coeff_width-1:0] coeff[0:(stages-1)/2];
-reg signed [11:0] chain_left[0:stages-1];
-reg signed [11:0] chain_right[0:stages-1];
+reg signed [data_width-1:0] chain_left[0:stages-1];
+reg signed [data_width-1:0] chain_right[0:stages-1];
 
 reg update, last_sample;
 
@@ -86,11 +86,20 @@ wire last_stage = cnt==(stages-1)/2;
 
 always @(*) begin
 	if( state==LEFT)
-		sum <= chain_left[cnt] +
-				( last_stage ? {data_width{1'b0}}:chain_left[rev]);
-	else
-		sum <= chain_right[cnt] +
-				( last_stage ? {data_width{1'b0}}:chain_right[rev]);	
+//		sum <= chain_left[cnt] +
+//				( last_stage ? {data_width{1'b0}}:chain_left[rev]);
+		begin	
+		if( last_stage )
+			sum <= chain_left[cnt];
+		else
+			sum <= chain_left[cnt] + chain_left[rev];
+		end
+	else begin
+		if( last_stage )
+			sum <= chain_right[cnt];
+		else
+			sum <= chain_right[cnt] + chain_right[rev];
+	end
 	mac <= coeff[cnt]*sum;
 end
 
