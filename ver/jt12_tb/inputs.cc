@@ -431,7 +431,11 @@ void tone00( Ch ch[6] ) {
     op.set_ar( 31 );
     op.set_dr( 0 );
 	ch[0].keyon( 1 );
-    wait( 40 );
+    wait( 12 );
+    ch[0].set_rl(1);
+    wait( 12 );
+    ch[0].set_rl(2);
+	wait( 12 );
 }
 
 void fnum_check( Ch ch[6] ) {
