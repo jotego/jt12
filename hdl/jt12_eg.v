@@ -277,7 +277,7 @@ always @(posedge clk) if(clk_en ) begin
 		state_V	<= RELEASE;
 		rate_V <= 5'h1f;
 		eg_V <= 10'h3ff;
-		cnt_V<= 3'd0;
+		//cnt_V<= 3'd0;
 	end
 	else begin
 		state_V	<= state_IV;
@@ -539,20 +539,20 @@ jt12_sh #( .width(1), .stages(18) ) u_ssg2sh(
    Has 19 stages here, for 24 operators
    plus 1 extra stage. 20 stages does not work well.
    Maybe JT51 should be 26!! */
-jt12_sh_rst #( .width(10), .stages(19), .rstval(1'b1) ) u_egsh(
+jt12_sh/*_rst*/ #( .width(10), .stages(19)/*, .rstval(1'b1)*/ ) u_egsh(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.rst	( rst		),
+//	.rst	( rst		),
 	.din	( eg_stop ? eg_stopped_VII : eg_VII		),
 	.drop	( eg_II	)
 );
 
 /* Had 32 stages in JT51, for 32 operators
    Has 24 stages here, for 24 operators */
-jt12_sh_rst #( .width(1), .stages(24) ) u_cntsh(
+jt12_sh/*_rst*/ #( .width(1), .stages(24) ) u_cntsh(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.rst	( rst		),	
+//	.rst	( rst		),	
 	.din	( cnt_V[0]	),
 	.drop	( cnt_out	)
 );
@@ -567,10 +567,10 @@ jt12_sh_rst #( .width(1), .stages(24) ) u_konsh(
 
 /* Had 31 stages in JT51, for 32 operators
    Has 23 stages here, for 24 operators */
-jt12_sh_rst #( .width(3), .stages(18), .rstval(1'b1) ) u_statesh(
+jt12_sh/*_rst*/ #( .width(3), .stages(18)/*, .rstval(1'b1)*/ ) u_statesh(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.rst	( rst		),
+//	.rst	( rst		),
 	.din	( state_VIII),
 	.drop	( state_II	)
 );

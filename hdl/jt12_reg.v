@@ -315,8 +315,8 @@ assign { 	dt1_II, mul_V, ks_III,
 			ar_II,	amsen_VII, d1r_II, d2r_II, d1l, rr_II,
 			ssg_en_II,	ssg_eg_II 				} = regop_out;
 
-jt12_sh_rst #(.width(regop_width),.stages(24)) u_regop(
-	.rst	( rst		),
+jt12_sh #(.width(regop_width),.stages(24)) u_regop(
+//	.rst	( rst		),
 	.clk	( clk		),
 	.clk_en	( clk_en),
 	.din	( regop_in	),
@@ -351,10 +351,10 @@ assign { 	block_latch, fnum_latch,
 			block_I_raw, fnum_I_raw, 
 			fb_I, alg, ams_VII, pms } = regch_out;
 
-jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
+jt12_sh #(.width(regch_width),.stages(6)) u_regch(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.rst	( rst		),
+	//.rst	( rst		),
 	.din	( regch_in	),
 	.drop	( regch_out	)
 );

@@ -214,10 +214,10 @@ always @(posedge clk)
 if(clk_en ) 
 	phase_VIII <= phase_VII;
 
-jt12_sh_rst #( .width(20), .stages(24) ) u_phsh(
+jt12_sh #( .width(20), .stages(24) ) u_phsh(
 	.clk	( clk		),
 	.clk_en	( clk_en),
-	.rst	( rst		),
+//	.rst	( rst		),
 	.din	( phase_in	),
 	.drop	( phase_drop)
 );

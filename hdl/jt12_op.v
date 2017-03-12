@@ -73,24 +73,24 @@ reg [44:0]  exptable[31:0], explut_jt51[31:0];
 
 wire [13:0]	prev1, prevprev1, prev2;
 
-jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
-	.rst	( rst	),
+jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
+//	.rst	( rst	),
 	.clk	( clk	),
 	.clk_en	( clk_en),
 	.din	( s2_enters ? op_result_internal : prev1 ),
 	.drop	( prev1	)
 );
 
-jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
-	.rst	( rst	),
+jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
+//	.rst	( rst	),
 	.clk	( clk	),
 	.clk_en	( clk_en),
 	.din	( s2_enters ? prev1 : prevprev1 ),
 	.drop	( prevprev1	)
 );
 
-jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
-	.rst	( rst	),
+jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
+//	.rst	( rst	),
 	.clk	( clk	),
 	.clk_en	( clk_en),
 	.din	( s1_enters ? op_result_internal : prev2 ),
@@ -170,7 +170,12 @@ jt12_sh #( .width(10), .stages(NUM_VOICES)) phasemod_sh(
 
 // REGISTER/CYCLE 8
 reg [ 9:0]	phase;
-reg [ 7:0]	phaselo_IX;
+// Sets the maximum number of fanouts for a register or combinational
+// cell.  The Quartus II software will replicate the cell and split
+// the fanouts among the duplicates until the fanout of each cell
+// is below the maximum.
+
+(* maxfan = 80 *) reg [ 7:0]	phaselo_IX;
 
 always @(*) begin
 	phase	<= phasemod_VIII + pg_phase_VIII;
@@ -300,7 +305,6 @@ end
 
 `ifdef SIMULATION
 reg [4:0] sep24_cnt;
-wire clk_int = clk & clk_en;
 
 wire signed [13:0] op_ch0s1, op_ch1s1, op_ch2s1, op_ch3s1,
 		 op_ch4s1, op_ch5s1, op_ch0s2, op_ch1s2,
@@ -309,12 +313,13 @@ wire signed [13:0] op_ch0s1, op_ch1s1, op_ch2s1, op_ch3s1,
 		 op_ch4s3, op_ch5s3, op_ch0s4, op_ch1s4,
 		 op_ch2s4, op_ch3s4, op_ch4s4, op_ch5s4;
 
-always @(posedge clk_int)
+always @(posedge clk ) if(clk_en)
 	sep24_cnt <= !zero ? sep24_cnt+1'b1 : 5'd0;
 
 sep24 #( .width(14), .pos0(13)) opsep
 (
-	.clk	( clk_int	),
+	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.mixed	( op_result_internal	),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -357,7 +362,8 @@ wire signed [8:0] acc_ch0s1, acc_ch1s1, acc_ch2s1, acc_ch3s1,
 
 sep24 #( .width(9), .pos0(13)) accsep
 (
-	.clk	( clk_int	),
+	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.mixed	( op_result_internal[13:5] ),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -401,7 +407,8 @@ wire signed [9:0] pm_ch0s1, pm_ch1s1, pm_ch2s1, pm_ch3s1,
 
 sep24 #( .width(10), .pos0( 18 ) ) pmsep
 (
-	.clk	( clk_int	),
+	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.mixed	( phasemod_VIII	),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -445,7 +452,8 @@ wire [9:0] phase_ch0s1, phase_ch1s1, phase_ch2s1, phase_ch3s1,
 
 sep24 #( .width(10), .pos0( 18 ) ) phsep
 (
-	.clk	( clk_int	),
+	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.mixed	( phase		),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -487,7 +495,8 @@ wire [9:0] eg_ch0s1, eg_ch1s1, eg_ch2s1, eg_ch3s1, eg_ch4s1, eg_ch5s1,
 
 sep24 #( .width(10), .pos0(17) ) egsep
 (
-	.clk	( clk_int	),
+	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.mixed	( eg_atten_IX		),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	

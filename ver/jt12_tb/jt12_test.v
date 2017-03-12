@@ -45,9 +45,10 @@ always @(posedge mclk or posedge rst0)
     end
 
 wire clk = vclk;
-
+`define USECLKEN
+`ifdef USECLKEN
 reg clk_en, clk_en2;
-
+wire jt12_clk = mclk;
 always @(negedge mclk or posedge rst0)
 	if( rst0 )
 		{ clk_en, clk_en2 } <= 2'b0;
@@ -55,6 +56,10 @@ always @(negedge mclk or posedge rst0)
 		clk_en2 <= vclk;
 		clk_en <= !clk_en2 && vclk;
 	end
+`else
+wire clk_en=1'b1;
+wire jt12_clk = vclk;
+`endif
 
 integer limit_time_cnt;
 
@@ -78,7 +83,7 @@ wire	[ 1:0]	addr;
 
 jt12_testdata #(.rand_wait(`RANDWAIT)) u_testdata(
 	.rst	( rst	),
-	.clk	( mclk	),
+	.clk	( jt12_clk	),
 	.clk_en ( clk_en),
 	.cs_n	( cs_n	),
 	.wr_n	( wr_n	),

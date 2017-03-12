@@ -418,6 +418,8 @@ void ssg_test( Ch ch[6] ) {
 }
 
 void tone00( Ch ch[6] ) {
+	initial_clear( ch );
+	wait(1);
 	ch[0].op[0].set_sl(15);
 	ch[0].set_alg(7);
 	ch[0].keyon( 15 );
