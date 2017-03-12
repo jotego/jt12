@@ -111,7 +111,7 @@ end else begin
 			if( update ) begin
 				state <= LEFT;
 				buffer_left <= left_in;
-				addr_left <= rev;
+				//addr_left <= rev;
 			end
 			cnt <= 6'd0;
 			acc_left <= {acc_width{1'b0}};
