@@ -40,6 +40,20 @@ wire signed [19:0] psg_fir6;
 
 wire signed [19:0] fir4_left, fir4_right;
 
+// Rebuilt the input reset in order to
+// reduce its load. Makes synthesis easier
+reg [1:0] rst_int_aux;
+reg rst_int;
+
+always @(posedge clk or posedge rst) 
+	if( rst ) begin
+		rst_int_aux	<= 2'b11;
+		rst_int		<= 1'b1;
+	end
+	else begin		
+		{ rst_int, rst_int_aux } <= { rst_int_aux, 1'b0 };
+	end
+
 
 // Change sampling frequency from 54kHz to 321kHz
 // interpolating by 6. This is done using the multiplexed output
@@ -47,7 +61,7 @@ wire signed [19:0] fir4_left, fir4_right;
 
 jt12_fir u_fir6 (
 	.clk		( clk 			),
-	.rst		( rst  			),
+	.rst		( rst_int  		),
 	.sample		( sample	 	),
 	.left_in	( left_in 		),
 	.right_in	( right_in	 	),
@@ -60,7 +74,7 @@ wire signed [11:0] psg_gated = {12{enable_psg}} & psg;
 
 jt12_fir u_fir6_psg (
 	.clk		( clk 			),
-	.rst		( rst  			),
+	.rst		( rst_int  		),
 	.sample		( sample	 	),
 	.left_in	( psg_gated[11:3]),
 	.right_in	( 9'd0			),
@@ -84,7 +98,7 @@ wire signed [15:0] amp5_left, amp5_right, amp4_left, amp4_right,
 
 jt12_interpol u_interpol(
 	.clk		( clk 			),
-	.rst		( rst  			),
+	.rst		( rst_int  		),
 	.sample_in	( fir6_sample 	),
 	.left_in	( fm_gated_left ),
 	.right_in	( fm_gated_right),

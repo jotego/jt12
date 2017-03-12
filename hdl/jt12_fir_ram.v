@@ -29,10 +29,15 @@ module jt12_fir_ram
 	output [(data_width-1):0] q
 );
 
-(* ramstyle = "M-RAM, no_rw_check" *) reg [data_width-1:0] ram[2**addr_width-1:0];
+(* ramstyle = "no_rw_check" *) reg [data_width-1:0] ram[2**addr_width-1:0];
 
-	always @ (posedge clk)
+	reg [addr_width-1:0] addr_reg;
+
+	always @ (posedge clk) begin
 		if (we)
 			ram[addr] <= data;
-	assign q = ram[addr];
+		addr_reg <= addr;
+	end
+	
+	assign q = ram[addr_reg];
 endmodule

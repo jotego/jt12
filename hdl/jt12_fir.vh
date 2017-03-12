@@ -1,28 +1,17 @@
 reg signed [coeff_width-1:0] coeff[0:(stages-1)/2];
 
 wire signed [data_width-1:0] mem_left, mem_right;
-reg [addr_width-1:0] addr_left, addr_right, forward, rev, in_pointer;
+
+// pointers
+reg [addr_width-1:0] addr_left, addr_right, 
+	forward, rev, in_pointer,
+	forward_next, rev_next,in_pointer_next;
+	
 reg update, last_sample;
 
 reg	[1:0]	state;
 parameter IDLE=2'b00, LEFT=2'b01, RIGHT=2'b10;
-/*
-always @(*) 
-	case( state )
-		default: begin
-			addr_left <= in_pointer;
-			addr_right<= in_pointer;
-		end
-		LEFT: begin
-			addr_left <= rev;
-			addr_right<= forward;
-		end
-		RIGHT: begin
-			addr_left <= forward;
-			addr_right<= rev;
-		end
-	endcase
-*/
+
 jt12_fir_ram #(.data_width(data_width),.addr_width(addr_width)) chain_left(
 	.clk	( clk		),
 	.data	( left_in 	),
@@ -82,13 +71,40 @@ end
 
 reg signed [data_width-1:0] buffer_left, buffer_right;
 
+
+always @(*)  begin
+	in_pointer_next <= in_pointer - 1'b1;
+	forward_next <= forward+1'b1;
+	rev_next <= rev-1'b1;
+	case( state )
+		default: begin
+			addr_left <= update ? rev : in_pointer;
+			addr_right<= in_pointer;
+		end
+		LEFT: begin
+			addr_left <= forward_next;
+			addr_right<= rev;
+		end
+		RIGHT: begin
+			if( cnt==(stages-1)/2 ) begin
+				addr_left <= in_pointer_next;
+				addr_right<= in_pointer_next;
+			end
+			else begin
+				addr_left <= rev_next;
+				addr_right<= forward;
+			end
+		end
+	endcase
+end
+
 always @(posedge clk)
 if( rst ) begin
 	sample_out <= 1'b0;
 	state	<= IDLE;
 	in_pointer <= 7'd0;	
-	addr_left <= in_pointer;
-	addr_right<= in_pointer;
+	//addr_left <= in_pointer;
+	//addr_right<= in_pointer;
 end else begin
 	case(state)
 		default: begin
@@ -106,12 +122,12 @@ end else begin
 		end
 		LEFT: begin
 				acc_left <= acc_left + mac;
-				addr_left <= forward+1'b1;
+				//addr_left <= forward_next;
 				
 				buffer_right <= mem_right;
-				addr_right <= rev;
+				//addr_right <= rev;
 				
-				forward<=forward + 1'b1;
+				forward<=forward_next;
 				state <= RIGHT;
 			end
 		RIGHT:
@@ -119,16 +135,16 @@ end else begin
 				left_out  <= acc_left;
 				right_out <= acc_right+mac;
 				sample_out <= 1'b1;
-				in_pointer  <= in_pointer - 1'b1;
-				addr_left <= in_pointer-1'b1;
-				addr_right<= in_pointer-1'b1;
+				in_pointer  <= in_pointer_next;
+				//addr_left <= in_pointer_next;
+				//addr_right<= in_pointer_next;
 				state <= IDLE;
 			end else begin
 				acc_right <= acc_right + mac;
-				addr_right <= forward;
+				//addr_right <= forward;
 				
 				buffer_left <= mem_left;
-				addr_left <= rev-1'b1;
+				//addr_left <= rev_next;
 				cnt<=next;
 				rev<=rev-1'b1;
 				state <= LEFT;

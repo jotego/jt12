@@ -610,7 +610,17 @@ void dr_test(Ch ch[6]) {
 		ch[k].keyon(0xf);
 	}
 	write( 0, 0x21, 0<<3 ); // PG on
-	wait( 30 );
+	wait( 10 );
+	for( int k=0; k<5; k++ ) {
+		ch[k].op[0].set_tl(127);
+//		wait( 6 );
+	}
+	write( 0, 0x21, 1<<3 ); // PG stop
+	for( int k=0; k<64; k+=2 ) {
+		ch[5].op[0].set_tl(k);
+		wait( 1 );
+	}
+	wait(2);
 }
 
 void gng2( Ch *ch ) {
