@@ -7,7 +7,6 @@ jt12_test.v
 ../../hdl/jt12_interpol.v
 ../../hdl/jt12_mixer.v
 ../../hdl/jt12_clksync.v
-../../hdl/jt12_clk.v
 ../../hdl/jt12_eg.v
 ../../hdl/jt12_fm.v
 ../../hdl/jt12_kon.v
@@ -18,7 +17,6 @@ jt12_test.v
 ../../hdl/jt12_pg.v
 ../../hdl/jt12_reg.v
 ../../hdl/jt12_sh24.v
-../../hdl/jt12_sh6_rst.v
 ../../hdl/jt12_sh_rst.v
 ../../hdl/jt12_sh.v
 ../../hdl/jt12_timers.v

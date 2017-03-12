@@ -33,6 +33,7 @@
 module jt12(
 	input			rst,
 	input			clk,
+(* direct_enable = 1 *)	input			clk_en,
 	output			clk_out,
 	input	[7:0]	din,
 	input	[1:0]	addr,
@@ -48,7 +49,7 @@ module jt12(
 	// multiplexed output
 	output signed	[8:0]	mux_left,
 	output signed	[8:0]	mux_right,	
-	output				mux_sample,
+	output			mux_sample,
 		
 	output			irq_n
 );
@@ -106,8 +107,7 @@ wire			use_internal_x, use_internal_y;
 wire			use_prevprev1, use_prev2, use_prev1;
 wire	[ 9:0]	phase_VIII;
 wire 			s1_enters, s2_enters, s3_enters, s4_enters;
-wire			set_n2, set_n3, set_n6;
-wire			clk_int, rst_int;
+wire			rst_int;
 // LFO
 wire	[6:0]	lfo_mod;
 wire			lfo_rst;
@@ -127,6 +127,7 @@ wire	busy, write, ch6op;
 jt12_clksync u_clksync(
 	.rst		( rst		),
 	.clk		( clk		),
+	.clk_en		( clk_en	),
 	.din		( din		),
 	.addr		( addr		),
 	.busy_mmr	( busy		),
@@ -134,31 +135,24 @@ jt12_clksync u_clksync(
 	.flag_B		( flag_B	),
 	.cs_n		( cs_n		),
 	.wr_n		( wr_n		),
-
-	.set_n6		( set_n6	),
-	.set_n3		( set_n3	),
-	.set_n2		( set_n2	),
-
-	.clk_int	( clk_int	),
-	.rst_int	( rst_int	),
 	.din_s		( din_s		),
-	.addr_s		( addr_s	),
+	.addr_s		( addr_s	),	
+
+	.clk_fm_en	( clk_fm_en	),
+	.rst_int	( rst_int	),
 	.dout		( dout		),
 	.write		( write		)
 );
 
 jt12_mmr u_mmr(
 	.rst		( rst_int	),
-	.clk		( clk_int	),		// Phi 1
+	.clk		( clk		),		// Phi 1
+	.clk_en		( clk_fm_en	),
 	.din		( din_s		),
 	.write		( write		),
 	.addr		( addr_s	),
 	.busy		( busy		),
 	.ch6op		( ch6op		),
-	// Clock speed
-	.set_n6		( set_n6	),
-	.set_n3		( set_n3	),
-	.set_n2		( set_n2	),
 	// LFO
 	.lfo_freq	( lfo_freq	),
 	.lfo_en		( lfo_en	),
@@ -230,10 +224,10 @@ jt12_mmr u_mmr(
 );
 
 jt12_timers u_timers( 
-	.clk		( clk_int		),
+	.clk		( clk			),
 	.rst   		( rst_int		),
-	.clk_en		( zero			),
-	.fast_timers( fast_timers	),
+	.clk_en		( clk_fm_en & zero	),
+	.fast_timers( fast_timers	), // fix this to work well with clock enable signals
 	.value_A	( value_A		),
 	.value_B	( value_B		),
 	.load_A		( load_A		),
@@ -254,7 +248,8 @@ jt12_timers u_timers(
 
 jt12_lfo u_lfo(
 	.rst		( rst_int	),
-	.clk		( clk_int	),
+	.clk		( clk		),
+	.clk_en		( clk_fm_en	),
 	.zero		( zero		),
 	.lfo_rst	( 1'b0		),
 	.lfo_en		( lfo_en	),
@@ -265,8 +260,9 @@ jt12_lfo u_lfo(
 `ifndef TIMERONLY
 
 jt12_pg u_pg(
-	.clk		( clk_int		),
+	.clk		( clk			),
 	.rst		( rst_int		),
+	.clk_en		( clk_fm_en	),
 	// Channel frequency
 	.fnum_I		( fnum_I		),
 	.block_I	( block_I		),
@@ -287,7 +283,8 @@ jt12_eg u_eg(
 	.test_eg		( test_eg		),
 	`endif
 	.rst			( rst_int		),
-	.clk			( clk_int		),
+	.clk			( clk			),
+	.clk_en			( clk_fm_en	),
 	.zero			( zero			),
 	.eg_stop		( eg_stop		),	
 	// envelope configuration
@@ -317,7 +314,8 @@ wire	[8:0]	op_result;
 
 jt12_op u_op(
 	.rst			( rst_int		),
-	.clk			( clk_int		),
+	.clk			( clk			),
+	.clk_en		( clk_fm_en	),
 	.pg_phase_VIII	( phase_VIII	),
 	.eg_atten_IX	( eg_IX			),
 	.fb_II			( fb_II			),
@@ -338,7 +336,8 @@ jt12_op u_op(
 
 jt12_acc u_acc(
 	.rst		( rst_int	),
-	.clk		( clk_int	),
+	.clk		( clk		),
+	.clk_en		( clk_fm_en	),
 	.op_result	( op_result	),
 	.rl			( rl		),
 	.limiter_en	( limiter_en),
@@ -365,6 +364,8 @@ jt12_acc u_acc(
 `ifdef SIMULATION
 reg [4:0] sep24_cnt;
 
+wire clk_int = clk & clk_fm_en;
+
 wire [9:0] eg_ch0s1, eg_ch1s1, eg_ch2s1, eg_ch3s1, eg_ch4s1, eg_ch5s1,
 		eg_ch0s2, eg_ch1s2, eg_ch2s2, eg_ch3s2, eg_ch4s2, eg_ch5s2,
 		eg_ch0s3, eg_ch1s3, eg_ch2s3, eg_ch3s3, eg_ch4s3, eg_ch5s3,
@@ -375,7 +376,8 @@ always @(posedge clk_int)
 
 sep24 #( .width(10), .pos0(5'd0)) egsep
 (
-	.clk	( clk_int	),
+	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.mixed	( eg_IX		),
 	.mask	( 10'd0		),
 	.cnt	( sep24_cnt	),

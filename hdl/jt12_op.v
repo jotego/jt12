@@ -29,6 +29,7 @@
 module jt12_op(
 	input			rst,
     input			clk,
+(* direct_enable = 1 *)	input			clk_en,
     input	[9:0]	pg_phase_VIII,
     input	[9:0]	eg_atten_IX,		// output from envelope generator
     input	[2:0]	fb_II,		// voice feedback
@@ -75,6 +76,7 @@ wire [13:0]	prev1, prevprev1, prev2;
 jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 	.rst	( rst	),
 	.clk	( clk	),
+	.clk_en	( clk_en),
 	.din	( s2_enters ? op_result_internal : prev1 ),
 	.drop	( prev1	)
 );
@@ -82,6 +84,7 @@ jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 	.rst	( rst	),
 	.clk	( clk	),
+	.clk_en	( clk_en),
 	.din	( s2_enters ? prev1 : prevprev1 ),
 	.drop	( prevprev1	)
 );
@@ -89,6 +92,7 @@ jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 jt12_sh_rst #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
 	.rst	( rst	),
 	.clk	( clk	),
+	.clk_en	( clk_en),
 	.din	( s1_enters ? op_result_internal : prev2 ),
 	.drop	( prev2	)
 );
@@ -124,7 +128,7 @@ always @(*) begin
 	ys <= { y[13], y }; // sign-extend
 end
 
-always @(posedge clk) begin
+always @(posedge clk) if(clk_en ) begin
 	pm_preshift_II <= xs + ys; // carry is discarded
     s1_II <= s1_enters;
 end
@@ -159,6 +163,7 @@ end
 // REGISTER/CYCLE 2-7
 jt12_sh #( .width(10), .stages(NUM_VOICES)) phasemod_sh(
 	.clk	( clk	),
+	.clk_en	( clk_en),
 	.din	( phasemod_II ),
 	.drop	( phasemod_VIII	)
 );
@@ -171,7 +176,7 @@ always @(*) begin
 	phase	<= phasemod_VIII + pg_phase_VIII;
 end
 
-always @(posedge clk) begin    
+always @(posedge clk) if(clk_en) begin    
 	phaselo_IX <= phase[7:0] ^ {8{~phase[8]}};
 	signbit_IX <= phase[9];     
 end
@@ -221,7 +226,7 @@ always @(*) begin
 	atten_internal <= { subtresult[9:0], logsin[1:0] } | {12{subtresult[10]}};
 end
 
-always @(posedge clk) begin
+always @(posedge clk) if(clk_en ) begin
 	totalatten_X <= atten_internal;
 	signbit_X <= signbit_IX;    
 end
@@ -257,7 +262,7 @@ always @(*) begin
 	endcase	
 end
 
-always @(posedge clk) begin
+always @(posedge clk) if(clk_en ) begin
     //RESULT
 	mantissa_XI <= etf + ( totalatten_X[0] ? 3'd0 : etg ); //carry-out discarded
 	exponent_XI <= totalatten_X[11:8];
@@ -285,7 +290,7 @@ always @(*) begin
 	endcase
 end
 
-always @(posedge clk) begin
+always @(posedge clk) if(clk_en ) begin
 	// REGISTER CYCLE 11
 	op_XII <= ({ test_214, shifter_3 } ^ {14{signbit_XI}}) + signbit_XI;               
 	// REGISTER CYCLE 12
@@ -295,7 +300,7 @@ end
 
 `ifdef SIMULATION
 reg [4:0] sep24_cnt;
-wire clk_int = clk;
+wire clk_int = clk & clk_en;
 
 wire signed [13:0] op_ch0s1, op_ch1s1, op_ch2s1, op_ch3s1,
 		 op_ch4s1, op_ch5s1, op_ch0s2, op_ch1s2,

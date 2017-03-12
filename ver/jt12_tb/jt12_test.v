@@ -46,6 +46,16 @@ always @(posedge mclk or posedge rst0)
 
 wire clk = vclk;
 
+reg clk_en, clk_en2;
+
+always @(negedge mclk or posedge rst0)
+	if( rst0 )
+		{ clk_en, clk_en2 } <= 2'b0;
+	else begin
+		clk_en2 <= vclk;
+		clk_en <= !clk_en2 && vclk;
+	end
+
 integer limit_time_cnt;
 
 initial begin
@@ -68,7 +78,8 @@ wire	[ 1:0]	addr;
 
 jt12_testdata #(.rand_wait(`RANDWAIT)) u_testdata(
 	.rst	( rst	),
-	.clk	( clk	),
+	.clk	( mclk	),
+	.clk_en ( clk_en),
 	.cs_n	( cs_n	),
 	.wr_n	( wr_n	),
 	.dout	( din	),
@@ -89,12 +100,10 @@ always @(posedge clk)
 wire	sample, mux_sample;
 wire signed [8:0] mux_left, mux_right;
 
-wire	clk_out;
-
 jt12 uut(
 	.rst	( rst	),
-	.clk	( clk	),
-    .clk_out( clk_out ),
+	.clk	( mclk	),
+    .clk_en	( clk_en ),
 	.din	( din	),
 	.addr	( addr	),
 	.cs_n	( cs_n	),

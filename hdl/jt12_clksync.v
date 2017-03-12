@@ -26,6 +26,8 @@
 module jt12_clksync(
 	input			rst,
 	input			clk,
+(* direct_enable = 1 *)	input			clk_en,
+
 	input	[7:0]	din,
 	input	[1:0]	addr,
 	input			busy_mmr,
@@ -34,18 +36,32 @@ module jt12_clksync(
 	input			cs_n,
 	input			wr_n,
 	
-	input			set_n6,
-	input			set_n3,
-	input			set_n2,
-	
-	output			clk_int,
-	output			rst_int,
+	output	reg		clk_fm_en,
+	output	reg		rst_int,
 	output	reg [7:0]	din_s,
 	output	reg [1:0]	addr_s,
 	output	[7:0]	dout,
 	output	reg		write
 );
 
+reg [2:0] cnt;
+always @(posedge clk) if(clk_en) begin
+	if( rst )
+		cnt <= 3'd0;
+	else
+		cnt <= (cnt==3'd5) ? 3'd0 : cnt+1'b1;
+end
+
+always @(negedge clk)
+	clk_fm_en <= clk_en && (cnt==3'd0);	
+	
+always @(posedge clk or posedge rst) 
+	if( rst )
+		rst_int <= 1'b1;
+	else if( clk_fm_en ) rst_int <= 1'b0;
+
+
+/*
 jt12_clk u_clkgen(
 	.rst		( rst		),
 	.clk		( clk		),
@@ -57,16 +73,18 @@ jt12_clk u_clkgen(
 	.clk_int	( clk_int	),
 	.rst_int	( rst_int	)
 );
+*/
 
 reg		busy;
 reg	[1:0] busy_mmr_sh;
 
-reg		flag_B_s, flag_A_s;
+//reg		flag_B_s, flag_A_s;
 assign 	dout = { busy, 5'h0, flag_B_s, flag_A_s };
-
+/*
 always @(posedge clk ) 
 	{ flag_B_s, flag_A_s } <= { flag_B, flag_A };
-
+*/
+//assign	write = !cs_n && !wr_n;
 
 wire		write_raw = !cs_n && !wr_n;
 
@@ -74,7 +92,7 @@ reg	[7:0]	din_copy;
 reg	[1:0]	addr_copy;
 reg			write_copy;
 
-always @(posedge clk) begin : cpu_interface
+always @(posedge clk) if(clk_en) begin : cpu_interface
 	if( rst ) begin
 		busy		<= 1'b0;
 		addr_copy	<= 2'b0;
@@ -96,7 +114,7 @@ always @(posedge clk) begin : cpu_interface
 	end
 end
 
-always @(posedge clk_int )
+always @(posedge clk ) if(clk_fm_en)
 	{ write, addr_s, din_s } <= { write_copy, addr_copy, din_copy };
 
 endmodule

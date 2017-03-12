@@ -23,15 +23,12 @@
 module jt12_mmr(
 	input		  	rst,
 	input		  	clk,		// Phi 1
+(* direct_enable = 1 *)	input			clk_en,
 	input	[7:0]	din,
 	input			write,
 	input	[1:0]	addr,
 	output	reg		busy,
 	output			ch6op,
-	// Clock speed
-	output	reg		set_n6,
-	output	reg		set_n3,
-	output	reg		set_n2,
 	// LFO
 	output	reg	[2:0]	lfo_freq,
 	output	reg		 	lfo_en,
@@ -159,7 +156,7 @@ reg [7:0] din_latch;
 
 `include "jt12_mmr_sim.vh"
 
-always @(posedge clk) begin : memory_mapped_registers
+always @(posedge clk) if(clk_en ) begin : memory_mapped_registers
 	if( rst ) begin
 		selected_register 	<= 8'h0;
 		busy				<= 1'b0;
@@ -189,10 +186,6 @@ always @(posedge clk) begin : memory_mapped_registers
 		// PCM
 		pcm			<= 9'h0;
 		pcm_en		<= 1'b0;
-		// clock speed
-		set_n6		<= 1'b1;
-		set_n3		<= 1'b0;
-		set_n2		<= 1'b0;
 		// sch			<= 1'b0;
 		// Original test features
 		eg_stop		<=	1'b0;
@@ -242,14 +235,6 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_DACTEST:pcm[0] <= din[3];
 					REG_PCM:	pcm[8:1]<= din;
 					REG_PCM_EN:	pcm_en	<= din[7];
-					//REG_CLK_N6:	{ set_n6, set_n3, set_n2 } <= 3'b100;
-					//REG_CLK_N3:	{ set_n6, set_n3, set_n2 } <= 3'b010;
-					//REG_CLK_N2:	{ set_n6, set_n3, set_n2 } <= 3'b001;
-					/*
-					REG_IRQMASK: { sch, irq_zero_en,
-						irq_brdy_en,
-						irq_eos_en,
-						irq_tb_en, irq_ta_en } <= { din[7], din[4:0] }; */
 					endcase
 				end
                 else if( selected_register[1:0]!=2'b11 ) begin
@@ -319,6 +304,7 @@ end
 jt12_reg u_reg(
 	.rst		( rst		),
 	.clk		( clk		),		// P1
+	.clk_en		( clk_en	),
 	.din		( din_latch	),
 
 	.up_keyon	( up_keyon	),

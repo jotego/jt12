@@ -26,6 +26,7 @@
 module jt12_kon(
 	input 			rst,
 	input 			clk,
+(* direct_enable = 1 *)	input			clk_en,
 	input	[3:0]	keyon_op,
 	input	[2:0]	keyon_ch,
 	input	[1:0]	cur_op,
@@ -46,6 +47,7 @@ wire drop;
 reg [3:0] cur_op_hot;
 
 always @(posedge clk) 
+if( clk_en )
 	keyon_II <= (csm&&cur_ch==2'd2&&overflow_A) || drop;
 
 always @(*) begin
@@ -60,6 +62,7 @@ end
 
 jt12_sh_rst #(.width(1),.stages(24)) u_konch(
 	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.rst	( rst		),
 	.din	( din		),
 	.drop	( drop		)

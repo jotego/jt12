@@ -1052,7 +1052,7 @@ void mmr_test( Ch ch[6], int rnd_cases=3 ) {
 			ch[k].op[j].set_sl( c );
 		}
 	}
-	write( 0, 1, 10 );
+	wait( 5 );
 	write( 0, 2, 4 ); // dump MMR data
 	cerr << "Reference data dumped\n";
 
