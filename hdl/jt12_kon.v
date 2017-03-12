@@ -63,7 +63,7 @@ end
 jt12_sh_rst #(.width(1),.stages(24)) u_konch(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.rst	( rst		),
+//	.rst	( rst		),
 	.din	( din		),
 	.drop	( drop		)
 );

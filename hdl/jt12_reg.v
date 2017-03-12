@@ -327,7 +327,7 @@ jt12_sh #(.width(regop_width),.stages(24)) u_regop(
 // have the reset to 1
 
 jt12_sh_rst #(.width(7),.stages(24), .rstval(1'b1) ) u_regtl(
-	.rst	( rst		),
+//	.rst	( rst		),
 	.clk	( clk		),
 	.clk_en	( clk_en),
 	.din	( up_tl_op	? tl_in	 : tl_VII	),
@@ -364,7 +364,7 @@ jt12_sh #(.width(regch_width),.stages(6)) u_regch(
 jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.rst	( rst		),
+//	.rst	( rst		),
 	.din	( up_pms_ch	? rl_in :  rl	),
 	.drop	( rl	)
 );

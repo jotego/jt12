@@ -560,7 +560,7 @@ jt12_sh/*_rst*/ #( .width(1), .stages(24) ) u_cntsh(
 jt12_sh_rst #( .width(1), .stages(24) ) u_konsh(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.rst	( rst		),	
+//	.rst	( rst		),	
 	.din	( keyon_II	),
 	.drop	( keyon_last_II	)
 );
