@@ -39,26 +39,22 @@ module jt12_fm(
 );
 
 always @(*) begin
-`ifdef ICARUS
-	casex( {s1_enters, s3_enters, s2_enters, s4_enters} )
-`else
-(* parallel_case *) casex( {s1_enters, s3_enters, s2_enters, s4_enters} )
-`endif
-		4'b1xxx: begin // S1
+case( {s1_enters, s3_enters, s2_enters, s4_enters} ) // synthesis parallel_case
+		4'b1000: begin // S1
 				use_prevprev1 <= 1'b1;
 				use_prev2     <= 1'b0;
 				use_internal_x<= 1'b0;
                 use_internal_y<= 1'b0;
 				use_prev1     <= 1'b1;                
 			end
-		4'b01xx: begin // S3
+		4'b0100: begin // S3
 				use_prevprev1 <= alg_I==3'd5;
 				use_prev2     <= (alg_I<=3'd2);
 				use_internal_x<= 1'b0;
 				use_prev1     <= alg_I==3'd1;                    
     	        use_internal_y<= 1'b0;
 				end
-		4'b001x: begin  // S2
+		4'b0010: begin  // S2
 				use_prevprev1 <= 1'b0;
 				use_prev2     <= 1'b0;
 				use_internal_x<= 1'b0;

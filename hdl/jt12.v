@@ -34,7 +34,6 @@ module jt12(
 	input			rst,
 	input			clk,
 (* direct_enable = 1 *)	input			clk_en,
-	output			clk_out,
 	input	[7:0]	din,
 	input	[1:0]	addr,
 	input			cs_n,
@@ -53,7 +52,7 @@ module jt12(
 		
 	output			irq_n
 );
-
+wire			clk_fm_en;
 wire			zero; // Single-clock pulse at the begginig of s1_enters
 // LFO
 wire	[2:0]	lfo_freq;
@@ -98,10 +97,9 @@ wire	[7:0]	value_B;
 wire			load_A, load_B;
 wire	 		enable_irq_A, enable_irq_B;
 wire			clr_flag_A, clr_flag_B;
-wire			clr_run_A, clr_run_B;
-wire			set_run_A, set_run_B;
 wire			flag_A, flag_B;
 wire			overflow_A;
+wire			fast_timers;
 // Operator
 wire			use_internal_x, use_internal_y;
 wire			use_prevprev1, use_prev2, use_prev1;
@@ -111,8 +109,6 @@ wire			rst_int;
 // LFO
 wire	[6:0]	lfo_mod;
 wire			lfo_rst;
-
-assign			clk_out = clk_int;
 
 `ifdef TEST_SUPPORT
 // Test bits
@@ -165,10 +161,6 @@ jt12_mmr u_mmr(
 	.enable_irq_B	( enable_irq_B	),
 	.clr_flag_A	( clr_flag_A	),
 	.clr_flag_B	( clr_flag_B	),
-	.clr_run_A	( clr_run_A		),
-	.clr_run_B	( clr_run_B		),
-	.set_run_A	( set_run_A		),
-	.set_run_B	( set_run_B		),
 	.flag_A		( flag_A		),
 	.overflow_A	( overflow_A	),
 	.fast_timers( fast_timers	),
@@ -236,10 +228,6 @@ jt12_timers u_timers(
 	.enable_irq_B( enable_irq_A ),
 	.clr_flag_A	( clr_flag_A	),
 	.clr_flag_B	( clr_flag_B	),
-	.set_run_A	( set_run_A		),
-	.set_run_B	( set_run_B		),
-	.clr_run_A	( clr_run_A		),
-	.clr_run_B	( clr_run_B		),
 	.flag_A		( flag_A		),
 	.flag_B		( flag_B		),
 	.overflow_A	( overflow_A	),

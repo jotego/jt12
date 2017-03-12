@@ -41,10 +41,6 @@ module jt12_mmr(
 	output	reg	 		enable_irq_B,
 	output	reg			clr_flag_A,
 	output	reg			clr_flag_B,
-	output	reg			clr_run_A,
-	output	reg			clr_run_B,
-	output	reg			set_run_A,
-	output	reg			set_run_B,
 	output	reg			fast_timers,
 	input				flag_A,
 	input				overflow_A,	
@@ -175,7 +171,6 @@ always @(posedge clk) if(clk_en ) begin : memory_mapped_registers
 		{ value_A, value_B } <= 18'd0;
 		{ clr_flag_B, clr_flag_A,
 		enable_irq_B, enable_irq_A, load_B, load_A } <= 6'd0;
-		{ clr_run_A, clr_run_B, set_run_A, set_run_B } <= 4'b1100;
 		up_clr <= 1'b0;
 		fast_timers <= 1'b0;
 		// LFO
@@ -226,10 +221,6 @@ always @(posedge clk) if(clk_en ) begin : memory_mapped_registers
 						{ clr_flag_B, clr_flag_A,
 						  enable_irq_B, enable_irq_A,
 						  load_B, load_A } <= din[5:0];
-						  clr_run_A <= ~din[0];
-						  set_run_A <=  din[0];
-						  clr_run_B <= ~din[1];
-						  set_run_B <=  din[1];
 						end
 					REG_LFO:	{ lfo_en, lfo_freq } <= din[3:0];
 					REG_DACTEST:pcm[0] <= din[3];
@@ -275,7 +266,6 @@ always @(posedge clk) if(clk_en ) begin : memory_mapped_registers
 			// csm 	<= 1'b0;
 			// lfo_rst <= 1'b0;
 			{ clr_flag_B, clr_flag_A, load_B, load_A } <= 4'd0;
-			{ clr_run_A, clr_run_B, set_run_A, set_run_B } <= 4'd0;
 			`ifdef SIMULATION
 			mmr_dump <= 1'b0;
 			`endif

@@ -45,7 +45,7 @@ module jt12_clksync(
 );
 
 reg [2:0] cnt;
-always @(posedge clk) if(clk_en) begin
+always @(negedge clk) if(clk_en) begin
 	if( rst )
 		cnt <= 3'd0;
 	else
@@ -54,11 +54,20 @@ end
 
 always @(negedge clk)
 	clk_fm_en <= clk_en && (cnt==3'd0);	
+
+// reset generation
+reg rst_aux, rst_aux0;
+
+always @(posedge clk)
+	{rst_aux,rst_aux0} <= { rst_aux0,rst };
 	
-always @(posedge clk or posedge rst) 
-	if( rst )
+always @(posedge clk or posedge rst_aux) 
+	if( rst_aux ) begin
 		rst_int <= 1'b1;
-	else if( clk_fm_en ) rst_int <= 1'b0;
+	end
+	else if( clk_fm_en ) begin
+		rst_int <= 1'b0;
+	end
 
 
 /*
@@ -79,7 +88,7 @@ reg		busy;
 reg	[1:0] busy_mmr_sh;
 
 //reg		flag_B_s, flag_A_s;
-assign 	dout = { busy, 5'h0, flag_B_s, flag_A_s };
+assign 	dout = { busy, 5'h0, flag_B, flag_A };
 /*
 always @(posedge clk ) 
 	{ flag_B_s, flag_A_s } <= { flag_B, flag_A };
