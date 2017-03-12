@@ -33,7 +33,10 @@ module jt12_mixer(
 	output	signed [11:0] left_out,
 	output	signed [11:0] right_out
 );
-
+`ifndef INTERPOLATION
+assign left_out = (left_in<<<2)+(psg>>>1);
+assign right_out = (right_in<<<2)+(psg>>>1);
+`else
 wire signed [11:0] fm6_left, fm6_right;
 wire fir6_sample;
 wire signed [11:0] psg_fir6;
@@ -93,9 +96,6 @@ wire signed	fir4_sample;
 wire signed [11:0] psg_att = psg_fir6>>>2;
 
 reg signed [11:0] amp_left, amp_right;
-wire signed [11:0] amp5_left, amp5_right, amp4_left, amp4_right,
-	amp3_left, amp3_right, amp2_left, amp2_right,
-	amp1_left, amp1_right;
 
 jt12_interpol u_interpol(
 	.clk		( clk 			),
@@ -114,5 +114,5 @@ jt12_interpol u_interpol(
 
 assign left_out  = fir4_left>>>(7-volume);
 assign right_out = fir4_right>>>(7-volume);
-
+`endif
 endmodule
