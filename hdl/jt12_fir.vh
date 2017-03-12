@@ -37,10 +37,12 @@ always @(posedge clk)
 		update <= sample && !last_sample;
 	end
 
-parameter mac_width=data_width+coeff_width+1;
-parameter acc_width=mac_width+3;
+parameter mac_width=(data_width+1)+coeff_width;
+parameter acc_width=output_width; // mac_width+3;
 reg	signed [acc_width-1:0] acc_left, acc_right;
+
 (* multstyle = "dsp" *) reg signed [mac_width-1:0] mac;
+reg signed [acc_width-1:0] mac_trim;
 //integer acc,mac;
 reg [5:0] 	cnt, next;
 
@@ -66,6 +68,7 @@ always @(*) begin
 	end
 	gain <= coeff[cnt];
 	mac <= gain*sum;
+	mac_trim <= mac>>>(mac_width-acc_width+acc_extra); 
 	next <= cnt+1'b1;
 end
 
@@ -121,7 +124,7 @@ end else begin
 			sample_out <= 1'b0;
 		end
 		LEFT: begin
-				acc_left <= acc_left + mac;
+				acc_left <= acc_left + mac_trim;
 				//addr_left <= forward_next;
 				
 				buffer_right <= mem_right;
@@ -133,14 +136,14 @@ end else begin
 		RIGHT:
 			if( cnt==(stages-1)/2 ) begin
 				left_out  <= acc_left;
-				right_out <= acc_right+mac;
+				right_out <= acc_right + mac_trim;
 				sample_out <= 1'b1;
 				in_pointer  <= in_pointer_next;
 				//addr_left <= in_pointer_next;
 				//addr_right<= in_pointer_next;
 				state <= IDLE;
 			end else begin
-				acc_right <= acc_right + mac;
+				acc_right <= acc_right + mac_trim;
 				//addr_right <= forward;
 				
 				buffer_left <= mem_left;

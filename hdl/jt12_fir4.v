@@ -21,21 +21,22 @@
 `timescale 1ns / 1ps
 
 module jt12_fir4
-#(parameter data_width=9, extra=3)
+#(parameter data_width=9, output_width=12)
 (
 	input	clk,	// Use clk_out from jt12, this is x24 higher than
 	input	rst,
 	input	sample,
 	input	signed [data_width-1:0] left_in,
 	input	signed [data_width-1:0] right_in,
-	output	reg signed [data_width*2+1:0] left_out,
-	output	reg signed [data_width*2+1:0] right_out,
+	output	reg signed [output_width-1:0] left_out,
+	output	reg signed [output_width-1:0] right_out,
 	output	reg sample_out
 );
 
 parameter coeff_width=9;
 parameter stages=11;
 parameter addr_width=4;
+parameter acc_extra=-1;
 
 `include "jt12_fir.vh"
 

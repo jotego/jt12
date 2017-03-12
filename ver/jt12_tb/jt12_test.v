@@ -117,7 +117,7 @@ jt12 uut(
 
 `ifdef POSTPROC
 
-wire [15:0] mixed_left;
+wire [11:0] mixed_left;
 
 jt12_mixer u_mixer(
 	.clk		( mclk 			),

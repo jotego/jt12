@@ -24,21 +24,21 @@ module jt12_interpol(
 	input	clk,
 	input	rst,
 	input	sample_in,
-	input	signed [8:0] left_in,
-	input	signed [8:0] right_in,
+	input	signed [11:0] left_in,
+	input	signed [11:0] right_in,
 	// mix in other sound sources, like PSG of Megadrive
 	// other sound sources should be at the same
 	// sampling frequency than the FM sound
 	// so a filter like jt12_fir must be used first
-	input	signed [8:0] left_other,
-	input	signed [8:0] right_other,		
+	input	signed [11:0] left_other,
+	input	signed [11:0] right_other,		
 	
-	output  signed [19:0] left_out,
-	output  signed [19:0] right_out,
+	output  signed [11:0] left_out,
+	output  signed [11:0] right_out,
 	output	sample_out
 );
 
-reg [8:0] fir_left_in, fir_right_in;
+reg [11:0] fir_left_in, fir_right_in;
 reg	fir_sample_in;
 
 reg [1:0] state;
@@ -47,9 +47,9 @@ reg [5:0] cnt;
 always @(*)
 	case( state )
 		2'd0: {fir_left_in,fir_right_in} <= { left_in, right_in};
-		2'd1: {fir_left_in,fir_right_in} <= 18'd0;
+		2'd1: {fir_left_in,fir_right_in} <= 24'd0;
 		2'd2: {fir_left_in,fir_right_in} <= { left_other, right_other};
-		2'd3: {fir_left_in,fir_right_in} <= 18'd0;
+		2'd3: {fir_left_in,fir_right_in} <= 24'd0;
 	endcase
 
 
@@ -70,7 +70,7 @@ end else begin
 	end
 end
 
-jt12_fir4 u_fir4 (
+jt12_fir4 #(.data_width(12), .output_width(12)) u_fir4 (
 	.clk		( clk 			),
 	.rst		( rst  			),
 	.sample		( fir_sample_in ),
