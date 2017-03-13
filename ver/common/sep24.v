@@ -1,7 +1,6 @@
 module sep24 #(parameter width=10, parameter pos0=5'd0)
 (
 	input 	clk,
-	input	clk_en,
 	input [width-1:0] mixed,
 	input [23:0] mask,
 	input [4:0] cnt,	
@@ -42,7 +41,7 @@ reg [4:0] cntadj;
 always @(*)
 	cntadj <= (cnt+pos0)%24;
 
-always @(posedge clk) if(clk_en) begin
+always @(posedge clk) begin
 	case( cntadj )
 		5'd0: ch0s1 <= mixed;
 		5'd1: ch1s1 <= mixed;

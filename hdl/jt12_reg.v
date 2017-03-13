@@ -27,7 +27,6 @@
 module jt12_reg(
 	input			rst,
 	input			clk,
-(* direct_enable = 1 *)	input			clk_en,
 	input	[7:0]	din,
 	
 	input	[2:0]	ch,
@@ -121,7 +120,7 @@ wire [4:0] cur  = {  cur_op,  cur_ch };
 
 wire [2:0] fb_I;
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	fb_II <= fb_I;
 	ch6op <= next_ch==3'd6;
 end	
@@ -236,7 +235,7 @@ reg		up_keyon_long;
 assign	busy = busy_op;
 
 
-always @(posedge clk) if(clk_en ) begin : up_counter
+always @(posedge clk) begin : up_counter
 	if( rst ) begin
 		cnt		<= 5'h0;
 		last	<= 1'b0;
@@ -265,7 +264,6 @@ end
 jt12_kon u_kon(
 	.rst		( rst		),
 	.clk		( clk		),
-	.clk_en		( clk_en	),
 	.keyon_op	( keyon_op	),
 	.keyon_ch	( keyon_ch	),
 	.cur_op		( cur_op	),
@@ -278,7 +276,7 @@ jt12_kon u_kon(
 	.keyon_II	( keyon_II	)
 );
 
-jt12_fm u_fm(
+jt12_mod u_mod(
 	.alg_I		( alg		),
 	.s1_enters	( s1_enters ),
 	.s3_enters	( s3_enters ),
@@ -318,7 +316,6 @@ assign { 	dt1_II, mul_V, ks_III,
 jt12_sh #(.width(regop_width),.stages(24)) u_regop(
 //	.rst	( rst		),
 	.clk	( clk		),
-	.clk_en	( clk_en),
 	.din	( regop_in	),
 	.drop	( regop_out	)
 );
@@ -329,7 +326,6 @@ jt12_sh #(.width(regop_width),.stages(24)) u_regop(
 jt12_sh_rst #(.width(7),.stages(24), .rstval(1'b1) ) u_regtl(
 //	.rst	( rst		),
 	.clk	( clk		),
-	.clk_en	( clk_en),
 	.din	( up_tl_op	? tl_in	 : tl_VII	),
 	.drop	( tl_VII	)
 );	
@@ -353,7 +349,6 @@ assign { 	block_latch, fnum_latch,
 
 jt12_sh #(.width(regch_width),.stages(6)) u_regch(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	//.rst	( rst		),
 	.din	( regch_in	),
 	.drop	( regch_out	)
@@ -363,7 +358,6 @@ jt12_sh #(.width(regch_width),.stages(6)) u_regch(
 // have the reset to 1
 jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 //	.rst	( rst		),
 	.din	( up_pms_ch	? rl_in :  rl	),
 	.drop	( rl	)

@@ -23,7 +23,7 @@
 
 */
 
-module jt12_fm(
+module jt12_mod(
 	input 		s1_enters,
 	input 		s2_enters,
 	input 		s3_enters,

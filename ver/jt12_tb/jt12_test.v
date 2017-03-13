@@ -22,7 +22,7 @@ initial begin
 end
 
 reg [2:0] clkcnt;
-reg vclk;
+reg vclk, syn_clk;
 
 reg rst0;
 
@@ -30,6 +30,11 @@ initial begin
 	rst0=0;
     #10 rst0=1;
     #10 rst0=0;
+end
+
+initial begin
+	syn_clk=0;
+	forever #750 syn_clk = ~syn_clk;
 end
 
 always @(posedge mclk or posedge rst0)
@@ -45,21 +50,6 @@ always @(posedge mclk or posedge rst0)
     end
 
 wire clk = vclk;
-`define USECLKEN
-`ifdef USECLKEN
-reg clk_en, clk_en2;
-wire jt12_clk = mclk;
-always @(negedge mclk or posedge rst0)
-	if( rst0 )
-		{ clk_en, clk_en2 } <= 2'b0;
-	else begin
-		clk_en2 <= vclk;
-		clk_en <= !clk_en2 && vclk;
-	end
-`else
-wire clk_en=1'b1;
-wire jt12_clk = vclk;
-`endif
 
 integer limit_time_cnt;
 
@@ -83,8 +73,7 @@ wire	[ 1:0]	addr;
 
 jt12_testdata #(.rand_wait(`RANDWAIT)) u_testdata(
 	.rst	( rst	),
-	.clk	( jt12_clk	),
-	.clk_en ( clk_en),
+	.clk	( vclk	),
 	.cs_n	( cs_n	),
 	.wr_n	( wr_n	),
 	.dout	( din	),
@@ -106,27 +95,27 @@ wire	sample, mux_sample;
 wire signed [8:0] mux_left, mux_right;
 
 jt12 uut(
-	.rst	( rst	),
-	.clk	( mclk	),
-    .clk_en	( clk_en ),
-	.din	( din	),
-	.addr	( addr	),
-	.cs_n	( cs_n	),
-	.wr_n	( wr_n	),
+	.rst		( rst	),
+	.cpu_clk	( vclk	),
+	.syn_clk	( syn_clk),
+	.cpu_din	( din	),
+	.cpu_addr	( addr	),
+	.cpu_cs_n	( cs_n	),
+	.cpu_wr_n	( wr_n	),
 
-	.limiter_en( 1'b1 ),
+	.cpu_limiter_en( 1'b1 ),
 
-	.dout	( dout	),
-	.snd_right	( right	),
-	.snd_left	( left	),
-	.sample	( sample	),
+	.cpu_dout	( dout	),
+	.syn_snd_right	( right	),
+	.syn_snd_left	( left	),
+	.syn_snd_sample	( sample	),
 
 	// muxed output
-	.mux_left	( mux_left	),
-	.mux_right	( mux_right ),
-	.mux_sample	( mux_sample),
+	.syn_mux_left	( mux_left	),
+	.syn_mux_right	( mux_right ),
+	.syn_mux_sample	( mux_sample),
 
-    .irq_n	( irq_n	)
+    .cpu_irq_n	( irq_n	)
 );
 
 `ifdef POSTPROC

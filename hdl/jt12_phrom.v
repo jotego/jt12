@@ -29,7 +29,6 @@ module jt12_phrom
 (
 	input [4:0] addr,
 	input clk, 
-	input clk_en,
 	output reg [45:0] ph
 );
 
@@ -71,8 +70,7 @@ module jt12_phrom
 
 	end
 
-	always @ (posedge clk) 
-	if(clk_en)
+	always @ (posedge clk)
 		ph <= sinetable[addr];
 
 endmodule

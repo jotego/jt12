@@ -22,8 +22,7 @@
 
 module jt12_mmr(
 	input		  	rst,
-	input		  	clk,		// Phi 1
-(* direct_enable = 1 *)	input			clk_en,
+	input		  	clk,
 	input	[7:0]	din,
 	input			write,
 	input	[1:0]	addr,
@@ -148,11 +147,9 @@ reg [ 5:0] latch_ch3op2,  latch_ch3op3,  latch_ch3op1;
 reg [2:0] up_ch;
 reg [1:0] up_op;
 
-reg [7:0] din_latch;
-
 `include "jt12_mmr_sim.vh"
 
-always @(posedge clk) if(clk_en ) begin : memory_mapped_registers
+always @(posedge clk) begin : memory_mapped_registers
 	if( rst ) begin
 		selected_register 	<= 8'h0;
 		busy				<= 1'b0;
@@ -197,7 +194,6 @@ always @(posedge clk) if(clk_en ) begin : memory_mapped_registers
 				up_ch	<= {addr[1], din[1:0]};
 				up_op	<= din[3:2]; // 0=S1,1=S3,2=S2,3=S4
 			end else begin
-				din_latch <= din;
 				// Global registers
 				if( selected_register < 8'h30 ) begin
 					case( selected_register)
@@ -294,8 +290,7 @@ end
 jt12_reg u_reg(
 	.rst		( rst		),
 	.clk		( clk		),		// P1
-	.clk_en		( clk_en	),
-	.din		( din_latch	),
+	.din		( din		),
 
 	.up_keyon	( up_keyon	),
 	.up_alg		( up_alg	),

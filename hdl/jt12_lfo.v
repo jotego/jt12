@@ -29,7 +29,6 @@
 module jt12_lfo(
 	input			 	rst,
 	input			 	clk,
-(* direct_enable = 1 *)	input			clk_en,
 	input				zero,
 	input				lfo_rst,
 	input				lfo_en,
@@ -53,7 +52,7 @@ always @(*)
 		3'd7: limit <= 7'd5;
 	endcase
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( rst || !lfo_en )
 		{ lfo_mod, cnt } <= 14'd0;
 	else  begin

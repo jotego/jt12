@@ -35,7 +35,6 @@ http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc
 module jt12_pg(
 	input			 	clk,
 	input				rst,
-(* direct_enable = 1 *)	input			clk_en,
 	// Channel frequency
 	input		[10:0]	fnum_I,
 	input		[ 2:0]	block_I,
@@ -88,7 +87,7 @@ wire pg_rst_VI;
 reg [4:0] keycode_II;
 reg [16:0] phinc_II;
 
-always @(posedge clk) if(clk_en ) begin : phase_calculation_I
+always @(posedge clk) begin : phase_calculation_I
 	case ( block_I )
 		3'd0: phinc_II <= { 7'd0, fnum_I[10:1] };
 		3'd1: phinc_II <= { 6'd0, fnum_I       };
@@ -108,7 +107,7 @@ reg [ 5:0] dt1_kf_III;
 reg [16:0] phinc_III;
 reg [ 2:0] dt1_III;
 
-always @(posedge clk) if(clk_en ) begin : phase_calculation_II
+always @(posedge clk) begin : phase_calculation_II
 	case( dt1_II[1:0] )
 		2'd1:	dt1_kf_III	<=	{ 1'b0, keycode_II } - 6'd4;
 		2'd2:	dt1_kf_III	<=	{ 1'b0, keycode_II } + 6'd4;
@@ -160,7 +159,7 @@ always @(*) begin : dt1_limit_mux
 	endcase
 end
 
-always @(posedge clk) if(clk_en ) begin : phase_calculation_III
+always @(posedge clk) begin : phase_calculation_III
 	dt1_offset_IV <= dt1_unlimited > dt1_limit ? 
 							dt1_limit : dt1_unlimited[4:0];
 	dt1_IV   <= dt1_III;	
@@ -171,7 +170,7 @@ end
 // IV	
 reg [16:0] phinc_V;
 
-always @(posedge clk) if(clk_en ) begin : phase_calculation_IV
+always @(posedge clk) begin : phase_calculation_IV
 	if( dt1_IV[1:0]==2'd0 )
 		phinc_V	<=	phinc_IV;
 	else begin
@@ -185,7 +184,7 @@ end
 //////////////////////////////////////////////////
 // V APPLY_MUL
 reg [16:0] phinc_VI;
-always @(posedge clk) if(clk_en ) begin : phase_calculation_V
+always @(posedge clk) begin : phase_calculation_V
 	if( mul_V==4'd0 )
 		phinc_VI	<= { 1'b0, phinc_V[16:1] };
 	else
@@ -203,7 +202,7 @@ always @(*)
 	phase_in <=  pg_rst_VI ? 20'd0 : 
 		( pg_stop ? phase_drop : phase_drop + phinc_VI);
 
-always @(posedge clk) if(clk_en ) begin : phase_calculation_VI
+always @(posedge clk) begin : phase_calculation_VI
 	phase_VII <= phase_in[19:10];
 end
 
@@ -211,12 +210,10 @@ end
 // VIII padding
  
 always @(posedge clk) 
-if(clk_en ) 
 	phase_VIII <= phase_VII;
 
 jt12_sh #( .width(20), .stages(24) ) u_phsh(
 	.clk	( clk		),
-	.clk_en	( clk_en),
 //	.rst	( rst		),
 	.din	( phase_in	),
 	.drop	( phase_drop)
@@ -224,7 +221,6 @@ jt12_sh #( .width(20), .stages(24) ) u_phsh(
 
 jt12_sh #( .width(1), .stages(3) ) u_rstsh(
 	.clk	( clk		),
-	.clk_en	( clk_en),
 	.din	( pg_rst_III),
 	.drop	( pg_rst_VI	)
 );
@@ -233,7 +229,6 @@ jt12_sh #( .width(1), .stages(3) ) u_rstsh(
 
 `ifdef SIMULATION
 reg [4:0] sep24_cnt;
-wire clk_int = clk & clk_en;
 
 wire [9:0] pg_ch0s1, pg_ch1s1, pg_ch2s1, pg_ch3s1,
 		 pg_ch4s1, pg_ch5s1, pg_ch0s2, pg_ch1s2,
@@ -242,13 +237,12 @@ wire [9:0] pg_ch0s1, pg_ch1s1, pg_ch2s1, pg_ch3s1,
 		 pg_ch4s3, pg_ch5s3, pg_ch0s4, pg_ch1s4,
 		 pg_ch2s4, pg_ch3s4, pg_ch4s4, pg_ch5s4;
 
-always @(posedge clk_int)
+always @(posedge clk)
 	sep24_cnt <= !zero ? sep24_cnt+1'b1 : 5'd0;
 
 sep24 #( .width(10), .pos0(18)) stsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( phase_VIII),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -292,7 +286,6 @@ wire [16:0] phinc_ch0s1, phinc_ch1s1, phinc_ch2s1, phinc_ch3s1,
 sep24 #( .width(17), .pos0(3+6)) pisep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( phinc_VI),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -336,7 +329,6 @@ wire [10:0] fnum_ch0s1, fnum_ch1s1, fnum_ch2s1, fnum_ch3s1,
 sep24 #( .width(11), .pos0(3+1)) fnsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( fnum_I),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -380,7 +372,6 @@ wire pgrst_III_ch0s1, pgrst_III_ch1s1, pgrst_III_ch2s1, pgrst_III_ch3s1,
 sep24 #( .width(1), .pos0(23)) pgrstsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( pg_rst_III),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	

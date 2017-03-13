@@ -23,7 +23,6 @@
 module jt12_sh24 #(parameter width=5 )
 (
 	input 					clk,
-(* direct_enable = 1 *)	input			clk_en,
 	input		[width-1:0]	din,
    	output reg [width-1:0]	st1,
    	output reg [width-1:0]	st2,
@@ -51,7 +50,7 @@ module jt12_sh24 #(parameter width=5 )
    	output reg [width-1:0]	st24
 );
 
-always @(posedge clk) if( clk_en ) begin
+always @(posedge clk) begin
 	st24<= st23;
 	st23<= st22;
 	st22<= st21;

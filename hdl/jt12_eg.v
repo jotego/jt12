@@ -49,7 +49,6 @@ module jt12_eg (
 	`endif
 	input			 	rst,
 	input			 	clk,
-(* direct_enable = 1 *)	input			clk_en,
 	input				zero,
 	input				eg_stop,
 	// envelope configuration
@@ -98,7 +97,7 @@ reg 	[5:0]	rate_V;
 reg		[1:0]	eg_cnt_base;
 reg		[14:0]	eg_cnt;
 
-always @(posedge clk) if(clk_en ) begin : envelope_counter
+always @(posedge clk) begin : envelope_counter
 	if( rst ) begin
 		eg_cnt_base	<= 2'd0;
 		eg_cnt		<=15'd0;
@@ -129,7 +128,7 @@ reg		ar_off_III;
 
 //	Register Cycle I
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( d1l == 4'd15 )
 		d1level_II <= 5'h1f; // 93dB
 	else
@@ -158,7 +157,7 @@ wire	ar_off_II = arate_II == 5'h1f;
 wire	keyon_now_II  = !keyon_last_II && keyon_II;
 wire	keyoff_now_II = keyon_last_II && !keyon_II;
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	// ar_off_III	<= arate_II == 5'h1f;
 	// trigger release
 	if( keyoff_now_II ) begin
@@ -256,7 +255,7 @@ always @(*) begin : pre_rate_calc
 		endcase
 end
 
-always @(posedge clk) if(clk_en ) begin 
+always @(posedge clk) begin 
 	if( rst ) begin
 		state_IV <= RELEASE;
 		eg_IV <= 10'h3ff;
@@ -272,7 +271,7 @@ end
 //	Register Cycle IV
 reg		[2:0]	cnt_V;
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( rst ) begin
 		state_V	<= RELEASE;
 		rate_V <= 5'h1f;
@@ -349,7 +348,7 @@ reg	[5:1]	rate_VI;
 reg [9:0]	eg_VI;
 reg			step_VI;
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( rst ) begin
 		state_VI <= RELEASE;
 		rate_VI <= 5'd1;
@@ -403,7 +402,7 @@ always @(*) begin : ar_calculation
 	ar_result <= ar_sum<eg_VI ? eg_VI-ar_sum : 10'd0;
 end
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( rst ) begin
 		eg_VII <= 10'h3ff;
 		state_VII <= RELEASE;
@@ -457,7 +456,7 @@ always @(*) begin : sum_eg_and_tl
 				   + { am_final, 1'b0 };
 end
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( rst ) begin
 		eg_internal_VIII <= 10'h3ff;
 		state_VIII <= RELEASE;
@@ -472,7 +471,7 @@ end
 // Register cycle VIII
 wire ssg_inv_VIII, ssg_en_VIII;
 //reg	[9:0] eg_IX;
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( rst )
 		eg_IX <= 10'h3ff;
 	else begin
@@ -498,7 +497,6 @@ jt12_sh #(.width(10), .stages(12-8)) u_padding(
 
 jt12_sh24 #( .width(1) ) u_ssgen(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.din	( ssg_en_in_II ),
 	.st4	( ssg_en_VI	  ),
 	.st6	( ssg_en_VIII ), // note that din is *_II
@@ -507,21 +505,18 @@ jt12_sh24 #( .width(1) ) u_ssgen(
 
 jt12_sh #( .width(1), .stages(6) ) u_ssgattsh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.din	( ssg_inv_II	),
 	.drop	( ssg_inv_VIII	)
 );
 
 jt12_sh #( .width(1), .stages(3) ) u_aroffsh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.din	( ar_off_III),
 	.drop	( ar_off_VI	)
 );
 
 jt12_sh #( .width(1), .stages(5) ) u_ssg1sh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.din	( ssg_invertion_III	),
 	.drop	( ssg_invertion_VIII	)
 );
@@ -529,7 +524,6 @@ jt12_sh #( .width(1), .stages(5) ) u_ssg1sh(
 
 jt12_sh #( .width(1), .stages(18) ) u_ssg2sh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.din	( ssg_invertion_VIII	),
 	.drop	( ssg_invertion_II	)
 );
@@ -541,7 +535,6 @@ jt12_sh #( .width(1), .stages(18) ) u_ssg2sh(
    Maybe JT51 should be 26!! */
 jt12_sh/*_rst*/ #( .width(10), .stages(19)/*, .rstval(1'b1)*/ ) u_egsh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 //	.rst	( rst		),
 	.din	( eg_stop ? eg_stopped_VII : eg_VII		),
 	.drop	( eg_II	)
@@ -551,7 +544,6 @@ jt12_sh/*_rst*/ #( .width(10), .stages(19)/*, .rstval(1'b1)*/ ) u_egsh(
    Has 24 stages here, for 24 operators */
 jt12_sh/*_rst*/ #( .width(1), .stages(24) ) u_cntsh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 //	.rst	( rst		),	
 	.din	( cnt_V[0]	),
 	.drop	( cnt_out	)
@@ -559,7 +551,6 @@ jt12_sh/*_rst*/ #( .width(1), .stages(24) ) u_cntsh(
 
 jt12_sh_rst #( .width(1), .stages(24) ) u_konsh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 //	.rst	( rst		),	
 	.din	( keyon_II	),
 	.drop	( keyon_last_II	)
@@ -569,7 +560,6 @@ jt12_sh_rst #( .width(1), .stages(24) ) u_konsh(
    Has 23 stages here, for 24 operators */
 jt12_sh/*_rst*/ #( .width(3), .stages(18)/*, .rstval(1'b1)*/ ) u_statesh(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 //	.rst	( rst		),
 	.din	( state_VIII),
 	.drop	( state_II	)
@@ -577,7 +567,6 @@ jt12_sh/*_rst*/ #( .width(3), .stages(18)/*, .rstval(1'b1)*/ ) u_statesh(
 
 `ifdef SIMULATION
 reg [4:0] sep24_cnt;
-wire clk_int = clk & clk_en;
 
 wire [2:0] state_ch0s1, state_ch1s1, state_ch2s1, state_ch3s1,
 		 state_ch4s1, state_ch5s1, state_ch0s2, state_ch1s2,
@@ -587,13 +576,12 @@ wire [2:0] state_ch0s1, state_ch1s1, state_ch2s1, state_ch3s1,
 		 state_ch2s4, state_ch3s4, state_ch4s4, state_ch5s4;
 
 
-always @(posedge clk_int)
+always @(posedge clk)
 	sep24_cnt <= !zero ? sep24_cnt+1'b1 : 5'd0;
 
 sep24 #( .width(3), .pos0(0) ) stsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( state_II	),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),

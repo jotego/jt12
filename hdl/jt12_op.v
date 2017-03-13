@@ -29,7 +29,6 @@
 module jt12_op(
 	input			rst,
     input			clk,
-(* direct_enable = 1 *)	input			clk_en,
     input	[9:0]	pg_phase_VIII,
     input	[9:0]	eg_atten_IX,		// output from envelope generator
     input	[2:0]	fb_II,		// voice feedback
@@ -66,17 +65,11 @@ parameter NUM_VOICES = 6;
 reg 		signbit_IX, signbit_X, signbit_XI;
 reg [11:0]	totalatten_X;
 
-reg [45:0]	sinetable[31:0];
-reg [44:0]  exptable[31:0], explut_jt51[31:0];
-
-`include "lut.vh"
-
 wire [13:0]	prev1, prevprev1, prev2;
 
 jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
-	.clk_en	( clk_en),
 	.din	( s2_enters ? op_result_internal : prev1 ),
 	.drop	( prev1	)
 );
@@ -84,7 +77,6 @@ jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
-	.clk_en	( clk_en),
 	.din	( s2_enters ? prev1 : prevprev1 ),
 	.drop	( prevprev1	)
 );
@@ -92,7 +84,6 @@ jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
-	.clk_en	( clk_en),
 	.din	( s1_enters ? op_result_internal : prev2 ),
 	.drop	( prev2	)
 );
@@ -126,7 +117,7 @@ always @(*) begin
 	ys <= { y[13], y }; // sign-extend
 end
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	pm_preshift_II <= xs + ys; // carry is discarded
     s1_II <= s1_enters;
 end
@@ -161,7 +152,6 @@ end
 // REGISTER/CYCLE 2-7
 jt12_sh #( .width(10), .stages(NUM_VOICES)) phasemod_sh(
 	.clk	( clk	),
-	.clk_en	( clk_en),
 	.din	( phasemod_II ),
 	.drop	( phasemod_VIII	)
 );
@@ -180,7 +170,7 @@ always @(*) begin
 	aux_VIII<= phase[7:0] ^ {8{~phase[8]}};
 end
 
-always @(posedge clk) if(clk_en) begin    
+always @(posedge clk) begin    
 	phaselo_IX <= aux_VIII;
 	signbit_IX <= phase[9];     
 
@@ -190,7 +180,6 @@ wire [45:0] sta_IX;
 
 jt12_phrom u_phrom(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.addr	( aux_VIII[5:1] ),
 	.ph		( sta_IX		)
 );
@@ -244,12 +233,11 @@ wire [44:0] exp_X;
 
 jt12_exprom u_exprom(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.addr	( atten_internal_IX[5:1] ),
 	.exp	( exp_X		)
 );
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	totalatten_X <= atten_internal_IX;
 	signbit_X <= signbit_IX;    
 end
@@ -284,7 +272,7 @@ always @(*) begin
 	endcase	
 end
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
     //RESULT
 	mantissa_XI <= etf + ( totalatten_X[0] ? 3'd0 : etg ); //carry-out discarded
 	exponent_XI <= totalatten_X[11:8];
@@ -312,7 +300,7 @@ always @(*) begin
 	endcase
 end
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	// REGISTER CYCLE 11
 	op_XII <= ({ test_214, shifter_3 } ^ {14{signbit_XI}}) + signbit_XI;               
 	// REGISTER CYCLE 12
@@ -330,13 +318,12 @@ wire signed [13:0] op_ch0s1, op_ch1s1, op_ch2s1, op_ch3s1,
 		 op_ch4s3, op_ch5s3, op_ch0s4, op_ch1s4,
 		 op_ch2s4, op_ch3s4, op_ch4s4, op_ch5s4;
 
-always @(posedge clk ) if(clk_en)
+always @(posedge clk ) 
 	sep24_cnt <= !zero ? sep24_cnt+1'b1 : 5'd0;
 
 sep24 #( .width(14), .pos0(13)) opsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( op_result_internal	),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -380,7 +367,6 @@ wire signed [8:0] acc_ch0s1, acc_ch1s1, acc_ch2s1, acc_ch3s1,
 sep24 #( .width(9), .pos0(13)) accsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( op_result_internal[13:5] ),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -425,7 +411,6 @@ wire signed [9:0] pm_ch0s1, pm_ch1s1, pm_ch2s1, pm_ch3s1,
 sep24 #( .width(10), .pos0( 18 ) ) pmsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( phasemod_VIII	),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -470,7 +455,6 @@ wire [9:0] phase_ch0s1, phase_ch1s1, phase_ch2s1, phase_ch3s1,
 sep24 #( .width(10), .pos0( 18 ) ) phsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( phase		),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	
@@ -513,7 +497,6 @@ wire [9:0] eg_ch0s1, eg_ch1s1, eg_ch2s1, eg_ch3s1, eg_ch4s1, eg_ch5s1,
 sep24 #( .width(10), .pos0(17) ) egsep
 (
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.mixed	( eg_atten_IX		),
 	.mask	( 0			),
 	.cnt	( sep24_cnt	),	

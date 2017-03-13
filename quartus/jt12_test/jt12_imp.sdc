@@ -38,15 +38,15 @@ set_time_format -unit ns -decimal_places 3
 # Create Clock
 #**************************************************************
 
-create_clock -name {clk} -period 18.510 -waveform { 0.000 9.255 }  [get_ports {clk}]
+#create_clock -name {clk} -period 18.510 -waveform { 0.000 9.255 }  [get_ports {clk}]
 
 
 #**************************************************************
 # Create Generated Clock
 #**************************************************************
 
-
-
+derive_pll_clocks -create_base_clocks -use_net_name
+derive_clock_uncertainty
 #**************************************************************
 # Set Clock Latency
 #**************************************************************

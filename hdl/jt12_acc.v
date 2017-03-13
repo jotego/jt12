@@ -34,7 +34,6 @@ module jt12_acc
 (
 	input				rst,
     input				clk,
-(* direct_enable = 1 *)	input			clk_en,
 	input signed [8:0]	op_result,
 	input		 [ 1:0]	rl,
 	input				limiter_en, // enables the limiter on
@@ -87,7 +86,7 @@ reg  [1:0] mux_cnt;
 
 wire signed [11:0] total_signext = { {3{total[8]}}, total };
 
-always @(posedge clk) if(clk_en ) begin : mux_dac_input
+always @(posedge clk) begin : mux_dac_input
 	buffer2 <= buffer;
 	rl2     <= rl;
 	last_s1 <= s1_enters;
@@ -111,7 +110,7 @@ always @(posedge clk) if(clk_en ) begin : mux_dac_input
 		mux_sample <= 1'b0;	
 end
 
-always @(posedge clk) if(clk_en ) begin
+always @(posedge clk) begin
 	if( rst ) begin
 		sum_all <= 1'b0;
 	end
@@ -166,14 +165,12 @@ end
 
 jt12_sh #(.width(9),.stages(6)) u_acc(
 	.clk	( clk	),
-	.clk_en	( clk_en),
 	.din	( opsum	),
 	.drop	( total	)
 );
 
 jt12_sh #(.width(9),.stages(6)) u_buffer(
 	.clk	( clk		),
-	.clk_en	( clk_en	),
 	.din	( s3_enters ? total : buffer	),
 	.drop	( buffer	)
 );

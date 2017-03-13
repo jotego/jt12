@@ -8,7 +8,7 @@ jt12_test.v
 ../../hdl/jt12_mixer.v
 ../../hdl/jt12_clksync.v
 ../../hdl/jt12_eg.v
-../../hdl/jt12_fm.v
+../../hdl/jt12_mod.v
 ../../hdl/jt12_kon.v
 ../../hdl/jt12_lfo.v
 ../../hdl/jt12_mmr.v
@@ -23,6 +23,7 @@ jt12_test.v
 ../../hdl/jt12_sh.v
 ../../hdl/jt12_timers.v
 ../../hdl/jt12.v
+../../hdl/jt12_syn.v
 ../common/sep24.v
 ../common/jt12_testdata.v
 ../common/hybrid_pwm_sd.v

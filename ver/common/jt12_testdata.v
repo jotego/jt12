@@ -25,7 +25,6 @@ module jt12_testdata
 (
 	input				rst,
 	input				clk,
-	input				clk_en,
 	output	reg			cs_n,
 	output	reg			wr_n,
 	output	reg [1:0]	addr,
@@ -63,7 +62,7 @@ module jt12_testdata
             rnd_count	<= 0;
 			waitcnt		<= 16'h0;
 		end
-		else if(clk_en ) begin
+		else begin
 			case( state )
 				BLANK:	begin
                 	if( rnd_count )
