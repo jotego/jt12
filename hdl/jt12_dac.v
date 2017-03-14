@@ -43,9 +43,10 @@ assign dout = acc[width];
 
 always @(posedge clk) 
 if( rst ) begin
-	unsigned_din <= {width{1'b0}};
+	acc <= {(width+1){1'b0}};
 end
 else begin
+	unsigned_din <= { ~din[width-1], din[width-2:0] };
 	acc <= unsigned_din + acc[width-1:0];
 end
 

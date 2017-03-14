@@ -58,12 +58,18 @@ initial begin
     limit_time_cnt=0;
     #500 rst = 1;
     #600 rst = 0;
-	`ifdef LIMITTIME
+	// reset again, when all the pipeline is clear
+	#(2500*1000) rst=1;
+	#1000 rst=0;
+end
+
+`ifdef LIMITTIME
+initial begin
     for( limit_time_cnt=`LIMITTIME; limit_time_cnt>0; limit_time_cnt=limit_time_cnt-1 )
 		#(1000*1000);
 	$finish;
-    `endif
 end
+`endif
 
 
 wire	cs_n, wr_n, prog_done;
@@ -93,7 +99,7 @@ always @(posedge clk)
 
 wire	sample, mux_sample;
 wire signed [8:0] mux_left, mux_right;
-
+/*
 jt12 uut(
 	.rst		( rst	),
 	.cpu_clk	( vclk	),
@@ -117,49 +123,43 @@ jt12 uut(
 
     .cpu_irq_n	( irq_n	)
 );
+*/
+
+wire syn_left, syn_right;
+
+jt12_top uut(
+	.rst		( rst	),
+	.cpu_clk	( vclk	),
+	.cpu_din	( din	),
+	.cpu_addr	( addr	),
+	.cpu_cs_n	( cs_n	),
+	.cpu_wr_n	( wr_n	),
+
+	.cpu_limiter_en( 1'b1 ),
+
+	.cpu_dout	( dout		),
+	.cpu_irq_n	( irq_n		),
+	// Synthesizer clock domain
+	.syn_clk	( syn_clk	),
+	// FIR filters clock
+	.fir_clk	( mclk		),
+	// 1 bit output per channel at 1.3MHz
+	.syn_left	( syn_left	),
+	.syn_right	( syn_right	)
+);
+
 
 `ifdef POSTPROC
 
-wire [11:0] mixed_left;
-
-jt12_mixer u_mixer(
-	.clk		( mclk 			),
-	.rst		( rst  			),
-	.sample		( mux_sample 	),
-	.left_in	( mux_left 		),
-	.right_in	( mux_right 	),
-	.psg		( 5'd10			),
-	.enable_psg	( 1'b1			),
-	.enable_fm	( 1'b1			),
-	.volume		( 3'd4			),
-	.left_out	( mixed_left	)
-);
-
-wire dacleft;
-reg dacrst;
-
-initial begin
-	dacrst=1;
-    #80000 dacrst=0;
-end
-
-wire [15:0] dacin_left = { ~mixed_left, mixed_left[14:0]};
-
-hybrid_pwm_sd dac(
-	.clk	( mclk		),
-    .n_reset( ~dacrst		),
-    .din	( dacin_left	),
-    .dout	( dacleft	)
-);
 
 real filter_left;
 // real tau=5e-6;
 
 always @(posedge mclk)
-if ( dacrst )
+if ( rst )
 	filter_left <= 0;
 else begin
-	if( dacleft )
+	if( syn_left )
     	filter_left <= filter_left + 9.26e-9/5e-6 * (1.0-filter_left);
 	else
 	    filter_left <= filter_left - 9.26e-9/5e-6 * filter_left;

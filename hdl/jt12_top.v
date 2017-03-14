@@ -57,7 +57,7 @@ module jt12_top(
 	output			syn_right
 );
 
-wire signed [7:0] syn_mux_left, syn_mux_right;
+wire signed [8:0] syn_mux_left, syn_mux_right;
 wire syn_mux_sample;
 
 jt12 u_jt12(
@@ -85,9 +85,9 @@ wire signed [11:0] fir_left, fir_right;
 jt12_mixer u_mixer(
 	.rst		( rst  			),
 	.clk		( fir_clk		),
-	.sample		( fir_mux_sample 	),
-	.left_in	( fir_mux_left 		),
-	.right_in	( fir_mux_right 	),
+	.sample		( syn_mux_sample 	),
+	.left_in	( syn_mux_left 		),
+	.right_in	( syn_mux_right 	),
 	.psg		( 5'd0		),
 	.enable_psg	( 1'b0		),
 	.enable_fm	( 1'b1		),
@@ -106,14 +106,14 @@ jt12_sh #(.width(1), .stages(2)) u_sample_sync(
 jt12_dac u_dac_left(
 	.rst		( rst  			),
 	.clk		( syn_clk		),
-	.din		( fir_mux_left	),
+	.din		( fir_left		),
 	.dout		( syn_left		)
 );
 
 jt12_dac u_dac_right(
 	.rst		( rst  			),
 	.clk		( syn_clk		),
-	.din		( fir_mux_right	),
+	.din		( fir_right		),
 	.dout		( syn_right		)
 );
 
