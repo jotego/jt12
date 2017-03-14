@@ -75,7 +75,7 @@ always @(*) begin
 					alg_I==3'd5 || alg_I==3'd6)) ||
 		(s4_enters&&(alg_I==3'd2 || alg_I==3'd5));
 end
-/*
+
 always @(*) begin
 case( {s1_enters, s3_enters, s2_enters, s4_enters} ) // synthesis parallel_case
 		4'b1000: begin // S1

@@ -255,16 +255,35 @@ void keyon( Ch ch[], int c, int op ) {
 	ch[c].keyon(op);
 }
 
+void alg_single_test( Ch ch[6], int alg ) {
+	cout << "\n\n// Starting ALG="<<alg <<endl;
+	keyoff_all(ch);
+	wait(1);
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(alg);
+		ch[k].op[0].set_tl(20);
+		ch[k].op[0].set_dr(0);
+		ch[k].set_fb(5);
+		for( int j=1; j<4; j++ ) {
+			ch[k].op[j].set_tl( 0 );
+		}
+	}
+	for( int k=0; k<6; k++ )
+		ch[k].keyon( 0xf );
+	wait(10);
+}
+
 void alg_test( Ch ch[6], int mask, int fb_max ) {
 	initial_clear( ch );
 	// ALG = 7
 	if (mask&0x80) {
-	cerr << "Starting ALG=7"<<endl;
+	cout << "\n\n// Starting ALG=7"<<endl;
 	for( int fb=0; fb<fb_max; fb++ ) {
-		cerr << "FB="<<fb<<endl;
+		cout << "//\tFB="<<fb<<endl;
 		for( int k=0; k<6; k++ ) {
 			ch[k].set_alg(7);
 			ch[k].set_fb(fb);
+			ch[k].op[0].set_dr(0);
 			ch[k].set_rl(3);
 		}
 		for( int k=0; k<6; k++ ) {
@@ -276,116 +295,15 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 			}
 			keyoff_all(ch);
 		}
+		for( int k=0; k<6; k++ ) ch[k].keyon( 0xf );
+		wait(10);
+		keyoff_all(ch);
 	}
 	}
 	// ALG = 6
-	if (mask&0x40) {
-	cerr << "Starting ALG=6"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(6);
-		ch[k].op[0].set_tl(20);
-		ch[k].op[0].set_dr(0);
-		for( int j=1; j<4; j++ ) {
-			ch[k].op[j].set_tl( 0 );
-		}
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
+	for( int m=6; m>=0; m-- )
+		if (mask&(1<<m)) alg_single_test( ch, m );
 
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 5
-	if (mask&0x20) {
-	cerr << "Starting ALG=5"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(5);
-		ch[k].set_fb(0);
-		ch[k].op[0].set_tl(20);
-		ch[k].op[0].set_dr(0);
-		for( int j=1; j<4; j++ ) {
-			ch[k].op[j].set_tl( 0 );
-		}
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 4
-	if (mask&0x10) {
-	cerr << "Starting ALG=4"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(4);
-		ch[k].set_fb(k+1);
-		ch[k].op[0].set_tl(20);
-		ch[k].op[2].set_tl(25);
-		ch[k].op[1].set_tl(0);
-		ch[k].op[3].set_tl(0);
-		for( int j=0; j<4; j++ )
-			ch[k].op[j].set_dr(0);
-		ch[k].keyon( 15 );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 3
-	if (mask&0x8) {
-	cerr << "Starting ALG=3"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(3);
-		ch[k].set_fb(k+1);
-		ch[k].op[0].set_tl(20); // S1
-		ch[k].op[2].set_tl(25); // S3
-		ch[k].op[1].set_tl(20); // S2
-		ch[k].op[3].set_tl(0);
-		ch[k].op[0].set_dr(0);
-		ch[k].op[3].set_dr(0);
-		ch[k].keyon( 0xc );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xb );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 2..0
-	for( int alg=2, m=4; alg>=0; alg--,m>>=1 )
-	if( mask& m ) {
-	cerr << "Starting ALG="<<alg<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(alg);
-		ch[k].set_fb(k+1);
-		ch[k].op[0].set_tl(20); // S1
-		ch[k].op[2].set_tl(25); // S3
-		ch[k].op[1].set_tl(20); // S2
-		ch[k].op[3].set_tl(0);
-		ch[k].op[0].set_dr(0);
-		ch[k].op[3].set_dr(0);
-		ch[k].keyon( 0x8 );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xc );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xe );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
 }
 
 void ssg_test( Ch ch[6] ) {

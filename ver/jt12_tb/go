@@ -107,7 +107,7 @@ else
 	ncverilog -64BIT -f gather.f +access+rc +incdir+../../hdl +nctop+$TOP \
     	+define+NCVERILOG+DISPLAY_STEP+$DUMPSIGNALS+TEST_SUPPORT+RANDWAIT=$RANDWAIT \
         +define+SIMULATION+$TIMERONLY+$DUMPSOUND+$SSG_TEST \
-        +define+$LIMITTIME+define+$POSTPROC > s
+        +define+$LIMITTIME+$POSTPROC > s
 	if [ $? -ne 0 ]; then
 		cat s
 		rm s

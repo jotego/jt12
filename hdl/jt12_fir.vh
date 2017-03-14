@@ -51,7 +51,7 @@ reg signed [coeff_width-1:0] gain;
 
 wire last_stage = cnt==(stages-1)/2;
 
-//integer a,b;
+reg signed [data_width-1:0] buffer_left, buffer_right;
 
 always @(*) begin
 	if( state==LEFT) begin	
@@ -71,9 +71,6 @@ always @(*) begin
 	mac_trim <= mac>>>(mac_width-acc_width+acc_extra); 
 	next <= cnt+1'b1;
 end
-
-reg signed [data_width-1:0] buffer_left, buffer_right;
-
 
 always @(*)  begin
 	in_pointer_next <= in_pointer - 1'b1;
