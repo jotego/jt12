@@ -33,20 +33,31 @@ module jt12_dac #(parameter width=12)
 	input	clk,
     input	rst,
     input	signed	[width-1:0] din,
-    output	dout
+    output	reg	 dout
 );
 
-reg [width-1:0] unsigned_din;
-reg [width:0] acc;
+reg signed [21:0] sigma;
+reg signed [22:0] sigma_unlim;
+reg signed [21:0] delta, delta1, delta2, delta1x2;
 
-assign dout = acc[width];
+always @(*) begin
+	if( delta1[20] )
+    	delta1x2 <= { delta1[21], {21{~delta1[21]}}};
+    else
+    	delta1x2 <= delta1<<<1;
 
-always @(posedge clk) 
-if( rst ) begin
-	unsigned_din <= {width{1'b0}};
+	sigma_unlim <= din + delta2 + delta1x2;
+    case( sigma_unlim[22:21] )
+    	2'b01: sigma <= { 1'b0, {20{1'b1}}};
+        2'b10: sigma <= { 1'b1, {20{1'b0}}};
+        default sigma <= sigma_unlim[21:0];
+    endcase
 end
-else begin
-	acc <= unsigned_din + acc[width-1:0];
+
+always @(posedge clk) begin
+	dout <= sigma[20];
+    delta1 <= sigma - { 1'b0, sigma[20], 20'd0 };
+    delta2 <= delta1;
 end
 
 endmodule
