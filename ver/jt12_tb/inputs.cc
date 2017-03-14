@@ -245,9 +245,10 @@ void initial_clear( Ch ch[6] ) {
 		int e = k>2 ? 1:0;
 		write(  0, 0x28, 0xf0 | (k+e) );
 	}
-	write( 0, 0x01, 55 ); // wait
+	wait(2);
 	keyoff_all(ch);
-	write( 0, 0x01, 155 ); // wait
+	wait(12);
+	cout << "// Initial clear done\n";
 }
 
 void keyon( Ch ch[], int c, int op ) {
@@ -255,6 +256,7 @@ void keyon( Ch ch[], int c, int op ) {
 }
 
 void alg_test( Ch ch[6], int mask, int fb_max ) {
+	initial_clear( ch );
 	// ALG = 7
 	if (mask&0x80) {
 	cerr << "Starting ALG=7"<<endl;
@@ -534,7 +536,7 @@ void ch3effect_test( Ch ch[6] ) {
 
 void csm_test(Ch ch[6]) {
 	cerr << "CSM test\n";
-	//initial_clear( ch );
+	initial_clear( ch );
 	ch[2].set_alg(7);
 	ch[2].set_fb(0);
 	ch[2].set_fnumber(925);
@@ -557,11 +559,10 @@ void csm_test(Ch ch[6]) {
 	write( 0, 0xaa, faux );
 	write( 0, 0xa2, faux );
 
-	write( 0, 0x24, 120 );
+	write( 0, 0x24, 200 );
 	write( 0, 0x25, 0 );
 	write( 0, 0x27, 0xb5 ); // CSM
-	for( int wait=0; wait<4; wait++ )
-		write( 0, 0x01, 255 ); // wait
+	wait( 40 );
 	//keyoff_all(ch);
 }
 
@@ -888,6 +889,7 @@ void fnumorder_test( Ch ch[6] ) {
 }
 
 void acc_test( Ch ch[6] ) {
+	initial_clear( ch );
 	cerr << "Prueba del acumulador\n"
 		<< "Al principio salen por orden cada operador al maximo\n"
 		<< "Deberia causar salidas erroneas por desborde\n"
@@ -1187,7 +1189,6 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-csm" )==0) csm_test( ch );
 		if( strcmp( argv[k], "-dr" )==0 ) dr_test( ch );
 		if( strcmp( argv[k], "-maxtl" )==0 ) maxtl_test( ch );
-		if( strcmp( argv[k], "-csm" )==0 )  csm_test( ch );
 		if( strcmp( argv[k], "-fnum" )==0 )  fnum_check( ch );
 		if( strcmp( argv[k], "-ssg" )==0 )  ssg_test( ch );
 		if( strcmp( argv[k], "-ssg2" )==0 )  ssg2_test( ch );
@@ -1196,7 +1197,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-keyon2" )==0 )  keyon_doble( ch );
 		if( strcmp( argv[k], "-keyon" )==0 )  keyon_simple( ch );
 		if( strcmp( argv[k], "-tone00" )==0 )  tone00( ch );
-		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 0x80, 1 );
+		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 0xFF, 7 );
 		if( strcmp( argv[k], "-am" )==0 )  am_test( ch );
 		if( strcmp( argv[k], "-amfreq" )==0 )  amfreq_test( ch );
 		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );
