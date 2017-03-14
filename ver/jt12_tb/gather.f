@@ -16,6 +16,7 @@ jt12_test.v
 ../../hdl/jt12_op.v
 ../../hdl/jt12_exprom.v
 ../../hdl/jt12_phrom.v
+../../hdl/jt12_opram.v
 ../../hdl/jt12_pg.v
 ../../hdl/jt12_reg.v
 ../../hdl/jt12_sh24.v

@@ -41,7 +41,7 @@ set_global_assignment -name DEVICE EP3C25E144C7
 set_global_assignment -name TOP_LEVEL_ENTITY jt12_imp
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 13.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "20:42:31  MARZO 12, 2017"
-set_global_assignment -name LAST_QUARTUS_VERSION 13.1
+set_global_assignment -name LAST_QUARTUS_VERSION "12.1 SP1"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
@@ -54,31 +54,6 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 set_location_assignment PIN_52 -to clk
-set_global_assignment -name VERILOG_FILE syn_clk_gen.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_syn.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_mod.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh_tl.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_phrom.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_exprom.v
-set_global_assignment -name SDC_FILE jt12_imp.sdc
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_timers.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sumch.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh_rst.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh24.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_reg.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_pg.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_op.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_mmr.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_lfo.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_kon.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_eg.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_dac.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_clksync.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12_acc.v
-set_global_assignment -name VERILOG_FILE ../../hdl/jt12.v
-set_global_assignment -name VERILOG_FILE jt12_imp.v
-set_global_assignment -name QIP_FILE syn_clk_gen.qip
 set_instance_assignment -name VIRTUAL_PIN ON -to mux_left[8]
 set_instance_assignment -name VIRTUAL_PIN ON -to mux_left[7]
 set_instance_assignment -name VIRTUAL_PIN ON -to mux_left[6]
@@ -116,4 +91,30 @@ set_instance_assignment -name VIRTUAL_PIN ON -to addr[0]
 set_instance_assignment -name VIRTUAL_PIN ON -to busy
 set_instance_assignment -name VIRTUAL_PIN ON -to flag_A
 set_instance_assignment -name VIRTUAL_PIN ON -to flag_B
+set_global_assignment -name VERILOG_FILE syn_clk_gen.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_syn.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_mod.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh_tl.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_phrom.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_exprom.v
+set_global_assignment -name SDC_FILE jt12_imp.sdc
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_timers.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sumch.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh_rst.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh24.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_sh.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_reg.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_pg.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_op.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_mmr.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_lfo.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_kon.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_eg.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_dac.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_clksync.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_acc.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12.v
+set_global_assignment -name VERILOG_FILE jt12_imp.v
+set_global_assignment -name QIP_FILE syn_clk_gen.qip
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_opram.v
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
