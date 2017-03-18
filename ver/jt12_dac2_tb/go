@@ -1,0 +1,4 @@
+#!/bin/bash
+
+iverilog jt12_dac2_tb.v ../../hdl/jt12_dac2.v ../../hdl/jt12_dac.v\
+	../common/sincf.v -o sim -s jt12_dac2_tb && sim -lxt

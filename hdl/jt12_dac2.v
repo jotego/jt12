@@ -23,41 +23,41 @@
 /*
 
 	input sampling rate must be the same as clk frequency
-    interpolation the input signal accordingly to get the
-    right sampling rate
+    interpolate input signal accordingly to get the
+    right sampling rate.
+	
+	Refer to sigmadelta.ods to see how the internal width (int_w)
+	was determined.
 
 */
 
-module jt12_dac #(parameter width=12)
+module jt12_dac2 #(parameter width=12)
 (
 	input	clk,
     input	rst,
-    input	signed	[width-1:0] din,
-    output	reg	 dout
+    input	signed [width-1:0] din,
+    output	reg dout
 );
 
-reg signed [21:0] sigma;
-reg signed [22:0] sigma_unlim;
-reg signed [21:0] delta, delta1, delta2, delta1x2;
+parameter int_w = width+5;
+
+reg [int_w-1:0] y, error, error_1, error_2;
+
+wire [width-1:0] undin = { ~din[width-1], din[width-2:0] };
 
 always @(*) begin
-	if( delta1[20] )
-    	delta1x2 <= { delta1[21], {21{~delta1[21]}}};
-    else
-    	delta1x2 <= delta1<<<1;
-
-	sigma_unlim <= din + delta2 + delta1x2;
-    case( sigma_unlim[22:21] )
-    	2'b01: sigma <= { 1'b0, {20{1'b1}}};
-        2'b10: sigma <= { 1'b1, {20{1'b0}}};
-        default sigma <= sigma_unlim[21:0];
-    endcase
+	y <= undin + { error_1, 1'b0} - error_2;
+	dout <= ~y[int_w-1];
+	error <= y - {dout, {width{1'b0}}};
 end
 
-always @(posedge clk) begin
-	dout <= sigma[20];
-    delta1 <= sigma - { 1'b0, sigma[20], 20'd0 };
-    delta2 <= delta1;
-end
+always @(posedge clk)
+	if( rst ) begin
+		error_1 <= {int_w{1'b0}};
+		error_2 <= {int_w{1'b0}};
+	end else begin
+		error_1 <= error;
+		error_2 <= error_1;
+	end
 
 endmodule

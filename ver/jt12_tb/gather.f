@@ -5,6 +5,7 @@ jt12_test.v
 ../../hdl/jt12_acc.v
 ../../hdl/jt12_clksync.v
 ../../hdl/jt12_dac.v
+../../hdl/jt12_dac2.v
 ../../hdl/jt12_eg.v
 ../../hdl/jt12_exprom.v
 ../../hdl/jt12_fir4.v

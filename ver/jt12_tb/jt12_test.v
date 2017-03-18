@@ -99,31 +99,6 @@ always @(posedge clk)
 
 wire	sample, mux_sample;
 wire signed [8:0] mux_left, mux_right;
-/*
-jt12 uut(
-	.rst		( rst	),
-	.cpu_clk	( vclk	),
-	.syn_clk	( syn_clk),
-	.cpu_din	( din	),
-	.cpu_addr	( addr	),
-	.cpu_cs_n	( cs_n	),
-	.cpu_wr_n	( wr_n	),
-
-	.cpu_limiter_en( 1'b1 ),
-
-	.cpu_dout	( dout	),
-	.syn_snd_right	( right	),
-	.syn_snd_left	( left	),
-	.syn_snd_sample	( sample	),
-
-	// muxed output
-	.syn_mux_left	( mux_left	),
-	.syn_mux_right	( mux_right ),
-	.syn_mux_sample	( mux_sample),
-
-    .cpu_irq_n	( irq_n	)
-);
-*/
 
 wire syn_left, syn_right;
 
@@ -155,24 +130,67 @@ jt12_top uut(
 wire [4:0] syn_sinc1;
 wire [8:0] syn_sinc2;
 wire [13:0] syn_sinc3;
+reg signed [13:0] sinc_left;
 
-sincf #(.win(1), .wout(5)) sinc1(
+sincf #(.win(1), .wout(5)) sinc1l(
 	.clk ( syn_clk ),
 	.din ( syn_left ),
 	.dout( syn_sinc1 )
 );
 
-sincf #(.win(5), .wout(9)) sinc2(
+sincf #(.win(5), .wout(9)) sinc2l(
 	.clk ( syn_clk ),
 	.din ( syn_sinc1 ),
 	.dout( syn_sinc2 )
 );
 
-sincf #(.win(9), .wout(14)) sinc3(
+sincf #(.win(9), .wout(14)) sinc3l(
 	.clk ( syn_clk ),
-	.din ( syn_sinc2 ),
+	.din ( syn_sinc2-9'd32 ),
 	.dout( syn_sinc3 )
 );
+
+wire [4:0] syn_sinc1_right;
+wire [8:0] syn_sinc2_right;
+wire [13:0] syn_sinc3_right;
+reg signed [13:0] sinc_right;
+
+sincf #(.win(1), .wout(5)) sinc1r(
+	.clk ( syn_clk ),
+	.din ( syn_right ),
+	.dout( syn_sinc1_right )
+);
+
+sincf #(.win(5), .wout(9)) sinc2r(
+	.clk ( syn_clk ),
+	.din ( syn_sinc1_right ),
+	.dout( syn_sinc2_right )
+);
+
+sincf #(.win(9), .wout(14)) sinc3r(
+	.clk ( syn_clk ),
+	.din ( syn_sinc2_right-9'd32 ),
+	.dout( syn_sinc3_right )
+);
+
+integer sinc_cnt;
+
+always @(posedge syn_clk or posedge rst)
+	if( rst ) begin
+		sinc_cnt  <= 0;
+		sinc_left <= 14'h2000;
+		sinc_right<= 14'h2000;
+	end
+	else begin
+		if( sinc_cnt == 23 ) begin
+			sinc_cnt <= 0;
+			sinc_left <= (syn_sinc3       + 14'd2048) ^ 14'h2000;
+			sinc_right<= (syn_sinc3_right + 14'd2048) ^ 14'h2000;
+		end
+		else
+			sinc_cnt <= sinc_cnt + 1'b1;
+	end
+
 
 
 /*

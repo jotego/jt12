@@ -17,6 +17,7 @@ for (i=23; i>0; i=i-1) begin: meminput
 	always @(posedge clk)
 		mem[i] <= mem[i-1];	
 end
+
 endgenerate
 
 always @(posedge clk) begin
