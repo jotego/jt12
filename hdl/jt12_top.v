@@ -53,6 +53,8 @@ module jt12_top(
 	// FIR filters clock
 	input			fir_clk,
 	input	[2:0]	fir_volume,
+	input			enable_fm,
+	input			enable_psg,
 	// 1 bit output per channel at 1.3MHz
 	output			syn_left,
 	output			syn_right
@@ -90,8 +92,8 @@ jt12_mixer u_mixer(
 	.left_in	( syn_mux_left 		),
 	.right_in	( syn_mux_right 	),
 	.psg		( 5'd0		),
-	.enable_psg	( 1'b0		),
-	.enable_fm	( 1'b1		),
+	.enable_psg	( enable_psg),
+	.enable_fm	( enable_fm	),
 	.volume		( fir_volume),
 	.left_out	( fir_left	),
 	.right_out	( fir_right	),
