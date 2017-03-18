@@ -143,6 +143,7 @@ jt12_top uut(
 	.syn_clk	( syn_clk	),
 	// FIR filters clock
 	.fir_clk	( mclk		),
+	.fir_volume	( 3'd7		),
 	// 1 bit output per channel at 1.3MHz
 	.syn_left	( syn_left	),
 	.syn_right	( syn_right	)
@@ -151,7 +152,30 @@ jt12_top uut(
 
 `ifdef POSTPROC
 
+wire [4:0] syn_sinc1;
+wire [8:0] syn_sinc2;
+wire [13:0] syn_sinc3;
 
+sincf #(.win(1), .wout(5)) sinc1(
+	.clk ( syn_clk ),
+	.din ( syn_left ),
+	.dout( syn_sinc1 )
+);
+
+sincf #(.win(5), .wout(9)) sinc2(
+	.clk ( syn_clk ),
+	.din ( syn_sinc1 ),
+	.dout( syn_sinc2 )
+);
+
+sincf #(.win(9), .wout(14)) sinc3(
+	.clk ( syn_clk ),
+	.din ( syn_sinc2 ),
+	.dout( syn_sinc3 )
+);
+
+
+/*
 real filter_left;
 // real tau=5e-6;
 
@@ -160,9 +184,9 @@ if ( rst )
 	filter_left <= 0;
 else begin
 	if( syn_left )
-    	filter_left <= filter_left + 9.26e-9/5e-6 * (1.0-filter_left);
+    	filter_left <= filter_left + 5.26e-9/5e-6 * (1.0-filter_left);
 	else
-	    filter_left <= filter_left - 9.26e-9/5e-6 * filter_left;
+	    filter_left <= filter_left - 5.26e-9/5e-6 * filter_left;
 end
 
 real speaker_left;
@@ -175,7 +199,8 @@ initial begin
 end
 
 always @(posedge audio_clk)
-	speaker_left <= filter_left;
+	speaker_left <= ((2*(filter_left-0.5))+speaker_left)/2;
+*/
 `endif
 
 `ifdef DUMPSOUND

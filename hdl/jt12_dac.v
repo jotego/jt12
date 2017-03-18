@@ -35,19 +35,22 @@ module jt12_dac #(parameter width=12)
     input	signed	[width-1:0] din,
     output	dout
 );
+parameter acc_w = width+1;
 
-reg [width-1:0] unsigned_din;
-reg [width:0] acc;
+reg [width-1:0] nosign;
+reg [acc_w-1:0] acc;
+wire [acc_w-2:0] err = acc[acc_w-2:0];
 
-assign dout = acc[width];
+assign dout = acc[acc_w-1];
 
 always @(posedge clk) 
 if( rst ) begin
-	acc <= {(width+1){1'b0}};
+	acc <= {(acc_w){1'b0}};
+	nosign <= {width{1'b0}};
 end
 else begin
-	unsigned_din <= { ~din[width-1], din[width-2:0] };
-	acc <= unsigned_din + acc[width-1:0];
+	nosign <= { ~din[width-1], din[width-2:0] };
+	acc <= nosign + err;
 end
 
 endmodule

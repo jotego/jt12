@@ -1,6 +1,7 @@
 jt12_test.v
 ../common/jt12_testdata.v
 ../common/sep24.v
+../common/sincf.v
 ../../hdl/jt12_acc.v
 ../../hdl/jt12_clksync.v
 ../../hdl/jt12_dac.v
