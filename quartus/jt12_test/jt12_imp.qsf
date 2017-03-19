@@ -91,6 +91,13 @@ set_instance_assignment -name VIRTUAL_PIN ON -to addr[0]
 set_instance_assignment -name VIRTUAL_PIN ON -to busy
 set_instance_assignment -name VIRTUAL_PIN ON -to flag_A
 set_instance_assignment -name VIRTUAL_PIN ON -to flag_B
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_fir_ram.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_interpol.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_fir4.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_fir.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_mixer.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_dac2.v
+set_global_assignment -name VERILOG_FILE ../../hdl/jt12_top.v
 set_global_assignment -name VERILOG_FILE syn_clk_gen.v
 set_global_assignment -name VERILOG_FILE ../../hdl/jt12_syn.v
 set_global_assignment -name VERILOG_FILE ../../hdl/jt12_mod.v

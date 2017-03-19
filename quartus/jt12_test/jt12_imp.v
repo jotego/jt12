@@ -17,8 +17,8 @@ module jt12_imp(
 	output			sample,
 	*/
 	// multiplexed output
-	output signed	[8:0]	mux_left,
-	output signed	[8:0]	mux_right,	
+	output			syn_left,
+	output 			syn_right,	
 	output			mux_sample,
 		
 	output			irq_n
@@ -38,10 +38,9 @@ assign busy = dout[7];
 assign flag_B = dout[1];
 assign flag_A = dout[0];
 
-jt12 u_fm(
+jt12_top uut(
 	.rst		( rst	),
 	.cpu_clk	( cpu_clk),
-	.syn_clk	( syn_clk),
 	.cpu_din	( din	),
 	.cpu_addr	( addr	),
 	.cpu_cs_n	( cs_n	),
@@ -49,18 +48,16 @@ jt12 u_fm(
 
 	.cpu_limiter_en( limiter_en ),
 
-	.cpu_dout	( dout	),
-	/*
-	.snd_right	( right	),
-	.snd_left	( left	),
-	.sample	( sample	),
-*/
-	// muxed output
-	.syn_mux_left	( mux_left	),
-	.syn_mux_right	( mux_right ),
-	.syn_mux_sample	( mux_sample),
-
-    .cpu_irq_n	( irq_n	)
+	.cpu_dout	( dout		),
+	.cpu_irq_n	( irq_n		),
+	// Synthesizer clock domain
+	.syn_clk	( syn_clk	),
+	// FIR filters clock
+	.fir_clk	( clk		),
+	.fir_volume	( 3'd7		),
+	// 1 bit output per channel at 1.3MHz
+	.syn_left	( syn_left	),
+	.syn_right	( syn_right	)
 );
 
 endmodule
