@@ -245,24 +245,45 @@ void initial_clear( Ch ch[6] ) {
 		int e = k>2 ? 1:0;
 		write(  0, 0x28, 0xf0 | (k+e) );
 	}
-	write( 0, 0x01, 55 ); // wait
+	wait(2);
 	keyoff_all(ch);
-	write( 0, 0x01, 155 ); // wait
+	wait(12);
+	cout << "// Initial clear done\n";
 }
 
 void keyon( Ch ch[], int c, int op ) {
 	ch[c].keyon(op);
 }
 
+void alg_single_test( Ch ch[6], int alg ) {
+	cout << "\n\n// Starting ALG="<<alg <<endl;
+	keyoff_all(ch);
+	wait(1);
+	for( int k=0; k<6; k++ ) {
+		ch[k].set_alg(alg);
+		ch[k].op[0].set_tl(20);
+		ch[k].op[0].set_dr(0);
+		ch[k].set_fb(5);
+		for( int j=1; j<4; j++ ) {
+			ch[k].op[j].set_tl( 0 );
+		}
+	}
+	for( int k=0; k<6; k++ )
+		ch[k].keyon( 0xf );
+	wait(10);
+}
+
 void alg_test( Ch ch[6], int mask, int fb_max ) {
+	initial_clear( ch );
 	// ALG = 7
 	if (mask&0x80) {
-	cerr << "Starting ALG=7"<<endl;
+	cout << "\n\n// Starting ALG=7"<<endl;
 	for( int fb=0; fb<fb_max; fb++ ) {
-		cerr << "FB="<<fb<<endl;
+		cout << "//\tFB="<<fb<<endl;
 		for( int k=0; k<6; k++ ) {
 			ch[k].set_alg(7);
 			ch[k].set_fb(fb);
+			ch[k].op[0].set_dr(0);
 			ch[k].set_rl(3);
 		}
 		for( int k=0; k<6; k++ ) {
@@ -274,116 +295,15 @@ void alg_test( Ch ch[6], int mask, int fb_max ) {
 			}
 			keyoff_all(ch);
 		}
+		for( int k=0; k<6; k++ ) ch[k].keyon( 0xf );
+		wait(10);
+		keyoff_all(ch);
 	}
 	}
 	// ALG = 6
-	if (mask&0x40) {
-	cerr << "Starting ALG=6"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(6);
-		ch[k].op[0].set_tl(20);
-		ch[k].op[0].set_dr(0);
-		for( int j=1; j<4; j++ ) {
-			ch[k].op[j].set_tl( 0 );
-		}
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
+	for( int m=6; m>=0; m-- )
+		if (mask&(1<<m)) alg_single_test( ch, m );
 
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 5
-	if (mask&0x20) {
-	cerr << "Starting ALG=5"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(5);
-		ch[k].set_fb(0);
-		ch[k].op[0].set_tl(20);
-		ch[k].op[0].set_dr(0);
-		for( int j=1; j<4; j++ ) {
-			ch[k].op[j].set_tl( 0 );
-		}
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 4
-	if (mask&0x10) {
-	cerr << "Starting ALG=4"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(4);
-		ch[k].set_fb(k+1);
-		ch[k].op[0].set_tl(20);
-		ch[k].op[2].set_tl(25);
-		ch[k].op[1].set_tl(0);
-		ch[k].op[3].set_tl(0);
-		for( int j=0; j<4; j++ )
-			ch[k].op[j].set_dr(0);
-		ch[k].keyon( 15 );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 3
-	if (mask&0x8) {
-	cerr << "Starting ALG=3"<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(3);
-		ch[k].set_fb(k+1);
-		ch[k].op[0].set_tl(20); // S1
-		ch[k].op[2].set_tl(25); // S3
-		ch[k].op[1].set_tl(20); // S2
-		ch[k].op[3].set_tl(0);
-		ch[k].op[0].set_dr(0);
-		ch[k].op[3].set_dr(0);
-		ch[k].keyon( 0xc );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xb );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
-	// ALG = 2..0
-	for( int alg=2, m=4; alg>=0; alg--,m>>=1 )
-	if( mask& m ) {
-	cerr << "Starting ALG="<<alg<<endl;
-	for( int k=0; k<6; k++ ) {
-		ch[k].set_alg(alg);
-		ch[k].set_fb(k+1);
-		ch[k].op[0].set_tl(20); // S1
-		ch[k].op[2].set_tl(25); // S3
-		ch[k].op[1].set_tl(20); // S2
-		ch[k].op[3].set_tl(0);
-		ch[k].op[0].set_dr(0);
-		ch[k].op[3].set_dr(0);
-		ch[k].keyon( 0x8 );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xc );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xe );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-		ch[k].keyon( 0xf );
-		for( int wait=0; wait<3; wait++ )
-			write( 0, 0x01, 255 ); // wait
-
-		keyoff_all(ch);
-	}
-	}
 }
 
 void ssg_test( Ch ch[6] ) {
@@ -418,6 +338,8 @@ void ssg_test( Ch ch[6] ) {
 }
 
 void tone00( Ch ch[6] ) {
+	initial_clear( ch );
+	wait(5);
 	ch[0].op[0].set_sl(15);
 	ch[0].set_alg(7);
 	ch[0].keyon( 15 );
@@ -431,7 +353,11 @@ void tone00( Ch ch[6] ) {
     op.set_ar( 31 );
     op.set_dr( 0 );
 	ch[0].keyon( 1 );
-    wait( 40 );
+    wait( 12 );
+    ch[0].set_rl(1);
+    wait( 12 );
+    ch[0].set_rl(2);
+	wait( 12 );
 }
 
 void fnum_check( Ch ch[6] ) {
@@ -528,7 +454,7 @@ void ch3effect_test( Ch ch[6] ) {
 
 void csm_test(Ch ch[6]) {
 	cerr << "CSM test\n";
-	//initial_clear( ch );
+	initial_clear( ch );
 	ch[2].set_alg(7);
 	ch[2].set_fb(0);
 	ch[2].set_fnumber(925);
@@ -551,11 +477,10 @@ void csm_test(Ch ch[6]) {
 	write( 0, 0xaa, faux );
 	write( 0, 0xa2, faux );
 
-	write( 0, 0x24, 120 );
+	write( 0, 0x24, 200 );
 	write( 0, 0x25, 0 );
 	write( 0, 0x27, 0xb5 ); // CSM
-	for( int wait=0; wait<4; wait++ )
-		write( 0, 0x01, 255 ); // wait
+	wait( 40 );
 	//keyoff_all(ch);
 }
 
@@ -571,14 +496,14 @@ void maxtl_test(Ch ch[6]) {
 		ch[k].set_rl(3);
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( 0 );
-			ch[k].op[j].set_ar( 31 );			
+			ch[k].op[j].set_ar( 31 );
 			ch[k].op[j].set_sr( 0 );
 			ch[k].op[j].set_dr( 0 );
 			ch[k].op[j].set_rr( 15 );
 			ch[k].op[j].set_mul(1);
 			ch[k].op[j].set_ssg4(0);
 		}
-		ch[k].keyon(0xf);		
+		ch[k].keyon(0xf);
 	}
 	write( 0, 0x21, 0<<3 ); // PG on
 	wait( 30 );
@@ -596,17 +521,27 @@ void dr_test(Ch ch[6]) {
 		ch[k].set_rl(3);
 		for( int j=0; j<4; j++ ) {
 			ch[k].op[j].set_tl( j==0 ? 0 : 127);
-			ch[k].op[j].set_ar( 31 );			
+			ch[k].op[j].set_ar( 31 );
 			ch[k].op[j].set_sr( 0 );
 			ch[k].op[j].set_dr( 0 );
 			ch[k].op[j].set_rr( 15 );
 			ch[k].op[j].set_mul(1);
 			ch[k].op[j].set_ssg4(0);
 		}
-		ch[k].keyon(0xf);		
+		ch[k].keyon(0xf);
 	}
 	write( 0, 0x21, 0<<3 ); // PG on
-	wait( 30 );
+	wait( 10 );
+	for( int k=0; k<5; k++ ) {
+		ch[k].op[0].set_tl(127);
+//		wait( 6 );
+	}
+	write( 0, 0x21, 1<<3 ); // PG stop
+	for( int k=0; k<64; k+=2 ) {
+		ch[5].op[0].set_tl(k);
+		wait( 1 );
+	}
+	wait(2);
 }
 
 void gng2( Ch *ch ) {
@@ -872,6 +807,7 @@ void fnumorder_test( Ch ch[6] ) {
 }
 
 void acc_test( Ch ch[6] ) {
+	initial_clear( ch );
 	cerr << "Prueba del acumulador\n"
 		<< "Al principio salen por orden cada operador al maximo\n"
 		<< "Deberia causar salidas erroneas por desborde\n"
@@ -1005,6 +941,7 @@ void dacmux_test( Ch ch[6] ) {
 }
 
 void mmr_test( Ch ch[6], int rnd_cases=3 ) {
+	initial_clear( ch );
 	cerr << "MMR test\n";
 	cerr << "Tarda unos 25 minutos en el portatil en hacer 800 casos\n";
 	cerr << "Tarda unos 45 minutos en el despacho en hacer 2000 casos\n";
@@ -1037,7 +974,7 @@ void mmr_test( Ch ch[6], int rnd_cases=3 ) {
 			ch[k].op[j].set_sl( c );
 		}
 	}
-	write( 0, 1, 10 );
+	wait( 5 );
 	write( 0, 2, 4 ); // dump MMR data
 	cerr << "Reference data dumped\n";
 
@@ -1146,7 +1083,7 @@ void ssg2_test( Ch ch[6] ) {
     }
     for( int ssg=0; ssg<8; ssg++ ) {
         write( 0, 0x28, 0x82 );
-		wait( 10000 );
+		wait( 5000 );
         write( 0, 0x28, 0x02 );
         write( 0, 0x9e, 0x08 | (ssg&7) );
 		wait( 300 );
@@ -1170,7 +1107,6 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-csm" )==0) csm_test( ch );
 		if( strcmp( argv[k], "-dr" )==0 ) dr_test( ch );
 		if( strcmp( argv[k], "-maxtl" )==0 ) maxtl_test( ch );
-		if( strcmp( argv[k], "-csm" )==0 )  csm_test( ch );
 		if( strcmp( argv[k], "-fnum" )==0 )  fnum_check( ch );
 		if( strcmp( argv[k], "-ssg" )==0 )  ssg_test( ch );
 		if( strcmp( argv[k], "-ssg2" )==0 )  ssg2_test( ch );
@@ -1179,7 +1115,7 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-keyon2" )==0 )  keyon_doble( ch );
 		if( strcmp( argv[k], "-keyon" )==0 )  keyon_simple( ch );
 		if( strcmp( argv[k], "-tone00" )==0 )  tone00( ch );
-		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 0x80, 1 );
+		if( strcmp( argv[k], "-alg" )==0 )  alg_test( ch, 0xFF, 7 );
 		if( strcmp( argv[k], "-am" )==0 )  am_test( ch );
 		if( strcmp( argv[k], "-amfreq" )==0 )  amfreq_test( ch );
 		if( strcmp( argv[k], "-fnumorder" )==0 )  fnumorder_test( ch );

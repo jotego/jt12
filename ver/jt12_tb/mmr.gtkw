@@ -1,22 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
-[*] Thu Mar  2 10:02:47 2017
+[*] Sun Mar 12 18:27:28 2017
 [*]
-[dumpfile] "/home/jtejada/jt12/ver/jt12_tb/jt12_test.lxt"
-[dumpfile_mtime] "Thu Mar  2 10:00:19 2017"
-[dumpfile_size] 10564524
-[savefile] "/home/jtejada/jt12/ver/jt12_tb/mmr.gtkw"
-[timestart] 17863250000
-[size] 1920 1123
+[dumpfile] "/home/jtejada/github/jt12/ver/jt12_tb/jt12_test.lxt"
+[dumpfile_mtime] "Sun Mar 12 18:25:12 2017"
+[dumpfile_size] 45446397
+[savefile] "/home/jtejada/github/jt12/ver/jt12_tb/mmr.gtkw"
+[timestart] 0
+[size] 1680 975
 [pos] -1 -1
-*-22.097332 17881040000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-32.978935 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] jt12_test.
 [treeopen] jt12_test.uut.
 [treeopen] jt12_test.uut.u_eg.
 [treeopen] jt12_test.uut.u_mmr.
 [treeopen] jt12_test.uut.u_mmr.u_reg.
 [sst_width] 264
-[signals_width] 142
+[signals_width] 185
 [sst_expanded] 1
 [sst_vpaned_height] 337
 @24
@@ -36,6 +36,9 @@ jt12_test.uut.u_mmr.u_reg.op[1:0]
 jt12_test.uut.u_mmr.u_reg.cur[4:0]
 @24
 jt12_test.uut.u_mmr.u_reg.alg[2:0]
+@29
+jt12_test.uut.u_mmr.block_I[2:0]
+@24
 jt12_test.uut.u_mmr.u_reg.fb_I[2:0]
 @22
 jt12_test.uut.u_mmr.u_reg.d1r_II[4:0]
@@ -44,7 +47,39 @@ jt12_test.uut.u_mmr.u_reg.d2r_II[4:0]
 jt12_test.uut.u_mmr.u_reg.dt1_II[2:0]
 @22
 jt12_test.uut.u_mmr.u_reg.mul_V[3:0]
-@25
+@24
 jt12_test.uut.u_mmr.u_reg.ssg_eg_II[2:0]
+@200
+-
+@28
+[color] 1
+jt12_test.uut.u_mmr.mmr_dump[0]
+jt12_test.uut.u_mmr.up_alg[0]
+jt12_test.uut.u_mmr.up_amen_d1r[0]
+jt12_test.uut.u_mmr.up_block[0]
+@24
+jt12_test.uut.u_mmr.up_ch[2:0]
+@28
+jt12_test.uut.u_mmr.up_clr[0]
+jt12_test.uut.u_mmr.up_d1l[0]
+jt12_test.uut.u_mmr.up_d2r[0]
+jt12_test.uut.u_mmr.up_dt1[0]
+jt12_test.uut.u_mmr.up_fnumlo[0]
+jt12_test.uut.u_mmr.up_keyon[0]
+jt12_test.uut.u_mmr.up_ks_ar[0]
+@24
+jt12_test.uut.u_mmr.up_op[1:0]
+@28
+jt12_test.uut.u_mmr.up_pms[0]
+jt12_test.uut.u_mmr.up_ssgeg[0]
+jt12_test.uut.u_mmr.up_tl[0]
+@200
+-
+@24
+jt12_test.u_testdata.data_cnt[15:0]
+@22
+jt12_test.uut.din[7:0]
+@28
+jt12_test.uut.u_mmr.u_reg.alg_in[2:0]
 [pattern_trace] 1
 [pattern_trace] 0

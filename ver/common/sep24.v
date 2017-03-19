@@ -1,6 +1,6 @@
 module sep24 #(parameter width=10, parameter pos0=5'd0)
 (
-	input clk,
+	input 	clk,
 	input [width-1:0] mixed,
 	input [23:0] mask,
 	input [4:0] cnt,	

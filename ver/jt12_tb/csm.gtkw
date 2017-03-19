@@ -1,0 +1,73 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Tue Mar 14 06:23:38 2017
+[*]
+[dumpfile] "/home/jtejada/github/jt12/ver/jt12_tb/jt12_test.lxt"
+[dumpfile_mtime] "Tue Mar 14 06:22:45 2017"
+[dumpfile_size] 30003326
+[savefile] "/home/jtejada/github/jt12/ver/jt12_tb/csm.gtkw"
+[timestart] 0
+[size] 1680 975
+[pos] -1 -1
+*-33.910667 33663750000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] jt12_test.
+[treeopen] jt12_test.uut.
+[treeopen] jt12_test.uut.u_syn.
+[treeopen] jt12_test.uut.u_syn.u_mmr.u_reg.
+[treeopen] jt12_test.uut.u_syn.u_timers.
+[sst_width] 215
+[signals_width] 216
+[sst_expanded] 1
+[sst_vpaned_height] 285
+@28
+jt12_test.uut.u_syn.u_mmr.u_reg.u_kon.csm[0]
+jt12_test.uut.u_syn.u_mmr.kon_ch2s1[0]
+jt12_test.uut.u_syn.u_mmr.kon_ch2s3[0]
+jt12_test.uut.u_syn.u_mmr.kon_ch2s2[0]
+jt12_test.uut.u_syn.u_mmr.kon_ch2s4[0]
+@200
+-Timers
+@28
+jt12_test.uut.u_syn.u_timers.overflow_A[0]
+@c00025
+jt12_test.uut.u_syn.u_timers.value_A[9:0]
+@28
+(0)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(1)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(2)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(3)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(4)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(5)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(6)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(7)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(8)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+(9)jt12_test.uut.u_syn.u_timers.value_A[9:0]
+@1401205
+-group_end
+@8022
+jt12_test.uut.u_syn.u_timers.timer_A.cnt[9:0]
+@20000
+-
+-
+@28
+jt12_test.uut.u_syn.u_timers.timer_A.load[0]
+@200
+-test data
+@24
+jt12_test.u_testdata.data_cnt[15:0]
+@8022
+jt12_test.u_testdata.waitcnt[15:0]
+@200
+-clksync
+@28
+jt12_test.uut.u_clksync.cpu_busy[0]
+jt12_test.uut.u_clksync.syn_busy[0]
+@200
+-op
+@8420
+jt12_test.uut.u_syn.u_op.acc_ch2s1[8:0]
+jt12_test.uut.u_syn.u_op.acc_ch2s2[8:0]
+jt12_test.uut.u_syn.u_op.acc_ch2s3[8:0]
+jt12_test.uut.u_syn.u_op.acc_ch2s4[8:0]
+[pattern_trace] 1
+[pattern_trace] 0

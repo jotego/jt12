@@ -20,33 +20,24 @@
 
 `timescale 1ns / 1ps
 
-module jt12_fir4
-#(parameter data_width=9, output_width=12)
+module jt12_fir_ram 
+#(parameter data_width=8, parameter addr_width=7)
 (
-	input	clk,	// Use clk_out from jt12, this is x24 higher than
-	input	rst,
-	input	sample,
-	input	signed [data_width-1:0] left_in,
-	input	signed [data_width-1:0] right_in,
-	output	reg signed [output_width-1:0] left_out,
-	output	reg signed [output_width-1:0] right_out,
-	output	reg sample_out
+	input [(data_width-1):0] data,
+	input [(addr_width-1):0] addr,
+	input we, clk,
+	output [(data_width-1):0] q
 );
 
-parameter coeff_width=9;
-parameter stages=11;
-parameter addr_width=4;
-parameter acc_extra=-1;
+(* ramstyle = "no_rw_check" *) reg [data_width-1:0] ram[2**addr_width-1:0];
 
-`include "jt12_fir.vh"
+	reg [addr_width-1:0] addr_reg;
 
-initial begin
-        coeff[0] <= 9'd19;
-        coeff[1] <= 9'd42;
-        coeff[2] <= 9'd100;
-        coeff[3] <= 9'd172;
-        coeff[4] <= 9'd232;
-        coeff[5] <= 9'd255;
-end
-
+	always @ (posedge clk) begin
+		if (we)
+			ram[addr] <= data;
+		addr_reg <= addr;
+	end
+	
+	assign q = ram[addr_reg];
 endmodule

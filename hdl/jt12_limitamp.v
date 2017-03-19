@@ -15,38 +15,28 @@
 
 	Author: Jose Tejada Gomez. Twitter: @topapate
 	Version: 1.0
-	Date: March, 7th 2017
+	Date: March, 10th 2017
 	*/
+
+/* Limiting amplifier by 3dB * shift */
 
 `timescale 1ns / 1ps
 
-module jt12_fir4
-#(parameter data_width=9, output_width=12)
-(
-	input	clk,	// Use clk_out from jt12, this is x24 higher than
-	input	rst,
-	input	sample,
-	input	signed [data_width-1:0] left_in,
-	input	signed [data_width-1:0] right_in,
-	output	reg signed [output_width-1:0] left_out,
-	output	reg signed [output_width-1:0] right_out,
-	output	reg sample_out
+module jt12_limitamp #( parameter width=20, shift=5 ) (
+	input signed [width-1:0] left_in,
+	input signed [width-1:0] right_in,
+	output reg signed [width-1:0] left_out,
+	output reg signed [width-1:0] right_out
 );
 
-parameter coeff_width=9;
-parameter stages=11;
-parameter addr_width=4;
-parameter acc_extra=-1;
+always @(*) begin
+	left_out <= ^left_in[width-1:width-1-shift] ?
+		{ left_in[width-1], {(width-1){~left_in[width-1]}}} :
+		left_in <<< shift;
 
-`include "jt12_fir.vh"
-
-initial begin
-        coeff[0] <= 9'd19;
-        coeff[1] <= 9'd42;
-        coeff[2] <= 9'd100;
-        coeff[3] <= 9'd172;
-        coeff[4] <= 9'd232;
-        coeff[5] <= 9'd255;
+	right_out <= ^right_in[width-1:width-1-shift] ?
+		{ right_in[width-1], {(width-1){~right_in[width-1]}}} :
+		right_in <<< shift;
 end
 
 endmodule

@@ -15,41 +15,42 @@
 
 	Author: Jose Tejada Gomez. Twitter: @topapate
 	Version: 1.0
-	Date: 1-31-2017
+	Date: March, 9th 2017
 	*/
 
 `timescale 1ns / 1ps
 
-module jt12_sh6_rst #(parameter width=5 )
+/*
+
+	input sampling rate must be the same as clk frequency
+    interpolation the input signal accordingly to get the
+    right sampling rate
+
+*/
+
+module jt12_dac #(parameter width=12)
 (
-	input					rst,	
-	input 					clk,
-	input		[width-1:0]	din,
-	input					load,
-   	output reg [width-1:0]	st1,
-   	output reg [width-1:0]	st2,
-   	output reg [width-1:0]	st3,
-   	output reg [width-1:0]	st4,
-   	output reg [width-1:0]	st5,
-   	output reg [width-1:0]	st6 					
+	input	clk,
+    input	rst,
+    input	signed	[width-1:0] din,
+    output	dout
 );
+parameter acc_w = width+1;
+
+reg [width-1:0] nosign;
+reg [acc_w-1:0] acc;
+wire [acc_w-2:0] err = acc[acc_w-2:0];
+
+assign dout = acc[acc_w-1];
 
 always @(posedge clk) 
-	if (rst) begin
-		st1 <= {width{1'b0}};
-		st2 <= {width{1'b0}};
-		st3 <= {width{1'b0}};
-		st4 <= {width{1'b0}};
-		st5 <= {width{1'b0}};
-		st6 <= {width{1'b0}};
-	end
-	else begin
-		st6 <= st5;
-		st5 <= st4;
-		st4 <= st3;
-		st3 <= st2;
-		st2 <= st1;
-		st1 <= load ? din : st6;
-	end
+if( rst ) begin
+	acc <= {(acc_w){1'b0}};
+	nosign <= {width{1'b0}};
+end
+else begin
+	nosign <= { ~din[width-1], din[width-2:0] };
+	acc <= nosign + err;
+end
 
 endmodule

@@ -21,130 +21,24 @@
 `timescale 1ns / 1ps
 
 module jt12_fir
-#(parameter data_width=9, extra=3)
+#(parameter data_width=9, output_width=12)
 (
 	input	clk,	// Use clk_out from jt12, this is x24 higher than
 	input	rst,
 	input	sample,
 	input	signed [data_width-1:0] left_in,
 	input	signed [data_width-1:0] right_in,
-	output	reg signed [data_width*2+1:0] left_out,
-	output	reg signed [data_width*2+1:0] right_out,
+	output	reg signed [output_width-1:0] left_out,
+	output	reg signed [output_width-1:0] right_out,
 	output	reg sample_out
 );
 
 parameter coeff_width=9;
 parameter stages=73;
+parameter addr_width=7;
+parameter acc_extra=1;
 
-reg signed [coeff_width-1:0] coeff[0:(stages-1)/2];
-reg signed [11:0] chain_left[0:stages-1];
-reg signed [11:0] chain_right[0:stages-1];
-
-reg update, last_sample;
-
-always @(posedge clk)
-	if( rst )
-		{ update, last_sample } <= 2'b00;
-	else begin
-		last_sample <= sample;
-		update <= sample && !last_sample;
-	end
-
-// shift register
-genvar i;
-generate
-	for (i=0; i < stages; i=i+1) begin: bit_shifter
-		always @(posedge clk)
-			if( update )
-				if(i>0) begin
-					chain_left[i] <= chain_left[i-1];
-					chain_right[i] <= chain_right[i-1];
-				end
-				else begin
-					chain_left[0] <= left_in;
-					chain_right[0] <= right_in;
-				end
-	end
-endgenerate
-
-parameter mac_width=data_width+coeff_width+1;
-parameter acc_width=mac_width+3;
-reg	signed [acc_width-1:0] acc;
-reg signed [mac_width-1:0] mac;
-//integer acc,mac;
-reg [5:0] 	cnt;
-reg [6:0]   rev;
-reg	[1:0]	state;
-
-parameter IDLE=2'b00, LEFT=2'b01, RIGHT=2'b10;
-
-reg signed [data_width:0] sum;
-
-wire last_stage = cnt==(stages-1)/2;
-
-//integer a,b;
-
-always @(*) begin
-	if( state==LEFT)
-		sum <= chain_left[cnt] +
-				( last_stage ? {data_width{1'b0}}:chain_left[rev]);
-	else
-		sum <= chain_right[cnt] +
-				( last_stage ? {data_width{1'b0}}:chain_right[rev]);	
-	mac <= coeff[cnt]*sum;
-end
-
-always @(posedge clk)
-if( rst ) begin
-	cnt <= 6'd0;
-	rev <= 6'd0;
-	acc <= {acc_width{1'b0}};
-	left_out<= {data_width+extra{1'b0}};
-	right_out<= {data_width+extra{1'b0}};
-	sample_out <= 1'b0;
-	state	<= IDLE;
-end else begin
-	case(state)
-		default: begin
-			if( update ) begin
-				cnt <= 6'd0;
-				rev <= stages-1;
-				acc <= {acc_width{1'b0}};
-				state <= LEFT;
-			end
-			sample_out <= 1'b0;
-		end
-		LEFT: begin
-				if( cnt==(stages-1)/2 ) begin
-					cnt <= 6'd0;
-					rev <= stages-1;
-					acc <= {acc_width{1'b0}};
-					left_out <= acc+mac;
-					state <= RIGHT;
-				end
-				else begin
-					acc <= acc + mac;
-					cnt<=cnt+1'b1;
-					rev<=rev-1'b1;
-				end
-			end
-		RIGHT: begin
-				if( cnt==(stages-1)/2 ) begin
-					cnt <= 6'd0;
-					rev <= stages-1;
-					acc <= {acc_width{1'b0}};
-					right_out <= acc+mac;
-					sample_out <= 1'b1;
-					state <= IDLE;
-				end
-				else begin
-					acc <= acc + mac;
-					cnt<=cnt+1'b1;
-					rev<=rev-1'b1;
-				end
-			end
-	endcase
-end
+`include "jt12_fir.vh"
 
 
 initial begin

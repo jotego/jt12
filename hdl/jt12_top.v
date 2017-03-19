@@ -24,13 +24,19 @@
 
 	Author: Jose Tejada Gomez. Twitter: @topapate
 	Version: 1.0
-	Date: 1-4-2017
+	Date: 14th March, 2017
 	
 	Use tab = 4 spaces
+	
+	fir_clk	=> 54MHz
+	cpu_clk	=> fir_clk/7 = 7.7MHz
+	syn_clk => cpu_clk/6 = 1.3MHz
+	
+	syn_mux_sample => syn_clk/24 = 53.6 kHz
 
 */
 
-module jt12(
+module jt12_top(
 	input			rst,
 	// CPU interface
 	input			cpu_clk,
@@ -44,71 +50,74 @@ module jt12(
 	output			cpu_irq_n,
 	// Synthesizer clock domain
 	input			syn_clk,
-	// combined output
-	output	signed	[11:0]	syn_snd_right,
-	output	signed	[11:0]	syn_snd_left,
-	output			syn_snd_sample,
-	// multiplexed output
-	output signed	[8:0]	syn_mux_right,	
-	output signed	[8:0]	syn_mux_left,
-	output			syn_mux_sample
+	// FIR filters clock
+	input			fir_clk,
+	input	[2:0]	fir_volume,
+	input			enable_fm,
+	input			enable_psg,
+	// 1 bit output per channel at 1.3MHz
+	output			syn_left,
+	output			syn_right
 );
 
-// Timers
-wire	syn_flag_A, syn_flag_B;
+wire signed [8:0] syn_mux_left, syn_mux_right;
+wire syn_mux_sample;
 
-
-wire	[7:0]	syn_din;
-wire	[1:0]	syn_addr;
-wire	syn_write, syn_limiter_en, syn_busy;
-wire	syn_rst, syn_irq_n;
-
-jt12_clksync u_clksync(
+jt12 u_jt12(
 	.rst		( rst		),
 	.cpu_clk	( cpu_clk	),
 	.syn_clk	( syn_clk	),
-
-	// CPU interface	
 	.cpu_din	( cpu_din	),
 	.cpu_addr	( cpu_addr	),
-	.cpu_dout	( cpu_dout	),
 	.cpu_cs_n	( cpu_cs_n	),
 	.cpu_wr_n	( cpu_wr_n	),
-	.cpu_irq_n	( cpu_irq_n	),
+
 	.cpu_limiter_en( cpu_limiter_en ),
-	
-	// Synthesizer interface
-	.syn_rst	( syn_rst	),
-	.syn_write	( syn_write	),
-	.syn_din	( syn_din	),
-	.syn_addr	( syn_addr	),	
-	.syn_limiter_en( syn_limiter_en ),
-	
-	.syn_busy	( syn_busy	),
-	.syn_flag_A	( syn_flag_A),
-	.syn_flag_B	( syn_flag_B),
-	.syn_irq_n	( syn_irq_n	)
+
+	.cpu_dout	( cpu_dout	),
+	// muxed output
+	.syn_mux_left	( syn_mux_left	),
+	.syn_mux_right	( syn_mux_right ),
+	.syn_mux_sample	( syn_mux_sample),
+
+    .cpu_irq_n	( cpu_irq_n	)
 );
 
-jt12_syn u_syn(
-	.rst		( syn_rst	),
-	.clk		( syn_clk	),
-	.din		( syn_din	),
-	.addr		( syn_addr	),
-	.busy		( syn_busy	),
-	.flag_A		( syn_flag_A),
-	.flag_B		( syn_flag_B),
-	.write		( syn_write	),
-	.limiter_en	( syn_limiter_en),
-	.irq_n		( syn_irq_n	),
-	// Mixed sound
-	.snd_right	( syn_snd_right	),
-	.snd_left	( syn_snd_left	),
-	.snd_sample	( syn_snd_sample),
-	// Multiplexed sound
-	.mux_right	( syn_mux_right	),
-	.mux_left	( syn_mux_left	),
-	.mux_sample	( syn_mux_sample)
+wire signed [11:0] fir_left, fir_right;
+
+jt12_mixer u_mixer(
+	.rst		( rst  			),
+	.clk		( fir_clk		),
+	.sample		( syn_mux_sample 	),
+	.left_in	( syn_mux_left 		),
+	.right_in	( syn_mux_right 	),
+	.psg		( 5'd0		),
+	.enable_psg	( enable_psg),
+	.enable_fm	( enable_fm	),
+	.volume		( fir_volume),
+	.left_out	( fir_left	),
+	.right_out	( fir_right	),
+	.sample_out	( fir_sample_out	)
+);
+/*
+jt12_sh #(.width(1), .stages(2)) u_sample_sync(
+	.clk	( syn_clk	),
+	.din	( fir_sample_out ),
+	.drop	( syn_sample_out )
+);
+*/
+jt12_dac2 u_dac_left(
+	.rst		( rst  			),
+	.clk		( syn_clk		),
+	.din		( fir_left		),
+	.dout		( syn_left		)
+);
+
+jt12_dac2 u_dac_right(
+	.rst		( rst  			),
+	.clk		( syn_clk		),
+	.din		( fir_right		),
+	.dout		( syn_right		)
 );
 
 endmodule

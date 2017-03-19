@@ -22,7 +22,7 @@ initial begin
 end
 
 reg [2:0] clkcnt;
-reg vclk;
+reg vclk, syn_clk;
 
 reg rst0;
 
@@ -30,6 +30,11 @@ initial begin
 	rst0=0;
     #10 rst0=1;
     #10 rst0=0;
+end
+
+initial begin
+	syn_clk=0;
+	forever #750 syn_clk = ~syn_clk;
 end
 
 always @(posedge mclk or posedge rst0)
@@ -53,12 +58,18 @@ initial begin
     limit_time_cnt=0;
     #500 rst = 1;
     #600 rst = 0;
-	`ifdef LIMITTIME
+	// reset again, when all the pipeline is clear
+	#(2500*1000) rst=1;
+	#1000 rst=0;
+end
+
+`ifdef LIMITTIME
+initial begin
     for( limit_time_cnt=`LIMITTIME; limit_time_cnt>0; limit_time_cnt=limit_time_cnt-1 )
 		#(1000*1000);
 	$finish;
-    `endif
 end
+`endif
 
 
 wire	cs_n, wr_n, prog_done;
@@ -68,7 +79,7 @@ wire	[ 1:0]	addr;
 
 jt12_testdata #(.rand_wait(`RANDWAIT)) u_testdata(
 	.rst	( rst	),
-	.clk	( clk	),
+	.clk	( vclk	),
 	.cs_n	( cs_n	),
 	.wr_n	( wr_n	),
 	.dout	( din	),
@@ -89,85 +100,111 @@ always @(posedge clk)
 wire	sample, mux_sample;
 wire signed [8:0] mux_left, mux_right;
 
-wire	clk_out;
+wire syn_left, syn_right;
 
-jt12 uut(
-	.rst	( rst	),
-	.clk	( clk	),
-    .clk_out( clk_out ),
-	.din	( din	),
-	.addr	( addr	),
-	.cs_n	( cs_n	),
-	.wr_n	( wr_n	),
+jt12_top uut(
+	.rst		( rst	),
+	.cpu_clk	( vclk	),
+	.cpu_din	( din	),
+	.cpu_addr	( addr	),
+	.cpu_cs_n	( cs_n	),
+	.cpu_wr_n	( wr_n	),
 
-	.limiter_en( 1'b1 ),
+	.cpu_limiter_en( 1'b1 ),
 
-	.dout	( dout	),
-	.snd_right	( right	),
-	.snd_left	( left	),
-	.sample	( sample	),
-
-	// muxed output
-	.mux_left	( mux_left	),
-	.mux_right	( mux_right ),
-	.mux_sample	( mux_sample),
-
-    .irq_n	( irq_n	)
+	.cpu_dout	( dout		),
+	.cpu_irq_n	( irq_n		),
+	// Synthesizer clock domain
+	.syn_clk	( syn_clk	),
+	// FIR filters clock
+	.fir_clk	( mclk		),
+	.fir_volume	( 3'd7		),
+	// 1 bit output per channel at 1.3MHz
+	.syn_left	( syn_left	),
+	.syn_right	( syn_right	)
 );
 
-jt12_mixer u_mixer(
-	.clk	( mclk 			),
-	.rst	( rst  			),
-	.sample	( mux_sample 	),
-	.left_in( mux_left 		),
-	.right_in( mux_right 	),
-	.psg	( 5'd10			),
-	.enable_psg( 1'b1		)
+
+`ifdef POSTPROC
+
+wire [4:0] syn_sinc1;
+wire [8:0] syn_sinc2;
+wire [13:0] syn_sinc3;
+reg signed [13:0] sinc_left;
+
+sincf #(.win(1), .wout(5)) sinc1l(
+	.clk ( syn_clk ),
+	.din ( syn_left ),
+	.dout( syn_sinc1 )
 );
 
-wire signed [15:0] ampleft, ampright;
-
-jt12_amp_stereo amp(
-	.clk	( clk 		),
-    .rst	( rst		),
-	.sample	( sample	),
-	.fmleft	( left		),
-	.fmright( right		),
-	.enable_psg( 1'b0 	),
-	.psg	( 6'd0 		),
-	.postleft( ampleft	),
-	.postright( ampright	),
-	.volume	( 3'd7 		)
+sincf #(.win(5), .wout(9)) sinc2l(
+	.clk ( syn_clk ),
+	.din ( syn_sinc1 ),
+	.dout( syn_sinc2 )
 );
 
-wire dacleft;
-reg dacrst;
-
-initial begin
-	dacrst=1;
-    #80000 dacrst=0;
-end
-
-wire [15:0] dacin_left = { ~ampleft[15], ampleft[14:0]};
-
-hybrid_pwm_sd dac(
-	.clk	( mclk		),
-    .n_reset( ~dacrst		),
-    .din	( dacin_left	),
-    .dout	( dacleft	)
+sincf #(.win(9), .wout(14)) sinc3l(
+	.clk ( syn_clk ),
+	.din ( syn_sinc2-9'd32 ),
+	.dout( syn_sinc3 )
 );
 
+wire [4:0] syn_sinc1_right;
+wire [8:0] syn_sinc2_right;
+wire [13:0] syn_sinc3_right;
+reg signed [13:0] sinc_right;
+
+sincf #(.win(1), .wout(5)) sinc1r(
+	.clk ( syn_clk ),
+	.din ( syn_right ),
+	.dout( syn_sinc1_right )
+);
+
+sincf #(.win(5), .wout(9)) sinc2r(
+	.clk ( syn_clk ),
+	.din ( syn_sinc1_right ),
+	.dout( syn_sinc2_right )
+);
+
+sincf #(.win(9), .wout(14)) sinc3r(
+	.clk ( syn_clk ),
+	.din ( syn_sinc2_right-9'd32 ),
+	.dout( syn_sinc3_right )
+);
+
+integer sinc_cnt;
+
+always @(posedge syn_clk or posedge rst)
+	if( rst ) begin
+		sinc_cnt  <= 0;
+		sinc_left <= 14'h2000;
+		sinc_right<= 14'h2000;
+	end
+	else begin
+		if( sinc_cnt == 23 ) begin
+			sinc_cnt <= 0;
+			sinc_left <= (syn_sinc3       + 14'd2048) ^ 14'h2000;
+			sinc_right<= (syn_sinc3_right + 14'd2048) ^ 14'h2000;
+		end
+		else
+			sinc_cnt <= sinc_cnt + 1'b1;
+	end
+
+
+
+/*
 real filter_left;
 // real tau=5e-6;
 
 always @(posedge mclk)
-if ( dacrst )
+if ( rst )
 	filter_left <= 0;
 else begin
-	if( dacleft )
-    	filter_left <= filter_left + 9.26e-9/5e-6 * (1.0-filter_left);
+	if( syn_left )
+    	filter_left <= filter_left + 5.26e-9/5e-6 * (1.0-filter_left);
 	else
-	    filter_left <= filter_left - 9.26e-9/5e-6 * filter_left;
+	    filter_left <= filter_left - 5.26e-9/5e-6 * filter_left;
 end
 
 real speaker_left;
@@ -180,8 +217,9 @@ initial begin
 end
 
 always @(posedge audio_clk)
-	speaker_left <= filter_left;
-
+	speaker_left <= ((2*(filter_left-0.5))+speaker_left)/2;
+*/
+`endif
 
 `ifdef DUMPSOUND
 initial $display("DUMP START");

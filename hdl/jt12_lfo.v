@@ -52,17 +52,19 @@ always @(*)
 		3'd7: limit <= 7'd5;
 	endcase
 
-always @(posedge clk)
+always @(posedge clk) begin
 	if( rst || !lfo_en )
 		{ lfo_mod, cnt } <= 14'd0;
-	else if(zero) begin
-		if( cnt == limit ) begin
-			cnt <= 8'd0;
-			lfo_mod <= lfo_mod + 1'b1;
+	else  begin
+		if(zero) begin
+			if( cnt == limit ) begin
+				cnt <= 8'd0;
+				lfo_mod <= lfo_mod + 1'b1;
+			end
+			else
+				cnt <= cnt + 1'b1;
 		end
-		else
-			cnt <= cnt + 1'b1;
 	end
-		
+end		
 	
 endmodule
