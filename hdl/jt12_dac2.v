@@ -39,7 +39,7 @@ module jt12_dac2 #(parameter width=12)
     output	reg dout
 );
 
-parameter int_w = width+5;
+localparam int_w = width+5;
 
 reg [int_w-1:0] y, error, error_1, error_2;
 
