@@ -106,7 +106,7 @@ jt12_sh #(.width(1), .stages(2)) u_sample_sync(
 	.drop	( syn_sample_out )
 );
 */
-jt12_dac2 u_dac_left(
+jt12_dac u_dac_left(
 	.rst		( rst  			),
 	.clk		( syn_clk		),
 	.din		( fir_left		),

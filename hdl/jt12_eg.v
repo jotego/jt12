@@ -415,7 +415,7 @@ always @(posedge clk) begin
 		else
 		if( state_VI == ATTACK ) begin
 			if( sum_up && eg_VI != 10'd0 )
-				if( rate_VI[5:1]==5'd31 )
+				if( rate_VI[5:1]==4'hf )
 					eg_VII <= 10'd0;
 				else
 					eg_VII <= ar_result;
