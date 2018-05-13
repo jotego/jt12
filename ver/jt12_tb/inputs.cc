@@ -255,6 +255,15 @@ void keyon( Ch ch[], int c, int op ) {
 	ch[c].keyon(op);
 }
 
+void lfo_check() {
+	cout << "\n// LFO check\n";
+	write( 0, 0x22, 0xf ); // 72.2 Hz
+	wait( 80 );
+
+	write( 0, 0x22, 8 | 6 ); // 48.1 Hz
+	wait( 80 );	
+}
+
 void alg_single_test( Ch ch[6], int alg ) {
 	cout << "\n\n// Starting ALG="<<alg <<endl;
 	keyoff_all(ch);
@@ -1104,6 +1113,7 @@ int main( int argc, char *argv[] ) {
 
 	for( int k=1; k<argc; k++ ) {
 		if( strcmp( argv[k], "-pcm" )==0 ) pcm_check( ch );
+		if( strcmp( argv[k], "-lfo" )==0 ) lfo_check();
 		if( strcmp( argv[k], "-csm" )==0) csm_test( ch );
 		if( strcmp( argv[k], "-dr" )==0 ) dr_test( ch );
 		if( strcmp( argv[k], "-maxtl" )==0 ) maxtl_test( ch );

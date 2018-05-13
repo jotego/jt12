@@ -11,11 +11,18 @@ RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
 TEST_NAME=NOTESTNAME
 SSG_TEST=NOSSG_TEST
+SIMULATION=SIMULATION
 
 while [ $# -gt 0 ]; do
 	if [ $1 = "-w" ]; then
 		echo "Signal dump enabled"
 		DUMPSIGNALS=DUMPSIGNALS
+		shift
+		continue
+	fi
+	if [ $1 = "-nosim" ]; then
+		echo "simulation verilog options disabled"
+		SIMULATION=NOSIMULATION
 		shift
 		continue
 	fi
@@ -44,7 +51,7 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
-    if [[ $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am"
+    if [[ $1 = "-lfo" || $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am"
     	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg"
 		|| $1 = "-tone00" || $1 = "-dac" || $1 = "-keyon"
 		|| $1 = "-keyon2" || $1 = "-mmr" || $1 = "-fnum" 
@@ -94,7 +101,7 @@ date
 if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
     	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT \
-        -DSIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
+        -D$SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 		-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
 		-D$POSTPROC -DICARUS && sim -lxt > s
     #exit 0

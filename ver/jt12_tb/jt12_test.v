@@ -34,7 +34,7 @@ end
 
 initial begin
 	syn_clk=0;
-	forever #750 syn_clk = ~syn_clk;
+	forever #375 syn_clk = ~syn_clk;
 end
 
 always @(posedge mclk or posedge rst0)
