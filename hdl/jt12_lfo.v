@@ -36,9 +36,7 @@ module jt12_lfo(
 	output	reg	[6:0]	lfo_mod
 );
 
-reg [7:0] cnt;
-
-reg [6:0] limit;
+reg [6:0] cnt, limit;
 
 always @(*)
 	case( lfo_freq )
@@ -58,7 +56,7 @@ always @(posedge clk) begin
 	else  begin
 		if(zero) begin
 			if( cnt == limit ) begin
-				cnt <= 8'd0;
+				cnt <= 7'd0;
 				lfo_mod <= lfo_mod + 1'b1;
 			end
 			else
