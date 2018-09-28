@@ -10,6 +10,159 @@ using namespace std;
 
 int cont=0;
 
+string reg2str(unsigned r) {
+	switch(r) {
+		case 0x21: return "TEST";
+		case 0x22: return "LFO";
+		case 0x24: return "TIMER A, MSB";
+		case 0x25: return "TIMER A, LSB";
+		case 0x26: return "TIMER B";
+		case 0x27: return "TIMER CTRL";
+		case 0x28: return "KEY ON/OFF";
+		case 0x29: return "SCH / IRQ ENABLE";
+		case 0x2D: return "BURISU";
+		case 0x2E: return "CLOCK DIVIDER 1/3, 1/6";
+		case 0x2F: return "CLOCK DIVIDER 1/2";
+		
+		case 0x30: return "DT/MULT";
+		case 0x31: return "DT/MULT";
+		case 0x32: return "DT/MULT";
+
+		case 0x34: return "DT/MULT";
+		case 0x35: return "DT/MULT";
+		case 0x36: return "DT/MULT";
+
+		case 0x38: return "DT/MULT";
+		case 0x39: return "DT/MULT";
+		case 0x3A: return "DT/MULT";
+
+		case 0x3C: return "DT/MULT";
+		case 0x3D: return "DT/MULT";
+		case 0x3E: return "DT/MULT";
+
+		case 0x40: return "TL";
+		case 0x41: return "TL";
+		case 0x42: return "TL";
+
+		case 0x44: return "TL";
+		case 0x45: return "TL";
+		case 0x46: return "TL";
+
+		case 0x48: return "TL";
+		case 0x49: return "TL";
+		case 0x4A: return "TL";
+
+		case 0x4C: return "TL";
+		case 0x4D: return "TL";
+		case 0x4E: return "TL";
+
+		case 0x50: return "AR/KS";
+		case 0x51: return "AR/KS";
+		case 0x52: return "AR/KS";
+
+		case 0x54: return "AR/KS";
+		case 0x55: return "AR/KS";
+		case 0x56: return "AR/KS";
+
+		case 0x58: return "AR/KS";
+		case 0x59: return "AR/KS";
+		case 0x5A: return "AR/KS";
+
+		case 0x5C: return "AR/KS";
+		case 0x5D: return "AR/KS";
+		case 0x5E: return "AR/KS";
+
+		case 0x60: return "AMON/DR";
+		case 0x61: return "AMON/DR";
+		case 0x62: return "AMON/DR";
+
+		case 0x64: return "AMON/DR";
+		case 0x65: return "AMON/DR";
+		case 0x66: return "AMON/DR";
+
+		case 0x68: return "AMON/DR";
+		case 0x69: return "AMON/DR";
+		case 0x6A: return "AMON/DR";
+
+		case 0x6C: return "AMON/DR";
+		case 0x6D: return "AMON/DR";
+		case 0x6E: return "AMON/DR";
+
+		case 0x70: return "SR";
+		case 0x71: return "SR";
+		case 0x72: return "SR";
+
+		case 0x74: return "SR";
+		case 0x75: return "SR";
+		case 0x76: return "SR";
+
+		case 0x78: return "SR";
+		case 0x79: return "SR";
+		case 0x7A: return "SR";
+
+		case 0x7C: return "SR";
+		case 0x7D: return "SR";
+		case 0x7E: return "SR";
+
+		case 0x80: return "SL/RR";
+		case 0x81: return "SL/RR";
+		case 0x82: return "SL/RR";
+
+		case 0x84: return "SL/RR";
+		case 0x85: return "SL/RR";
+		case 0x86: return "SL/RR";
+
+		case 0x88: return "SL/RR";
+		case 0x89: return "SL/RR";
+		case 0x8A: return "SL/RR";
+
+		case 0x8C: return "SL/RR";
+		case 0x8D: return "SL/RR";
+		case 0x8E: return "SL/RR";
+
+		case 0x90: return "SSG-EG";
+		case 0x91: return "SSG-EG";
+		case 0x92: return "SSG-EG";
+
+		case 0x94: return "SSG-EG";
+		case 0x95: return "SSG-EG";
+		case 0x96: return "SSG-EG";
+
+		case 0x98: return "SSG-EG";
+		case 0x99: return "SSG-EG";
+		case 0x9A: return "SSG-EG";
+
+		case 0x9C: return "SSG-EG";
+		case 0x9D: return "SSG-EG";
+		case 0x9E: return "SSG-EG";
+
+		case 0xA0: return "F-NUM 1";
+		case 0xA1: return "F-NUM 1";
+		case 0xA2: return "F-NUM 1";
+
+		case 0xA4: return "BLOCK/F-NUM 2";
+		case 0xA5: return "BLOCK/F-NUM 2";
+		case 0xA6: return "BLOCK/F-NUM 2";
+
+		case 0xA8: return "3 CH F-NUM";
+		case 0xA9: return "3 CH F-NUM";
+		case 0xAA: return "3 CH F-NUM";
+
+		case 0xAC: return "3 CH BLOCK/ F-NUM";
+		case 0xAD: return "3 CH BLOCK/ F-NUM";
+		case 0xAE: return "3 CH BLOCK/ F-NUM";
+
+		case 0xB0: return "FB/CONNECT";
+		case 0xB1: return "F-NUM 1";
+		case 0xB2: return "F-NUM 1";
+
+		case 0xB4: return "LR/AMS/PMS";
+		case 0xB5: return "LR/AMS/PMS";
+		case 0xB6: return "LR/AMS/PMS";				
+	}
+	return "BAD REGISTER";
+}
+
 void write( unsigned chnum, unsigned reg, unsigned val, bool addr1=false ) {
 	cout << "cfg[" << dec << cont++ << "] = { 1'b";
     if( addr1 )
@@ -20,7 +173,8 @@ void write( unsigned chnum, unsigned reg, unsigned val, bool addr1=false ) {
         else
 	        cout << '1';
     }
-	cout <<", 8'h" << hex << ((reg+(chnum&3))&0xff) << ", 8'h" << (val&0xff) << "};\n";
+	cout <<", 8'h" << hex << ((reg+(chnum&3))&0xff) << ", 8'h" << (val&0xff) << "};\t // ";
+	cout << reg2str(reg) << '\n';
 	cout << dec;
 }
 
@@ -30,6 +184,37 @@ void wait( float ms ) {
 	for( int k=0; k<(x/255); k++ )
 		write( 0, 1, 255 );
 	write( 0, 1, x%255 );
+}
+
+void parse_gym( char *filename ) {
+	ifstream file(filename,ios_base::binary);
+	cerr << "Parsing GYM file " << filename << endl;
+	// int max=400;
+	while( !file.eof() /*&& --max */ ) {
+		char c;
+		file.read( &c, 1);
+		switch(c) {
+			case 0: 
+				wait(17); // should be 16.7ms
+				continue;
+			case 3: {
+				file.read(&c,1);
+				unsigned p = (unsigned char)c;
+				cerr << "Attempt to write to PSG port " << p << endl;
+				continue;
+			}
+			case 1:
+			case 2:	{
+				char buf[2];
+				file.read(buf,2);
+				write( 0, buf[0], buf[1], c==2 /* addr1? */);
+				continue;				
+			}
+			default:
+				cerr << "Wrong code ( " << ((int)c) << ") in GYM file\n";
+				return;
+		}
+	}
 }
 
 void write_allop(  int chnum, int reg, int val ) {
@@ -1133,6 +1318,9 @@ int main( int argc, char *argv[] ) {
 		if( strcmp( argv[k], "-dac" )==0 )  dacmux_test( ch );
 		if( strcmp( argv[k], "-burst" )==0 )  burst_test( ch );
 		if( strcmp( argv[k], "-powerup" )==0 )  wait(1000);
+		if( strcmp( argv[k], "-gym" )==0 ) {			
+			parse_gym( argv[++k] );
+		}
 
 		if( strcmp( argv[k], "-mmr" )==0 )  {
 			k++;

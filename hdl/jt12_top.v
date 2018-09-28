@@ -84,6 +84,7 @@ jt12 u_jt12(
 );
 
 wire signed [11:0] fir_left, fir_right;
+wire fir_sample_out;
 
 jt12_mixer u_mixer(
 	.rst		( rst  			),
@@ -91,7 +92,7 @@ jt12_mixer u_mixer(
 	.sample		( syn_mux_sample 	),
 	.left_in	( syn_mux_left 		),
 	.right_in	( syn_mux_right 	),
-	.psg		( 5'd0		),
+	.psg		( 12'd0		),
 	.enable_psg	( enable_psg),
 	.enable_fm	( enable_fm	),
 	.volume		( fir_volume),

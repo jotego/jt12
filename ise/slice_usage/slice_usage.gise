@@ -22,9 +22,113 @@
   <sourceproject xmlns="http://www.xilinx.com/XMLSchema" xil_pn:fileType="FILE_XISE" xil_pn:name="slice_usage.xise"/>
 
   <files xmlns="http://www.xilinx.com/XMLSchema">
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="_ngo"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/map.xmsgs"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/ngdbuild.xmsgs"/>
+    <file xil_pn:fileType="FILE_XMSGS" xil_pn:name="_xmsgs/xst.xmsgs"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGDBUILD_LOG" xil_pn:name="jt12.bld"/>
+    <file xil_pn:fileType="FILE_CMD_LOG" xil_pn:name="jt12.cmd_log"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_LSO" xil_pn:name="jt12.lso"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGC" xil_pn:name="jt12.ngc"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGD" xil_pn:name="jt12.ngd"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGR" xil_pn:name="jt12.ngr"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_PCF" xil_pn:name="jt12.pcf" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="jt12.prj"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_STX" xil_pn:name="jt12.stx"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_REPORT" xil_pn:name="jt12.syr"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST" xil_pn:name="jt12.xst"/>
+    <file xil_pn:fileType="FILE_HTML" xil_pn:name="jt12_envsettings.html"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_MAP_REPORT" xil_pn:name="jt12_map.map" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_MAP_REPORT" xil_pn:name="jt12_map.mrp" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NCD" xil_pn:name="jt12_map.ncd" xil_pn:subbranch="Map"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGM" xil_pn:name="jt12_map.ngm" xil_pn:subbranch="Map"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="jt12_map.xrpt"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="jt12_ngdbuild.xrpt"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_NGR" xil_pn:name="jt12_pg.ngr"/>
+    <file xil_pn:branch="Implementation" xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="jt12_pg.prj"/>
     <file xil_pn:fileType="FILE_NCD" xil_pn:name="jt12_pg_guide.ncd" xil_pn:origination="imported"/>
+    <file xil_pn:fileType="FILE_HTML" xil_pn:name="jt12_summary.html"/>
+    <file xil_pn:fileType="FILE_WEBTALK" xil_pn:name="jt12_summary.xml"/>
+    <file xil_pn:fileType="FILE_WEBTALK" xil_pn:name="jt12_usage.xml"/>
+    <file xil_pn:fileType="FILE_XRPT" xil_pn:name="jt12_xst.xrpt"/>
+    <file xil_pn:fileType="FILE_WEBTALK" xil_pn:name="webtalk_pn.xml"/>
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="xlnx_auto_0_xdb"/>
+    <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="xst"/>
   </files>
 
-  <transforms xmlns="http://www.xilinx.com/XMLSchema"/>
+  <transforms xmlns="http://www.xilinx.com/XMLSchema">
+    <transform xil_pn:end_ts="1528657451" xil_pn:name="TRAN_copyInitialToXSTAbstractSynthesis" xil_pn:start_ts="1528657451">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657451" xil_pn:name="TRAN_schematicsToHdl" xil_pn:prop_ck="-308051297498820874" xil_pn:start_ts="1528657451">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657451" xil_pn:name="TRAN_regenerateCores" xil_pn:prop_ck="-5925983669266094267" xil_pn:start_ts="1528657451">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657451" xil_pn:name="TRAN_SubProjectAbstractToPreProxy" xil_pn:start_ts="1528657451">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657451" xil_pn:name="TRAN_xawsTohdl" xil_pn:prop_ck="-3500180014353072136" xil_pn:start_ts="1528657451">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657451" xil_pn:name="TRAN_SubProjectPreToStructuralProxy" xil_pn:prop_ck="250970745955965653" xil_pn:start_ts="1528657451">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657451" xil_pn:name="TRAN_platgen" xil_pn:prop_ck="-5119942766105709041" xil_pn:start_ts="1528657451">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657735" xil_pn:in_ck="7724119184803665026" xil_pn:name="TRANEXT_xstsynthesize_spartan6" xil_pn:prop_ck="-7507553008473018317" xil_pn:start_ts="1528657711">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="WarningsGenerated"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="_xmsgs/xst.xmsgs"/>
+      <outfile xil_pn:name="jt12.lso"/>
+      <outfile xil_pn:name="jt12.ngc"/>
+      <outfile xil_pn:name="jt12.ngr"/>
+      <outfile xil_pn:name="jt12.prj"/>
+      <outfile xil_pn:name="jt12.stx"/>
+      <outfile xil_pn:name="jt12.syr"/>
+      <outfile xil_pn:name="jt12.xst"/>
+      <outfile xil_pn:name="jt12_pg.ngr"/>
+      <outfile xil_pn:name="jt12_pg.prj"/>
+      <outfile xil_pn:name="jt12_xst.xrpt"/>
+      <outfile xil_pn:name="webtalk_pn.xml"/>
+      <outfile xil_pn:name="xst"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657457" xil_pn:name="TRAN_compileBCD2" xil_pn:prop_ck="123229027435838627" xil_pn:start_ts="1528657457">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657741" xil_pn:in_ck="4669343946663" xil_pn:name="TRANEXT_ngdbuild_FPGA" xil_pn:prop_ck="1524731467479205734" xil_pn:start_ts="1528657735">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="_ngo"/>
+      <outfile xil_pn:name="_xmsgs/ngdbuild.xmsgs"/>
+      <outfile xil_pn:name="jt12.bld"/>
+      <outfile xil_pn:name="jt12.ngd"/>
+      <outfile xil_pn:name="jt12_ngdbuild.xrpt"/>
+    </transform>
+    <transform xil_pn:end_ts="1528657803" xil_pn:in_ck="4669343946664" xil_pn:name="TRANEXT_map_spartan6" xil_pn:prop_ck="-7036854207931970956" xil_pn:start_ts="1528657741">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="_xmsgs/map.xmsgs"/>
+      <outfile xil_pn:name="jt12.pcf"/>
+      <outfile xil_pn:name="jt12_map.map"/>
+      <outfile xil_pn:name="jt12_map.mrp"/>
+      <outfile xil_pn:name="jt12_map.ncd"/>
+      <outfile xil_pn:name="jt12_map.ngm"/>
+      <outfile xil_pn:name="jt12_map.xrpt"/>
+      <outfile xil_pn:name="jt12_summary.xml"/>
+      <outfile xil_pn:name="jt12_usage.xml"/>
+    </transform>
+  </transforms>
 
 </generated_project>

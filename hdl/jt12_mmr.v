@@ -23,6 +23,7 @@
 module jt12_mmr(
 	input		  	rst,
 	input		  	clk,
+	input			clk_en,
 	input	[7:0]	din,
 	input			write,
 	input	[1:0]	addr,
@@ -182,9 +183,6 @@ always @(posedge clk) begin : memory_mapped_registers
 		// Original test features
 		eg_stop		<=	1'b0;
 		pg_stop		<=	1'b0;
-		`ifdef SIMULATION
-		mmr_dump	<= 1'b0;
-		`endif
 	end else begin
 		// WRITE IN REGISTERS
 		if( write && !busy ) begin
@@ -200,7 +198,7 @@ always @(posedge clk) begin : memory_mapped_registers
 					// registros especiales
 					//REG_TEST:	lfo_rst <= 1'b1; // regardless of din
 					`ifdef TEST_SUPPORT
-					REG_TEST2:	{ mmr_dump, test_op0, test_eg } <= din[2:0];
+					REG_TEST2:	{test_op0, test_eg} <= din[1:0];
 					`endif
 					REG_TESTYM: begin
 						eg_stop <= din[5];
@@ -262,9 +260,6 @@ always @(posedge clk) begin : memory_mapped_registers
 			// csm 	<= 1'b0;
 			// lfo_rst <= 1'b0;
 			{ clr_flag_B, clr_flag_A, load_B, load_A } <= 4'd0;
-			`ifdef SIMULATION
-			mmr_dump <= 1'b0;
-			`endif
 			up_keyon <= 1'b0;
 			if( |{  up_keyon,	up_alg, 	up_block, 	up_fnumlo,
 					up_pms, 	up_dt1, 	up_tl, 		up_ks_ar,
@@ -290,6 +285,7 @@ end
 jt12_reg u_reg(
 	.rst		( rst		),
 	.clk		( clk		),		// P1
+	.clk_en		( clk_en	),
 	.din		( din		),
 
 	.up_keyon	( up_keyon	),

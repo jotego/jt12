@@ -101,6 +101,7 @@ wire	sample, mux_sample;
 wire signed [8:0] mux_left, mux_right;
 
 wire syn_left, syn_right;
+wire irq_n = 1'b1;
 
 jt12_top uut(
 	.rst		( rst	),

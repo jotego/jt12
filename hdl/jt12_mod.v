@@ -42,23 +42,23 @@ reg [7:0] alg_hot;
 
 always @(*) begin
 	case( alg_I )
-		3'd0: alg_hot <= 8'h1;  // D0
-		3'd1: alg_hot <= 8'h2;  // D1
-		3'd2: alg_hot <= 8'h4;  // D2
-		3'd3: alg_hot <= 8'h8;  // D3
-		3'd4: alg_hot <= 8'h10; // D4
-		3'd5: alg_hot <= 8'h20; // D5
-		3'd6: alg_hot <= 8'h40; // D6
-		3'd7: alg_hot <= 8'h80; // D7
+		3'd0: alg_hot = 8'h1;  // D0
+		3'd1: alg_hot = 8'h2;  // D1
+		3'd2: alg_hot = 8'h4;  // D2
+		3'd3: alg_hot = 8'h8;  // D3
+		3'd4: alg_hot = 8'h10; // D4
+		3'd5: alg_hot = 8'h20; // D5
+		3'd6: alg_hot = 8'h40; // D6
+		3'd7: alg_hot = 8'h80; // D7
 	endcase
 end
 
 always @(*) begin
-	use_prevprev1 <= s1_enters | (s3_enters&alg_hot[5]);
-	use_prev2 <= (s3_enters&(|alg_hot[2:0])) | (s4_enters&alg_hot[3]);
-	use_internal_x <= s4_enters & alg_hot[2];
-	use_internal_y <= s4_enters & (|{alg_hot[4:3],alg_hot[1:0]});
-	use_prev1 <= s1_enters | (s3_enters&alg_hot[1]) |
+	use_prevprev1 = s1_enters | (s3_enters&alg_hot[5]);
+	use_prev2 = (s3_enters&(|alg_hot[2:0])) | (s4_enters&alg_hot[3]);
+	use_internal_x = s4_enters & alg_hot[2];
+	use_internal_y = s4_enters & (|{alg_hot[4:3],alg_hot[1:0]});
+	use_prev1 = s1_enters | (s3_enters&alg_hot[1]) |
 		(s2_enters&(|{alg_hot[6:3],alg_hot[0]}) )|
 		(s4_enters&(|{alg_hot[5],alg_hot[2]}));
 end

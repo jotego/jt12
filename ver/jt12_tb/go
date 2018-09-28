@@ -20,6 +20,12 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
+	if [ $1 = "-snd" ]; then
+		echo "Sound dump enabled"
+		DUMPSOUND=DUMPSOUND
+		shift
+		continue
+	fi	
 	if [ $1 = "-nosim" ]; then
 		echo "simulation verilog options disabled"
 		SIMULATION=NOSIMULATION
@@ -56,8 +62,16 @@ while [ $# -gt 0 ]; do
 		|| $1 = "-tone00" || $1 = "-dac" || $1 = "-keyon"
 		|| $1 = "-keyon2" || $1 = "-mmr" || $1 = "-fnum" 
 		|| $1 = "-burst" || $1 = "-csm" || $1 = "-timerB" 
-		|| $1 = "-ssg" || $1 = "-ssg2" || $1 = "-powerup" ]]; then
+		|| $1 = "-ssg" || $1 = "-ssg2" || $1 = "-powerup" || $1 = "-gym" ]]; then
     	EXTRA=$EXTRA" "$1
+    	if [ $1 = "-gym" ]; then
+    		shift
+    		if [ ! -e $1 ]; then
+    			echo "Cannot open file " $1 " for GYM parsing"
+    			exit 1
+    		fi
+    		EXTRA=$EXTRA" "$1
+    	fi
 		if [[ $1 = "-amfreq" ]]; then
 			echo "-amfreq: timer only"
 			TIMERONLY=TIMERONLY

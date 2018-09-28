@@ -46,9 +46,9 @@ reg [int_w-1:0] y, error, error_1, error_2;
 wire [width-1:0] undin = { ~din[width-1], din[width-2:0] };
 
 always @(*) begin
-	y <= undin + { error_1, 1'b0} - error_2;
-	dout <= ~y[int_w-1];
-	error <= y - {dout, {width{1'b0}}};
+	y = undin + { error_1, 1'b0} - error_2;
+	dout = ~y[int_w-1];
+	error = y - {dout, {width{1'b0}}};
 end
 
 always @(posedge clk)

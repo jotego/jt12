@@ -46,10 +46,10 @@ reg [5:0] cnt;
 
 always @(*)
 	case( state )
-		2'd0: {fir_left_in,fir_right_in} <= { left_in, right_in};
-		2'd1: {fir_left_in,fir_right_in} <= 24'd0;
-		2'd2: {fir_left_in,fir_right_in} <= { left_other, right_other};
-		2'd3: {fir_left_in,fir_right_in} <= 24'd0;
+		2'd0: {fir_left_in,fir_right_in} = { left_in, right_in};
+		2'd1: {fir_left_in,fir_right_in} = 24'd0;
+		2'd2: {fir_left_in,fir_right_in} = { left_other, right_other};
+		2'd3: {fir_left_in,fir_right_in} = 24'd0;
 	endcase
 
 

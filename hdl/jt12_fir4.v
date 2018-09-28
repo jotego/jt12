@@ -41,12 +41,12 @@ parameter acc_extra=-1;
 `include "jt12_fir.vh"
 
 initial begin
-        coeff[0] <= 9'd19;
-        coeff[1] <= 9'd42;
-        coeff[2] <= 9'd100;
-        coeff[3] <= 9'd172;
-        coeff[4] <= 9'd232;
-        coeff[5] <= 9'd255;
+        coeff[0] = 9'd19;
+        coeff[1] = 9'd42;
+        coeff[2] = 9'd100;
+        coeff[3] = 9'd172;
+        coeff[4] = 9'd232;
+        coeff[5] = 9'd255;
 end
 
 endmodule

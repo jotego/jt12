@@ -35,7 +35,7 @@ integer k;
 generate
 initial
 	for (k=0; k < width; k=k+1) begin
-		bits[k] <= { stages{rstval}};
+		bits[k] = { stages{rstval}};
 	end
 endgenerate
 

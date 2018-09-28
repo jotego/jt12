@@ -56,43 +56,43 @@ reg signed [data_width-1:0] buffer_left, buffer_right;
 always @(*) begin
 	if( state==LEFT) begin	
 		if( last_stage )
-			sum <= buffer_left;
+			sum = buffer_left;
 		else
-			sum <= buffer_left + mem_left;
+			sum = buffer_left + mem_left;
 		end
 	else begin
 		if( last_stage )
-			sum <= buffer_right;
+			sum = buffer_right;
 		else
-			sum <= buffer_right + mem_right;
+			sum = buffer_right + mem_right;
 	end
-	gain <= coeff[cnt];
-	mac <= gain*sum;
-	mac_trim <= mac>>>(mac_width-acc_width+acc_extra); 
-	next <= cnt+1'b1;
+	gain = coeff[cnt];
+	mac = gain*sum;
+	mac_trim = mac>>>(mac_width-acc_width+acc_extra); 
+	next = cnt+1'b1;
 end
 
 always @(*)  begin
-	in_pointer_next <= in_pointer - 1'b1;
-	forward_next <= forward+1'b1;
-	rev_next <= rev-1'b1;
+	in_pointer_next = in_pointer - 1'b1;
+	forward_next = forward+1'b1;
+	rev_next = rev-1'b1;
 	case( state )
 		default: begin
-			addr_left <= update ? rev : in_pointer;
-			addr_right<= in_pointer;
+			addr_left = update ? rev : in_pointer;
+			addr_right= in_pointer;
 		end
 		LEFT: begin
-			addr_left <= forward_next;
-			addr_right<= rev;
+			addr_left = forward_next;
+			addr_right= rev;
 		end
 		RIGHT: begin
 			if( cnt==(stages-1)/2 ) begin
-				addr_left <= in_pointer_next;
-				addr_right<= in_pointer_next;
+				addr_left = in_pointer_next;
+				addr_right= in_pointer_next;
 			end
 			else begin
-				addr_left <= rev_next;
-				addr_right<= forward;
+				addr_left = rev_next;
+				addr_right= forward;
 			end
 		end
 	endcase

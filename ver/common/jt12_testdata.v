@@ -72,7 +72,7 @@ module jt12_testdata
                 end
 				WAIT_FREE: begin
 					// a0 <= 1'b0;
-					{ cs_n, wr_n } = 2'b01;
+					{ cs_n, wr_n } <= 2'b01;
 					if( !din[7] ) begin
 						case( cfg[data_cnt][15:8] )
 							8'h0: state <= DONE;							
@@ -95,7 +95,11 @@ module jt12_testdata
 					end
 				WRITE: begin
 					{ cs_n, wr_n } = 2'b00;
+					`ifndef VERILATOR
                     rnd_count <= rand_wait ? ($urandom%100) : 0;
+                    `else 
+                    rnd_count <= 0;
+                    `endif
 					state<= BLANK;
 				end
 				WR_ADDR: begin
