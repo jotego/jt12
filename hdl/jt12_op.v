@@ -71,7 +71,7 @@ wire [13:0]	prev1, prevprev1, prev2;
 jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
-	.clk	( clk_en),
+	.clk_en	( clk_en),
 	.din	( s2_enters ? op_result_internal : prev1 ),
 	.drop	( prev1	)
 );
@@ -79,7 +79,7 @@ jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
-	.clk	( clk_en),
+	.clk_en	( clk_en),
 	.din	( s2_enters ? prev1 : prevprev1 ),
 	.drop	( prevprev1	)
 );
@@ -87,7 +87,7 @@ jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
-	.clk	( clk_en),
+	.clk_en	( clk_en),
 	.din	( s1_enters ? op_result_internal : prev2 ),
 	.drop	( prev2	)
 );
@@ -331,7 +331,7 @@ sep24 #( .width(14), .pos0(13)) opsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( op_result_internal	),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (op_ch0s1), 
@@ -375,7 +375,7 @@ sep24 #( .width(9), .pos0(13)) accsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( op_result_internal[13:5] ),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (acc_ch0s1), 
@@ -420,7 +420,7 @@ sep24 #( .width(10), .pos0( 18 ) ) pmsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( phasemod_VIII	),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (pm_ch0s1), 
@@ -465,7 +465,7 @@ sep24 #( .width(10), .pos0( 18 ) ) phsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( phase		),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (phase_ch0s1), 
@@ -508,7 +508,7 @@ sep24 #( .width(10), .pos0(17) ) egsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( eg_atten_IX		),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (eg_ch0s1), 

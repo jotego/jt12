@@ -556,7 +556,7 @@ jt12_sh/*_rst*/ #( .width(1), .stages(24) ) u_cntsh(
 	.drop	( cnt_out	)
 );
 
-jt12_sh_rst #( .width(1), .stages(24) ) u_konsh(
+jt12_sh #( .width(1), .stages(24) ) u_konsh(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 //	.rst	( rst		),	
@@ -593,7 +593,7 @@ sep24 #( .width(3), .pos0(0) ) stsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( state_II	),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),
 
 	.ch0s1 (state_ch0s1),

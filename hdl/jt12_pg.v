@@ -248,7 +248,7 @@ sep24 #( .width(10), .pos0(18)) stsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( phase_VIII),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (pg_ch0s1), 
@@ -292,7 +292,7 @@ sep24 #( .width(17), .pos0(3+6)) pisep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( phinc_VI	),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (phinc_ch0s1), 
@@ -336,7 +336,7 @@ sep24 #( .width(11), .pos0(3+1)) fnsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( fnum_I	),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (fnum_ch0s1), 
@@ -380,7 +380,7 @@ sep24 #( .width(1), .pos0(23)) pgrstsep
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.mixed	( pg_rst_III),
-	.mask	( 0			),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),	
 	
 	.ch0s1 (pgrst_III_ch0s1), 

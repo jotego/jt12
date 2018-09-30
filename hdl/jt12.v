@@ -1,15 +1,14 @@
-module jt12_syn(
-	input		rst,
-	input		clk,		// CPU clock
-	input		clk_en,		// cpu_clk/6 ~ 1.3MHz
+module jt12 (
+	input			rst,
+	input			clk,		// CPU clock
+	input			clk_en,		// cpu_clk/6 ~ 1.3MHz
 	input	[7:0]	din,
 	input	[1:0]	addr,
-	input			write,
+	input			cs_n,
+	input			wr_n,
 	input			limiter_en,
 	
-	output			busy,
-	output			flag_A,
-	output			flag_B,
+	output	[7:0]	dout,
 	output			irq_n,
 	// combined output
 	output	signed	[11:0]	snd_right,
@@ -20,6 +19,10 @@ module jt12_syn(
 	output signed	[8:0]	mux_left,
 	output			mux_sample
 );
+
+assign dout[7:0] = { busy, 5'd0, flag_B, flag_A };
+wire write = !cs_n && !wr_n;
+
 // Timers
 wire	[9:0]	value_A;
 wire	[7:0]	value_B;
@@ -308,7 +311,7 @@ sep24 #( .width(10), .pos0(5'd0)) egsep
 (
 	.clk	( clk		),
 	.mixed	( eg_IX		),
-	.mask	( 10'd0		),
+	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),
 
 	.ch0s1 (eg_ch0s1), 

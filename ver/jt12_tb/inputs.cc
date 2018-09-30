@@ -1255,7 +1255,7 @@ void ssg2_test( Ch ch[6] ) {
 	cerr << "1s de simulacion tarda 20m y ocupa 38MB\n";
 	//cerr << "Tarda 50 minutos en el despacho\n";
 
-    char ymregs[] = {
+    unsigned char ymregs[] = {
         0xb2, 0x07,
         0xb6, 0xc0,
         0x3e, 0x01,

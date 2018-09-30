@@ -6,23 +6,16 @@ reg	rst;
 
 `include "../common/dump.vh"
 
-/*
-reg	clk;
+
+reg clk; // 54MHz clock
+
 initial begin
 	clk = 0;
-    forever #62.5 clk=~clk;
-end
-*/
-
-reg mclk; // 54MHz clock
-
-initial begin
-	mclk = 0;
-    forever #9.26 mclk=~mclk;
+    forever #125 clk=~clk;
 end
 
-reg [2:0] clkcnt;
-reg vclk, syn_clk;
+reg [1:0] clkcnt;
+reg clk_en;
 
 reg rst0;
 
@@ -32,24 +25,22 @@ initial begin
     #10 rst0=0;
 end
 
-initial begin
-	syn_clk=0;
-	forever #375 syn_clk = ~syn_clk;
-end
 
-always @(posedge mclk or posedge rst0)
+always @(posedge clk or posedge rst0)
 	if( rst0 ) begin
-    	clkcnt <= 3'd0;
+    	clkcnt <= 2'd0;
+    	clk_en <= 1'b0;
     end
     else begin
-    	if ( clkcnt== 3'b110 ) begin
-        	clkcnt <= 3'd0;
+    	if ( clkcnt== 2'b11 ) begin
+        	clkcnt <= 2'd0;
+        	clk_en <= 1'b1;
         end
-        else clkcnt <= clkcnt+1'b1;
-        vclk <= clkcnt <= 3'd3;
+        else begin
+        	clkcnt <= clkcnt+1'b1;
+        	clk_en <= 1'b0;
+        end
     end
-
-wire clk = vclk;
 
 integer limit_time_cnt;
 
@@ -79,7 +70,7 @@ wire	[ 1:0]	addr;
 
 jt12_testdata #(.rand_wait(`RANDWAIT)) u_testdata(
 	.rst	( rst	),
-	.clk	( vclk	),
+	.clk	( clk	),
 	.cs_n	( cs_n	),
 	.wr_n	( wr_n	),
 	.dout	( din	),
@@ -98,129 +89,27 @@ always @(posedge clk)
      end
 
 wire	sample, mux_sample;
-wire signed [8:0] mux_left, mux_right;
+wire signed [11:0] snd_left, snd_right;
 
-wire syn_left, syn_right;
 wire irq_n = 1'b1;
 
-jt12_top uut(
+jt12 uut(
 	.rst		( rst	),
-	.cpu_clk	( vclk	),
-	.cpu_din	( din	),
-	.cpu_addr	( addr	),
-	.cpu_cs_n	( cs_n	),
-	.cpu_wr_n	( wr_n	),
+	.clk		( clk	),
+	.clk_en		( clk_en),
+	.din		( din	),
+	.addr		( addr	),
+	.cs_n		( cs_n	),
+	.wr_n		( wr_n	),
 
-	.cpu_limiter_en( 1'b1 ),
+	.limiter_en( 1'b1 ),
 
-	.cpu_dout	( dout		),
-	.cpu_irq_n	( irq_n		),
-	// Synthesizer clock domain
-	.syn_clk	( syn_clk	),
-	// FIR filters clock
-	.fir_clk	( mclk		),
-	.fir_volume	( 3'd7		),
+	.dout		( dout	),
+	.irq_n		( irq_n	),
 	// 1 bit output per channel at 1.3MHz
-	.syn_left	( syn_left	),
-	.syn_right	( syn_right	)
+	.snd_left	( snd_left	),
+	.snd_right	( snd_right	)
 );
-
-
-`ifdef POSTPROC
-
-wire [4:0] syn_sinc1;
-wire [8:0] syn_sinc2;
-wire [13:0] syn_sinc3;
-reg signed [13:0] sinc_left;
-
-sincf #(.win(1), .wout(5)) sinc1l(
-	.clk ( syn_clk ),
-	.din ( syn_left ),
-	.dout( syn_sinc1 )
-);
-
-sincf #(.win(5), .wout(9)) sinc2l(
-	.clk ( syn_clk ),
-	.din ( syn_sinc1 ),
-	.dout( syn_sinc2 )
-);
-
-sincf #(.win(9), .wout(14)) sinc3l(
-	.clk ( syn_clk ),
-	.din ( syn_sinc2-9'd32 ),
-	.dout( syn_sinc3 )
-);
-
-wire [4:0] syn_sinc1_right;
-wire [8:0] syn_sinc2_right;
-wire [13:0] syn_sinc3_right;
-reg signed [13:0] sinc_right;
-
-sincf #(.win(1), .wout(5)) sinc1r(
-	.clk ( syn_clk ),
-	.din ( syn_right ),
-	.dout( syn_sinc1_right )
-);
-
-sincf #(.win(5), .wout(9)) sinc2r(
-	.clk ( syn_clk ),
-	.din ( syn_sinc1_right ),
-	.dout( syn_sinc2_right )
-);
-
-sincf #(.win(9), .wout(14)) sinc3r(
-	.clk ( syn_clk ),
-	.din ( syn_sinc2_right-9'd32 ),
-	.dout( syn_sinc3_right )
-);
-
-integer sinc_cnt;
-
-always @(posedge syn_clk or posedge rst)
-	if( rst ) begin
-		sinc_cnt  <= 0;
-		sinc_left <= 14'h2000;
-		sinc_right<= 14'h2000;
-	end
-	else begin
-		if( sinc_cnt == 23 ) begin
-			sinc_cnt <= 0;
-			sinc_left <= (syn_sinc3       + 14'd2048) ^ 14'h2000;
-			sinc_right<= (syn_sinc3_right + 14'd2048) ^ 14'h2000;
-		end
-		else
-			sinc_cnt <= sinc_cnt + 1'b1;
-	end
-
-
-
-/*
-real filter_left;
-// real tau=5e-6;
-
-always @(posedge mclk)
-if ( rst )
-	filter_left <= 0;
-else begin
-	if( syn_left )
-    	filter_left <= filter_left + 5.26e-9/5e-6 * (1.0-filter_left);
-	else
-	    filter_left <= filter_left - 5.26e-9/5e-6 * filter_left;
-end
-
-real speaker_left;
-
-reg audio_clk;
-
-initial begin
-	audio_clk = 0;
-    forever #22700 audio_clk = ~audio_clk;
-end
-
-always @(posedge audio_clk)
-	speaker_left <= ((2*(filter_left-0.5))+speaker_left)/2;
-*/
-`endif
 
 `ifdef DUMPSOUND
 initial $display("DUMP START");

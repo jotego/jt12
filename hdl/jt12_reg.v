@@ -356,7 +356,7 @@ jt12_sh #(.width(regch_width),.stages(6)) u_regch(
 
 // RL is on a different register to 
 // have the reset to 1
-jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
+jt12_sh #(.width(2),.stages(6)) u_regch_rl(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 //	.rst	( rst		),
