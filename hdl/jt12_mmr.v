@@ -213,7 +213,7 @@ always @(posedge clk) begin : memory_mapped_registers
 		pg_stop		<=	1'b0;
 	end else begin
 		// WRITE IN REGISTERS
-		if( (old_write ^ write) /*&& !busy*/ ) begin
+		if( (!old_write && write) /*&& !busy*/ ) begin
 			busy <= 1'b1;
 			if( !addr[0] ) begin
 				selected_register <= din;
