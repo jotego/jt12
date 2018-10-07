@@ -20,6 +20,8 @@ module jt12 (
 	output			mux_sample
 );
 
+wire flag_A, flag_B, busy;
+
 assign dout[7:0] = { busy, 5'd0, flag_B, flag_A };
 wire write = !cs_n && !wr_n;
 wire clk_en;
