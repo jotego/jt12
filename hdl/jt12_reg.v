@@ -334,7 +334,7 @@ wire [2:0] block_latch, fnum_latch;
 // Trying to synthesize this memory as M-9K RAM in Altera devices
 // turns out worse in terms of resource utilization. Probably because
 // this memory is already very small. It is better to leave it as it is.
-parameter regch_width=33;
+parameter regch_width=31;
 wire [regch_width-1:0] regch_out;
 wire [regch_width-1:0] regch_in = {
 	up_block_ch	? { block_in, fnhi_in } : { block_latch, fnum_latch }, // 3+3

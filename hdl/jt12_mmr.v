@@ -296,7 +296,7 @@ always @(posedge clk) begin : memory_mapped_registers
 			if( |{  up_keyon,	up_alg, 	up_block, 	up_fnumlo,
 					up_pms, 	up_dt1, 	up_tl, 		up_ks_ar,
 					up_amen_d1r,up_d2r,		up_d1l,		up_ssgeg } == 1'b0 )
-				busy	<= busy_reg | write;
+				busy	<= 1'b0; // busy_reg | write;
 			else
 				busy	<= 1'b1;
 
