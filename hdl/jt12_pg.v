@@ -60,14 +60,14 @@ reg signed [8:0] mod;
 
 always @(*) begin
 	case( pms ) // comprobar en silicio
-		3'd0: mod <= 9'd0;
-		3'd1: mod <= { 7'd0, pm[6:5] };
-		3'd2: mod <= { 6'd0, pm[6:4] };
-		3'd3: mod <= { 5'd0, pm[6:3] };
-		3'd4: mod <= { 4'd0, pm[6:2] };
-		3'd5: mod <= { 3'd0, pm[6:1] };
-		3'd6: mod <= { 1'd0, pm[6:0], 1'b0 };
-		3'd7: mod <= {		 pm[6:0], 2'b0 };
+		3'd0: mod = 9'd0;
+		3'd1: mod = { 7'd0, pm[6:5] };
+		3'd2: mod = { 6'd0, pm[6:4] };
+		3'd3: mod = { 5'd0, pm[6:3] };
+		3'd4: mod = { 4'd0, pm[6:2] };
+		3'd5: mod = { 3'd0, pm[6:1] };
+		3'd6: mod = { 1'd0, pm[6:0], 1'b0 };
+		3'd7: mod = {		 pm[6:0], 2'b0 };
 	endcase 	
 end
 
