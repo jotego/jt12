@@ -25,13 +25,15 @@
 
 */
 
+// altera message_off 10030
+
 module jt12_phrom
 (
 	input [4:0] addr,
 	input clk, 
 	input clk_en,
 	output reg [45:0] ph
-);
+);	
 
 	reg [45:0] sinetable[31:0];
 	initial
