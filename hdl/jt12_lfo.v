@@ -54,7 +54,7 @@ always @(*)
 always @(posedge clk) 
 	if( rst || !lfo_en )
 		{ lfo_mod, cnt } <= 14'd0;
-	else if( clk_en & zero) begin
+	else if( clk_en && zero) begin
 		if( cnt == limit ) begin
 			cnt <= 7'd0;
 			lfo_mod <= lfo_mod + 1'b1;

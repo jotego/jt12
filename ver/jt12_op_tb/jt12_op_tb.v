@@ -81,11 +81,12 @@ always @(posedge clk or rst)
 	end
 
 jt12_op #(.NUM_VOICES(6)) uut(
-	.rst		( rst		),
-    .clk		( clk 		),
-    .pg_phase	( count6==0 ? pg_phase : 10'd0 ),
-    .eg_atten	( eg_atten	),		// output from envelope generator
-    .voice_fb	( voice_fb	),		// voice feedback
+	.rst			( rst		),
+    .clk			( clk 		),
+    .clk_en			( 1'b1		),
+    .pg_phase_VIII	( count6==0 ? pg_phase : 10'd0 ),
+    .eg_atten_IX	( eg_atten	),		// output from envelope generator
+    .fb_II			( voice_fb	),		// voice feedback
     .op_fb_enable(op_count==2'd0 ),	// feedback enable
     .op_algorithm_ctl( count6==0? algctl[0] : 6'd0 ),	// Algorithm control
     .test_214	( test_214	),

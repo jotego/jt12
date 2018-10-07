@@ -300,6 +300,7 @@ wire [regop_width-1:0] regop_in, regop_out;
 
 jt12_opram u_opram(
 	.clk	( clk 		),
+	.clk_en	( clk_en	),
 	.wr_addr( cur 		),
 	.rd_addr( next 		),
 	.data	( regop_in 	),
@@ -307,7 +308,7 @@ jt12_opram u_opram(
 );
 
 assign regop_in = {
-	up_tl_op		? tl_in : tl_VII, // 7
+	up_tl_op	? tl_in  : tl_VII, // 7
 	up_dt1_op	? dt1_in : dt1_II,	// 3
 	up_mul_op	? mul_in : mul_V,	// 4 - 7
 	up_ks_op	? ks_in	 : ks_III,	// 2 - 16
@@ -346,10 +347,10 @@ assign { block_latch, fnum_latch,
 			block_I_raw, fnum_I_raw, 
 			fb_I, alg, ams_VII, pms } = regch_out;
 
-jt12_sh #(.width(regch_width),.stages(6)) u_regch(
+jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	//.rst	( rst		),
+	.rst	( rst		),
 	.din	( regch_in	),
 	.drop	( regch_out	)
 );

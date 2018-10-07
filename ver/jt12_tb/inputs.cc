@@ -571,6 +571,8 @@ void fnum_check( Ch ch[6] ) {
 	for( int wait=0; wait<17; wait++ )
 		write( 0, 0x01, 255 ); // wait
 	keyoff_all(ch);
+	ofstream of("fnum_check.log");
+	dump( of, ch );
 }
 
 void pcm_check( Ch ch[6] ) {

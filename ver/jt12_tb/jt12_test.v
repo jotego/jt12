@@ -7,7 +7,7 @@ reg	rst;
 `include "../common/dump.vh"
 
 
-reg clk; // 54MHz clock
+reg clk; // 4MHz clock
 
 initial begin
 	clk = 0;
@@ -26,13 +26,13 @@ initial begin
 end
 
 
-always @(posedge clk or posedge rst0)
+always @(negedge clk or posedge rst0)
 	if( rst0 ) begin
     	clkcnt <= 2'd0;
     	clk_en <= 1'b0;
     end
     else begin
-    	if ( clkcnt== 2'b11 ) begin
+    	if ( clkcnt== 2'b1 ) begin
         	clkcnt <= 2'd0;
         	clk_en <= 1'b1;
         end
@@ -96,7 +96,7 @@ wire irq_n = 1'b1;
 jt12 uut(
 	.rst		( rst	),
 	.clk		( clk	),
-	.clk_en		( clk_en),
+	.cen		( 1'b1	),
 	.din		( din	),
 	.addr		( addr	),
 	.cs_n		( cs_n	),

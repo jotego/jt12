@@ -29,6 +29,7 @@ module jt12_exprom
 (
 	input [4:0] addr,
 	input clk, 
+	input clk_en,
 	output reg [44:0] exp
 );
 
@@ -69,7 +70,7 @@ module jt12_exprom
 	explut_jt51[31] = 45'b010111010010110101000001100001001100000000011;
 	end
 
-	always @ (posedge clk) 
+	always @ (posedge clk) if(clk_en)
 		exp <= explut_jt51[addr];
 
 endmodule

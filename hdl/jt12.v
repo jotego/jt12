@@ -1,7 +1,7 @@
 module jt12 (
 	input			rst,
 	input			clk,		// CPU clock
-	input			clk_en,		// cpu_clk/6 ~ 1.3MHz
+	input			cen,		// optional clock enable, it not needed leave as 1'b1
 	input	[7:0]	din,
 	input	[1:0]	addr,
 	input			cs_n,
@@ -22,6 +22,7 @@ module jt12 (
 
 assign dout[7:0] = { busy, 5'd0, flag_B, flag_A };
 wire write = !cs_n && !wr_n;
+wire clk_en;
 
 // Timers
 wire	[9:0]	value_A;
@@ -90,7 +91,8 @@ wire			test_eg, test_op0;
 jt12_mmr u_mmr(
 	.rst		( rst		),
 	.clk		( clk		),
-	.clk_en		( clk_en	),
+	.cen		( cen		),	// external clock enable
+	.clk_en		( clk_en	),	// internal clock enable	
 	.din		( din		),
 	.write		( write		),
 	.addr		( addr		),
@@ -304,12 +306,13 @@ wire [9:0] eg_ch0s1, eg_ch1s1, eg_ch2s1, eg_ch3s1, eg_ch4s1, eg_ch5s1,
 		eg_ch0s3, eg_ch1s3, eg_ch2s3, eg_ch3s3, eg_ch4s3, eg_ch5s3,
 		eg_ch0s4, eg_ch1s4, eg_ch2s4, eg_ch3s4, eg_ch4s4, eg_ch5s4;
 
-always @(posedge clk)
+always @(posedge clk) if( clk_en )
 	sep24_cnt <= !zero ? sep24_cnt+1'b1 : 5'd0;
 
 sep24 #( .width(10), .pos0(5'd0)) egsep
 (
 	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.mixed	( eg_IX		),
 	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),

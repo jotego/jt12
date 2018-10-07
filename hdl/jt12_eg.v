@@ -104,7 +104,7 @@ always @(posedge clk) begin : envelope_counter
 		eg_cnt		<=15'd0;
 	end
 	else begin
-		if( zero ) begin
+		if( zero && clk_en ) begin
 			// envelope counter increases every 3 output samples,
 			// there is one sample every 32 clock ticks
 			if( eg_cnt_base == 2'd2 ) begin
@@ -585,7 +585,7 @@ wire [2:0] state_ch0s1, state_ch1s1, state_ch2s1, state_ch3s1,
 		 state_ch2s4, state_ch3s4, state_ch4s4, state_ch5s4;
 
 
-always @(posedge clk)
+always @(posedge clk) if(clk_en)
 	sep24_cnt <= !zero ? sep24_cnt+1'b1 : 5'd0;
 
 sep24 #( .width(3), .pos0(0) ) stsep

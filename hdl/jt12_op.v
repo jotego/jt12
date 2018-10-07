@@ -68,7 +68,7 @@ reg [11:0]	totalatten_X;
 
 wire [13:0]	prev1, prevprev1, prev2;
 
-jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
+jt12_sh #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
 	.clk_en	( clk_en),
@@ -76,7 +76,7 @@ jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
 	.drop	( prev1	)
 );
 
-jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
+jt12_sh #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
 	.clk_en	( clk_en),
@@ -84,7 +84,7 @@ jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
 	.drop	( prevprev1	)
 );
 
-jt12_sh/*_rst*/ #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
+jt12_sh #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
 //	.rst	( rst	),
 	.clk	( clk	),
 	.clk_en	( clk_en),
@@ -111,7 +111,6 @@ reg [14:0]	xs, ys, pm_preshift_II;
 reg			s1_II;
 
 always @(*) begin
-
 	x  = ( {14{use_prevprev1}}  & prevprev1 ) |
 		  ( {14{use_internal_x}} & op_result_internal ) |
           ( {14{use_prev2}}      & prev2 );
@@ -156,6 +155,7 @@ end
 // REGISTER/CYCLE 2-7
 jt12_sh #( .width(10), .stages(NUM_VOICES)) phasemod_sh(
 	.clk	( clk	),
+	.clk_en	( clk_en),
 	.din	( phasemod_II ),
 	.drop	( phasemod_VIII	)
 );
@@ -184,6 +184,7 @@ wire [45:0] sta_IX;
 
 jt12_phrom u_phrom(
 	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.addr	( aux_VIII[5:1] ),
 	.ph		( sta_IX		)
 );
@@ -237,6 +238,7 @@ wire [44:0] exp_X;
 
 jt12_exprom u_exprom(
 	.clk	( clk		),
+	.clk_en	( clk_en	),
 	.addr	( atten_internal_IX[5:1] ),
 	.exp	( exp_X		)
 );

@@ -23,7 +23,8 @@
 module jt12_mmr(
 	input		  	rst,
 	input		  	clk,
-	input			clk_en,
+	input			cen,
+	output			clk_en,
 	input	[7:0]	din,
 	input			write,
 	input	[1:0]	addr,
@@ -96,6 +97,26 @@ module jt12_mmr(
 	output 			s4_enters
 );
 
+reg [2:0] cen_cnt;
+reg [2:0] cen_cnt_lim;
+reg cen_int;
+
+assign clk_en = cen & cen_int;
+
+always @(negedge clk)
+	cen_int <= cen_cnt == cen_cnt_lim;
+
+always @(posedge clk)
+	if( rst ) begin
+		cen_cnt <= 3'd0;
+	end
+	else if( cen ) begin
+		if( cen_cnt == cen_cnt_lim ) begin
+			cen_cnt <= 3'd0;			
+		end
+		else cen_cnt <= cen_cnt + 3'd1;
+	end
+
 reg [7:0]	selected_register;
 
 //reg		sch; // 0 => CH1~CH3 only available. 1=>CH4~CH6
@@ -150,9 +171,16 @@ reg [1:0] up_op;
 
 `include "jt12_mmr_sim.vh"
 
+reg old_write;
+
+always @(posedge clk)
+	old_write <= write;
+
+// this runs at clk speed, no clock gating here
 always @(posedge clk) begin : memory_mapped_registers
 	if( rst ) begin
 		selected_register 	<= 8'h0;
+		cen_cnt_lim			<= 3'd5;
 		busy				<= 1'b0;
 		up_ch				<= 3'd0;
 		up_op				<= 2'd0;
@@ -185,7 +213,7 @@ always @(posedge clk) begin : memory_mapped_registers
 		pg_stop		<=	1'b0;
 	end else begin
 		// WRITE IN REGISTERS
-		if( write && !busy ) begin
+		if( (old_write ^ write) /*&& !busy*/ ) begin
 			busy <= 1'b1;
 			if( !addr[0] ) begin
 				selected_register <= din;
@@ -220,6 +248,10 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_DACTEST:pcm[0] <= din[3];
 					REG_PCM:	pcm[8:1]<= din;
 					REG_PCM_EN:	pcm_en	<= din[7];
+					// clock divider
+					REG_CLK_N6:	cen_cnt_lim <= 3'd5;
+					REG_CLK_N3:	cen_cnt_lim <= 3'd2;
+					REG_CLK_N2:	cen_cnt_lim <= 3'd1;
 					endcase
 				end
                 else if( selected_register[1:0]!=2'b11 ) begin
@@ -256,7 +288,7 @@ always @(posedge clk) begin : memory_mapped_registers
                 end
 			end
 		end
-		else begin /* clear once-only bits */
+		else if(clk_en) begin /* clear once-only bits */
 			// csm 	<= 1'b0;
 			// lfo_rst <= 1'b0;
 			{ clr_flag_B, clr_flag_A, load_B, load_A } <= 4'd0;

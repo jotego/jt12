@@ -91,6 +91,7 @@ jt12_envelope uut(
 	.test_eg(test_eg),
 	.rst	(rst),
 	.clk	(clk),
+	.clk_en	(1'b1),
 	.zero	(zero),
 // envelope configuration
 	.keycode_III(keycode_III),

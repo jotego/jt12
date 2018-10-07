@@ -184,10 +184,10 @@ end
 
 //////////////////////////////////////////////////
 // V APPLY_MUL
-reg [16:0] phinc_VI;
+reg [19:0] phinc_VI; // expanded to 20-bit widht, as per @ElectronAsh's advice
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_V
 	if( mul_V==4'd0 )
-		phinc_VI	<= { 1'b0, phinc_V[16:1] };
+		phinc_VI	<= { 4'b0, phinc_V[16:1] };
 	else
 		phinc_VI	<= phinc_V * mul_V;
 end
@@ -210,7 +210,7 @@ end
 //////////////////////////////////////////////////
 // VIII padding
  
-always @(posedge clk) 
+always @(posedge clk) if(clk_en)
 	phase_VIII <= phase_VII;
 
 jt12_sh #( .width(20), .stages(24) ) u_phsh(
@@ -280,14 +280,14 @@ sep24 #( .width(10), .pos0(18)) stsep
 	.ch5s4 (pg_ch5s4)
 );
 
-wire [16:0] phinc_ch0s1, phinc_ch1s1, phinc_ch2s1, phinc_ch3s1,
+wire [19:0] phinc_ch0s1, phinc_ch1s1, phinc_ch2s1, phinc_ch3s1,
 		 phinc_ch4s1, phinc_ch5s1, phinc_ch0s2, phinc_ch1s2,
 		 phinc_ch2s2, phinc_ch3s2, phinc_ch4s2, phinc_ch5s2,
 		 phinc_ch0s3, phinc_ch1s3, phinc_ch2s3, phinc_ch3s3,
 		 phinc_ch4s3, phinc_ch5s3, phinc_ch0s4, phinc_ch1s4,
 		 phinc_ch2s4, phinc_ch3s4, phinc_ch4s4, phinc_ch5s4;
 
-sep24 #( .width(17), .pos0(3+6)) pisep
+sep24 #( .width(20), .pos0(3+6)) pisep
 (
 	.clk	( clk		),
 	.clk_en	( clk_en	),
