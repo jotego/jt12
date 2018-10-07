@@ -172,6 +172,7 @@ reg [1:0] up_op;
 `include "jt12_mmr_sim.vh"
 
 reg old_write;
+reg [7:0] din_copy;
 
 always @(posedge clk)
 	old_write <= write;
@@ -221,6 +222,7 @@ always @(posedge clk) begin : memory_mapped_registers
 				up_op	<= din[3:2]; // 0=S1,1=S3,2=S2,3=S4
 			end else begin
 				// Global registers
+				din_copy <= din;
 				if( selected_register < 8'h30 ) begin
 					case( selected_register)
 					// registros especiales
@@ -318,7 +320,7 @@ jt12_reg u_reg(
 	.rst		( rst		),
 	.clk		( clk		),		// P1
 	.clk_en		( clk_en	),
-	.din		( din		),
+	.din		( din_copy	),
 
 	.up_keyon	( up_keyon	),
 	.up_alg		( up_alg	),
