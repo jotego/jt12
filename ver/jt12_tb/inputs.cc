@@ -836,7 +836,8 @@ void test_bin( Ch ch[6] ) {
 }
 
 void timerb( Ch ch[6] ) {
-    for( int k=0; k<256; k++ ) {
+	write( 0, 0x21, 4 ); // fast timers
+    for( int k=105; k<255; k+=10 ) {
     	write( 0, 0x26, k );
         write( 0, 0x27, 0x2a );
         write( 0, 3, 3 );
