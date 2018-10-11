@@ -154,7 +154,7 @@ jt12_sumch u_opch_II ( .chin(req_opch_I  ), .chout(req_opch_II)  );
 jt12_sumch u_opch_III( .chin(req_opch_II ), .chout(req_opch_III) );
 jt12_sumch u_opch_IV ( .chin(req_opch_III), .chout(req_opch_IV)  );
 jt12_sumch u_opch_V  ( .chin(req_opch_IV ), .chout(req_opch_V)   );
-jt12_sumch u_opch_VI ( .chin(req_opch_V  ), .chout(req_opch_VI)  );
+// jt12_sumch u_opch_VI ( .chin(req_opch_V  ), .chout(req_opch_VI)  );
 
 wire update_op_I  = cur == req_opch_I;
 wire update_op_II = cur == req_opch_II;
@@ -273,7 +273,7 @@ jt12_kon u_kon(
 	.cur_ch		( cur_ch	),
 	.up_keyon	( up_keyon_long	),
 	.csm		( csm		),
-	.flag_A		( flag_A	),
+	// .flag_A		( flag_A	),
 	.overflow_A	( overflow_A),
 	
 	.keyon_II	( keyon_II	)

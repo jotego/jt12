@@ -1,0 +1,422 @@
+Release 14.5 Map P.58f (lin64)
+Xilinx Mapping Report File for Design 'jt12'
+
+Design Information
+------------------
+Command Line   : map -intstyle ise -p xc6slx9-tqg144-2 -w -logic_opt off -ol
+high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -detail
+-ir off -pr off -lc off -power off -o jt12_map.ncd jt12.ngd jt12.pcf 
+Target Device  : xc6slx9
+Target Package : tqg144
+Target Speed   : -2
+Mapper Version : spartan6 -- $Revision: 1.55 $
+Mapped Date    : Thu Oct 11 16:33:03 2018
+
+Design Summary
+--------------
+Number of errors:      0
+Number of warnings:    1
+Slice Logic Utilization:
+  Number of Slice Registers:                   906 out of  11,440    7%
+    Number used as Flip Flops:                 897
+    Number used as Latches:                      0
+    Number used as Latch-thrus:                  0
+    Number used as AND/OR logics:                9
+  Number of Slice LUTs:                      1,141 out of   5,720   19%
+    Number used as logic:                    1,008 out of   5,720   17%
+      Number using O6 output only:             714
+      Number using O5 output only:              35
+      Number using O5 and O6:                  259
+      Number used as ROM:                        0
+    Number used as Memory:                     115 out of   1,440    7%
+      Number used as Dual Port RAM:              0
+      Number used as Single Port RAM:            0
+      Number used as Shift Register:           115
+        Number using O6 output only:            44
+        Number using O5 output only:             0
+        Number using O5 and O6:                 71
+    Number used exclusively as route-thrus:     18
+      Number with same-slice register load:     14
+      Number with same-slice carry load:         4
+      Number with other load:                    0
+
+Slice Logic Distribution:
+  Number of occupied Slices:                   460 out of   1,430   32%
+  Number of MUXCYs used:                       320 out of   2,860   11%
+  Number of LUT Flip Flop pairs used:        1,284
+    Number with an unused Flip Flop:           544 out of   1,284   42%
+    Number with an unused LUT:                 143 out of   1,284   11%
+    Number of fully used LUT-FF pairs:         597 out of   1,284   46%
+    Number of unique control sets:              40
+    Number of slice register sites lost
+      to control set restrictions:             133 out of  11,440    1%
+
+  A LUT Flip Flop pair for this architecture represents one LUT paired with
+  one Flip Flop within a slice.  A control set is a unique combination of
+  clock, reset, set, and enable signals for a registered element.
+  The Slice Logic Distribution report is not meaningful if the design is
+  over-mapped for a non-slice resource or if Placement fails.
+
+IO Utilization:
+  Number of bonded IOBs:                        69 out of     102   67%
+    IOB Flip Flops:                             47
+
+Specific Feature Utilization:
+  Number of RAMB16BWERs:                         2 out of      32    6%
+  Number of RAMB8BWERs:                          6 out of      64    9%
+  Number of BUFIO2/BUFIO2_2CLKs:                 0 out of      32    0%
+  Number of BUFIO2FB/BUFIO2FB_2CLKs:             0 out of      32    0%
+  Number of BUFG/BUFGMUXs:                       1 out of      16    6%
+    Number used as BUFGs:                        1
+    Number used as BUFGMUX:                      0
+  Number of DCM/DCM_CLKGENs:                     0 out of       4    0%
+  Number of ILOGIC2/ISERDES2s:                   1 out of     200    1%
+    Number used as ILOGIC2s:                     1
+    Number used as ISERDES2s:                    0
+  Number of IODELAY2/IODRP2/IODRP2_MCBs:         0 out of     200    0%
+  Number of OLOGIC2/OSERDES2s:                  46 out of     200   23%
+    Number used as OLOGIC2s:                    46
+    Number used as OSERDES2s:                    0
+  Number of BSCANs:                              0 out of       4    0%
+  Number of BUFHs:                               0 out of     128    0%
+  Number of BUFPLLs:                             0 out of       8    0%
+  Number of BUFPLL_MCBs:                         0 out of       4    0%
+  Number of DSP48A1s:                            0 out of      16    0%
+  Number of ICAPs:                               0 out of       1    0%
+  Number of MCBs:                                0 out of       2    0%
+  Number of PCILOGICSEs:                         0 out of       2    0%
+  Number of PLL_ADVs:                            0 out of       2    0%
+  Number of PMVs:                                0 out of       1    0%
+  Number of STARTUPs:                            0 out of       1    0%
+  Number of SUSPEND_SYNCs:                       0 out of       1    0%
+
+Average Fanout of Non-Clock Nets:                3.45
+
+Peak Memory Usage:  790 MB
+Total REAL time to MAP completion:  59 secs 
+Total CPU time to MAP completion:   56 secs 
+
+Table of Contents
+-----------------
+Section 1 - Errors
+Section 2 - Warnings
+Section 3 - Informational
+Section 4 - Removed Logic Summary
+Section 5 - Removed Logic
+Section 6 - IOB Properties
+Section 7 - RPMs
+Section 8 - Guide Report
+Section 9 - Area Group and Partition Summary
+Section 10 - Timing Report
+Section 11 - Configuration String Information
+Section 12 - Control Set Information
+Section 13 - Utilization by Hierarchy
+
+Section 1 - Errors
+------------------
+
+Section 2 - Warnings
+--------------------
+WARNING:Security:43 - No license file was found in the standard Xilinx license
+directory.
+WARNING:Security:44 - Since no license file was found,
+WARNING:Security:42 - Your software subscription period has lapsed. Your current
+version of Xilinx tools will continue to function, but you no longer qualify for
+Xilinx software updates or new releases.
+WARNING:PhysDesignRules:2410 - This design is using one or more 9K Block RAMs
+   (RAMB8BWER).  9K Block RAM initialization data, both user defined and
+   default, may be incorrect and should not be used.  For more information,
+   please reference Xilinx Answer Record 39999.
+
+Section 3 - Informational
+-------------------------
+INFO:Security:51 - The XILINXD_LICENSE_FILE environment variable is not set.
+INFO:Security:52 - The LM_LICENSE_FILE environment variable is set to
+'2100@limklicsrv2.adbvdesign:4343@gnat.spd'.
+INFO:Security:54 - 'xc6slx9' is a WebPack part.
+INFO:MapLib:562 - No environment variables are currently set.
+INFO:LIT:244 - All of the single ended outputs in this design are using slew
+   rate limited output drivers. The delay on speed critical single ended outputs
+   can be dramatically reduced by designating them as fast outputs.
+INFO:Pack:1716 - Initializing temperature to 85.000 Celsius. (default - Range:
+   0.000 to 85.000 Celsius)
+INFO:Pack:1720 - Initializing voltage to 1.140 Volts. (default - Range: 1.140 to
+   1.260 Volts)
+INFO:Map:215 - The Interim Design Summary has been generated in the MAP Report
+   (.mrp).
+INFO:Pack:1650 - Map created a placed design.
+
+Section 4 - Removed Logic Summary
+---------------------------------
+   2 block(s) optimized away
+  39 Block(s) redundant
+
+Section 5 - Removed Logic
+-------------------------
+
+Optimized Block(s):
+TYPE 		BLOCK
+GND 		XST_GND
+VCC 		XST_VCC
+
+Redundant Block(s):
+TYPE 		BLOCK
+LUT1 		u_timers/timer_A/Madd_n0037_cy<9>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<8>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<7>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<6>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<5>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<4>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<3>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<2>_rt
+LUT1 		u_timers/timer_A/Madd_n0037_cy<1>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_cy<7>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_cy<6>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_cy<5>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_cy<4>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_cy<3>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_cy<2>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_cy<1>_rt
+LUT1 		u_eg/Madd_n0386_cy<9>_rt
+LUT1 		u_eg/Madd_n0386_cy<8>_rt
+LUT1 		u_eg/Madd_n0386_cy<7>_rt
+LUT1 		u_eg/Madd_n0386_cy<6>_rt
+LUT1 		u_eg/Mmux_ks_III[1]_BUS_0003_wide_mux_54_OUT3_rs_cy<5>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<13>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<12>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<11>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<10>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<9>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<8>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<7>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<6>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<5>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<4>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<3>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<2>_rt
+LUT1 		u_eg/Mcount_eg_cnt_cy<1>_rt
+LUT1 		u_eg/Madd_n0424_cy<0>_rt
+LUT1 		u_timers/timer_B/Madd_mult[8]_GND_13_o_add_2_OUT_xor<8>_rt
+LUT1 		u_eg/Mcount_eg_cnt_xor<14>_rt
+LUT1 		u_eg/Msub_PWR_20_o_eg_internal_VIII[9]_sub_164_OUT_xor<9>_rt
+LUT1 		u_op/Madd_test_214_GND_28_o_add_50_OUT_xor<13>_rt
+
+Section 6 - IOB Properties
+--------------------------
+
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+| IOB Name                           | Type             | Direction | IO Standard          | Diff  | Drive    | Slew | Reg (s)      | Resistor | IOB      |
+|                                    |                  |           |                      | Term  | Strength | Rate |              |          | Delay    |
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+| addr<0>                            | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| addr<1>                            | IOB              | INPUT     | LVCMOS25             |       |          |      | IFF          |          |          |
+| cen                                | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| clk                                | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| cs_n                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<0>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<1>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<2>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<3>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<4>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<5>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<6>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| din<7>                             | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| dout<0>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| dout<1>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| dout<2>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| dout<3>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| dout<4>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| dout<5>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| dout<6>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| dout<7>                            | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| irq_n                              | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| limiter_en                         | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| mux_left<0>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<1>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<2>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<3>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<4>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<5>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<6>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<7>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_left<8>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<0>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<1>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<2>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<3>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<4>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<5>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<6>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<7>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_right<8>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| mux_sample                         | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| rst                                | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| snd_left<0>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<1>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<2>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<3>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<4>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<5>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<6>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<7>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<8>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<9>                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<10>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_left<11>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<0>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<1>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<2>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<3>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<4>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<5>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<6>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<7>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<8>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<9>                       | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<10>                      | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_right<11>                      | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| snd_sample                         | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| wr_n                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Section 7 - RPMs
+----------------
+
+Section 8 - Guide Report
+------------------------
+Guide not run on this design.
+
+Section 9 - Area Group and Partition Summary
+--------------------------------------------
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+Area Group Information
+----------------------
+
+  No area groups were found in this design.
+
+----------------------
+
+Section 10 - Timing Report
+--------------------------
+A logic-level (pre-route) timing report can be generated by using Xilinx static
+timing analysis tools, Timing Analyzer (GUI) or TRCE (command line), with the
+mapped NCD and PCF files. Please note that this timing report will be generated
+using estimated delay information. For accurate numbers, please generate a
+timing report with the post Place and Route NCD file.
+
+For more information about the Timing Analyzer, consult the Xilinx Timing
+Analyzer Reference Manual; for more information about TRCE, consult the Xilinx
+Command Line Tools User Guide "TRACE" chapter.
+
+Section 11 - Configuration String Details
+-----------------------------------------
+
+Section 12 - Control Set Information
+------------------------------------
++------------------------------------------------------------------------------------------------------------------------------------+
+| Clock Signal | Reset Signal                         | Set Signal | Enable Signal               | Slice Load Count | Bel Load Count |
++------------------------------------------------------------------------------------------------------------------------------------+
+| clk_BUFGP    |                                      |            |                             | 10               | 16             |
+| clk_BUFGP    |                                      |            | clk_en                      | 158              | 591            |
+| clk_BUFGP    |                                      |            | u_acc/_n0185_inv            | 8                | 11             |
+| clk_BUFGP    |                                      |            | u_acc/_n0199_inv            | 6                | 24             |
+| clk_BUFGP    |                                      |            | u_eg/_n0566_inv             | 3                | 3              |
+| clk_BUFGP    |                                      |            | u_mmr/_n0880_inv            | 2                | 8              |
+| clk_BUFGP    |                                      |            | u_mmr/_n0896_inv            | 5                | 14             |
+| clk_BUFGP    |                                      |            | u_mmr/_n0928_inv            | 4                | 14             |
+| clk_BUFGP    |                                      |            | u_mmr/_n0960_inv            | 6                | 14             |
+| clk_BUFGP    |                                      |            | u_mmr/_n0992_inv            | 2                | 6              |
+| clk_BUFGP    |                                      |            | u_mmr/_n1008_inv            | 2                | 6              |
+| clk_BUFGP    |                                      |            | u_mmr/_n1024_inv            | 2                | 6              |
+| clk_BUFGP    |                                      |            | u_timers/timer_A/_n0040_inv | 4                | 10             |
+| clk_BUFGP    |                                      |            | u_timers/timer_B/_n0040_inv | 2                | 8              |
+| clk_BUFGP    | rst_IBUF                             |            |                             | 13               | 17             |
+| clk_BUFGP    | rst_IBUF                             |            | clk_en                      | 79               | 177            |
+| clk_BUFGP    | rst_IBUF                             |            | u_eg/_n0570_inv             | 4                | 15             |
+| clk_BUFGP    | rst_IBUF                             |            | u_lfo/clk_en_zero_AND_88_o  | 1                | 2              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1028_inv            | 3                | 8              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1043_inv            | 2                | 8              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1079_inv            | 2                | 10             |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1088_inv            | 4                | 5              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1128_inv            | 3                | 3              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1137_inv            | 2                | 4              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1192_inv            | 2                | 9              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/_n1440_inv            | 1                | 2              |
+| clk_BUFGP    | rst_IBUF                             |            | u_mmr/u_reg/_n0328          | 1                | 5              |
+| clk_BUFGP    | u_eg/_n0506                          |            | u_eg/_n0595_inv             | 4                | 5              |
+| clk_BUFGP    | u_eg/_n0512                          |            |                             | 2                | 2              |
+| clk_BUFGP    | u_eg/_n0534                          |            | clk_en                      | 1                | 5              |
+| clk_BUFGP    | u_eg/_n0536                          |            | clk_en                      | 9                | 32             |
+| clk_BUFGP    | u_eg/_n0542                          |            | clk_en                      | 1                | 6              |
+| clk_BUFGP    | u_eg/_n0550                          |            |                             | 2                | 3              |
+| clk_BUFGP    | u_lfo/Mcount_cnt_val                 |            | u_lfo/clk_en_zero_AND_88_o  | 3                | 7              |
+| clk_BUFGP    | u_lfo/rst_lfo_en_OR_178_o            |            | u_lfo/_n0036_inv            | 2                | 7              |
+| clk_BUFGP    | u_mmr/Reset_OR_DriverANDClockEnable1 |            | u_mmr/_n1088_inv61          | 1                | 2              |
+| clk_BUFGP    | u_mmr/_n0749                         |            | cen_IBUF                    | 1                | 3              |
+| clk_BUFGP    | u_timers/timer_A/load_rst_OR_174_o   |            | clk_en_fast_timers_OR_177_o | 1                | 5              |
+| clk_BUFGP    | u_timers/timer_B/load_rst_OR_176_o   |            | clk_en_fast_timers_OR_177_o | 2                | 9              |
++------------------------------------------------------------------------------------------------------------------------------------+
+| ~clk_BUFGP   |                                      |            |                             | 1                | 1              |
++------------------------------------------------------------------------------------------------------------------------------------+
+
+Section 13 - Utilization by Hierarchy
+-------------------------------------
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Module             | Partition | Slices*       | Slice Reg     | LUTs          | LUTRAM        | BRAM/FIFO | DSP48A1 | BUFG  | BUFIO | BUFR  | DCM   | PLL_ADV   | Full Hierarchical Name          |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| jt12/              |           | 7/634         | 23/897        | 6/1141        | 0/115         | 0/8       | 0/0     | 1/1   | 0/0   | 0/0   | 0/0   | 0/0       | jt12                            |
+| +u_acc             |           | 40/54         | 50/86         | 76/84         | 0/8           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_acc                      |
+| ++u_acc            |           | 9/9           | 18/18         | 4/4           | 4/4           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_acc/u_acc                |
+| ++u_buffer         |           | 5/5           | 18/18         | 4/4           | 4/4           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_acc/u_buffer             |
+| +u_eg              |           | 108/129       | 140/174       | 257/276       | 0/19          | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg                       |
+| ++u_aroffsh        |           | 1/1           | 1/1           | 0/0           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_aroffsh             |
+| ++u_cntsh          |           | 1/1           | 1/1           | 1/1           | 1/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_cntsh               |
+| ++u_egsh           |           | 9/9           | 20/20         | 10/10         | 10/10         | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_egsh                |
+| ++u_konsh          |           | 1/1           | 1/1           | 1/1           | 1/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_konsh               |
+| ++u_ssg1sh         |           | 1/1           | 1/1           | 1/1           | 1/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_ssg1sh              |
+| ++u_ssg2sh         |           | 1/1           | 1/1           | 1/1           | 1/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_ssg2sh              |
+| ++u_ssgattsh       |           | 2/2           | 2/2           | 1/1           | 1/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_ssgattsh            |
+| ++u_ssgen          |           | 4/4           | 4/4           | 1/1           | 1/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_ssgen               |
+| ++u_statesh        |           | 1/1           | 3/3           | 3/3           | 3/3           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_eg/u_statesh             |
+| +u_lfo             |           | 6/6           | 14/14         | 18/18         | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_lfo                      |
+| +u_mmr             |           | 68/191        | 140/257       | 66/249        | 0/17          | 0/2       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr                      |
+| ++u_reg            |           | 75/123        | 18/117        | 122/183       | 0/17          | 0/2       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg                |
+| +++u_kon           |           | 3/4           | 1/3           | 4/5           | 0/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_kon          |
+| ++++u_konch        |           | 1/1           | 2/2           | 1/1           | 1/1           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_kon/u_konch  |
+| +++u_mod           |           | 2/2           | 0/0           | 1/1           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_mod          |
+| +++u_opch_III      |           | 1/1           | 0/0           | 1/1           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_opch_III     |
+| +++u_opch_IV       |           | 1/1           | 0/0           | 0/0           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_opch_IV      |
+| +++u_opch_V        |           | 2/2           | 0/0           | 1/1           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_opch_V       |
+| +++u_opram         |           | 0/0           | 0/0           | 0/0           | 0/0           | 2/2       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_opram        |
+| +++u_regch         |           | 32/32         | 84/84         | 44/44         | 16/16         | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_regch        |
+| +++u_regch_rl      |           | 6/6           | 12/12         | 9/9           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_mmr/u_reg/u_regch_rl     |
+| +u_op              |           | 77/120        | 54/158        | 178/204       | 5/31          | 0/4       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_op                       |
+| ++phasemod_sh      |           | 8/8           | 20/20         | 4/4           | 4/4           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_op/phasemod_sh           |
+| ++prev1_buffer     |           | 13/13         | 28/28         | 6/6           | 6/6           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_op/prev1_buffer          |
+| ++prev2_buffer     |           | 12/12         | 28/28         | 10/10         | 10/10         | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_op/prev2_buffer          |
+| ++prevprev1_buffer |           | 10/10         | 28/28         | 6/6           | 6/6           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_op/prevprev1_buffer      |
+| ++u_exprom         |           | 0/0           | 0/0           | 0/0           | 0/0           | 2/2       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_op/u_exprom              |
+| ++u_phrom          |           | 0/0           | 0/0           | 0/0           | 0/0           | 2/2       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_op/u_phrom               |
+| +u_pg              |           | 81/106        | 98/151        | 208/248       | 20/40         | 2/2       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_pg                       |
+| ++u_phsh           |           | 24/24         | 50/50         | 40/40         | 20/20         | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_pg/u_phsh                |
+| ++u_rstsh          |           | 1/1           | 3/3           | 0/0           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_pg/u_rstsh               |
+| +u_timers          |           | 1/21          | 0/34          | 1/56          | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_timers                   |
+| ++timer_A          |           | 10/10         | 16/16         | 28/28         | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_timers/timer_A           |
+| ++timer_B          |           | 10/10         | 18/18         | 27/27         | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | jt12/u_timers/timer_B           |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+* Slices can be packed with basic elements from multiple hierarchies.
+  Therefore, a slice will be counted in every hierarchical module
+  that each of its packed basic elements belong to.
+** For each column, there are two numbers reported <A>/<B>.
+   <A> is the number of elements that belong to that specific hierarchical module.
+   <B> is the total number of elements from that hierarchical module and any lower level
+   hierarchical modules below.
+*** The LUTRAM column counts all LUTs used as memory including RAM, ROM, and shift registers.
