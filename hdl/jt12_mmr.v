@@ -97,8 +97,8 @@ module jt12_mmr(
 	output 			s4_enters
 );
 
-reg [2:0] cen_cnt;
-reg [2:0] cen_cnt_lim;
+reg [2:0] cen_cnt=3'd0;
+reg [2:0] cen_cnt_lim=3'd5;
 reg cen_int;
 
 assign clk_en = cen & cen_int;
@@ -107,10 +107,7 @@ always @(negedge clk)
 	cen_int <= cen_cnt == cen_cnt_lim;
 
 always @(posedge clk)
-	if( rst ) begin
-		cen_cnt <= 3'd0;
-	end		
-	else if( cen ) begin
+	if( cen ) begin
 		if( cen_cnt == cen_cnt_lim ) begin
 			cen_cnt <= 3'd0;			
 		end
