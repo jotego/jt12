@@ -238,7 +238,16 @@ assign	busy = busy_op;
 
 
 always @(posedge clk) begin : up_counter
-	if( clk_en ) begin
+	if( rst ) begin
+		cnt		<= 5'h0;
+		last	<= 1'b0;
+		zero	<= 1'b1;
+		busy_op	<= 1'b0;
+		up_keyon_long <= 1'b0;
+		cur_op  <= 2'd0;
+		cur_ch  <= 3'd0;
+	end
+	else if( clk_en ) begin
 		{ cur_op, cur_ch }	<= { next_op, next_ch };
 		zero 	<= next == 5'd0;
 		last	<= up;
@@ -348,10 +357,10 @@ jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 
 // RL is on a different register to 
 // have the reset to 1
-jt12_sh #(.width(2),.stages(6)) u_regch_rl(
+jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-//	.rst	( rst		),
+	.rst	( rst		),
 	.din	( up_pms_ch	? rl_in :  rl	),
 	.drop	( rl	)
 );
