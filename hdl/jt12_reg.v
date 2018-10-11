@@ -298,12 +298,13 @@ parameter regop_width=44;
 
 wire [regop_width-1:0] regop_in, regop_out;
 
+
 jt12_opram u_opram(
 	.clk	( clk 		),
 	.clk_en	( clk_en	),
 	.wr_addr( cur 		),
 	.rd_addr( next 		),
-	.data	( rst ? {regop_width{1'b0}} : regop_in ),
+	.data	( regop_in	),
 	.q		( regop_out )
 );
 
