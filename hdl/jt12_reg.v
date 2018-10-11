@@ -304,7 +304,7 @@ jt12_opram u_opram(
 	.clk_en	( clk_en	),
 	.wr_addr( cur 		),
 	.rd_addr( next 		),
-	.data	( regop_in	),
+	.data	( rst ? {regop_width{1'b1}} : regop_in ),
 	.q		( regop_out )
 );
 
