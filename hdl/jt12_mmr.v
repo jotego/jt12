@@ -107,10 +107,7 @@ always @(negedge clk)
 	cen_int <= cen_cnt == cen_cnt_lim;
 
 always @(posedge clk)
-	if( rst ) begin
-		cen_cnt <= 3'd0;
-	end
-	else if( cen ) begin
+	if( cen ) begin
 		if( cen_cnt == cen_cnt_lim ) begin
 			cen_cnt <= 3'd0;			
 		end
@@ -293,7 +290,7 @@ always @(posedge clk) begin : memory_mapped_registers
 		else if(clk_en) begin /* clear once-only bits */
 			// csm 	<= 1'b0;
 			// lfo_rst <= 1'b0;
-			{ clr_flag_B, clr_flag_A, load_B, load_A } <= 4'd0;
+			{ clr_flag_B, clr_flag_A } <= 2'd0;
 			up_keyon <= 1'b0;
 			if( |{  up_keyon,	up_alg, 	up_block, 	up_fnumlo,
 					up_pms, 	up_dt1, 	up_tl, 		up_ks_ar,
