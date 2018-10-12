@@ -108,7 +108,12 @@ jt12 uut(
 	.irq_n		( irq_n	),
 	// 1 bit output per channel at 1.3MHz
 	.snd_left	( snd_left	),
-	.snd_right	( snd_right	)
+	.snd_right	( snd_right	),
+	// unused outputs
+	.snd_sample(),
+	.mux_right(),
+	.mux_left(),
+	.mux_sample()
 );
 
 `ifdef DUMPSOUND

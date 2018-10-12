@@ -105,6 +105,7 @@ reg cen_int;
 	initial begin
 		cen_cnt = 3'd0;
 	end
+	`include "jt12_mmr_sim.vh"
 `endif
 
 always @(negedge clk) begin
@@ -171,8 +172,6 @@ reg [ 5:0] latch_ch3op2,  latch_ch3op3,  latch_ch3op1;
 
 reg [2:0] up_ch;
 reg [1:0] up_op;
-
-`include "jt12_mmr_sim.vh"
 
 reg old_write;
 reg [7:0] din_copy;

@@ -32,6 +32,10 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
+	if [ $1 = "-lint" ]; then
+		verilator -f gather.f --lint-only -I../../hdl --top-module $TOP -DRANDWAIT=$RANDWAIT
+		exit $?
+	fi
 	if [ $1 = "-timeronly" ]; then
 		echo "Timer only"
 		TIMERONLY=TIMERONLY
