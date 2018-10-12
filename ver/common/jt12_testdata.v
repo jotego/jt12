@@ -65,7 +65,7 @@ module jt12_testdata
 		else begin
 			case( state )
 				BLANK:	begin
-                	if( rnd_count )
+                	if( rnd_count>0 )
                     	rnd_count <= rnd_count -1;
                     else
                     	state <= WAIT_FREE;
@@ -81,20 +81,20 @@ module jt12_testdata
 								state <= WAIT_CNT;
 							end
 							// Wait for timer flag:
-							8'h3: if( din[1:0]&cfg[data_cnt][1:0] ) state<=next;
+							8'h3: if( (din[1:0]&cfg[data_cnt][1:0])!=2'd0 ) state<=next;
 							default: state <= next;
 						endcase
 					end
 				end
 				WAIT_CNT: begin
-						if( !waitcnt ) begin
+						if( waitcnt==16'd0 ) begin
 							data_cnt <= data_cnt + 1'b1;
 							state <= WAIT_FREE;
 						end
 						else waitcnt <= waitcnt-1'b1;
 					end
 				WRITE: begin
-					{ cs_n, wr_n } = 2'b00;
+					{ cs_n, wr_n } <= 2'b00;
 					`ifndef VERILATOR
                     rnd_count <= rand_wait ? ($urandom%100) : 0;
                     `else 

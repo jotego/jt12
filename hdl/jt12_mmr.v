@@ -24,7 +24,7 @@ module jt12_mmr(
 	input		  	rst,
 	input		  	clk,
 	input			cen,
-	output			clk_en,
+	output	reg		clk_en,
 	input	[7:0]	din,
 	input			write,
 	input	[1:0]	addr,
@@ -97,14 +97,20 @@ module jt12_mmr(
 	output 			s4_enters
 );
 
-reg [2:0] cen_cnt=3'd0;
-reg [2:0] cen_cnt_lim=3'd5;
+reg [2:0] cen_cnt;
+reg [2:0] cen_cnt_lim;
 reg cen_int;
 
-assign clk_en = cen & cen_int;
+`ifdef SIMULATION
+	initial begin
+		cen_cnt = 3'd0;
+	end
+`endif
 
-always @(negedge clk)
+always @(negedge clk) begin
 	cen_int <= cen_cnt == cen_cnt_lim;
+	clk_en  <= cen & cen_int;	
+end
 
 always @(posedge clk)
 	if( cen ) begin
@@ -251,6 +257,7 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_CLK_N6:	cen_cnt_lim <= 3'd5;
 					REG_CLK_N3:	cen_cnt_lim <= 3'd2;
 					REG_CLK_N2:	cen_cnt_lim <= 3'd1;
+					default:;	// avoid incomplete-case warning
 					endcase
 				end
                 else if( selected_register[1:0]!=2'b11 ) begin
@@ -269,6 +276,7 @@ always @(posedge clk) begin : memory_mapped_registers
 							// FB + Algorithm
                             8'hB0, 8'hB1, 8'hB2:	up_alg		<= 1'b1;
 							8'hB4, 8'hB5, 8'hB6:	up_pms		<= 1'b1;
+							default:;	// avoid incomplete-case warning
 						endcase
 					end
 					else
@@ -282,6 +290,7 @@ always @(posedge clk) begin : memory_mapped_registers
 							4'h7: up_d2r 	<= 1'b1;
 							4'h8: up_d1l 	<= 1'b1;
 							4'h9: up_ssgeg	<= 1'b1;
+							default:;	// avoid incomplete-case warning
 						endcase
 					end
                 end

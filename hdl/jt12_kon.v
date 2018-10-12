@@ -47,7 +47,7 @@ wire drop;
 reg [3:0] cur_op_hot;
 
 always @(posedge clk) if( clk_en ) begin
-	keyon_II <= (csm&&cur_ch==2'd2&&overflow_A) || drop;
+	keyon_II <= (csm&&cur_ch==3'd2&&overflow_A) || drop;
 end
 
 always @(*) begin
@@ -63,7 +63,7 @@ end
 jt12_sh_rst #(.width(1),.stages(24),.rstval(1'b0)) u_konch(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-//	.rst	( rst		),
+	.rst	( rst		),
 	.din	( din		),
 	.drop	( drop		)
 );

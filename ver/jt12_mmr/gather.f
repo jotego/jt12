@@ -1,13 +1,12 @@
 jt12_test.v
-../../hdl/jt12_opsync.v
 ../../hdl/jt12_sh.v
 ../../hdl/jt12_sh24.v
 ../../hdl/jt12_sh_rst.v
-../../hdl/jt12_sh6_rst.v
 ../../hdl/jt12_reg.v
+../../hdl/jt12_sumch.v
+../../hdl/jt12_kon.v
+../../hdl/jt12_opram.v
+../../hdl/jt12_mod.v
 ../../hdl/jt12_mmr.v
-../../hdl/jt12_fm.v
-../../hdl/jt12_mod6.v
-../../hdl/jt12_mod24.v
 ../common/sep24.v
 ../common/jt12_testdata.v

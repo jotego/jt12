@@ -111,6 +111,20 @@ reg	 [4:0] cnt;
 reg  [1:0] next_op, cur_op;
 reg  [2:0] next_ch, cur_ch;
 
+`ifdef SIMULATION
+// These signals need to operate during rst
+// initial state is not relevant (or critical) in real life
+// but we need a clear value during simulation
+initial begin
+	cur_op = 2'd0;
+	cur_ch = 3'd0;
+	cnt		= 5'h0;
+	last	= 1'b0;
+	zero	= 1'b1;
+	busy_op	= 1'b0;
+end
+`endif
+
 assign s1_enters = cur_op == 2'b00;
 assign s3_enters = cur_op == 2'b01;
 assign s2_enters = cur_op == 2'b10;
@@ -239,13 +253,7 @@ assign	busy = busy_op;
 
 always @(posedge clk) begin : up_counter
 	if( rst ) begin
-		cnt		<= 5'h0;
-		last	<= 1'b0;
-		zero	<= 1'b1;
-		busy_op	<= 1'b0;
 		up_keyon_long <= 1'b0;
-		cur_op  <= 2'd0;
-		cur_ch  <= 3'd0;
 	end
 	else if( clk_en ) begin
 		{ cur_op, cur_ch }	<= { next_op, next_ch };
@@ -304,7 +312,7 @@ jt12_opram u_opram(
 	.clk_en	( clk_en	),
 	.wr_addr( cur 		),
 	.rd_addr( next 		),
-	.data	( rst ? {regop_width{1'b1}} : regop_in ),
+	.data	( rst ? { ~7'd0, 37'd0 } : regop_in ),
 	.q		( regop_out )
 );
 
