@@ -164,7 +164,7 @@ always @(posedge clk) if ( clk_en ) begin // phase_calculation_III
 	dt1_offset_IV <= dt1_unlimited > {1'b0, dt1_limit} ? 
 							dt1_limit : dt1_unlimited[4:0];
 	dt1_IV   <= dt1_III;	
-	phinc_IV <= phinc_III;	
+	phinc_IV <= phinc_III > 17'd69905 ? 17'd69905 : phinc_III;	
 end
 
 //////////////////////////////////////////////////
@@ -184,7 +184,7 @@ end
 
 //////////////////////////////////////////////////
 // V APPLY_MUL
-reg [17:0] phinc_VI; // expanded to 20-bit widht, as per @ElectronAsh's advice
+reg [19:0] phinc_VI; // expanded to 20-bit widht, as per @ElectronAsh's advice
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_V
 	if( mul_V==4'd0 )
 		phinc_VI	<= { 4'b0, phinc_V[16:1] };
@@ -198,16 +198,11 @@ wire		keyon_VI;
 wire [19:0]	phase_drop;
 reg  [19:0] phase_in;
 reg  [ 9:0] phase_VII;
-reg	 [17:0] phase_limited;
 
-always @(*) begin
-	// limit known from YM2151
-	phase_limited = phinc_VI>18'd82976 ? 18'd82976 : phase_limited; 
-end
 
 always @(*)
 	phase_in =  pg_rst_VI ? 20'd0 : 
-		( pg_stop ? phase_drop : phase_drop + {2'd0,phase_limited});
+		( pg_stop ? phase_drop : phase_drop + phinc_VI);
 
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_VI
 	phase_VII <= phase_in[19:10];
