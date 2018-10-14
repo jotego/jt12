@@ -715,7 +715,7 @@ sep24 #( .width(1), .pos0(0) ) konstep
 /* Dump all registers on request */
 integer fmmr;
 initial begin
-	fmmr=$fopen("mmr_dump.log");
+	fmmr=$fopen("mmr_dump.log","w");
 end
 
 always @(posedge clk )

@@ -22,7 +22,7 @@
 
 /*
 
-	tab size 4
+	Does the LFO frequency depend on the pre-scaler for YM2608?
 
 */
 
