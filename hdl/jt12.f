@@ -10,6 +10,7 @@ jt12_mod.v
 jt12_op.v
 jt12_opram.v
 jt12_pg.v
+jt12_pm.v
 jt12_phrom.v
 jt12_reg.v
 jt12_sh.v
