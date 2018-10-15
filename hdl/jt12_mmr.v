@@ -217,13 +217,14 @@ always @(posedge clk) begin : memory_mapped_registers
 	end else begin
 		// WRITE IN REGISTERS
 		if( (!old_write && write) /*&& !busy*/ ) begin
+			busy <= 1'b1;
 			if( !addr[0] ) begin
 				selected_register <= din;
 				up_ch	<= {addr[1], din[1:0]};
 				up_op	<= din[3:2]; // 0=S1,1=S3,2=S2,3=S4
 			end else begin
 				// Global registers
-				busy <= 1'b1; // only set for data port writes, according to Eke (spritesmind.net)
+				// busy <= 1'b1; // only set for data port writes, according to Eke (spritesmind.net)
 				din_copy <= din;
 				if( selected_register < 8'h30 ) begin
 					case( selected_register)

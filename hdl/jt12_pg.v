@@ -71,9 +71,12 @@ jt12_pm u_pm(
 	.pm_offset( pm_offset_I )
 );
 
+wire [11:0] pm_offset_I_12b = { {4{pm_offset_I[7]}}, pm_offset_I};
+
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_I
 	block_II <= block_I;
-	fnum_II <= {fnum_I,1'b0} + { {3{pm_offset_I[7]}}, pm_offset_I};
+	fnum_II <= {fnum_I,1'b0} + pm_offset_I_12b;
+	// fnum_II <= {fnum_I,1'b0}; // + { {3{pm_offset_I[7]}}, pm_offset_I};
 	keycode_II <= { block_I, fnum_I[10], fnum_I[10] ? (|fnum_I[9:7]) : (&fnum_I[9:7])};
 end
 
@@ -91,7 +94,7 @@ always @(posedge clk) if ( clk_en ) begin // phase_calculation_II
 		default:dt1_kf_III	<=	{ 1'b0, keycode_II };
 	endcase
 	dt1_III     <= dt1_II;
-	case ( block_I )
+	case ( block_II )
 		3'd0: phinc_III <= { 7'd0, fnum_II[11:2] };
 		3'd1: phinc_III <= { 6'd0, fnum_II[11:1] };
 		3'd2: phinc_III <= { 5'd0, fnum_II };
