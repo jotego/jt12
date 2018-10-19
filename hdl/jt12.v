@@ -50,7 +50,7 @@ wire	[ 4:0]	ar_II;
 wire	[ 4:0]	d1r_II;
 wire	[ 4:0]	d2r_II;
 wire	[ 3:0]	rr_II;
-wire	[ 3:0]	d1l;
+wire	[ 3:0]	d1l_I;
 wire	[ 1:0]	ks_III;
 // SSG operation
 wire			ssg_en_II;
@@ -149,7 +149,7 @@ jt12_mmr u_mmr(
 	.d1r_II		( d1r_II	),
 	.d2r_II		( d2r_II	),
 	.rr_II		( rr_II		),
-	.d1l		( d1l		),
+	.d1l_I		( d1l_I		),
 	.ks_III		( ks_III	),
 
 	.eg_stop	( eg_stop	),	
@@ -234,7 +234,7 @@ jt12_eg u_eg(
 	.rate1_II		( d1r_II		), // decay   rate
 	.rate2_II		( d2r_II		), // sustain rate
 	.rrate_II		( rr_II			), // release rate
-	.d1l			( d1l			), // sustain level
+	.d1l_I			( d1l_I			), // sustain level
 	.ks_III			( ks_III		), // key scale
 	// SSG operation
 	.ssg_en_II		( ssg_en_II		),

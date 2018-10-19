@@ -80,7 +80,7 @@ module jt12_mmr(
 	output	[ 4:0]	d1r_II,
 	output	[ 4:0]	d2r_II,
 	output	[ 3:0]	rr_II,
-	output	[ 3:0]	d1l,
+	output	[ 3:0]	d1l_I,
 	output	[ 1:0]	ks_III,
 	// SSG operation
 	output			ssg_en_II,
@@ -377,7 +377,7 @@ jt12_reg u_reg(
 	.d1r_II		(d1r_II		), // decay   rate
 	.d2r_II		(d2r_II		), // sustain rate
 	.rr_II		(rr_II		),	// release rate
-	.d1l		(d1l		),   // sustain level
+	.d1l_I		(d1l_I		),   // sustain level
 	.ks_III		(ks_III		),	   // key scale
 	// SSG operation
 	.ssg_en_II	( ssg_en_II	),

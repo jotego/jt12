@@ -58,7 +58,7 @@ module jt12_eg (
 	input		[4:0]	rate1_II, // decay   rate
 	input		[4:0]	rate2_II, // sustain rate
 	input		[3:0]	rrate_II, // release rate
-	input		[3:0]	d1l,   // sustain level
+	input		[3:0]	d1l_I,   // sustain level
 	input		[1:0]	ks_III,	   // key scale
 	// SSG operation
 	input				ssg_en_II,
@@ -130,10 +130,10 @@ reg		ar_off_III;
 //	Register Cycle I
 
 always @(posedge clk) if( clk_en ) begin
-	if( d1l == 4'd15 )
+	if( d1l_I == 4'd15 )
 		d1level_II <= 5'h1f; // 93dB
 	else
-		d1level_II <= {1'b0, d1l};
+		d1level_II <= {1'b0, d1l_I};
 end
 
 //	Register Cycle II
@@ -495,7 +495,7 @@ jt12_sh #(.width(10), .stages(12-8)) u_padding(
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 // Shift registers
-
+/* verilator lint_off PINMISSING */
 jt12_sh24 #( .width(1) ) u_ssgen(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
@@ -504,6 +504,7 @@ jt12_sh24 #( .width(1) ) u_ssgen(
 	.st6	( ssg_en_VIII ), // note that din is *_II
 	.st24	( ssg_en_out  )
 );
+/* verilator lint_on PINMISSING */
 
 jt12_sh #( .width(1), .stages(6) ) u_ssgattsh(
 	.clk	( clk			),
@@ -576,6 +577,7 @@ jt12_sh/*_rst*/ #( .width(3), .stages(18)/*, .rstval(1'b1)*/ ) u_statesh(
 );
 
 `ifdef SIMULATION
+/* verilator lint_off PINMISSING */
 reg [4:0] sep24_cnt;
 
 wire [2:0] state_ch0s1, state_ch1s1, state_ch2s1, state_ch3s1,
@@ -625,7 +627,7 @@ sep24 #( .width(3), .pos0(0) ) stsep
 	.ch4s4 (state_ch4s4),
 	.ch5s4 (state_ch5s4)
 );
-
+/* verilator lint_on PINMISSING */
 `endif
 
 endmodule

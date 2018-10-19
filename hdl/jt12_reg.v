@@ -93,7 +93,7 @@ module jt12_reg(
 	output		[4:0]	d1r_II, // decay   rate
 	output		[4:0]	d2r_II, // sustain rate
 	output		[3:0]	rr_II,	// release rate
-	output		[3:0]	d1l,   // sustain level
+	output		[3:0]	d1l_I,   // sustain level
 	output		[1:0]	ks_III,	   // key scale
 	output				ssg_en_II,
 	output		[2:0]	ssg_eg_II,
@@ -321,14 +321,14 @@ assign regop_in = {
 	up_amen_op	? amen_in: amsen_VII,// 1 - 22
 	up_d1r_op	? d1r_in : d1r_II,	// 5 - 25
 	up_d2r_op	? d2r_in : d2r_II,	// 5 - 30
-	up_d1l_op	? d1l_in : d1l,		// 4 - 34
+	up_d1l_op	? d1l_in : d1l_I,	// 4 - 34
 	up_rr_op	? rr_in	 : rr_II,	// 4 - 38
 	up_ssg_op	? ssg_in[3]   : ssg_en_II,	// 1 - 39
 	up_ssg_op	? ssg_in[2:0] : ssg_eg_II	// 3 - 42
 };
 
 assign { tl_VII, dt1_II, mul_V, ks_III, 
-			ar_II,	amsen_VII, d1r_II, d2r_II, d1l, rr_II,
+			ar_II,	amsen_VII, d1r_II, d2r_II, d1l_I, rr_II,
 			ssg_en_II,	ssg_eg_II 				} = regop_out;
 
 

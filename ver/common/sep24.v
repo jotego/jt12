@@ -40,7 +40,7 @@ module sep24 #(parameter width=10, parameter pos0=5'd0)
 reg [4:0] cntadj;
 
 always @(*)
-	cntadj <= (cnt+pos0)%24;
+	cntadj = (cnt+pos0)%24;
 
 always @(posedge clk) if( clk_en ) begin
 	case( cntadj )
@@ -71,6 +71,7 @@ always @(posedge clk) if( clk_en ) begin
 		5'h15: ch3s4 <= mixed; 			   
 		5'h16: ch4s4 <= mixed;
 		5'h17: ch5s4 <= mixed; 		   
+		default:;
 	endcase
 	
 	alland <= 	({width{~mask[0]}} | ch0s1) &

@@ -1,5 +1,7 @@
 `timescale 1ns / 1ps
 
+/* verilator lint_off STMTDLY */
+
 module jt12_test;
 
 reg	rst;
@@ -80,64 +82,56 @@ always @(posedge clk)
 
 always @(*)
 	if( cycles < 104 )
-		arate <= 5'h1f;
+		arate = 5'h1f;
 	else
-		arate <= cnt24==5'd0 ? 5'd31 : 5'd0;
+		arate = cnt24==5'd0 ? 5'd31 : 5'd0;
 
-wire	[9:0]	eg;
-wire	phase_cnt_rst;
+wire	[9:0]	eg_IX;
+wire	pg_rst_III;
 
-jt12_envelope uut(
-	.test_eg(test_eg),
+jt12_eg uut(
+	// .test_eg(test_eg),
 	.rst	(rst),
 	.clk	(clk),
 	.clk_en	(1'b1),
 	.zero	(zero),
+	.eg_stop(1'b0),
 // envelope configuration
 	.keycode_III(keycode_III),
-	.arate(arate), // attack  rate
-	.rate1(rate1), // decay   rate
-	.rate2(rate2), // sustain rate
-	.rrate(rrate), // release rate
-	.d1l(d1l),   // sustain level
-	.ks_III(ks_III),	   // key scale
+	.arate_II	(arate), // attack  rate
+	.rate1_II	(rate1), // decay   rate
+	.rate2_II	(rate2), // sustain rate
+	.rrate_II	(rrate), // release rate
+	.d1l_I		(d1l),   // sustain level
+	.ks_III		(ks_III),	   // key scale
 // SSG operation
-	.ssg_en_I ( cnt24==5'd0 ? ssg_eg_II[3]   : 1'h0 ),
-	.ssg_eg_II( cnt24==5'd1 ? ssg_eg_II[2:0] : 3'h0 ),
+	.ssg_en_II	( cnt24==5'd0 ? ssg_eg_II[3]   : 1'h0 ),
+	.ssg_eg_II	( cnt24==5'd1 ? ssg_eg_II[2:0] : 3'h0 ),
 // envelope operation
-	.keyon	(keyon),
-	.keyoff	(keyoff),
+	.keyon_II	(keyon),
 // envelope number
-	.am		(am),
-	.tl_VII	(tl_VII),
-	.ams_VII(ams_VII),
-	.amsen_VII(amsen_VII),
+	.am			(am),
+	.tl_VII		(tl_VII),
+	.ams_VII	(ams_VII),
+	.amsen_VII	(amsen_VII),
 
-	.eg(eg),
-	.phase_cnt_rst(phase_cnt_rst)
+	.eg_IX		(eg_IX),
+	.pg_rst_III	(pg_rst_III)
 );
 
 wire [9:0] eg0;
 wire [9:0] rest_and, rest_or;
 
-jt12_opsync u_opsync(
-	.rst	( rst		),
-	.clk	( clk		),
-    .clk6   ( clk6      ),
-	.s1_enters	( s1_enters ),
-	.s2_enters	( s2_enters ),
-	.s3_enters	( s3_enters ),
-	.s4_enters	( s4_enters )
-);    
-
+/* verilator lint_off PINMISSING */
 sep24 #(.width(10),.pos0(8)) sep(
 	.clk	( clk	),
-	.mixed	( eg	),
+	.clk_en	( 1'b1	),
+	.mixed	( eg_IX	),
 	.cnt	( cnt24	),
-	.ch0op0	( eg0	),
+	.ch0s1	( eg0	),
 	.alland	( rest_and ),
 	.allor	( rest_or  ),
 	.mask	( ~24'b1 )
 );
-
+/* verilator lint_on PINMISSING */
 endmodule
