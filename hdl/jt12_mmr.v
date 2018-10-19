@@ -217,6 +217,7 @@ always @(posedge clk) begin : memory_mapped_registers
 	end else begin
 		// WRITE IN REGISTERS
 		if( (!old_write && write) /*&& !busy*/ ) begin
+			// if busy is not always set high, some games do not perform well (Altered Beast)
 			busy <= 1'b1;
 			if( !addr[0] ) begin
 				selected_register <= din;
