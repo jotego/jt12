@@ -163,9 +163,9 @@ always @(posedge clk) if ( clk_en ) begin // phase_calculation_IV
 		phinc_V	<=	phinc_IV;
 	else begin
 		if( !dt1_IV[2] )
-			phinc_V	<=	phinc_IV + dt1_offset_IV;
+			phinc_V	<=	phinc_IV + { 12'd0, dt1_offset_IV };
 		else
-			phinc_V	<=	phinc_IV - dt1_offset_IV;
+			phinc_V	<=	phinc_IV - { 12'd0, dt1_offset_IV };
 	end
 end
 

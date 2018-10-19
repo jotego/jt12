@@ -450,7 +450,7 @@ always @(*) begin : sum_eg_and_tl
 	endcase
 	`ifdef TEST_SUPPORT
 	if( test_eg && tl_VII!=7'd0 )
-		sum_eg_tl = 11'd0;
+		sum_eg_tl = 12'd0;
 	else
 	`endif
 		sum_eg_tl = { 1'b0, tl_VII,   3'd0 }

@@ -1,0 +1,121 @@
+#!/bin/bash
+
+TOP=jt12
+DUMPSIGNALS=DONT
+DUMPSOUND=DONTDUMPSOUND
+DUMPLFO=DONTDUMPLFO
+LIMITTIME="LIMITTIME=100000"
+EXTRA=
+POSTPROC=NOTPOSTPROC
+RANDWAIT=0
+TIMERONLY=NOTTIMERONLY
+TEST_NAME=NOTESTNAME
+SSG_TEST=NOSSG_TEST
+# use SIMULATION="-DSIMULATION" to enable simulation statements
+SIMULATION=
+
+while [ $# -gt 0 ]; do
+	if [ $1 = "-w" ]; then
+		echo "Signal dump enabled"
+		DUMPSIGNALS=DUMPSIGNALS
+		shift
+		continue
+	fi
+	if [ $1 = "-snd" ]; then
+		echo "Sound dump enabled"
+		DUMPSOUND=DUMPSOUND
+		shift
+		continue
+	fi	
+	if [ $1 = "-nosim" ]; then
+		echo "simulation verilog options disabled"
+		SIMULATION=NOSIMULATION
+		shift
+		continue
+	fi
+	if [ $1 = "-lint" ]; then
+		verilator -f gather.f --lint-only -I../../hdl --top-module $TOP -DRANDWAIT=$RANDWAIT
+		exit $?
+	fi
+	if [ $1 = "-timeronly" ]; then
+		echo "Timer only"
+		TIMERONLY=TIMERONLY
+		shift
+		continue
+    fi
+	if [ $1 = "-post" ]; then
+		echo "Post-processing will be included"
+		POSTPROC=POSTPROC
+		shift
+		continue
+    fi
+	if [ $1 = "-time" ]; then
+		shift
+		echo "Only simulates " $1 "ms"
+		LIMITTIME="LIMITTIME="$1
+		shift
+		continue
+	fi
+	if [ $1 = "-randwait" ]; then
+		echo "Random wait enabled"
+		RANDWAIT=1
+		shift
+		continue
+	fi
+    if [[ $1 = "-lfo" || $1 = "-pcm" || $1 = "-dr" || $1 = "-amfreq" || $1 = "-am"
+    	|| $1 = "-fnumorder" || $1 = "-acc" || $1 = "-alg"
+		|| $1 = "-tone00" || $1 = "-dac" || $1 = "-keyon"
+		|| $1 = "-keyon2" || $1 = "-mmr" || $1 = "-fnum" 
+		|| $1 = "-burst" || $1 = "-csm" || $1 = "-timerB" 
+		|| $1 = "-ssg" || $1 = "-ssg2" || $1 = "-powerup" || $1 = "-gym" ]]; then
+    	EXTRA=$EXTRA" "$1
+    	if [ $1 = "-gym" ]; then
+    		shift
+    		if [ ! -e $1 ]; then
+    			echo "Cannot open file " $1 " for GYM parsing"
+    			exit 1
+    		fi
+    		EXTRA=$EXTRA" "$1
+    	fi
+		if [[ $1 = "-amfreq" ]]; then
+			echo "-amfreq: timer only"
+			TIMERONLY=TIMERONLY
+			DUMPLFO=DUMPLFO
+		fi
+		if [[ $1 = "-ssg" || $1 = "-ssg2" ]]; then
+			SSG_TEST=SSG_TEST
+		fi		
+		if [[ $1 = "-fnumorder" || $1 = "-timerB" ]]; then
+			echo "Dump only timers"
+			TIMERONLY=TIMERONLY
+		fi
+		if [[ $1 = "-keyon" || $1 = "-keyon2" ]]; then
+			echo "-keyon2: keep only waveforms of OP and EG"
+			TEST_NAME=KEYON_TEST
+		fi
+		if [[ $1 = "-mmr" ]]; then
+			echo "It is not recommended to use -w with -mmr as the output is huge"
+			# skip the argument of number of cases
+			shift
+			EXTRA=$EXTRA" "$1
+			TEST_NAME=MMR_TEST
+		fi
+        shift
+        continue
+    fi
+	echo Unrecognized option
+    exit 1
+done
+
+date
+
+rm -rf obj_dir
+# export VERILATOR_ROOT=$(which verilator)
+
+verilator --cc -f gather.f --top-module $TOP -I../../hdl  \
+	-DDISPLAY_STEP -D$DUMPSIGNALS -DTEST_SUPPORT \
+    $SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
+	-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
+	-D$POSTPROC -DICARUS --exe jt12_test.cpp
+
+make -j -C obj_dir -f Vjt12.mk Vjt12

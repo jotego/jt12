@@ -309,7 +309,7 @@ end
 
 always @(posedge clk) if( clk_en ) begin
 	// REGISTER CYCLE 11
-	op_XII <= ({ test_214, shifter_3 } ^ {14{signbit_XI}}) + signbit_XI;               
+	op_XII <= ({ test_214, shifter_3 } ^ {14{signbit_XI}}) + {13'd0,signbit_XI};               
 	// REGISTER CYCLE 12
 	// Extra register, take output after here
     op_result_internal <= op_XII;   

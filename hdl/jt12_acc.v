@@ -142,14 +142,15 @@ always @(posedge clk)
     end
 
 			
-reg  signed [8:0] next, opsum, prev;
-wire signed [9:0] opsum10 = next+total;
+reg signed [8:0] next, opsum, prev;
+reg	signed [9:0] opsum10;
 
 always @(*) begin
 	next = sum_en ? op_result : 9'd0;
 	if( s3_enters )
 		opsum = (ch6op && pcm_en) ? { ~pcm[8], pcm[7:0] } : next;
 	else begin
+		opsum10 = next+total;
 		if( sum_en && !(ch6op && pcm_en) )
 			if( limiter_en ) begin
 				if( opsum10[9]==opsum10[8] )
