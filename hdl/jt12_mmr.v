@@ -170,8 +170,8 @@ reg [10:0] fnum_ch3op2, fnum_ch3op3, fnum_ch3op1;
 reg [ 5:0] latch_ch3op2,  latch_ch3op3,  latch_ch3op1;
 
 
-reg [2:0] up_ch;
-reg [1:0] up_op;
+reg [2:0] pre_up_ch, up_ch;
+reg [1:0] pre_up_op, up_op;
 
 reg old_write;
 reg [7:0] din_copy;
@@ -217,15 +217,13 @@ always @(posedge clk) begin : memory_mapped_registers
 	end else begin
 		// WRITE IN REGISTERS
 		if( (!old_write && write) /*&& !busy*/ ) begin
-			// if busy is not always set high, some games do not perform well (Altered Beast)
-			busy <= 1'b1;
 			if( !addr[0] ) begin
 				selected_register <= din;
-				up_ch	<= {addr[1], din[1:0]};
-				up_op	<= din[3:2]; // 0=S1,1=S3,2=S2,3=S4
+				pre_up_ch	<= {addr[1], din[1:0]};
+				pre_up_op	<= din[3:2]; // 0=S1,1=S3,2=S2,3=S4
 			end else begin
 				// Global registers
-				// busy <= 1'b1; // only set for data port writes, according to Eke (spritesmind.net)
+				busy <= 1'b1; // only set for data port writes, according to Eke (spritesmind.net)
 				din_copy <= din;
 				if( selected_register < 8'h30 ) begin
 					case( selected_register)
@@ -262,6 +260,8 @@ always @(posedge clk) begin : memory_mapped_registers
 					endcase
 				end
                 else if( selected_register[1:0]!=2'b11 ) begin
+                	up_ch <= pre_up_ch;
+                	up_op <= pre_up_op;
 					// channel registers
 					if( selected_register >= 8'hA0 ) begin
 						case( selected_register )
