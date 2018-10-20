@@ -21,21 +21,19 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
-	if [ $1 = "-time" ]; then
-		shift
-		echo "Only simulates " $1 "ms"
-		LIMITTIME="LIMITTIME="$1
-		shift
-		continue
-	fi
-
 	if [ $1 = "-gym" ]; then
 		shift
 		if [ ! -e $1 ]; then
 			echo "Cannot open file " $1 " for GYM parsing"
 			exit 1
 		fi
-		EXTRA=$EXTRA" "$1
+		EXTRA=$EXTRA" --gym "$1
+		shift
+		continue
+	fi
+	if [ $1 = "-time" ]; then
+		shift
+		EXTRA=$EXTRA" --time "$1
 		shift
 		continue
 	fi
@@ -52,11 +50,11 @@ verilator --cc -f gather.f --top-module $TOP -I../../hdl  \
 	-DDISPLAY_STEP --trace -DTEST_SUPPORT \
     $SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 	-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
-	-D$POSTPROC -DICARUS --exe jt12_test.cpp
+	-D$POSTPROC -DICARUS -DFASTDIV --exe jt12_test.cpp
 
 if ! make -j -C obj_dir -f Vjt12.mk Vjt12; then
 	exit $?
 fi
 echo Simulation start...
-echo obj_dir/Vjt12 $DUMPSIGNALS --gym $EXTRA
-obj_dir/Vjt12 $DUMPSIGNALS --gym $EXTRA
+echo obj_dir/Vjt12 $DUMPSIGNALS $EXTRA
+obj_dir/Vjt12 $DUMPSIGNALS $EXTRA

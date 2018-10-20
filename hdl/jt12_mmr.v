@@ -183,7 +183,11 @@ always @(posedge clk)
 always @(posedge clk) begin : memory_mapped_registers
 	if( rst ) begin
 		selected_register 	<= 8'h0;
-		cen_cnt_lim			<= 3'd5;
+		`ifdef FASTDIV
+			cen_cnt_lim			<= 3'd1; // used mainly for sims
+		`else
+			cen_cnt_lim			<= 3'd5;
+		`endif
 		busy				<= 1'b0;
 		up_ch				<= 3'd0;
 		up_op				<= 2'd0;
