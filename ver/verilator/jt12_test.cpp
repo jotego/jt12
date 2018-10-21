@@ -9,9 +9,9 @@
 
 using namespace std;
 
-const int PERIOD=132;
-const int SEMIPERIOD=66;
-const int CLKSTEP=33;
+const int PERIOD=784; // use with -DFASTDIV
+const int SEMIPERIOD=392;
+const int CLKSTEP=196;
 
 vluint64_t main_time = 0;	   // Current simulation time
 // This is a 64-bit integer to reduce wrap over issues and
@@ -24,6 +24,7 @@ double sc_time_stamp () {	   // Called by $time in Verilog
 
 class Gym {
 	ifstream file;	
+	int max_PSG_warning;
 public:
 	char cmd, val, addr;
 	int count, count_limit;
@@ -37,6 +38,7 @@ void Gym::open(const char* filename, int limit=-1) {
 	cout << "Open " << filename << '\n';
 	cmd = val = addr = 0;
 	count = 0;
+	max_PSG_warning = 10;
 }
 
 int Gym::parse() {
@@ -54,7 +56,11 @@ int Gym::parse() {
 			case 3: {
 				file.read(&c,1);
 				unsigned p = (unsigned char)c;
-				cerr << "Attempt to write to PSG port " << p << endl;
+				if(max_PSG_warning>0) {
+					max_PSG_warning--;
+					cerr << "Attempt to write to PSG port " << p << endl;
+					if(max_PSG_warning==0) cerr << "No more PSG warnings will be shown\n";
+				}
 				continue;
 			}
 			case 1:
@@ -239,10 +245,8 @@ int main(int argc, char** argv, char** env) {
 				int16_t snd[2];
 				// snd[0] = (top->snd_left & 0x800) ? (top->snd_left|0xf000) : top->snd_left;
 				// snd[1] = (top->snd_right & 0x800) ? (top->snd_right|0xf000) : top->snd_right;
-				snd[0] = top->snd_left;
-				snd[1] = top->snd_right;
-				if ( snd[0] > 2047 ) snd[0] |= 0xf000;
-				if ( snd[1] > 2047 ) snd[1] |= 0xf000;
+				snd[0] = top->snd_left << 4;
+				snd[1] = top->snd_right << 4;
 				// skip initial set of zero's
 				if( skip_zeros && snd[0]==0 && snd[1] == 0 ) continue;
 				else skip_zeros=false;
@@ -271,7 +275,7 @@ int main(int argc, char** argv, char** env) {
 					break; // parse register
 				case 1: 
 					// cout << "Waiting\n";
-					wait=main_time+( trace ? 16700 : 16700000/3); // Divided by 3 because
+					wait=main_time+( trace ? 16700 : 16700000); // Divided by 3 because
 						// of FASTDIV in Verilog, so clock divider is 2 instead of 6
 					timeout=0;
 					break;// wait 16.7ms					

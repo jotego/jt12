@@ -110,7 +110,12 @@ reg cen_int;
 
 always @(negedge clk) begin
 	cen_int <= cen_cnt == cen_cnt_lim;
+	`ifdef FASTDIV
+	// always enabled for fast sims (use with GYM output, timer will not work well)
+	clk_en <= 1'b1;
+	`else
 	clk_en  <= cen & cen_int;	
+	`endif
 end
 
 always @(posedge clk)
@@ -183,11 +188,7 @@ always @(posedge clk)
 always @(posedge clk) begin : memory_mapped_registers
 	if( rst ) begin
 		selected_register 	<= 8'h0;
-		`ifdef FASTDIV
-			cen_cnt_lim			<= 3'd1; // used mainly for sims
-		`else
-			cen_cnt_lim			<= 3'd5;
-		`endif
+		cen_cnt_lim			<= 3'd5;
 		busy				<= 1'b0;
 		up_ch				<= 3'd0;
 		up_op				<= 2'd0;
