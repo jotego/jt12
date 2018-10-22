@@ -51,7 +51,6 @@ module jt12_reg(
 	input			up_d1l,
 	input			up_ssgeg,
 
-	output			busy,
 	output	reg		ch6op,	// 1 when the operator belongs to CH6
 	
 	// CH3 Effect-mode operation
@@ -107,11 +106,8 @@ module jt12_reg(
 );
 
 
-reg	 [4:0] cnt;
 reg  [1:0] next_op, cur_op;
 reg  [2:0] next_ch, cur_ch;
-reg busy_op; 
-reg up_keyon_long;
 
 `ifdef SIMULATION
 // These signals need to operate during rst
@@ -120,10 +116,8 @@ reg up_keyon_long;
 initial begin
 	cur_op = 2'd0;
 	cur_ch = 3'd0;
-	cnt		= 5'h0;
 	last	= 1'b0;
 	zero	= 1'b1;
-	busy_op	= 1'b0;
 	up_keyon_long = 1'b0;
 end
 `endif
@@ -238,32 +232,16 @@ wire up_rr_op	= up_d1l	& update_op_II;
 //wire up_ssgen_op = up_ssgeg	& update_op_I;
 wire up_ssg_op	= up_ssgeg	& update_op_II;
 
-wire up = 	up_alg 	| up_block 	| up_fnumlo | up_pms |
-			up_dt1 	| up_tl 	| up_ks_ar	| up_amen_d1r | 
-			up_d2r	| up_d1l 	| up_ssgeg  | up_keyon;			
-
 always @(*) begin
 	// next = cur==5'd23 ? 5'd0 : cur +1'b1;
 	next_op = cur_ch==3'd6 ? cur_op+1'b1 : cur_op;
 	next_ch = cur_ch[1:0]==2'b10 ? cur_ch+2'd2 : cur_ch+1'd1;
 end
 
-assign	busy = busy_op;
-
 always @(posedge clk) begin : up_counter
 	if( clk_en ) begin
 		{ cur_op, cur_ch }	<= { next_op, next_ch };
 		zero 	<= next == 5'd0;
-		last	<= up;
-		if( up && !last ) begin
-			cnt		<= cur;
-			busy_op	<= 1'b1;
-			up_keyon_long <= up_keyon;
-		end
-		else if( cnt == cur ) begin
-			busy_op <= 1'b0;
-			up_keyon_long <= 1'b0;
-		end
 	end
 end
 
@@ -275,7 +253,7 @@ jt12_kon u_kon(
 	.keyon_ch	( keyon_ch	),
 	.cur_op		( cur_op	),
 	.cur_ch		( cur_ch	),
-	.up_keyon	( up_keyon_long	),
+	.up_keyon	( up_keyon	),
 	.csm		( csm		),
 	// .flag_A		( flag_A	),
 	.overflow_A	( overflow_A),
