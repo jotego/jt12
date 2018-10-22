@@ -215,11 +215,9 @@ always @(posedge clk) begin : memory_mapped_registers
 				// Global registers
 				din_copy <= din;
 				up_keyon <= selected_register == REG_KON;
-				if( selected_register < 8'h30 ) begin
-					up_opreg <= 7'h0;
-					up_chreg <= 4'h0;
-					case( selected_register)
-					// registros especiales
+            	up_ch <= {addr[1], selected_register[1:0]};
+            	up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
+				case( selected_register)
 					//REG_TEST:	lfo_rst <= 1'b1; // regardless of din
 					`ifdef TEST_SUPPORT
 					REG_TEST2:	{test_op0, test_eg} <= din[1:0];
@@ -247,53 +245,32 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_CLK_N6:	cen_cnt_lim <= 3'd5;
 					REG_CLK_N3:	cen_cnt_lim <= 3'd2;
 					REG_CLK_N2:	cen_cnt_lim <= 3'd1;
+					// CH3 special registers
+					8'hA9: { block_ch3op1, fnum_ch3op1 } <= { latch_ch3op1, din };
+					8'hA8: { block_ch3op3, fnum_ch3op3 } <= { latch_ch3op3, din };
+					8'hAA: { block_ch3op2, fnum_ch3op2 } <= { latch_ch3op2, din };
+					8'hAD: latch_ch3op1 <= din[5:0];
+					8'hAC: latch_ch3op3 <= din[5:0];
+					8'hAE: latch_ch3op2 <= din[5:0];
 					default:;	// avoid incomplete-case warning
-					endcase
-				end
-                else begin
-                	if( selected_register[1:0]!=2'b11 ) begin
-	                	up_ch <= {addr[1], selected_register[1:0]};;
-	                	up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
-						// channel registers
-						if( selected_register >= 8'hA0 ) begin
-							up_opreg <= 7'h0;
-							case( selected_register )
-								8'hA0, 8'hA1, 8'hA2:	up_chreg <= 4'h1; // up_fnumlo
-								8'hA4, 8'hA5, 8'hA6:	up_chreg <= 4'h2; // up_block
-								// CH3 special registers
-								8'hA9: { block_ch3op1, fnum_ch3op1 } <= { latch_ch3op1, din };
-	                            8'hA8: { block_ch3op3, fnum_ch3op3 } <= { latch_ch3op3, din };
-	                            8'hAA: { block_ch3op2, fnum_ch3op2 } <= { latch_ch3op2, din };
-	                            8'hAD: latch_ch3op1 <= din[5:0];
-								8'hAC: latch_ch3op3 <= din[5:0];
-	                            8'hAE: latch_ch3op2 <= din[5:0];
-								// FB + Algorithm
-	                            8'hB0, 8'hB1, 8'hB2:	up_chreg <= 4'h4; // up_alg
-								8'hB4, 8'hB5, 8'hB6:	up_chreg <= 4'h8; // up_pms
-								default: up_chreg <= 4'h0;	// avoid incomplete-case warning
-							endcase
-						end
-						else
-						// operator registers
-						begin
-							up_chreg <= 4'h0;
-							case( selected_register[7:4] )
-								4'h3: up_opreg <= 7'h01; // up_dt1
-								4'h4: up_opreg <= 7'h02; // up_tl
-								4'h5: up_opreg <= 7'h04; // up_ks_ar
-								4'h6: up_opreg <= 7'h08; // up_amen_d1r
-								4'h7: up_opreg <= 7'h10; // up_d2r
-								4'h8: up_opreg <= 7'h20; // up_d1l
-								4'h9: up_opreg <= 7'h40; // up_ssgeg
-								default:up_opreg <= 7'h0;	// avoid incomplete-case warning
-							endcase
-						end
-	                end
-	                else begin
-	                	up_opreg <= 7'd0;
-	                	up_chreg <= 4'd0;
-	                end
-	            end
+				endcase
+            	casez( selected_register )
+					// channel registers
+					8'hA0, 8'hA1, 8'hA2:    { up_chreg, up_opreg } <= { 4'h1, 7'd0 }; // up_fnumlo
+					8'hA4, 8'hA5, 8'hA6:	{ up_chreg, up_opreg } <= { 4'h2, 7'd0 }; // up_block
+					// FB + Algorithm
+					8'hB0, 8'hB1, 8'hB2: { up_chreg, up_opreg } <= { 4'h4, 7'd0 }; // up_alg
+					8'hB4, 8'hB5, 8'hB6: { up_chreg, up_opreg } <= { 4'h8, 7'd0 }; // up_pms
+					// operator registers
+					8'h3?: { up_chreg, up_opreg } <= { 4'h0, 7'h01 }; // up_dt1
+					8'h4?: { up_chreg, up_opreg } <= { 4'h0, 7'h02 }; // up_tl
+					8'h5?: { up_chreg, up_opreg } <= { 4'h0, 7'h04 }; // up_ks_ar
+					8'h6?: { up_chreg, up_opreg } <= { 4'h0, 7'h08 }; // up_amen_d1r
+					8'h7?: { up_chreg, up_opreg } <= { 4'h0, 7'h10 }; // up_d2r
+					8'h8?: { up_chreg, up_opreg } <= { 4'h0, 7'h20 }; // up_d1l
+					8'h9?: { up_chreg, up_opreg } <= { 4'h0, 7'h40 }; // up_ssgeg
+					default: { up_chreg, up_opreg } <= { 4'h0, 7'h0 };
+            	endcase // selected_register
 			end
 		end
 		else if(clk_en) begin /* clear once-only bits */
@@ -304,7 +281,7 @@ always @(posedge clk) begin : memory_mapped_registers
 	end
 end
 
-reg [4:0] busy_cnt;
+reg [4:0] busy_cnt; // busy lasts for 32 synth clock cycles, like in real chip
 
 always @(posedge clk)
 	if( rst ) begin
@@ -316,7 +293,7 @@ always @(posedge clk)
 			busy <= 1'b1;
 			busy_cnt <= 5'd0;
 		end
-		else begin
+		else if(clk_en) begin
 			if( busy_cnt == 5'd31 ) busy <= 1'b0;
 			busy_cnt <= busy_cnt+5'd1;
 		end
