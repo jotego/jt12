@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <string>
 #include "Vjt12.h"
 #include "verilated_vcd_c.h"
 #include "VGMParser.hpp"
@@ -100,7 +101,24 @@ int main(int argc, char** argv, char** env) {
 
 	for( int k=0; k<argc; k++ ) {
 		if( string(argv[k])=="--trace" ) { trace=true; continue; }
-		if( string(argv[k])=="--gym" ) { gym = new Gym(); gym->open(argv[++k]); continue; }
+		if( string(argv[k])=="--gym" ) { 
+			string filename(argv[++k]);
+			auto k = filename.find_last_of('.');
+			if( k == string::npos ) {
+				cout << "The filename must end in .gym or .vgm\n";
+				return 1;
+			}
+			if( filename.substr(k)==".gym") {
+				gym = new Gym(); gym->open(argv[k]); 
+				continue; 
+			}
+			if( filename.substr(k)==".vgm") {
+				gym = new VGMParser(); gym->open(argv[k]); 
+				continue; 
+			}
+			cout << "The filename must end in .gym or .vgm\n";
+			return 1;
+		}
 		if( string(argv[k])=="--time" ) { 
 			int aux;
 			sscanf(argv[++k],"%d",&aux);
