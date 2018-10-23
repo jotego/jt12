@@ -237,8 +237,9 @@ int main(int argc, char** argv, char** env) {
 				case 1: 
 					// cout << "Waiting\n";
 					wait=gym->wait;
-					wait*=10000000/441; // sample period in ns
-					if(trace) wait/=3;
+					wait*=100000/441; // sample period in ns
+					cout << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
+					// if(trace) wait/=3;
 					wait+=main_time;
 					timeout=0;
 					break;// wait 16.7ms					

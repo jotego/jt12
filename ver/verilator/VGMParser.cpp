@@ -36,7 +36,10 @@ int VGMParser::parse() {
 				return 0;
 			case 0x61:
 				file.read( extra, 2);
-				wait = extra[1] | ( extra[0]<<8);
+				wait = extra[0];
+				wait <<= 8;
+				wait |= extra[1];
+				wait&=0xffff;
 				return 1; // request wait
 			case 0x62:
 				wait = 735;
