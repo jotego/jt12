@@ -103,16 +103,16 @@ int main(int argc, char** argv, char** env) {
 		if( string(argv[k])=="--trace" ) { trace=true; continue; }
 		if( string(argv[k])=="--gym" ) { 
 			string filename(argv[++k]);
-			auto k = filename.find_last_of('.');
-			if( k == string::npos ) {
+			auto ext = filename.find_last_of('.');
+			if( ext == string::npos ) {
 				cout << "The filename must end in .gym or .vgm\n";
 				return 1;
 			}
-			if( filename.substr(k)==".gym") {
+			if( filename.substr(ext)==".gym") {
 				gym = new Gym(); gym->open(argv[k]); 
 				continue; 
 			}
-			if( filename.substr(k)==".vgm") {
+			if( filename.substr(ext)==".vgm") {
 				gym = new VGMParser(); gym->open(argv[k]); 
 				continue; 
 			}
@@ -237,7 +237,7 @@ int main(int argc, char** argv, char** env) {
 				case 1: 
 					// cout << "Waiting\n";
 					wait=gym->wait;
-					wait*=1000000000/44100; // sample period in ns
+					wait*=10000000/441; // sample period in ns
 					if(trace) wait/=3;
 					wait+=main_time;
 					timeout=0;
@@ -257,7 +257,7 @@ finish:
 	fsnd.seekp(40);
 	number32 = (int32_t)file_length-44;
 	fsnd.write( (char*)&number32, 4);
-	cout << "$finish: #" << dec << main_time << '\n';
+	cout << "$finish at " << dec << main_time/1000000 << "ms = " << main_time << " ns\n";
 	if(trace) tfp->close();	
 	delete top;
  }
