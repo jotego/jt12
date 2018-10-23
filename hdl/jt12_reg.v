@@ -118,7 +118,6 @@ initial begin
 	cur_ch = 3'd0;
 	last	= 1'b0;
 	zero	= 1'b1;
-	up_keyon_long = 1'b0;
 end
 `endif
 

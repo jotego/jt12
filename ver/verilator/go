@@ -21,6 +21,12 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
+	if [ $1 = "-sim" ]; then
+		echo "Simulation signals enabled"
+		SIMULATION=-DSIMULATION
+		shift
+		continue
+	fi
 	if [ $1 = "-gym" ]; then
 		shift
 		if [ ! -e $1 ]; then
@@ -46,11 +52,13 @@ date
 # rm -rf obj_dir
 # export VERILATOR_ROOT=$(which verilator)
 
-verilator --cc -f gather.f --top-module $TOP -I../../hdl  \
+if ! verilator --cc -f gather.f --top-module $TOP -I../../hdl  \
 	-DDISPLAY_STEP --trace -DTEST_SUPPORT \
     $SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 	-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
-	-D$POSTPROC -DICARUS -DFASTDIV --exe jt12_test.cpp VGMParser.cpp
+	-D$POSTPROC -DICARUS -DFASTDIV --exe jt12_test.cpp VGMParser.cpp; then
+	exit $?
+fi
 
 if ! make -j -C obj_dir -f Vjt12.mk Vjt12; then
 	exit $?

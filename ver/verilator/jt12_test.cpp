@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <string>
+#include <list>
 #include "Vjt12.h"
 #include "verilated_vcd_c.h"
 #include "VGMParser.hpp"
@@ -31,9 +32,11 @@ class CmdWritter {
 	bool done;
 	int last_clk;
 	int state;
+	int watch_addr, watch_ch;
 public:
 	CmdWritter( Vjt12* _top );
 	void Write( int _addr, int _cmd, int _val );
+	void watch( int addr, int ch ) { watch_addr=addr; watch_ch=ch; }
 	void Eval();
 	bool Done() { return done; }
 };
@@ -51,6 +54,8 @@ void CmdWritter::Write( int _addr, int _cmd, int _val ) {
 	val  = _val;
 	done = false;
 	state = 0;
+	if( addr == watch_addr && cmd>=(char)0x30 && (cmd&0x3)==watch_ch )
+		cout << addr << '-' << watch_ch << " CMD = " << hex << (cmd&0xff) << " VAL = " << (val&0xff) << '\n';
 	// cout << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
 	// cout  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
 }
@@ -90,6 +95,8 @@ void CmdWritter::Eval() {
 	}
 	last_clk = clk;
 }
+
+struct YMcmd { int addr; int cmd; int val; };
 
 int main(int argc, char** argv, char** env) {
 	Verilated::commandArgs(argc, argv);
@@ -190,10 +197,19 @@ int main(int argc, char** argv, char** env) {
 	number16=16;
 	fsnd.write( (char*) &number16, 2);
 	fsnd.write( "data", 4 );
-	fsnd.seekp(44);
+	fsnd.seekp(44);	
 
+	// forced values
+	list<YMcmd> forced_values;
+	forced_values.push_back( {0, 0xb4, 0x40} );
+	forced_values.push_back( {0, 0xb5, 0x40} );
+	forced_values.push_back( {0, 0xb6, 0x40} );
+	forced_values.push_back( {1, 0xb4, 0x80} ); // canal malo
+	forced_values.push_back( {1, 0xb5, 0x40} );
+	forced_values.push_back( {1, 0xb6, 0x40} ); // no es
 	// main loop
 	CmdWritter writter(top);
+	writter.watch( 1, 0 ); // top bank, channel 0
 	bool skip_zeros=true;
 	while( forever || main_time < time_limit ) {
 		top->eval();
@@ -225,12 +241,27 @@ int main(int argc, char** argv, char** env) {
 			if( main_time < wait ) continue;
 			if( !writter.Done() ) continue;
 
+			if( !forced_values.empty() ) {
+				const YMcmd &c = forced_values.front();
+				cout << "Forced value\n";
+				writter.Write( c.addr, c.cmd, c.val );
+				forced_values.pop_front();
+				continue;
+			}
+
 			int action = gym->parse();
 			switch( action ) {
 				default: 
 					// cout << "File read\n";
 					goto finish;
 				case 0: 
+					if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
+					/*(gym->addr==0 && gym->cmd>=(char)0x30) || */
+					((gym->cmd&(char)0xf0)==(char)0x90)) {
+						 cout << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
+						break; // do not write to RL register
+					}
+					// cout << hex << (unsigned) gym->cmd << '\n';
 					writter.Write( gym->addr, gym->cmd, gym->val );
 					timeout = main_time + PERIOD*6*100;
 					break; // parse register
@@ -238,7 +269,7 @@ int main(int argc, char** argv, char** env) {
 					// cout << "Waiting\n";
 					wait=gym->wait;
 					wait*=100000/441; // sample period in ns
-					cout << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
+					// cout << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
 					// if(trace) wait/=3;
 					wait+=main_time;
 					timeout=0;
