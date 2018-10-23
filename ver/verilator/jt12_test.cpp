@@ -4,6 +4,7 @@
 #include <string>
 #include "Vjt12.h"
 #include "verilated_vcd_c.h"
+#include "VGMParser.hpp"
 
   // #include "verilated.h"
 
@@ -22,64 +23,6 @@ double sc_time_stamp () {	   // Called by $time in Verilog
 							   // what SystemC does
 }
 
-class Gym {
-	ifstream file;	
-	int max_PSG_warning;
-public:
-	char cmd, val, addr;
-	int count, count_limit;
-	void open(const char *filename, int limit);
-	int parse();
-};
-
-void Gym::open(const char* filename, int limit=-1) {
-	file.open(filename,ios_base::binary);	
-	if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
-	cout << "Open " << filename << '\n';
-	cmd = val = addr = 0;
-	count = 0;
-	max_PSG_warning = 10;
-}
-
-int Gym::parse() {
-	char c;
-	do {
-		if( ! file.good() ) return -1; // finish
-		file.read( &c, 1);
-		count++;
-		// cout << "Read "	<< (int)c << '\n';
-		// cout << (int) c << " @ " << file.tellp() << '\n';
-		if( count> count_limit && count_limit>=0 ) return -1;
-		switch(c) {
-			case 0: 
-				return 1; // wait 16.7ms
-			case 3: {
-				file.read(&c,1);
-				unsigned p = (unsigned char)c;
-				if(max_PSG_warning>0) {
-					max_PSG_warning--;
-					cerr << "Attempt to write to PSG port " << p << endl;
-					if(max_PSG_warning==0) cerr << "No more PSG warnings will be shown\n";
-				}
-				continue;
-			}
-			case 1:
-			case 2:	{
-				char buf[2];
-				file.read(buf,2);
-				cmd = buf[0];
-				val = buf[1];
-				addr = (c == 2); // if c==2 then write to top bank of JT12
-				return 0;
-			}
-			default:
-				cerr << "Wrong code ( " << ((int)c) << ") in GYM file\n";
-				continue;
-		}
-	}while(file.good());
-	cout << "Done\n";
-	return -1;
-}
 
 class CmdWritter {
 	int addr, cmd, val;
@@ -151,13 +94,13 @@ int main(int argc, char** argv, char** env) {
 	Verilated::commandArgs(argc, argv);
 	Vjt12* top = new Vjt12;
 	bool trace = false;
-	Gym gym;
+	RipParser *gym;
 	bool forever=true;
 	vluint64_t time_limit=0;
 
 	for( int k=0; k<argc; k++ ) {
 		if( string(argv[k])=="--trace" ) { trace=true; continue; }
-		if( string(argv[k])=="--gym" ) { gym.open(argv[++k],50); continue; }
+		if( string(argv[k])=="--gym" ) { gym = new Gym(); gym->open(argv[++k]); continue; }
 		if( string(argv[k])=="--time" ) { 
 			int aux;
 			sscanf(argv[++k],"%d",&aux);
@@ -264,19 +207,21 @@ int main(int argc, char** argv, char** env) {
 			if( main_time < wait ) continue;
 			if( !writter.Done() ) continue;
 
-			int action = gym.parse();
+			int action = gym->parse();
 			switch( action ) {
 				default: 
 					// cout << "File read\n";
 					goto finish;
 				case 0: 
-					writter.Write( gym.addr, gym.cmd, gym.val );
+					writter.Write( gym->addr, gym->cmd, gym->val );
 					timeout = main_time + PERIOD*6*100;
 					break; // parse register
 				case 1: 
 					// cout << "Waiting\n";
-					wait=main_time+( trace ? 16700 : 16700000); // Divided by 3 because
-						// of FASTDIV in Verilog, so clock divider is 2 instead of 6
+					wait=gym->wait;
+					wait*=1000000000/44100; // sample period in ns
+					if(trace) wait/=3;
+					wait+=main_time;
 					timeout=0;
 					break;// wait 16.7ms					
 			}		
@@ -285,6 +230,8 @@ int main(int argc, char** argv, char** env) {
 		if(trace && (main_time%SEMIPERIOD==0)) { tfp->dump(main_time); }
 	}
 finish:
+	delete gym;
+	gym = 0;
 	streampos file_length = fsnd.tellp();
 	number32 = (int32_t)file_length-8;
 	fsnd.seekp(4);

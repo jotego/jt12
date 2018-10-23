@@ -50,7 +50,7 @@ verilator --cc -f gather.f --top-module $TOP -I../../hdl  \
 	-DDISPLAY_STEP --trace -DTEST_SUPPORT \
     $SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 	-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
-	-D$POSTPROC -DICARUS -DFASTDIV --exe jt12_test.cpp
+	-D$POSTPROC -DICARUS -DFASTDIV --exe jt12_test.cpp VGMParser.cpp
 
 if ! make -j -C obj_dir -f Vjt12.mk Vjt12; then
 	exit $?
