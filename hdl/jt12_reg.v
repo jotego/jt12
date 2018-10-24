@@ -108,11 +108,13 @@ module jt12_reg(
 
 reg  [1:0] next_op, cur_op;
 reg  [2:0] next_ch, cur_ch;
+reg	last;
 
 `ifdef SIMULATION
 // These signals need to operate during rst
 // initial state is not relevant (or critical) in real life
 // but we need a clear value during simulation
+// This does not work with NCVERILOG
 initial begin
 	cur_op = 2'd0;
 	cur_ch = 3'd0;
@@ -201,8 +203,6 @@ wire	[3:0]	rr_in	= din[3:0];
 wire	[3:0]	ssg_in	= din[3:0];
 
 wire	[3:0]	ssg;
-
-reg			last;
 
 wire	update_ch_I  = cur_ch == ch;
 

@@ -9,7 +9,7 @@ initial begin
 		$shm_open("jt12_test.shm");
 //		$shm_probe(jt12_test,"AS");
 		$shm_probe(jt12_test.uut,"AS");
-        $shm_probe(jt12_test.u_testdata,"A");
+//        $shm_probe(jt12_test.u_testdata,"A");
         `ifdef POSTPROC
         	$shm_probe(jt12_test.speaker_left);
         `endif
@@ -48,6 +48,7 @@ end
 initial begin
 	`ifdef NCVERILOG
 		$shm_open("ssg.shm");
+		$shm_probe(jt12_test,"AS"); // gets everything
 		$shm_probe(jt12_test.uut.u_op,"A");
         $shm_probe(jt12_test.uut.u_eg,"A");
         $shm_probe(jt12_test.uut.u_mmr.ssg_ch2s4);

@@ -134,4 +134,9 @@ sep24 #(.width(10),.pos0(8)) sep(
 	.mask	( ~24'b1 )
 );
 /* verilator lint_on PINMISSING */
+
+`ifdef NCVERILOG
+initial $shm_probe(jt12_test,"AS");
+
+`endif
 endmodule
