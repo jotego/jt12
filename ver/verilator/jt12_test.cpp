@@ -12,9 +12,10 @@
 
 using namespace std;
 
-const int PERIOD=784; // use with -DFASTDIV
-const int SEMIPERIOD=392;
-const int CLKSTEP=196;
+const int PERIOD=784; // Must be an even number. use with -DFASTDIV
+const int SEMIPERIOD=PERIOD/2; // make sure result is an even number
+const int CLKSTEP=SEMIPERIOD/2;
+const int SAMPLERATE=1.0e9/PERIOD/24;
 
 vluint64_t main_time = 0;	   // Current simulation time
 // This is a 64-bit integer to reduce wrap over issues and
@@ -96,6 +97,56 @@ void CmdWritter::Eval() {
 	last_clk = clk;
 }
 
+class WaveWritter {
+	ofstream fsnd;
+public:
+	WaveWritter(const char *filename);
+	void write( int16_t *lr );
+	~WaveWritter();
+};
+
+void WaveWritter::write( int16_t* lr ) {
+	fsnd.write( (char*)lr, sizeof(int16_t)*2 );
+}
+
+WaveWritter::WaveWritter(const char *filename) {
+	fsnd.open(filename, ios_base::binary);
+	// write header
+	char zero=0;
+	for( int k=0; k<45; k++ ) fsnd.write( &zero, 1 );
+	fsnd.seekp(0);
+	fsnd.write( "RIFF", 4 );
+	fsnd.seekp(8);
+	fsnd.write( "WAVEfmt ", 8 );
+	int32_t number32 = 16;
+	fsnd.write( (char*)&number32, 4 );
+	int16_t number16 = 1;
+	fsnd.write( (char*) &number16, 2);
+	number16=2;
+	fsnd.write( (char*) &number16, 2);
+	number32 = SAMPLERATE; 
+	fsnd.write( (char*)&number32, 4 );
+	number32 = SAMPLERATE*2*2; 
+	fsnd.write( (char*)&number32, 4 );
+	number16=2*2;	// Block align
+	fsnd.write( (char*) &number16, 2);
+	number16=16;
+	fsnd.write( (char*) &number16, 2);
+	fsnd.write( "data", 4 );
+	fsnd.seekp(44);	
+}
+
+WaveWritter::~WaveWritter() {
+	int32_t number32;
+	streampos file_length = fsnd.tellp();
+	number32 = (int32_t)file_length-8;
+	fsnd.seekp(4);
+	fsnd.write( (char*)&number32, 4);
+	fsnd.seekp(40);
+	number32 = (int32_t)file_length-44;
+	fsnd.write( (char*)&number32, 4);	
+}
+
 struct YMcmd { int addr; int cmd; int val; };
 
 int main(int argc, char** argv, char** env) {
@@ -105,6 +156,7 @@ int main(int argc, char** argv, char** env) {
 	RipParser *gym;
 	bool forever=true;
 	vluint64_t time_limit=0;
+	assert( PERIOD%4 == 0);
 
 	for( int k=0; k<argc; k++ ) {
 		if( string(argv[k])=="--trace" ) { trace=true; continue; }
@@ -176,30 +228,7 @@ int main(int argc, char** argv, char** env) {
 	cout << "Main loop\n";
 	vluint64_t wait=0;
 	int last_sample=0;
-	ofstream fsnd("jt12_test.wav", ios_base::binary);
-	// write header
-	char zero=0;
-	for( int k=0; k<45; k++ ) fsnd.write( &zero, 1 );
-	fsnd.seekp(0);
-	fsnd.write( "RIFF", 4 );
-	fsnd.seekp(8);
-	fsnd.write( "WAVEfmt ", 8 );
-	int32_t number32 = 16;
-	fsnd.write( (char*)&number32, 4 );
-	int16_t number16 = 1;
-	fsnd.write( (char*) &number16, 2);
-	number16=2;
-	fsnd.write( (char*) &number16, 2);
-	number32 = 48000; // should be 52847
-	fsnd.write( (char*)&number32, 4 );
-	number32 = 48000*2*2; 
-	fsnd.write( (char*)&number32, 4 );
-	number16=2*2;	// Block align
-	fsnd.write( (char*) &number16, 2);
-	number16=16;
-	fsnd.write( (char*) &number16, 2);
-	fsnd.write( "data", 4 );
-	fsnd.seekp(44);	
+	WaveWritter wav("jt12_test.wav");
 
 	// forced values
 	list<YMcmd> forced_values;
@@ -230,7 +259,7 @@ int main(int argc, char** argv, char** env) {
 				if( skip_zeros && snd[0]==0 && snd[1] == 0 ) continue;
 				else skip_zeros=false;
 				// cout << (int)snd[0] << '\n';
-				fsnd.write( (char*)snd, sizeof(int16_t)*2 );
+				wav.write( snd );
 			}
 			last_sample = top->snd_sample;
 			writter.Eval();
@@ -288,18 +317,16 @@ finish:
 	if( skip_zeros ) {
 		cout << "WARNING: Output wavefile is empty. No sound output was produced.\n";
 	}
-	streampos file_length = fsnd.tellp();
-	number32 = (int32_t)file_length-8;
-	fsnd.seekp(4);
-	fsnd.write( (char*)&number32, 4);
-	fsnd.seekp(40);
-	number32 = (int32_t)file_length-44;
-	fsnd.write( (char*)&number32, 4);
-	cout << "$finish at " << dec << main_time/1000000 << "ms = " << main_time << " ns\n";
-	if( gym->length() != 0 ) {
-		float l = (float) gym->length()/1e6;
-		cout << "Expected time from input file was " << l << "ms\n";
+
+	if( main_time>1000000000 ) { // sim lasted for seconds
+		cout << "$finish at " << dec << main_time/1000000000 << "s = " << main_time/1000000 << " ms\n";
+	} else {
+		cout << "$finish at " << dec << main_time/1000000 << "ms = " << main_time << " ns\n";
 	}
+// 	if( gym->length() != 0 ) {
+// 		float l = (float) gym->length()/1e6;
+// 		cout << "Expected time from input file was " << l << "ms\n";
+// 	}
 	if(trace) tfp->close();	
 	delete gym;
 	delete top;
