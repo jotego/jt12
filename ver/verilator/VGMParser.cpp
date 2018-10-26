@@ -3,16 +3,34 @@
 
 using namespace std;
 
+uint64_t VGMParser::length() {
+	uint64_t l = totalwait*1e9/44100; // total number of samples in ns
+	return l;
+}
+
 void VGMParser::open(const char* filename, int limit) {
 	file.open(filename,ios_base::binary);
-	file.seekg(0x100);	
 	if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
 	cout << "Open " << filename << '\n';
 	cmd = val = addr = 0;
+	file.seekg(0x18);
+	file.read((char*)& totalwait, 4);
+	totalwait &= 0xffffffff;
+	// read version number
+	char version[2];
+	file.seekg(0x08);
+	file.read( version,2 );
+	if( version[0]<50 && version[1]==1 ) {
+		cout << "VGM version < 1.50 in this file. Data offset set at 0x40\n";
+		file.seekg(0x40);
+	}
+	else file.seekg(0x100);
+	done=false;
 	// max_PSG_warning = 10;
 }
 
 int VGMParser::parse() {
+	if(done) return -1;
 	while( !file.eof() && file.good() ) {
 		char vgm_cmd;
 		file.read( &vgm_cmd, 1);
@@ -48,7 +66,9 @@ int VGMParser::parse() {
 				wait = 882; // wait one frame (PAL)
 				return 1;
 			case 0x66:
+				done=true;
 				return -1; // finish
+				// continue;
 			// wait short commands (bad design option for VGM file designer)
 			case 0x70: wait=1; return 1;
 			case 0x71: wait=2; return 1;
@@ -71,8 +91,9 @@ int VGMParser::parse() {
 				file.read(extra,1);
 				continue;
 			default:
-				cout << "ERROR: Unsupported VGM command 0x" << hex << (((int)vgm_cmd)&0xff) << '\n';
-				return -1;
+				cout << "ERROR: Unsupported VGM command 0x" << hex << (((int)vgm_cmd)&0xff) 
+					<< " at offset 0x" << (int)file.tellg() << '\n';
+				return -2;
 		}
 	}
 	return -1;

@@ -133,8 +133,8 @@ reg [7:0]	selected_register;
 reg		irq_zero_en, irq_brdy_en, irq_eos_en,
 		irq_tb_en, irq_ta_en;
 		*/
-reg [6:0] up_opreg;
-reg	[3:0] up_chreg;
+reg [6:0] up_opreg; // hot-one encoding. tells which operator register gets updated next
+reg	[2:0] up_chreg; // hot-one encoding. tells which channel register gets updated next
 reg	up_keyon;
 
 wire			busy_reg;
@@ -161,7 +161,7 @@ reg	csm, effect;
 
 reg [ 2:0] block_ch3op2,  block_ch3op3,  block_ch3op1;
 reg [10:0] fnum_ch3op2, fnum_ch3op3, fnum_ch3op1;
-reg [ 5:0] latch_ch3op2,  latch_ch3op3,  latch_ch3op1;
+reg [ 5:0] latch_fnum;
 
 
 reg [2:0] up_ch;
@@ -182,7 +182,7 @@ always @(posedge clk) begin : memory_mapped_registers
 		up_op				<= 2'd0;
 		up_keyon			<= 1'd0;
 		up_opreg			<= 7'd0;
-		up_chreg			<= 4'd0;
+		up_chreg			<= 3'd0;
 		`ifdef TEST_SUPPORT
 		{ test_eg, test_op0 } <= 2'd0;
 		`endif
@@ -246,30 +246,29 @@ always @(posedge clk) begin : memory_mapped_registers
 					REG_CLK_N3:	cen_cnt_lim <= 3'd2;
 					REG_CLK_N2:	cen_cnt_lim <= 3'd1;
 					// CH3 special registers
-					8'hA9: { block_ch3op1, fnum_ch3op1 } <= { latch_ch3op1, din };
-					8'hA8: { block_ch3op3, fnum_ch3op3 } <= { latch_ch3op3, din };
-					8'hAA: { block_ch3op2, fnum_ch3op2 } <= { latch_ch3op2, din };
-					8'hAD: latch_ch3op1 <= din[5:0];
-					8'hAC: latch_ch3op3 <= din[5:0];
-					8'hAE: latch_ch3op2 <= din[5:0];
+					8'hA9: { block_ch3op1, fnum_ch3op1 } <= { latch_fnum, din };
+					8'hA8: { block_ch3op3, fnum_ch3op3 } <= { latch_fnum, din };
+					8'hAA: { block_ch3op2, fnum_ch3op2 } <= { latch_fnum, din };
+					// According to http://www.mjsstuf.x10host.com/pages/vgmPlay/vgmPlay.htm
+					// There is a single fnum latch for all channels
+					8'hA4, 8'hA5, 8'hA6, 8'hAD, 8'hAC, 8'hAE: latch_fnum <= din[5:0];
 					default:;	// avoid incomplete-case warning
 				endcase
             	casez( selected_register )
 					// channel registers
-					8'hA0, 8'hA1, 8'hA2:    { up_chreg, up_opreg } <= { 4'h1, 7'd0 }; // up_fnumlo
-					8'hA4, 8'hA5, 8'hA6:	{ up_chreg, up_opreg } <= { 4'h2, 7'd0 }; // up_block
+					8'hA0, 8'hA1, 8'hA2:    { up_chreg, up_opreg } <= { 3'h1, 7'd0 }; // up_fnumlo
 					// FB + Algorithm
-					8'hB0, 8'hB1, 8'hB2: { up_chreg, up_opreg } <= { 4'h4, 7'd0 }; // up_alg
-					8'hB4, 8'hB5, 8'hB6: { up_chreg, up_opreg } <= { 4'h8, 7'd0 }; // up_pms
+					8'hB0, 8'hB1, 8'hB2: { up_chreg, up_opreg } <= { 3'h2, 7'd0 }; // up_alg
+					8'hB4, 8'hB5, 8'hB6: { up_chreg, up_opreg } <= { 3'h4, 7'd0 }; // up_pms
 					// operator registers
-					8'h3?: { up_chreg, up_opreg } <= { 4'h0, 7'h01 }; // up_dt1
-					8'h4?: { up_chreg, up_opreg } <= { 4'h0, 7'h02 }; // up_tl
-					8'h5?: { up_chreg, up_opreg } <= { 4'h0, 7'h04 }; // up_ks_ar
-					8'h6?: { up_chreg, up_opreg } <= { 4'h0, 7'h08 }; // up_amen_d1r
-					8'h7?: { up_chreg, up_opreg } <= { 4'h0, 7'h10 }; // up_d2r
-					8'h8?: { up_chreg, up_opreg } <= { 4'h0, 7'h20 }; // up_d1l
-					8'h9?: { up_chreg, up_opreg } <= { 4'h0, 7'h40 }; // up_ssgeg
-					default: { up_chreg, up_opreg } <= { 4'h0, 7'h0 };
+					8'h3?: { up_chreg, up_opreg } <= { 3'h0, 7'h01 }; // up_dt1
+					8'h4?: { up_chreg, up_opreg } <= { 3'h0, 7'h02 }; // up_tl
+					8'h5?: { up_chreg, up_opreg } <= { 3'h0, 7'h04 }; // up_ks_ar
+					8'h6?: { up_chreg, up_opreg } <= { 3'h0, 7'h08 }; // up_amen_d1r
+					8'h7?: { up_chreg, up_opreg } <= { 3'h0, 7'h10 }; // up_d2r
+					8'h8?: { up_chreg, up_opreg } <= { 3'h0, 7'h20 }; // up_d1l
+					8'h9?: { up_chreg, up_opreg } <= { 3'h0, 7'h40 }; // up_ssgeg
+					default: { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
             	endcase // selected_register
 			end
 		end
@@ -307,9 +306,8 @@ jt12_reg u_reg(
 
 	.up_keyon	( up_keyon	),
 	.up_fnumlo	( up_chreg[0]	),
-	.up_block	( up_chreg[1]	),
-	.up_alg		( up_chreg[2]	),
-	.up_pms		( up_chreg[3]	),
+	.up_alg		( up_chreg[1]	),
+	.up_pms		( up_chreg[2]	),
 	.up_dt1		( up_opreg[0]	),
 	.up_tl		( up_opreg[1]	),
 	.up_ks_ar	( up_opreg[2]	),
@@ -334,6 +332,7 @@ jt12_reg u_reg(
 	.block_ch3op2( block_ch3op2 ),
 	.block_ch3op3( block_ch3op3 ),
 	.block_ch3op1( block_ch3op1 ),
+	.latch_fnum	( latch_fnum	),
 	// Operator
 	.use_prevprev1(use_prevprev1),
 	.use_internal_x(use_internal_x),

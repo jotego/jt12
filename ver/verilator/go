@@ -11,6 +11,8 @@ RANDWAIT=0
 TIMERONLY=NOTTIMERONLY
 TEST_NAME=NOTESTNAME
 SSG_TEST=NOSSG_TEST
+GYM_FILE=
+GYM_ARG=
 # use SIMULATION="-DSIMULATION" to enable simulation statements
 SIMULATION=
 
@@ -33,7 +35,8 @@ while [ $# -gt 0 ]; do
 			echo "Cannot open file " $1 " for GYM parsing"
 			exit 1
 		fi
-		EXTRA=$EXTRA" --gym "$1
+		GYM_ARG="--gym"
+		GYM_FILE="$1"
 		shift
 		continue
 	fi
@@ -46,6 +49,12 @@ while [ $# -gt 0 ]; do
 	echo Unrecognized option
     exit 1
 done
+
+if [[ $(expr match "$GYM_FILE" ".*\.vgz") != 0 ]]; then
+	echo Uncompressing vgz file...
+	gunzip -S vgz "$GYM_FILE" --to-stdout > input.vgm
+	GYM_FILE=input.vgm
+fi
 
 date
 
@@ -64,5 +73,5 @@ if ! make -j -C obj_dir -f Vjt12.mk Vjt12; then
 	exit $?
 fi
 echo Simulation start...
-echo obj_dir/Vjt12 $DUMPSIGNALS $EXTRA
-obj_dir/Vjt12 $DUMPSIGNALS $EXTRA
+echo obj_dir/Vjt12 $DUMPSIGNALS $EXTRA  $GYM_ARG "$GYM_FILE"
+obj_dir/Vjt12 $DUMPSIGNALS $EXTRA $GYM_ARG "$GYM_FILE"

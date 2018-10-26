@@ -9,14 +9,18 @@ public:
 	int wait;
 	virtual void open(const char *filename, int limit=0)=0;
 	virtual int parse()=0;
+	virtual uint64_t length()=0;
 };
 
 class VGMParser : public RipParser {
 	std::ifstream file;	
+	int totalwait;
+	bool done;
 	// int max_PSG_warning;
 public:
 	void open(const char *filename, int limit=0);
 	int parse();
+	uint64_t length();
 };
 
 class Gym : public RipParser {
@@ -26,6 +30,7 @@ class Gym : public RipParser {
 public:
 	void open(const char *filename, int limit=0);
 	int parse();
+	uint64_t length() { return 0; /* unknown */ }
 };
 
 #endif

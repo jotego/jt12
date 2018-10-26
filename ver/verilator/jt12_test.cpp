@@ -136,6 +136,8 @@ int main(int argc, char** argv, char** env) {
 		}
 	}
 
+	if( gym->length() != 0 && time_limit == 0 ) time_limit=gym->length();
+
 	VerilatedVcdC* tfp = new VerilatedVcdC;
 	if( trace ) {
 		Verilated::traceEverOn(true);
@@ -201,15 +203,15 @@ int main(int argc, char** argv, char** env) {
 
 	// forced values
 	list<YMcmd> forced_values;
-	forced_values.push_back( {0, 0xb4, 0x40} );
-	forced_values.push_back( {0, 0xb5, 0x40} );
-	forced_values.push_back( {0, 0xb6, 0x40} );
-	forced_values.push_back( {1, 0xb4, 0x80} ); // canal malo
-	forced_values.push_back( {1, 0xb5, 0x40} );
-	forced_values.push_back( {1, 0xb6, 0x40} ); // no es
+	// forced_values.push_back( {0, 0xb4, 0x40} );
+	// forced_values.push_back( {0, 0xb5, 0x40} );
+	// forced_values.push_back( {0, 0xb6, 0x40} );
+	// forced_values.push_back( {1, 0xb4, 0x80} ); // canal malo
+	// forced_values.push_back( {1, 0xb5, 0x40} );
+	// forced_values.push_back( {1, 0xb6, 0x40} ); // no es
 	// main loop
 	CmdWritter writter(top);
-	writter.watch( 1, 0 ); // top bank, channel 0
+	// writter.watch( 1, 0 ); // top bank, channel 0
 	bool skip_zeros=true;
 	while( forever || main_time < time_limit ) {
 		top->eval();
@@ -253,14 +255,15 @@ int main(int argc, char** argv, char** env) {
 			switch( action ) {
 				default: 
 					// cout << "File read\n";
+					if( main_time < time_limit && time_limit!=0 ) continue;
 					goto finish;
 				case 0: 
-					if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
-					/*(gym->addr==0 && gym->cmd>=(char)0x30) || */
-					((gym->cmd&(char)0xf0)==(char)0x90)) {
-						 cout << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
-						break; // do not write to RL register
-					}
+					// if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
+					// /*(gym->addr==0 && gym->cmd>=(char)0x30) || */
+					// ((gym->cmd&(char)0xf0)==(char)0x90)) {
+					// 	 cout << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
+					// 	break; // do not write to RL register
+					// }
 					// cout << hex << (unsigned) gym->cmd << '\n';
 					writter.Write( gym->addr, gym->cmd, gym->val );
 					timeout = main_time + PERIOD*6*100;
@@ -273,15 +276,18 @@ int main(int argc, char** argv, char** env) {
 					// if(trace) wait/=3;
 					wait+=main_time;
 					timeout=0;
-					break;// wait 16.7ms					
+					break;// wait 16.7ms	
+				case -2: // unsupported command
+					goto finish;				
 			}		
 		}
 		main_time+=CLKSTEP;
 		if(trace && (main_time%SEMIPERIOD==0)) { tfp->dump(main_time); }
 	}
 finish:
-	delete gym;
-	gym = 0;
+	if( skip_zeros ) {
+		cout << "WARNING: Output wavefile is empty. No sound output was produced.\n";
+	}
 	streampos file_length = fsnd.tellp();
 	number32 = (int32_t)file_length-8;
 	fsnd.seekp(4);
@@ -290,6 +296,11 @@ finish:
 	number32 = (int32_t)file_length-44;
 	fsnd.write( (char*)&number32, 4);
 	cout << "$finish at " << dec << main_time/1000000 << "ms = " << main_time << " ns\n";
+	if( gym->length() != 0 ) {
+		float l = (float) gym->length()/1e6;
+		cout << "Expected time from input file was " << l << "ms\n";
+	}
 	if(trace) tfp->close();	
+	delete gym;
 	delete top;
  }

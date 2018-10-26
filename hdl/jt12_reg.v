@@ -39,7 +39,6 @@ module jt12_reg(
 
 	input			up_keyon,	
 	input			up_alg,	
-	input			up_block,
 	input			up_fnumlo,
 	input			up_pms,
 	input			up_dt1,
@@ -61,6 +60,7 @@ module jt12_reg(
 	input	[ 2:0]	block_ch3op2,
 	input	[ 2:0]	block_ch3op3,
 	input	[ 2:0]	block_ch3op1,
+	input	[ 5:0]	latch_fnum,
 	// Pipeline order
 	output	reg		zero,
 	output 			s1_enters,
@@ -207,7 +207,6 @@ wire	[3:0]	ssg;
 wire	update_ch_I  = cur_ch == ch;
 
 wire up_alg_ch	= up_alg	& update_ch_I;
-wire up_block_ch= up_block	& update_ch_I;
 wire up_fnumlo_ch=up_fnumlo & update_ch_I;
 wire up_pms_ch	= up_pms	& update_ch_I;
 
@@ -309,24 +308,20 @@ assign { tl_VII, dt1_II, mul_V, ks_III,
 			ssg_en_II,	ssg_eg_II 				} = regop_out;
 
 
-wire [2:0] block_latch, fnum_latch;
-
 // memory for CH registers
 // Block/fnum data is latched until fnum low byte is written to
 // Trying to synthesize this memory as M-9K RAM in Altera devices
 // turns out worse in terms of resource utilization. Probably because
 // this memory is already very small. It is better to leave it as it is.
-parameter regch_width=31;
+parameter regch_width=25;
 wire [regch_width-1:0] regch_out;
 wire [regch_width-1:0] regch_in = {
-	up_block_ch	? { block_in, fnhi_in } : { block_latch, fnum_latch }, // 3+3
-	up_fnumlo_ch? { block_latch, fnum_latch, fnlo_in } : { block_I_raw, fnum_I_raw }, // 14
+	up_fnumlo_ch? { latch_fnum, fnlo_in } : { block_I_raw, fnum_I_raw }, // 14
 	up_alg_ch	? { fb_in, alg_in } : { fb_I, alg },//3+3
 	up_pms_ch	? { ams_in, pms_in } : { ams_VII, pms_I }//2+2+3
 }; 
 
-assign { block_latch, fnum_latch, 
-			block_I_raw, fnum_I_raw, 
+assign { 	block_I_raw, fnum_I_raw, 
 			fb_I, alg, ams_VII, pms_I } = regch_out;
 
 jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
