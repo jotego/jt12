@@ -12,10 +12,12 @@
 
 using namespace std;
 
-const int PERIOD=784; // Must be an even number. use with -DFASTDIV
+// const int PERIOD=130; // Must be an even number. use with -DFASTDIV
+const int PERIOD=132; // Must be an even number. use with -DFASTDIV
 const int SEMIPERIOD=PERIOD/2; // make sure result is an even number
 const int CLKSTEP=SEMIPERIOD/2;
-const int SAMPLERATE=1.0e9/PERIOD/24;
+const int SAMPLERATE=48000; // 1.0e9/PERIOD/24;
+const int SAMPLING_PERIOD = 1e9/SAMPLERATE;
 
 vluint64_t main_time = 0;	   // Current simulation time
 // This is a 64-bit integer to reduce wrap over issues and
@@ -156,7 +158,7 @@ int main(int argc, char** argv, char** env) {
 	RipParser *gym;
 	bool forever=true;
 	vluint64_t time_limit=0;
-	assert( PERIOD%4 == 0);
+	assert( PERIOD%2 == 0);
 
 	for( int k=0; k<argc; k++ ) {
 		if( string(argv[k])=="--trace" ) { trace=true; continue; }
@@ -181,9 +183,10 @@ int main(int argc, char** argv, char** env) {
 		if( string(argv[k])=="--time" ) { 
 			int aux;
 			sscanf(argv[++k],"%d",&aux);
-			time_limit = aux*1000000;
+			time_limit = aux;
+			time_limit *= 1000000;
 			forever=false;
-			cout << "Simulate until " << aux << "ms\n";
+			cout << "Simulate until " << time_limit/1000000 << "ms\n";
 			continue; 
 		}
 	}
@@ -242,6 +245,9 @@ int main(int argc, char** argv, char** env) {
 	CmdWritter writter(top);
 	// writter.watch( 1, 0 ); // top bank, channel 0
 	bool skip_zeros=true;
+	vluint64_t adjust_sum=0;
+	int next_verbosity = 200;
+	vluint64_t next_sample=0;
 	while( forever || main_time < time_limit ) {
 		top->eval();
 		if( clk_time==main_time ) {
@@ -249,17 +255,19 @@ int main(int argc, char** argv, char** env) {
 			clk_time = main_time+SEMIPERIOD;
 			top->clk = 1-clk;
 			// int dout = top->dout;
-			if( last_sample != top->snd_sample &&  top->snd_sample ) {
+			if( main_time > next_sample ) {
 				int16_t snd[2];
 				// snd[0] = (top->snd_left & 0x800) ? (top->snd_left|0xf000) : top->snd_left;
 				// snd[1] = (top->snd_right & 0x800) ? (top->snd_right|0xf000) : top->snd_right;
 				snd[0] = top->snd_left << 4;
 				snd[1] = top->snd_right << 4;
 				// skip initial set of zero's
-				if( skip_zeros && snd[0]==0 && snd[1] == 0 ) continue;
-				else skip_zeros=false;
-				// cout << (int)snd[0] << '\n';
-				wav.write( snd );
+				if( !skip_zeros || snd[0]!=0 || snd[1] != 0 ) {
+					skip_zeros=false;
+					// cout << (int)snd[0] << '\n';
+					wav.write( snd );
+				}
+				next_sample = main_time + SAMPLING_PERIOD;
 			}
 			last_sample = top->snd_sample;
 			writter.Eval();
@@ -284,7 +292,10 @@ int main(int argc, char** argv, char** env) {
 			switch( action ) {
 				default: 
 					// cout << "File read\n";
-					if( main_time < time_limit && time_limit!=0 ) continue;
+					if( main_time < time_limit && time_limit!=0 ) {
+						cout << "Done\n";
+						continue;
+					}
 					goto finish;
 				case 0: 
 					// if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
@@ -300,7 +311,8 @@ int main(int argc, char** argv, char** env) {
 				case 1: 
 					// cout << "Waiting\n";
 					wait=gym->wait;
-					wait*=100000/441; // sample period in ns
+					wait*=100000;
+					wait/=441; // sample period in ns
 					// cout << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
 					// if(trace) wait/=3;
 					wait+=main_time;
@@ -310,7 +322,14 @@ int main(int argc, char** argv, char** env) {
 					goto finish;				
 			}		
 		}
-		main_time+=CLKSTEP;
+		if( adjust_sum==0 )
+			{ adjust_sum=main_time+SEMIPERIOD; main_time+=CLKSTEP; }
+		else
+			{ main_time = adjust_sum; adjust_sum=0; }
+		if( ( (int)(main_time>>20))>next_verbosity ) {
+			next_verbosity+=100;
+			cout << "Current time " << dec << (int)(main_time/1000000) << " ms\n";
+		}
 		if(trace && (main_time%SEMIPERIOD==0)) { tfp->dump(main_time); }
 	}
 finish:
@@ -323,6 +342,8 @@ finish:
 	} else {
 		cout << "$finish at " << dec << main_time/1000000 << "ms = " << main_time << " ns\n";
 	}
+	if( time_limit)
+		cout << "Time limit = " << time_limit/1000000 << "ms\n";
 // 	if( gym->length() != 0 ) {
 // 		float l = (float) gym->length()/1e6;
 // 		cout << "Expected time from input file was " << l << "ms\n";
