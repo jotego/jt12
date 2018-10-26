@@ -7,13 +7,15 @@
 #include "Vjt12.h"
 #include "verilated_vcd_c.h"
 #include "VGMParser.hpp"
+#include "feature.hpp"
 
   // #include "verilated.h"
 
 using namespace std;
 
 // const int PERIOD=130; // Must be an even number. use with -DFASTDIV
-const int PERIOD=132; // Must be an even number. use with -DFASTDIV
+// const int PERIOD=132; // Must be an even number. use with -DFASTDIV
+const int PERIOD=132*6; // Must be an even number. use with -DFASTDIV
 const int SEMIPERIOD=PERIOD/2; // make sure result is an even number
 const int CLKSTEP=SEMIPERIOD/2;
 const int SAMPLERATE=48000; // 1.0e9/PERIOD/24;
@@ -36,18 +38,32 @@ class CmdWritter {
 	int last_clk;
 	int state;
 	int watch_addr, watch_ch;
+	list<FeatureUse>features;
 public:
 	CmdWritter( Vjt12* _top );
 	void Write( int _addr, int _cmd, int _val );
 	void watch( int addr, int ch ) { watch_addr=addr; watch_ch=ch; }
 	void Eval();
 	bool Done() { return done; }
+	void report_usage();
 };
+
+void CmdWritter::report_usage() {
+	cout << "Features used: \t";
+	for( const auto& k : features )
+		if(k.is_used()) cout << k.name() << ' ';
+	cout << '\n';
+}
 
 CmdWritter::CmdWritter( Vjt12* _top ) {
 	top  = _top;
 	last_clk = 0;
 	done = true;
+	features.push_back( FeatureUse("DT",   0xF0, 0x30, 0x70, [](char v)->bool{return v!=0;} ));
+	features.push_back( FeatureUse("MULT", 0xF0, 0x30, 0x0F, [](char v)->bool{return v!=1;} ));
+	features.push_back( FeatureUse("KS",   0xF0, 0x50, 0x0C, [](char v)->bool{return v!=0;} ));
+	features.push_back( FeatureUse("AM",   0xF0, 0x60, 0x80, [](char v)->bool{return v!=0;} ));
+	features.push_back( FeatureUse("SSG",  0xF0, 0x90, 0x08, [](char v)->bool{return v!=0;} ));
 }
 
 void CmdWritter::Write( int _addr, int _cmd, int _val ) {
@@ -59,6 +75,8 @@ void CmdWritter::Write( int _addr, int _cmd, int _val ) {
 	state = 0;
 	if( addr == watch_addr && cmd>=(char)0x30 && (cmd&0x3)==watch_ch )
 		cout << addr << '-' << watch_ch << " CMD = " << hex << (cmd&0xff) << " VAL = " << (val&0xff) << '\n';
+	for( auto& k : features )
+		k.check( cmd, val );	
 	// cout << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
 	// cout  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
 }
@@ -293,7 +311,7 @@ int main(int argc, char** argv, char** env) {
 				default: 
 					// cout << "File read\n";
 					if( main_time < time_limit && time_limit!=0 ) {
-						cout << "Done\n";
+						// cout << "Done\n";
 						continue;
 					}
 					goto finish;
@@ -333,6 +351,7 @@ int main(int argc, char** argv, char** env) {
 		if(trace && (main_time%SEMIPERIOD==0)) { tfp->dump(main_time); }
 	}
 finish:
+	writter.report_usage();
 	if( skip_zeros ) {
 		cout << "WARNING: Output wavefile is empty. No sound output was produced.\n";
 	}

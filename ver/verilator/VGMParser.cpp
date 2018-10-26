@@ -149,6 +149,6 @@ int Gym::parse() {
 				continue;
 		}
 	}while(file.good());
-	cout << "Done\n";
+	// cout << "Done\n";
 	return -1;
 }
