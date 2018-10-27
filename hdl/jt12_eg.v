@@ -66,7 +66,7 @@ module jt12_eg (
 	// envelope operation
 	input				keyon_II,
 	// envelope number
-	input		[6:0]	am,
+	input		[6:0]	lfo_mod,
 	input		[6:0]	tl_VII,
 	input		[1:0]	ams_VII,
 	input				amsen_VII,
@@ -437,25 +437,27 @@ always @(posedge clk)
 
 //////////////////////////////////////////////////////////////
 // Register cycle VII
-reg		[9:0]	eg_internal_VIII;
-reg		[8:0]	am_final;
-reg		[11:0]	sum_eg_tl;
+reg		[ 9:0]	eg_internal_VIII;
+reg		[ 8:0]	am_final;
+reg		[10:0]	sum_eg_tl;
+reg		[11:0]	sum_eg_tl_am;
+wire	[ 5:0]	am_inverted;
 
-always @(*) begin : sum_eg_and_tl
+always @(*) begin
+	am_inverted = {6{lfo_mod[6]}} ^ lfo_mod[5:0];
 	casez( {amsen_VII, ams_VII } )
-		3'b0??,3'b100: am_final = 9'd0;
-		3'b101: am_final = { 2'b00, am };
-		3'b110: am_final = { 1'b0, am, 1'b0};
-		3'b111: am_final = { am, 2'b0	  };
+		default: am_final = 9'd0;
+		3'b1_01: am_final = { {3{am_inverted[5]}}, am_inverted };
+		3'b1_10: am_final = { am_inverted[5], am_inverted, 2'b0};
+		3'b1_11: am_final = { am_inverted, 3'b0	  };
 	endcase
+	sum_eg_tl = {  tl_VII,   3'd0 } + eg_VII;
 	`ifdef TEST_SUPPORT
 	if( test_eg && tl_VII!=7'd0 )
-		sum_eg_tl = 12'd0;
+		sum_eg_tl_am = 12'd0;
 	else
 	`endif
-		sum_eg_tl = { 1'b0, tl_VII,   3'd0 }
-				   + { 1'b0, eg_VII}
-				   + { 1'b0, am_final, 1'b0 };
+	sum_eg_tl_am = sum_eg_tl + { {2{am_final[8]}}, am_final, 1'b0 };
 end
 
 always @(posedge clk) 
@@ -464,7 +466,11 @@ always @(posedge clk)
 		state_VIII <= RELEASE;
 	end
 	else if( clk_en ) begin
-		eg_internal_VIII <= sum_eg_tl[11:10] > 2'b0 ? {10{1'b1}} : sum_eg_tl[9:0];
+		case( sum_eg_tl_am[11:10] )
+			2'b00: eg_internal_VIII <= sum_eg_tl_am[9:0];
+			2'b01: eg_internal_VIII <= 10'h3ff;
+			default: eg_internal_VIII <= 10'h0;
+		endcase // sum_eg_tl_am[11:10]
 		state_VIII <= state_VII;
 	end
 

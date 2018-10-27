@@ -242,7 +242,7 @@ jt12_eg u_eg(
 	// envelope operation
 	.keyon_II		( keyon_II		),
 	// envelope number
-	.am				( lfo_mod		),
+	.lfo_mod		( lfo_mod		),
 	.tl_VII			( tl_VII		),
 	.ams_VII		( ams_VII		),
 	.amsen_VII		( amsen_VII		),

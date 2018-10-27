@@ -1,0 +1,8 @@
+blk_fnum 0,c # block=1, fnum hi=100b
+fnum 0, 0
+tl 0,0,0
+alg 0,7
+sr 0,0,0	# it will not decay
+ar 0,0,1f	# direct attack
+kon 10
+wait 2048 # number of output samples to wait (at YM sampling rate)

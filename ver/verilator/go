@@ -19,38 +19,45 @@ FAST=-DFASTDIV
 SIMULATION=
 
 while [ $# -gt 0 ]; do
-	if [ $1 = "-w" ]; then
+	if [ "$1" = "-w" ]; then
 		echo "Signal dump enabled"
-		DUMPSIGNALS=--trace
+		DUMPSIGNALS=-trace
 		shift
 		continue
 	fi
-	if [ $1 = "-sim" ]; then
+	if [ "$1" = "-sim" ]; then
 		echo "Simulation signals enabled"
 		SIMULATION=-DSIMULATION
 		shift
 		continue
 	fi
-	if [ $1 = "-gym" ]; then
+	if [ "$1" = "-gym" ]; then
 		shift
-		if [ ! -e $1 ]; then
+		if [ ! -e "$1" ]; then
 			echo "Cannot open file " $1 " for GYM parsing"
 			exit 1
 		fi
-		GYM_ARG="--gym"
+		GYM_ARG="-gym"
 		GYM_FILE="$1"
 		shift
 		continue
 	fi
-	if [ $1 = "-time" ]; then
+	if [ "$1" = "-time" ]; then
 		shift
-		EXTRA=$EXTRA" --time "$1
+		EXTRA="$EXTRA -time $1"
+		shift
+		continue
+	fi
+	if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" ]]; then
+		EXTRA="$EXTRA $1"
 		shift
 		continue
 	fi
 	echo Unrecognized option
     exit 1
 done
+
+echo EXTRA="$EXTRA"
 
 if [[ $(expr match "$GYM_FILE" ".*\.vgz") != 0 ]]; then
 	echo Uncompressing vgz file...

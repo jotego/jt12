@@ -1,7 +1,56 @@
 #include <iostream>
+#include <string>
+#include <cstring>
+#include <cstdio>
 #include "VGMParser.hpp"
 
 using namespace std;
+
+void JTTParser::open(const char* filename, int limit) {
+	file.open(filename);
+	if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
+	cout << "Open " << filename << '\n';
+	done=false;
+	line_cnt = 0;
+}
+
+void JTTParser::remove_blanks( (char*&) str ) {
+	if( token==NULL ) { 
+		cout << "Syntax error at line " << line_cnt << '\n'; 
+		throw 0;
+	}
+	while( *str!=NULL && (*str==' ' || *str=='\t') ) str++;
+}
+
+void JTTParser::parse_opdata(int cmd_base) {
+	int ch, op, int_val, read=0;
+	read=sscanf( txt_ch, " %X , %X , %X ", &ch, &op, &int_val );
+	if( read != 3 ) {
+		cout << "Syntax error at line " << line_cnt << '\n';
+		throw 0;
+	}
+	val = int_val;
+	cmd = cmd_base | ((op<<2) | ch);
+}
+
+int JTTParser::parse() {
+	if(done) return -1;
+	while( !file.eof() && file.good() ) {
+		try {
+			string line;
+			line << file;
+			line_cnt++;
+			char *token = strtok( line.c_str(), "#" );
+			remove_blanks(token);
+			char *txt_cmd = strtok( token, " \t" ); 
+			remove_blanks(txt_cmd);
+			if( strcmp(txt_cmd,"ar" ) {
+				parse_opdata(0x50);
+			}
+		} 
+		catch( int ) { return cmd_error; }
+	}
+}
 
 uint64_t VGMParser::length() {
 	uint64_t l = totalwait*1e9/44100; // total number of samples in ns
