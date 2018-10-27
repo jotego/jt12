@@ -14,23 +14,63 @@ void JTTParser::open(const char* filename, int limit) {
 	line_cnt = 0;
 }
 
-void JTTParser::remove_blanks( (char*&) str ) {
-	if( token==NULL ) { 
+void JTTParser::remove_blanks( char*& str ) {
+	if( str==NULL ) { 
 		cout << "Syntax error at line " << line_cnt << '\n'; 
 		throw 0;
 	}
-	while( *str!=NULL && (*str==' ' || *str=='\t') ) str++;
+	while( *str!=0 && (*str==' ' || *str=='\t') ) str++;
 }
 
-void JTTParser::parse_opdata(int cmd_base) {
+void JTTParser::parse_opdata(char *txt_arg, int cmd_base) {
 	int ch, op, int_val, read=0;
-	read=sscanf( txt_ch, " %X , %X , %X ", &ch, &op, &int_val );
+	read=sscanf( txt_arg, " %X , %X , %X ", &ch, &op, &int_val );
 	if( read != 3 ) {
 		cout << "Syntax error at line " << line_cnt << '\n';
 		throw 0;
 	}
+	addr = ch < 3 ? 0 : 1;
+	if(ch>3) ch-=3;
+
 	val = int_val;
 	cmd = cmd_base | ((op<<2) | ch);
+}
+
+void JTTParser::parse_chdata(char *txt_arg, int cmd_base) {
+	int ch, int_val, read=0;
+	read=sscanf( txt_arg, " %X , %X ", &ch, &int_val );
+	if( read != 2 ) {
+		cout << "Syntax error at line " << line_cnt << '\n';
+		throw 0;
+	}
+	addr = ch < 3 ? 0 : 1;
+	if(ch>3) ch-=3;
+
+	val = int_val;
+	cmd = cmd_base | ch;
+}
+
+JTTParser::JTTParser(int c) : RipParser(c) {
+	op_commands["ar"] = 0x50;
+	op_commands["ks"] = 0x50;
+	op_commands["dr"] = 0x60;
+	op_commands["amon"] = 0x60;
+	op_commands["sr"] = 0x70;
+	op_commands["sl"] = 0x80;
+	op_commands["rr"] = 0x80;
+	op_commands["ssg-eg"] = 0x90;
+	ch_commands["fnum"] = 0xa0;
+	ch_commands["fnum_lsb"] = 0xa0;
+	ch_commands["block"] = 0xa4;
+	ch_commands["blk_fnum"] = 0xa4;
+	ch_commands["fnum_msb"] = 0xa4;
+	ch_commands["fb"] = 0xb0;
+	ch_commands["alg"] = 0xb0;
+	ch_commands["conn"] = 0xb0;
+	ch_commands["lr"] = 0xb4;
+	ch_commands["ams"] = 0xb4;
+	ch_commands["pms"] = 0xb4;
+	global_commands["kon"] = 0x28;
 }
 
 int JTTParser::parse() {
@@ -38,17 +78,62 @@ int JTTParser::parse() {
 	while( !file.eof() && file.good() ) {
 		try {
 			string line;
-			line << file;
+			file >> line;
 			line_cnt++;
-			char *token = strtok( line.c_str(), "#" );
+			char line2[128];
+			strncpy( line2, line.c_str(), 127 ); line2[127]=0;
+			char *token = strtok( line2, "#" );
 			remove_blanks(token);
 			char *txt_cmd = strtok( token, " \t" ); 
 			remove_blanks(txt_cmd);
-			if( strcmp(txt_cmd,"ar" ) {
-				parse_opdata(0x50);
+			char cmd_base;
+			char *txt_arg = strtok( NULL, " \t");
+			if( txt_arg==NULL ) {
+				cout << "ERROR: Incomplete line " << line_cnt << '\n';
+				done=true;
+				return cmd_error;
 			}
+
+			auto op_cmd = op_commands.find(txt_cmd);
+			if( op_cmd != op_commands.end() ) {
+				cmd_base = op_cmd->second;
+				parse_opdata(txt_arg, cmd_base);
+				return cmd_write;
+			}
+
+			auto ch_cmd = ch_commands.find(txt_cmd);
+			if( ch_cmd != ch_commands.end() ) {
+				cmd_base = ch_cmd->second;
+				parse_chdata(txt_arg, cmd_base);
+				return cmd_write;
+			}
+
+			auto global_cmd = global_commands.find(txt_cmd);
+			if( global_cmd != global_commands.end() ) {
+				cmd = global_cmd->second;
+				int aux;
+				if( sscanf( txt_arg,"%X", &aux) != 1 ) {
+					cout << "ERROR: Expecting value in line " << line_cnt << '\n';
+					return cmd_error;
+				}
+				val = (char)aux;
+				addr=0;
+				return cmd_write;
+			}
+
+			if( strcmp(txt_cmd, "wait")==0 ) {
+				int aux;
+				sscanf( txt_arg, "%d", &aux );
+				totalwait = aux*24*clk_period;
+				return cmd_wait;
+			}
+
+			cout << "ERROR: incorrect syntax at line " << line_cnt << '\n';
+			cout << '\t' << line << '\n';
+			done=true;
+			return cmd_error;
 		} 
-		catch( int ) { return cmd_error; }
+		catch( int ) { done=true; return cmd_error; }
 	}
 }
 
@@ -93,27 +178,27 @@ int VGMParser::parse() {
 				file.read( extra, 2);
 				cmd = extra[0];
 				val = extra[1];
-				return 0;
+				return cmd_write;
 			case 0x53: // A1=1
 			case 0x57:
 				addr = 1;
 				file.read( extra, 2);
 				cmd = extra[0];
 				val = extra[1];
-				return 0;
+				return cmd_write;
 			case 0x61:
 				file.read( extra, 2);
 				wait = extra[0];
 				wait <<= 8;
 				wait |= extra[1];
 				wait&=0xffff;
-				return 1; // request wait
+				return cmd_wait; // request wait
 			case 0x62:
 				wait = 735;
-				return 1; // wait one frame (NTSC)
+				return cmd_wait; // wait one frame (NTSC)
 			case 0x63:
 				wait = 882; // wait one frame (PAL)
-				return 1;
+				return cmd_wait;
 			case 0x66:
 				done=true;
 				return -1; // finish
@@ -191,7 +276,7 @@ int Gym::parse() {
 				cmd = buf[0];
 				val = buf[1];
 				addr = (c == 2); // if c==2 then write to top bank of JT12
-				return 0;
+				return cmd_write;
 			}
 			default:
 				cerr << "Wrong code ( " << ((int)c) << ") in GYM file\n";

@@ -123,11 +123,11 @@ int main(int argc, char** argv, char** env) {
 				return 1;
 			}
 			if( filename.substr(ext)==".gym") {
-				gym = new Gym(); gym->open(argv[k]); 
+				gym = new Gym(PERIOD); gym->open(argv[k]); 
 				continue; 
 			}
 			if( filename.substr(ext)==".vgm") {
-				gym = new VGMParser(); gym->open(argv[k]); 
+				gym = new VGMParser(PERIOD); gym->open(argv[k]); 
 				continue; 
 			}
 			cout << "The filename must end in .gym or .vgm\n";
