@@ -437,11 +437,11 @@ always @(posedge clk)
 
 //////////////////////////////////////////////////////////////
 // Register cycle VII
-reg		[ 9:0]	eg_internal_VIII;
-reg		[ 8:0]	am_final;
-reg		[10:0]	sum_eg_tl;
-reg		[11:0]	sum_eg_tl_am;
-wire	[ 5:0]	am_inverted;
+reg	[ 9:0]	eg_internal_VIII;
+reg	[ 8:0]	am_final;
+reg	[10:0]	sum_eg_tl;
+reg	[11:0]	sum_eg_tl_am;
+reg	[ 5:0]	am_inverted;
 
 always @(*) begin
 	am_inverted = {6{lfo_mod[6]}} ^ lfo_mod[5:0];
@@ -466,11 +466,7 @@ always @(posedge clk)
 		state_VIII <= RELEASE;
 	end
 	else if( clk_en ) begin
-		case( sum_eg_tl_am[11:10] )
-			2'b00: eg_internal_VIII <= sum_eg_tl_am[9:0];
-			2'b01: eg_internal_VIII <= 10'h3ff;
-			default: eg_internal_VIII <= 10'h0;
-		endcase // sum_eg_tl_am[11:10]
+		eg_internal_VIII <= sum_eg_tl_am[11:10]==2'd0 ? sum_eg_tl_am[9:0] : 10'h3ff;
 		state_VIII <= state_VII;
 	end
 

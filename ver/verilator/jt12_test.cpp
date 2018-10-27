@@ -397,8 +397,8 @@ void CmdWritter::Write( int _addr, int _cmd, int _val ) {
 		cout << addr << '-' << watch_ch << " CMD = " << hex << (cmd&0xff) << " VAL = " << (val&0xff) << '\n';
 	for( auto& k : features )
 		k.check( cmd, val );	
-	cout << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
-	cout  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
+	// cout << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
+	// cout  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
 }
 
 void CmdWritter::Eval() {	
