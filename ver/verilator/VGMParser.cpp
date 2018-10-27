@@ -51,6 +51,9 @@ void JTTParser::parse_chdata(char *txt_arg, int cmd_base) {
 }
 
 JTTParser::JTTParser(int c) : RipParser(c) {
+	op_commands["dt"] = 0x30;
+	op_commands["mul"] = 0x30;
+	op_commands["tl"] = 0x40;
 	op_commands["ar"] = 0x50;
 	op_commands["ks"] = 0x50;
 	op_commands["dr"] = 0x60;
@@ -74,25 +77,26 @@ JTTParser::JTTParser(int c) : RipParser(c) {
 }
 
 int JTTParser::parse() {
-	if(done) return -1;
+	if(done) return cmd_finish;
 	while( !file.eof() && file.good() ) {
 		try {
-			string line;
-			file >> line;
+			char line[128];
+			file.getline(line,128);
 			line_cnt++;
 			char line2[128];
-			strncpy( line2, line.c_str(), 127 ); line2[127]=0;
-			char *token = strtok( line2, "#" );
-			remove_blanks(token);
-			char *txt_cmd = strtok( token, " \t" ); 
+			strncpy( line2, line, 128 ); line2[127]=0;
+			char *txt_cmd = strtok( line2, "#" );
 			remove_blanks(txt_cmd);
+			char *txt_arg = strchr( txt_cmd, ' ');
 			char cmd_base;
-			char *txt_arg = strtok( NULL, " \t");
 			if( txt_arg==NULL ) {
 				cout << "ERROR: Incomplete line " << line_cnt << '\n';
+				cout << "txt_cmd = " << txt_cmd << '\n';
 				done=true;
 				return cmd_error;
 			}
+			*txt_arg = 0;
+			txt_arg++;
 
 			auto op_cmd = op_commands.find(txt_cmd);
 			if( op_cmd != op_commands.end() ) {
@@ -124,7 +128,9 @@ int JTTParser::parse() {
 			if( strcmp(txt_cmd, "wait")==0 ) {
 				int aux;
 				sscanf( txt_arg, "%d", &aux );
-				totalwait = aux*24*clk_period;
+				wait = aux;
+				wait *= 24*clk_period;
+				cout << "Wait for " << wait << '\n';
 				return cmd_wait;
 			}
 
@@ -135,6 +141,8 @@ int JTTParser::parse() {
 		} 
 		catch( int ) { done=true; return cmd_error; }
 	}
+	done=true;
+	return cmd_finish;
 }
 
 uint64_t VGMParser::length() {
@@ -192,12 +200,15 @@ int VGMParser::parse() {
 				wait <<= 8;
 				wait |= extra[1];
 				wait&=0xffff;
+				adjust_wait();
 				return cmd_wait; // request wait
 			case 0x62:
 				wait = 735;
+				adjust_wait();
 				return cmd_wait; // wait one frame (NTSC)
 			case 0x63:
 				wait = 882; // wait one frame (PAL)
+				adjust_wait();				
 				return cmd_wait;
 			case 0x66:
 				done=true;
@@ -258,6 +269,7 @@ int Gym::parse() {
 		switch(c) {
 			case 0: 
 				wait = 735; // 16.7ms
+				adjust_wait();				
 				return 1; 
 			case 3: {
 				file.read(&c,1);

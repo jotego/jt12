@@ -10,18 +10,19 @@ protected:
 	int clk_period; // synthesizer clock period
 public:
 	char cmd, val, addr;
-	int wait;
+	uint64_t wait;
 	virtual void open(const char *filename, int limit=0)=0;
 	virtual int parse()=0;
 	virtual uint64_t length()=0;
 	RipParser(int c) { clk_period = c; }
-	enum { cmd_error=-2, cmd_write=0, cmd_wait=1 };
+	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1 };
 };
 
 class VGMParser : public RipParser {
 	std::ifstream file;	
 	int totalwait;
 	bool done;
+	void adjust_wait() { wait*=100000; wait/=441; }
 	// int max_PSG_warning;
 public:
 	void open(const char *filename, int limit=0);
@@ -34,6 +35,7 @@ class Gym : public RipParser {
 	std::ifstream file;	
 	int max_PSG_warning;
 	int count, count_limit;
+	void adjust_wait() { wait*=100000; wait/=441; }
 public:
 	void open(const char *filename, int limit=0);
 	int parse();
@@ -43,7 +45,7 @@ public:
 
 class JTTParser : public RipParser {
 	std::ifstream file;	
-	int totalwait, line_cnt;
+	int line_cnt;
 	bool done;
 	// int max_PSG_warning;
 	void remove_blanks( char*& str );

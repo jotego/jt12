@@ -19,7 +19,7 @@ const int PERIOD=132*6; // Must be an even number. use with -DFASTDIV
 const int SEMIPERIOD=PERIOD/2; // make sure result is an even number
 const int CLKSTEP=SEMIPERIOD/2;
 const int SAMPLERATE=48000; // 1.0e9/PERIOD/24;
-const int SAMPLING_PERIOD = 1e9/SAMPLERATE;
+const vluint64_t SAMPLING_PERIOD = 1e9/SAMPLERATE;
 
 class SimTime {
 	vluint64_t main_time, time_limit, fast_forward;
@@ -128,6 +128,10 @@ int main(int argc, char** argv, char** env) {
 			}
 			if( filename.substr(ext)==".vgm") {
 				gym = new VGMParser(PERIOD); gym->open(argv[k]); 
+				continue; 
+			}
+			if( filename.substr(ext)==".jtt") {
+				gym = new JTTParser(PERIOD); gym->open(argv[k]); 
 				continue; 
 			}
 			cout << "The filename must end in .gym or .vgm\n";
@@ -264,37 +268,36 @@ int main(int argc, char** argv, char** env) {
 			switch( action ) {
 				default: 
 					if( !sim_time.finish() ) {
+						cout << "go on\n";
 						continue;
 					}
 					goto finish;
-				case 0: 
+				case RipParser::cmd_write: 
 					// if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
 					// /*(gym->addr==0 && gym->cmd>=(char)0x30) || */
 					// ((gym->cmd&(char)0xf0)==(char)0x90)) {
 					// 	 cout << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
 					// 	break; // do not write to RL register
 					// }
-					// cout << hex << (unsigned) gym->cmd << '\n';
+					cout << "CMD = " << hex << ((int)gym->cmd&0xff) << '\n';
 					writter.Write( gym->addr, gym->cmd, gym->val );
 					timeout = sim_time.get_time() + PERIOD*6*100;
 					break; // parse register
-				case 1: 
+				case RipParser::cmd_wait: 
 					// cout << "Waiting\n";
 					wait=gym->wait;
-					wait*=100000;
-					wait/=441; // sample period in ns
 					// cout << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
 					// if(trace) wait/=3;
 					wait+=sim_time.get_time();
 					timeout=0;
 					break;// wait 16.7ms	
-				case -1: // reached end of file
+				case RipParser::cmd_finish: // reached end of file
 					goto finish;
-				case -2: // unsupported command
+				case RipParser::cmd_error: // unsupported command
 					goto finish;				
 			}		
-			if(trace) tfp->dump(sim_time.get_time());
 		}
+		if(trace) tfp->dump(sim_time.get_time());
 	}
 finish:
 	writter.report_usage();
@@ -394,11 +397,12 @@ void CmdWritter::Write( int _addr, int _cmd, int _val ) {
 		cout << addr << '-' << watch_ch << " CMD = " << hex << (cmd&0xff) << " VAL = " << (val&0xff) << '\n';
 	for( auto& k : features )
 		k.check( cmd, val );	
-	// cout << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
-	// cout  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
+	cout << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
+	cout  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
 }
 
 void CmdWritter::Eval() {	
+	// cout << "Writter eval " << state << "\n";
 	int clk = top->clk;	
 	if( (clk==0) && (last_clk != clk) ) {
 		switch( state ) {
