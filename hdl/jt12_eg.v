@@ -447,9 +447,9 @@ always @(*) begin
 	am_inverted = {6{lfo_mod[6]}} ^ lfo_mod[5:0];
 	casez( {amsen_VII, ams_VII } )
 		default: am_final = 9'd0;
-		3'b1_01: am_final = { {3{am_inverted[5]}}, am_inverted };
-		3'b1_10: am_final = { am_inverted[5], am_inverted, 2'b0};
-		3'b1_11: am_final = { am_inverted, 3'b0	  };
+		3'b1_01: am_final = { 5'd0, am_inverted[5:2]	};
+		3'b1_10: am_final = { 3'd0, am_inverted 		};
+		3'b1_11: am_final = { 2'd0, am_inverted, 1'b0	};
 	endcase
 	sum_eg_tl = {  tl_VII,   3'd0 } + eg_VII;
 	`ifdef TEST_SUPPORT
@@ -457,7 +457,7 @@ always @(*) begin
 		sum_eg_tl_am = 12'd0;
 	else
 	`endif
-	sum_eg_tl_am = sum_eg_tl + { {2{am_final[8]}}, am_final, 1'b0 };
+	sum_eg_tl_am = sum_eg_tl + { 3'd0, am_final };
 end
 
 always @(posedge clk) 

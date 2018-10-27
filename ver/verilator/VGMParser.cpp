@@ -74,19 +74,32 @@ JTTParser::JTTParser(int c) : RipParser(c) {
 	ch_commands["ams"] = 0xb4;
 	ch_commands["pms"] = 0xb4;
 	global_commands["kon"] = 0x28;
+	global_commands["lfo"] = 0x22;
 }
 
 int JTTParser::parse() {
 	if(done) return cmd_finish;
 	while( !file.eof() && file.good() ) {
 		try {
-			char line[128];
-			file.getline(line,128);
-			line_cnt++;
+			char line[128]="";
+			char *noblanks;
+			do{
+				file.getline(line,128);
+				line_cnt++;
+				noblanks = line;
+				remove_blanks(noblanks);
+			} while( (noblanks[0]=='#' || strlen(line)==0) && !file.eof()  );
+			if( strlen(line)==0 ) { done=true; return cmd_finish; }
 			char line2[128];
 			strncpy( line2, line, 128 ); line2[127]=0;
 			char *txt_cmd = strtok( line2, "#" );
+			// cout << "TXT CMD = " << txt_cmd << "\n";
 			remove_blanks(txt_cmd);
+
+			if( strcmp(txt_cmd, "finish")==0 ) {
+				done=true;
+				return cmd_finish;
+			}			
 			char *txt_arg = strchr( txt_cmd, ' ');
 			char cmd_base;
 			if( txt_arg==NULL ) {
@@ -97,6 +110,15 @@ int JTTParser::parse() {
 			}
 			*txt_arg = 0;
 			txt_arg++;
+
+			if( strcmp(txt_cmd, "wait")==0 ) {
+				int aux;
+				sscanf( txt_arg, "%d", &aux );
+				wait = aux;
+				wait *= 24*clk_period;
+				cout << "Wait for " << wait << '\n';
+				return cmd_wait;
+			}
 
 			auto op_cmd = op_commands.find(txt_cmd);
 			if( op_cmd != op_commands.end() ) {
@@ -123,15 +145,6 @@ int JTTParser::parse() {
 				val = (char)aux;
 				addr=0;
 				return cmd_write;
-			}
-
-			if( strcmp(txt_cmd, "wait")==0 ) {
-				int aux;
-				sscanf( txt_arg, "%d", &aux );
-				wait = aux;
-				wait *= 24*clk_period;
-				cout << "Wait for " << wait << '\n';
-				return cmd_wait;
 			}
 
 			cout << "ERROR: incorrect syntax at line " << line_cnt << '\n';

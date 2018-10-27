@@ -279,7 +279,7 @@ int main(int argc, char** argv, char** env) {
 					// 	 cout << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
 					// 	break; // do not write to RL register
 					// }
-					cout << "CMD = " << hex << ((int)gym->cmd&0xff) << '\n';
+					// cout << "CMD = " << hex << ((int)gym->cmd&0xff) << '\n';
 					writter.Write( gym->addr, gym->cmd, gym->val );
 					timeout = sim_time.get_time() + PERIOD*6*100;
 					break; // parse register
