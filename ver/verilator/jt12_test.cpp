@@ -75,17 +75,20 @@ class CmdWritter {
 	int state;
 	int watch_addr, watch_ch;
 	list<FeatureUse>features;
-	struct Block_def{ int cmd_mask, cmd, val_and, val_or; };
+	struct Block_def{ int cmd_mask, cmd, blk_addr; 
+		int (*filter)(int);
+	};
 	list<Block_def>blocks;
 public:
 	CmdWritter( Vjt12* _top );
 	void Write( int _addr, int _cmd, int _val );
-	void block( int cmd_mask, int cmd, int val_and, int val_or ) {
+	void block( int cmd_mask, int cmd, int (*filter)(int), int blk_addr=3 ) {
 		Block_def aux;
 		aux.cmd_mask = cmd_mask;
 		aux.cmd = cmd;
-		aux.val_and = val_and;
-		aux.val_or = val_or;
+		aux.filter = filter;
+		aux.blk_addr = blk_addr;
+		cout << "Added block to " << hex << cmd_mask << " - " << cmd << "/ ADDR=" << blk_addr << '\n';
 		blocks.push_back( aux );
 	};
 	void watch( int addr, int ch ) { watch_addr=addr; watch_ch=ch; }
@@ -113,29 +116,12 @@ int main(int argc, char** argv, char** env) {
 	bool forever=true;
 	assert( PERIOD%2 == 0);
 
-	for( int k=0; k<argc; k++ ) {
+	for( int k=1; k<argc; k++ ) {
 		if( string(argv[k])=="-trace" ) { trace=true; continue; }
 		if( string(argv[k])=="-gym" ) { 
-			string filename(argv[++k]);
-			auto ext = filename.find_last_of('.');
-			if( ext == string::npos ) {
-				cout << "The filename must end in .gym or .vgm\n";
-				return 1;
-			}
-			if( filename.substr(ext)==".gym") {
-				gym = new Gym(PERIOD); gym->open(argv[k]); 
-				continue; 
-			}
-			if( filename.substr(ext)==".vgm") {
-				gym = new VGMParser(PERIOD); gym->open(argv[k]); 
-				continue; 
-			}
-			if( filename.substr(ext)==".jtt") {
-				gym = new JTTParser(PERIOD); gym->open(argv[k]); 
-				continue; 
-			}
-			cout << "The filename must end in .gym or .vgm\n";
-			return 1;
+			gym = ParserFactory( argv[++k], PERIOD );
+			if( gym==NULL ) return 1;
+			continue;
 		}
 		if( string(argv[k])=="-time" ) { 
 			int aux;
@@ -159,16 +145,46 @@ int main(int argc, char** argv, char** env) {
 		}
 		*/
 		if( string(argv[k])=="-noam" ) {
-			writter.block( 0xF0, 0x60, 0x7F, 0 ); 
+			writter.block( 0xF0, 0x60, [](int v){return v&0x7f;} ); 
 			continue;
 		}
 		if( string(argv[k])=="-noks") {
-			writter.block( 0xF0, 0x50, 0x1F, 0 ); 
+			writter.block( 0xF0, 0x50, [](int v){return v&0x1f;} ); 
+			continue;
 		}
 		if( string(argv[k])=="-nomul") {
 			cout << "All writes to MULT locked to 1\n";
-			writter.block( 0xF0, 0x30, 0x70, 1 ); 
+			writter.block( 0xF0, 0x30, [](int v){ return (v&0x70)|1;} ); 
+			continue;
 		}
+		if( string(argv[k])=="-nossg") {
+			cout << "All writes to SSG locked to 0\n";
+			writter.block( 0xF0, 0x90, [](int v){ return 0;} ); 
+			continue;
+		}
+		if( string(argv[k])=="-mute") {
+			int ch;
+			if( sscanf(argv[++k],"%d",&ch) != 1 ) {
+				cout << "ERROR: needs channel number after -mute\n";
+				return 1;
+			}
+			if( ch<0 || ch>5 ) {
+				cout << "ERROR: muted channel must be within 0-5 range\n";
+				return 1;
+			}
+			cout << "Channel " << ch << " muted\n";
+			switch(ch) {
+				case 0: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==0? 0 : v;} ); break;
+				case 1: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==1? 0 : v;} ); break;
+				case 2: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==2? 0 : v;} ); break;
+				case 3: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==4? 0 : v;} ); break;
+				case 4: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==5? 0 : v;} ); break;
+				case 5: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==6? 0 : v;} ); break;
+			}
+			continue;
+		}
+		cout << "ERROR: Unknown argument " << argv[k] << "\n";
+		return 1;
 	}
 
 	if( gym->length() != 0 && !sim_time.limited() ) sim_time.set_time_limit( gym->length() );
@@ -380,12 +396,11 @@ CmdWritter::CmdWritter( Vjt12* _top ) {
 void CmdWritter::Write( int _addr, int _cmd, int _val ) {
 	// cout << "Writter command\n";
 	for( auto&k : blocks ) {
-		char aux = _cmd;
+		int aux = _cmd;
 		aux &= k.cmd_mask;
-		if( aux == k.cmd ) {
-			_val &= k.val_and;
-			_val |= k.val_or;
-			cout << "Blocked!\n";
+		if( aux == k.cmd && (k.blk_addr==3 || k.blk_addr==_addr )) {
+			int old=_val;
+			_val = k.filter(_val);
 		}
 	}
 	addr = _addr;

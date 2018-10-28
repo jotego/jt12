@@ -44,10 +44,10 @@ module jt12_reg(
 	input			up_dt1,
 	input			up_tl,
 	input			up_ks_ar,
-	input			up_amen_d1r,
-	input			up_d2r,
+	input			up_amen_dr,
+	input			up_sr,
 		
-	input			up_d1l,
+	input			up_sl_rr,
 	input			up_ssgeg,
 
 	output	reg		ch6op,	// 1 when the operator belongs to CH6
@@ -219,13 +219,13 @@ wire up_tl_op	= up_tl		& update_op_VII;
 wire up_ks_op	= up_ks_ar	& update_op_III;
 wire up_ar_op	= up_ks_ar	& update_op_II;
 // AM ON, D1R
-wire up_amen_op	= up_amen_d1r	& update_op_VII;
-wire up_d1r_op	= up_amen_d1r	& update_op_II;
+wire up_amen_op	= up_amen_dr& update_op_VII;
+wire up_dr_op	= up_amen_dr& update_op_II;
 // Sustain Rate (D2R)
-wire up_d2r_op	= up_d2r	& update_op_II;
+wire up_sr_op	= up_sr	& update_op_II;
 // D1L & RR
-wire up_d1l_op	= up_d1l	& update_op_I;
-wire up_rr_op	= up_d1l	& update_op_II;
+wire up_sl_op	= up_sl_rr	& update_op_I;
+wire up_rr_op	= up_sl_rr	& update_op_II;
 // SSG
 //wire up_ssgen_op = up_ssgeg	& update_op_I;
 wire up_ssg_op	= up_ssgeg	& update_op_II;
@@ -295,9 +295,9 @@ assign regop_in = {
 	up_ks_op	? ks_in	 : ks_III,	// 2 - 16
 	up_ar_op	? ar_in	 : ar_II,	// 5 - 21
 	up_amen_op	? amen_in: amsen_VII,// 1 - 22
-	up_d1r_op	? d1r_in : d1r_II,	// 5 - 25
-	up_d2r_op	? d2r_in : d2r_II,	// 5 - 30
-	up_d1l_op	? d1l_in : d1l_I,	// 4 - 34
+	up_dr_op	? d1r_in : d1r_II,	// 5 - 25
+	up_sr_op	? d2r_in : d2r_II,	// 5 - 30
+	up_sl_op	? d1l_in : d1l_I,	// 4 - 34
 	up_rr_op	? rr_in	 : rr_II,	// 4 - 38
 	up_ssg_op	? ssg_in[3]   : ssg_en_II,	// 1 - 39
 	up_ssg_op	? ssg_in[2:0] : ssg_eg_II	// 3 - 42

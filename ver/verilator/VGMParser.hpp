@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 
+
 class RipParser {
 protected:
 	int clk_period; // synthesizer clock period
@@ -17,6 +18,8 @@ public:
 	RipParser(int c) { clk_period = c; }
 	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1 };
 };
+
+RipParser* ParserFactory( const char *filename, int clk_period );
 
 class VGMParser : public RipParser {
 	std::ifstream file;	
@@ -62,5 +65,7 @@ public:
 	int parse();
 	uint64_t length() { return 0; }
 };
+
+
 
 #endif

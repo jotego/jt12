@@ -15,13 +15,21 @@ GYM_FILE=
 GYM_ARG=
 #FAST=
 FAST=-DFASTDIV
+VERI_EXTRA=
 # use SIMULATION="-DSIMULATION" to enable simulation statements
 SIMULATION=
 
 while [ $# -gt 0 ]; do
 	if [ "$1" = "-w" ]; then
 		echo "Signal dump enabled"
-		DUMPSIGNALS=-trace
+		DUMPSIGNALS="-trace"
+		shift
+		continue
+	fi
+	if [ "$1" = "-w1" ]; then
+		echo "Signal dump enabled (only top level)"
+		DUMPSIGNALS="-trace"
+		VERI_EXTRA="$VERI_EXTRA --trace-depth 1"
 		shift
 		continue
 	fi
@@ -48,8 +56,12 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
-	if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" ]]; then
+	if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "-mute" ]]; then
 		EXTRA="$EXTRA $1"
+		if [[ "$1" = -mute ]]; then
+			shift
+			EXTRA="$EXTRA $1"
+		fi
 		shift
 		continue
 	fi
@@ -74,7 +86,7 @@ if ! verilator --cc -f gather.f --top-module $TOP -I../../hdl  \
 	-DDISPLAY_STEP --trace -DTEST_SUPPORT \
     $SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 	-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
-	-D$POSTPROC -DICARUS $FAST --exe jt12_test.cpp VGMParser.cpp; then
+	-D$POSTPROC $VERI_EXTRA -DICARUS $FAST --exe jt12_test.cpp VGMParser.cpp; then
 	exit $?
 fi
 

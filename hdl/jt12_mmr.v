@@ -264,9 +264,9 @@ always @(posedge clk) begin : memory_mapped_registers
 					8'h3?: { up_chreg, up_opreg } <= { 3'h0, 7'h01 }; // up_dt1
 					8'h4?: { up_chreg, up_opreg } <= { 3'h0, 7'h02 }; // up_tl
 					8'h5?: { up_chreg, up_opreg } <= { 3'h0, 7'h04 }; // up_ks_ar
-					8'h6?: { up_chreg, up_opreg } <= { 3'h0, 7'h08 }; // up_amen_d1r
-					8'h7?: { up_chreg, up_opreg } <= { 3'h0, 7'h10 }; // up_d2r
-					8'h8?: { up_chreg, up_opreg } <= { 3'h0, 7'h20 }; // up_d1l
+					8'h6?: { up_chreg, up_opreg } <= { 3'h0, 7'h08 }; // up_amen_dr
+					8'h7?: { up_chreg, up_opreg } <= { 3'h0, 7'h10 }; // up_sr
+					8'h8?: { up_chreg, up_opreg } <= { 3'h0, 7'h20 }; // up_sl
 					8'h9?: { up_chreg, up_opreg } <= { 3'h0, 7'h40 }; // up_ssgeg
 					default: { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
             	endcase // selected_register
@@ -311,9 +311,9 @@ jt12_reg u_reg(
 	.up_dt1		( up_opreg[0]	),
 	.up_tl		( up_opreg[1]	),
 	.up_ks_ar	( up_opreg[2]	),
-	.up_amen_d1r( up_opreg[3]	),
-	.up_d2r		( up_opreg[4]	),
-	.up_d1l		( up_opreg[5]	),
+	.up_amen_dr ( up_opreg[3]	),
+	.up_sr		( up_opreg[4]	),
+	.up_sl_rr	( up_opreg[5]	),
 	.up_ssgeg	( up_opreg[6]	),
 
 	.op			( up_op		),		// operator to update

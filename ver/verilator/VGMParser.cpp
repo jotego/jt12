@@ -66,6 +66,7 @@ JTTParser::JTTParser(int c) : RipParser(c) {
 	op_commands["sl"] = 0x80;
 	op_commands["rr"] = 0x80;
 	op_commands["ssg-eg"] = 0x90;
+	op_commands["ssg"] = 0x90;
 	ch_commands["fnum"] = 0xa0;
 	ch_commands["fnum_lsb"] = 0xa0;
 	ch_commands["block"] = 0xa4;
@@ -184,7 +185,13 @@ void VGMParser::open(const char* filename, int limit) {
 		cout << "VGM version < 1.50 in this file. Data offset set at 0x40\n";
 		file.seekg(0x40);
 	}
-	else file.seekg(0x100);
+	else {
+		int32_t start;
+		file.seekg(0x34);
+		file.read( (char*)&start, 4 );
+		start+=0x34;
+		file.seekg(start);
+	}
 	done=false;
 	// max_PSG_warning = 10;
 }
@@ -315,4 +322,28 @@ int Gym::parse() {
 	}while(file.good());
 	// cout << "Done\n";
 	return -1;
+}
+
+RipParser* ParserFactory( const char *filename, int clk_period ) {
+	string aux(filename);
+	auto ext = aux.find_last_of('.');
+	if( ext == string::npos ) {
+		cout << "ERROR: The filename must end in .gym or .vgm\n";
+		return NULL;
+	}
+	RipParser *gym;
+	if( aux.substr(ext)==".gym") {
+		gym = new Gym(clk_period); gym->open(filename);
+		return gym;
+	}
+	if( aux.substr(ext)==".vgm") {
+		gym = new VGMParser(clk_period); gym->open(filename);
+		return gym;
+	}
+	if( aux.substr(ext)==".jtt") {
+		gym = new JTTParser(clk_period); gym->open(filename);
+		return gym;
+	}
+	cout << "ERROR: The filename must end in .gym or .vgm\n";
+	return NULL;
 }
