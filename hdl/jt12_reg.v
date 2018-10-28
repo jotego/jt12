@@ -186,8 +186,6 @@ wire	[2:0]	fb_in	= din[5:3];
 wire	[2:0]	alg_in	= din[2:0];
 wire	[2:0]	pms_in	= din[2:0];
 wire	[1:0]	ams_in	= din[5:4];
-wire	[2:0]	block_in= din[5:3];
-wire	[2:0]	fnhi_in	= din[2:0];
 wire	[7:0]	fnlo_in	= din;
 // operator data
 wire	[2:0]	dt1_in	= din[6:4];
