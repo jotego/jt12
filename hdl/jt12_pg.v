@@ -71,7 +71,11 @@ jt12_pm u_pm(
 	.pm_offset( pm_offset_I )
 );
 
+`ifdef NOPM
+wire [11:0] pm_offset_I_ext = 12'd0;
+`else
 wire [11:0] pm_offset_I_ext = { {4{pm_offset_I[7]}}, pm_offset_I};
+`endif
 
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_I
 	block_II <= block_I;
@@ -82,7 +86,7 @@ end
 //////////////////////////////////////////////////
 // II
 reg [ 5:0] dt1_kf_III;
-reg [16:0] phinc_III;
+reg [17:0] phinc_III;
 reg [ 2:0] dt1_III;
 
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_II
@@ -94,21 +98,21 @@ always @(posedge clk) if ( clk_en ) begin // phase_calculation_II
 	endcase
 	dt1_III     <= dt1_II;
 	case ( block_II )
-		3'd0: phinc_III <= { 6'd0, fnum_II[12:2] };
-		3'd1: phinc_III <= { 5'd0, fnum_II[12:1] };
-		3'd2: phinc_III <= { 4'd0, fnum_II[12:0] };
-		3'd3: phinc_III <= { 3'd0, fnum_II, 1'd0 };
-		3'd4: phinc_III <= { 2'd0, fnum_II, 2'd0 };
-		3'd5: phinc_III <= { 1'd0, fnum_II, 3'd0 };
-		3'd6: phinc_III <= {       fnum_II, 4'd0 };
-		3'd7: phinc_III <= {       fnum_II[11:0], 5'd0 };
+		3'd0: phinc_III <= { 7'd0, fnum_II[12:2] };
+		3'd1: phinc_III <= { 6'd0, fnum_II[12:1] };
+		3'd2: phinc_III <= { 5'd0, fnum_II[12:0] };
+		3'd3: phinc_III <= { 4'd0, fnum_II, 1'd0 };
+		3'd4: phinc_III <= { 3'd0, fnum_II, 2'd0 };
+		3'd5: phinc_III <= { 2'd0, fnum_II, 3'd0 };
+		3'd6: phinc_III <= { 1'd0, fnum_II, 4'd0 };
+		3'd7: phinc_III <= {       fnum_II, 5'd0 };
 	endcase
 	keycode_III <= keycode_II;
 end
 
 //////////////////////////////////////////////////
 // III		
-reg [16:0] phinc_IV;
+reg [17:0] phinc_IV;
 reg [ 4:0] pow2;
 reg [ 2:0] dt1_IV;
 
@@ -160,12 +164,12 @@ reg [19:0] phinc_V;
 
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_IV
 	if( dt1_IV[1:0]==2'd0 )
-		phinc_V	<=	{3'd0, phinc_IV};
+		phinc_V	<=	{2'd0, phinc_IV};
 	else begin
 		if( !dt1_IV[2] )
-			phinc_V	<=	{3'd0,phinc_IV} + { 15'd0, dt1_offset_IV };
+			phinc_V	<=	{2'd0,phinc_IV} + { 15'd0, dt1_offset_IV };
 		else
-			phinc_V	<=	{3'd0,phinc_IV} - { 15'd0, dt1_offset_IV };
+			phinc_V	<=	{2'd0,phinc_IV} - { 15'd0, dt1_offset_IV };
 	end
 end
 
@@ -174,7 +178,7 @@ end
 reg [19:0] phinc_VI; // expanded to 20-bit widht, as per @ElectronAsh's advice
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_V
 	if( mul_V==4'd0 )
-		phinc_VI	<= { 4'b0, phinc_V[16:1] };
+		phinc_VI	<= phinc_V>>1;
 	else
 		phinc_VI	<= phinc_V * mul_V;
 end

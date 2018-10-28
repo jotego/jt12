@@ -444,7 +444,14 @@ reg	[11:0]	sum_eg_tl_am;
 reg	[ 5:0]	am_inverted;
 
 always @(*) begin
+`ifdef NOFM
+	am_inverted = 6'd0;
+`else 
 	am_inverted = {6{lfo_mod[6]}} ^ lfo_mod[5:0];
+`endif
+end
+
+always @(*) begin
 	casez( {amsen_VII, ams_VII } )
 		default: am_final = 9'd0;
 		3'b1_01: am_final = { 5'd0, am_inverted[5:2]	};

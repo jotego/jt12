@@ -32,6 +32,14 @@ void JTTParser::parse_opdata(char *txt_arg, int cmd_base) {
 	addr = ch < 3 ? 0 : 1;
 	if(ch>=3) ch-=3;
 
+	// adjust for writting order of device
+	switch(op) {
+		case 0: op=0; break;
+		case 1: op=2; break;
+		case 2: op=1; break;
+		case 3: op=3; break;
+	}
+
 	val = int_val;
 	cmd = cmd_base | ((op<<2) | ch);
 }
