@@ -444,7 +444,7 @@ reg	[11:0]	sum_eg_tl_am;
 reg	[ 5:0]	am_inverted;
 
 always @(*) begin
-`ifdef NOFM
+`ifdef NOAM
 	am_inverted = 6'd0;
 `else 
 	am_inverted = {6{lfo_mod[6]}} ^ lfo_mod[5:0];
@@ -482,11 +482,12 @@ always @(posedge clk)
 // Register cycle VIII
 wire ssg_inv_VIII, ssg_en_VIII;
 //reg	[9:0] eg_IX;
+wire invert_VIII = ssg_en_VIII && (ssg_invertion_VIII ^^ ssg_inv_VIII);
 always @(posedge clk) 
 	if( rst )
 		eg_IX <= 10'h3ff;
 	else if( clk_en ) begin
-		if( ssg_en_VIII && (ssg_invertion_VIII ^^ ssg_inv_VIII) )
+		if( invert_VIII )
 			eg_IX <= eg_internal_VIII>=10'h200 ? 10'h0 : (10'h200 - eg_internal_VIII);
 		else
 			eg_IX <= eg_internal_VIII;

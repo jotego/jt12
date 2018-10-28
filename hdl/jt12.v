@@ -189,7 +189,11 @@ jt12_lfo u_lfo(
 	.clk		( clk		),
 	.clk_en		( clk_en	),
 	.zero		( zero		),
+	`ifdef NOLFO
+	.lfo_rst	( 1'b1		),
+	`else
 	.lfo_rst	( 1'b0		),
+	`endif
 	.lfo_en		( lfo_en	),
 	.lfo_freq	( lfo_freq	),
 	.lfo_mod	( lfo_mod	)
