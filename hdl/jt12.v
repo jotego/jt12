@@ -303,6 +303,7 @@ jt12_acc u_acc(
 );
 
 `ifdef SIMULATION
+/* verilator lint_off PINMISSING */
 reg [4:0] sep24_cnt;
 
 wire [9:0] eg_ch0s1, eg_ch1s1, eg_ch2s1, eg_ch3s1, eg_ch4s1, eg_ch5s1,
@@ -350,6 +351,6 @@ sep24 #( .width(10), .pos0(5'd0)) egsep
 	.ch5s4 (eg_ch5s4)
 );
 `endif
-
+/* verilator lint_on PINMISSING */
 `endif
 endmodule

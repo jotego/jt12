@@ -30,7 +30,7 @@ void JTTParser::parse_opdata(char *txt_arg, int cmd_base) {
 		throw 0;
 	}
 	addr = ch < 3 ? 0 : 1;
-	if(ch>3) ch-=3;
+	if(ch>=3) ch-=3;
 
 	val = int_val;
 	cmd = cmd_base | ((op<<2) | ch);
@@ -48,7 +48,7 @@ void JTTParser::parse_chdata(char *txt_arg, int cmd_base) {
 		throw 0;
 	}
 	addr = ch < 3 ? 0 : 1;
-	if(ch>3) ch-=3;
+	if(ch>=3) ch-=3;
 
 	val = int_val;
 	cmd = cmd_base | ch;

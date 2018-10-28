@@ -1,4 +1,5 @@
 `ifdef SIMULATION
+/* verilator lint_off PINMISSING */
 
 reg [4:0] sep24_cnt;
 reg mmr_dump;
@@ -545,7 +546,7 @@ sep24 #( .width(4), .pos0(1) ) d1l_step
 (
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.mixed	( d1l		),
+	.mixed	( d1l_I		),
 	.mask	( 24'd0		),
 	.cnt	( sep24_cnt	),
 
@@ -848,5 +849,6 @@ if (mmr_dump ) begin
 		d2r_ch5s4, rr_ch5s4, d1l_ch5s4, ks_ch5s4, ssg_ch5s4,
 		kon_ch5s4 );
 end
+/* verilator lint_on PINMISSING */
 `endif
 

@@ -61,7 +61,7 @@ wire pg_rst_VI;
 // I
 reg [4:0] keycode_II;
 reg [ 2:0] block_II;
-reg [12:0] fnum_II;
+reg [11:0] fnum_II;
 wire signed [7:0] pm_offset_I;
 
 jt12_pm u_pm(
@@ -71,11 +71,11 @@ jt12_pm u_pm(
 	.pm_offset( pm_offset_I )
 );
 
-wire [12:0] pm_offset_I_13b = { {5{pm_offset_I[7]}}, pm_offset_I};
+wire [11:0] pm_offset_I_ext = { {4{pm_offset_I[7]}}, pm_offset_I};
 
 always @(posedge clk) if ( clk_en ) begin // phase_calculation_I
 	block_II <= block_I;
-	fnum_II <= {fnum_I,1'b0} + pm_offset_I_13b;
+	fnum_II <= {fnum_I,1'b0} + pm_offset_I_ext;
 	// fnum_II <= {fnum_I,1'b0}; // + { {3{pm_offset_I[7]}}, pm_offset_I};
 	keycode_II <= { block_I, fnum_I[10], fnum_I[10] ? (|fnum_I[9:7]) : (&fnum_I[9:7])};
 end
@@ -95,14 +95,14 @@ always @(posedge clk) if ( clk_en ) begin // phase_calculation_II
 	endcase
 	dt1_III     <= dt1_II;
 	case ( block_II )
-		3'd0: phinc_III <= { 7'd0, fnum_II[12:3] };
-		3'd1: phinc_III <= { 6'd0, fnum_II[12:2] };
-		3'd2: phinc_III <= { 5'd0, fnum_II[12:1] };
-		3'd3: phinc_III <= { 4'd0, fnum_II       };
-		3'd4: phinc_III <= { 3'd0, fnum_II, 1'd0 };
-		3'd5: phinc_III <= { 2'd0, fnum_II, 2'd0 };
-		3'd6: phinc_III <= { 1'd0, fnum_II, 3'd0 };
-		3'd7: phinc_III <= {       fnum_II, 4'd0 };
+		3'd0: phinc_III <= { 7'd0, fnum_II[11:2] };
+		3'd1: phinc_III <= { 6'd0, fnum_II[11:1] };
+		3'd2: phinc_III <= { 5'd0, fnum_II[11:0] };
+		3'd3: phinc_III <= { 4'd0, fnum_II, 1'd0 };
+		3'd4: phinc_III <= { 3'd0, fnum_II, 2'd0 };
+		3'd5: phinc_III <= { 2'd0, fnum_II, 3'd0 };
+		3'd6: phinc_III <= { 1'd0, fnum_II, 4'd0 };
+		3'd7: phinc_III <= {       fnum_II, 5'd0 };
 	endcase
 	keycode_III <= keycode_II;
 end
@@ -221,6 +221,7 @@ jt12_sh_rst #( .width(1), .stages(3) ) u_rstsh(
 
 
 `ifdef SIMULATION
+/* verilator lint_off PINMISSING */
 reg [4:0] sep24_cnt;
 
 wire [9:0] pg_ch0s1, pg_ch1s1, pg_ch2s1, pg_ch3s1,
@@ -402,7 +403,7 @@ sep24 #( .width(1), .pos0(23)) pgrstsep
 	.ch5s4 (pgrst_III_ch5s4)
 );
 
-
+/* verilator lint_on PINMISSING */
 `endif
 
 endmodule

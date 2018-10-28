@@ -39,8 +39,10 @@ module sep24 #(parameter width=10, parameter pos0=5'd0)
 
 reg [4:0] cntadj;
 
+/* verilator lint_off WIDTH */
 always @(*)
 	cntadj = (cnt+pos0)%24;
+/* verilator lint_on WIDTH */
 
 always @(posedge clk) if( clk_en ) begin
 	case( cntadj )
