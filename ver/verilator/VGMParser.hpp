@@ -47,6 +47,7 @@ class JTTParser : public RipParser {
 	std::ifstream file;	
 	int line_cnt;
 	bool done;
+	int default_ch;
 	// int max_PSG_warning;
 	void remove_blanks( char*& str );
 	void parse_chdata(char *txt_arg, int cmd_base);

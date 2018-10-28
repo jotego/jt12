@@ -109,7 +109,7 @@ always @(*) begin
 	endcase
 
 	casez( fnum[10:4] )
-		7'b1??_????: pm_unsigned = { 1'b0, pm_base, 2'd0 };
+		7'b1??_????: pm_unsigned = { 1'b0,  pm_base, 2'd0 };
 		7'b01?_????: pm_unsigned = { 2'b0, pm_base, 1'd0 };
 		7'b001_????: pm_unsigned = { 3'b0, pm_base };
 		7'b000_1???: pm_unsigned = { 4'b0, pm_base[4:1] };

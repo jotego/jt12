@@ -189,7 +189,7 @@ int main(int argc, char** argv, char** env) {
 	top->cs_n = 0;
 	top->wr_n = 1;
 	top->limiter_en=0;
-	cout << "Reset\n";
+	// cout << "Reset\n";
 	while( sim_time.get_time() < 256*PERIOD ) {
 		top->eval();
 		if( sim_time.next_quarter() ) top->clk = 1-top->clk;
@@ -206,7 +206,7 @@ int main(int argc, char** argv, char** env) {
 	int next_check=check_step;
 	int reg, val;
 	bool fail=true;
-	cout << "Main loop\n";
+	// cout << "Main loop\n";
 	vluint64_t wait=0;
 	int last_sample=0;
 	WaveWritter wav("jt12_test.wav");

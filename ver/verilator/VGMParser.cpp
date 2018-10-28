@@ -39,8 +39,12 @@ void JTTParser::parse_opdata(char *txt_arg, int cmd_base) {
 void JTTParser::parse_chdata(char *txt_arg, int cmd_base) {
 	int ch, int_val, read=0;
 	read=sscanf( txt_arg, " %X , %X ", &ch, &int_val );
-	if( read != 2 ) {
-		cout << "Syntax error at line " << line_cnt << '\n';
+	if( read == 1 ) {
+		int_val = ch;
+		ch = default_ch;
+	}
+	else if( read != 2 ) {
+		cout << "Missing arguments at line " << line_cnt << '\n';
 		throw 0;
 	}
 	addr = ch < 3 ? 0 : 1;
@@ -75,6 +79,7 @@ JTTParser::JTTParser(int c) : RipParser(c) {
 	ch_commands["pms"] = 0xb4;
 	global_commands["kon"] = 0x28;
 	global_commands["lfo"] = 0x22;
+	default_ch = 0;
 }
 
 int JTTParser::parse() {
