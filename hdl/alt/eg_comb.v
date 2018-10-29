@@ -49,7 +49,7 @@ end
 always @(*)
 	rate = pre_rate[6] ? 6'd63 : pre_rate[5:0];
 
-reg		[2:0]	cnt;
+reg	[2:0] cnt;
 
 reg [4:0] mux_sel;
 always @(*) begin
@@ -109,9 +109,9 @@ assign cnt_lsb = cnt[0];
 always @(*) begin
 	sum_up = cnt[0] != cnt_in;
 end
-
-
 //////////////////////////////////////////////////////////////
+// cnt/cnt_lsb/cnt_in not used below this point
+
 reg [3:0] 	dr_sum;
 reg	[10:0]	dr_result;
 
