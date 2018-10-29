@@ -83,7 +83,7 @@ wire ssg_inv_II  = ssg_eg_II[2] & ssg_en_II;
 wire ssg_alt_II  = ssg_eg_II[1] & ssg_en_II;
 wire ssg_hold_II = ssg_eg_II[0] & ssg_en_II;
 
-parameter ATTACK=3'd0, DECAY1=3'd1, DECAY2=3'd2, RELEASE=3'd7, HOLD=3'd3;
+localparam ATTACK=3'd0, DECAY1=3'd1, DECAY2=3'd2, RELEASE=3'd7, HOLD=3'd3;
 
 reg		[4:0]	d1level_II;
 reg		[9:0]	eg_III, eg_IV, eg_V;
