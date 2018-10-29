@@ -8,6 +8,9 @@
 | eg_comb/           |           | 43/43         | 0/0           | 122/122       | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | eg_comb            |
 +---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+This module represents all the envelope generator calculations.
+Everything is combinational. The testbench ver/eg2 checks the 
+functionality of this module.
 
 */
 
@@ -24,7 +27,8 @@ module eg_comb(
 	input [ 1:0] ams,
 	input [ 6:0] tl,
 	output       cnt_lsb,
-	output reg	[ 9:0]	eg_limited	
+	output reg	[9:0] eg_limited,
+	output reg  [9:0] eg_pure
 );
 
 reg		[6:0]	pre_rate;
@@ -108,21 +112,18 @@ end
 
 
 //////////////////////////////////////////////////////////////
-reg [3:0] 	preatt;
-reg [5:0] 	att;
-wire		ssg_en;
-reg	[10:0]	egatt;
+reg [3:0] 	dr_sum;
+reg	[10:0]	dr_result;
 
 always @(*) begin
 	case( rate[5:2] )
-		4'b1100: preatt = { 2'b0, step, ~step }; // 12
-		4'b1101: preatt = { 1'b0, step, ~step, 1'b0 }; // 13
-		4'b1110: preatt = { step, ~step, 2'b0 }; // 14
-		4'b1111: preatt = 4'd8;// 15
-		default: preatt = { 2'b0, step, 1'b0 };
+		4'b1100: dr_sum = { 2'b0, step, ~step }; // 12
+		4'b1101: dr_sum = { 1'b0, step, ~step, 1'b0 }; // 13
+		4'b1110: dr_sum = { step, ~step, 2'b0 }; // 14
+		4'b1111: dr_sum = 4'd8;// 15
+		default: dr_sum = { 2'b0, step, 1'b0 };
 	endcase
-	att = { 2'd0, preatt };
-	egatt = {4'd0, att} + eg_in;
+	dr_result = {6'd0, dr_sum} + eg_in;
 end
 
 reg [ 7:0] ar_sum0;
@@ -143,15 +144,14 @@ always @(*) begin : ar_calculation
 		ar_sum = step ? { 1'b0, ar_sum1 } : 10'd0;
 	ar_result = rate[5:1]==5'h1F ? 11'd0 : eg_in-ar_sum;
 end
-
-reg [9:0] eg_pure;
-
+///////////////////////////////////////////////////////////
+// rate not used below this point
 always @(*) begin
 	if(sum_up) begin
 		if( attack  )
 			eg_pure = ar_result[10] ? 10'd0: ar_result[9:0];
 		else 
-			eg_pure = egatt[10] ? 10'h3FF : egatt[9:0];
+			eg_pure = dr_result[10] ? 10'h3FF : dr_result[9:0];
 	end
 	else eg_pure = eg_in;
 end

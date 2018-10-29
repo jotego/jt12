@@ -10,7 +10,7 @@ if ! make -j -C obj_dir -f Veg_comb.mk Veg_comb > s; then
 	exit $?
 fi
 
-if ! obj_dir/Veg_comb; then
+if ! obj_dir/Veg_comb $*; then
 	exit $?
 fi
 verilator_coverage logs/coverage.dat --annotate coverage

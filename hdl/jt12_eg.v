@@ -106,7 +106,7 @@ always @(posedge clk) begin : envelope_counter
 	else begin
 		if( zero && clk_en ) begin
 			// envelope counter increases every 3 output samples,
-			// there is one sample every 32 clock ticks
+			// there is one sample every 24 clock ticks
 			if( eg_cnt_base == 2'd2 ) begin
 				eg_cnt 		<= eg_cnt + 1'b1;
 				eg_cnt_base	<= 2'd0;
