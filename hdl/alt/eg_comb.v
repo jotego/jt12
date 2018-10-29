@@ -1,21 +1,21 @@
 module eg_comb(
 	input [ 2:0] state,
-	input [ 5:0] arate,
+	input [ 4:0] arate,
 	input [ 4:0] base_rate,
 	input [ 4:0] keycode,
 	input [14:0] eg_cnt,
-	input [ 2:0] cnt_in,
+	input        cnt_in,
 	input [ 1:0] ks,
 	input [ 9:0] eg_in,
 	input [ 6:0] lfo_mod,
 	input        amsen,
 	input [ 1:0] ams,
 	input [ 6:0] tl,
-	output reg   sum_up,
+	output       cnt_lsb,
 	output reg	[ 9:0]	eg_limited	
 );
 
-localparam ATTACK=3'd0, DECAY1=3'd1, DECAY2=3'd2, RELEASE=3'd7, HOLD=3'd3;
+localparam ATTACK=3'd0;
 
 reg ar_off;
 
@@ -105,6 +105,8 @@ always @(*) begin : rate_step
 	step = rate[5:1]==5'd0 ? 1'b0 : step_idx[ cnt ];
 end
 
+reg sum_up;
+assign cnt_lsb = cnt[0];
 always @(*) begin
 	sum_up = cnt[0] != cnt_in;
 end

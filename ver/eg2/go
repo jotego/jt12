@@ -1,0 +1,4 @@
+#!/bin/bash
+
+verilator ../../hdl/alt/eg_comb.v eg2.cpp --cc --exe --trace
+make -C obj_dir -j Makefile.mk Veg_comb
