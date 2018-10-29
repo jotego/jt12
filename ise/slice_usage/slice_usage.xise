@@ -424,7 +424,6 @@
     <!-- Do not hand-edit this section, as it will be overwritten when the    -->
     <!-- project is analyzed based on files automatically identified as       -->
     <!-- include files.                                                       -->
-    <file xil_pn:name="../../hdl/jt12_mmr_sim.vh" xil_pn:type="FILE_VERILOG"/>
   </autoManagedFiles>
 
 </project>
