@@ -13,7 +13,6 @@
 
 module eg_comb(
 	input attack,
-	input [ 4:0] arate,
 	input [ 4:0] base_rate,
 	input [ 4:0] keycode,
 	input [14:0] eg_cnt,
@@ -126,7 +125,8 @@ always @(*) begin
 	egatt = {4'd0, att} + eg_in;
 end
 
-reg [ 8:0] ar_sum0, ar_sum1;
+reg [ 7:0] ar_sum0;
+reg [ 8:0] ar_sum1;
 reg [10:0] ar_result;
 reg [ 9:0] ar_sum;
 
