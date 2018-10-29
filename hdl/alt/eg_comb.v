@@ -1,5 +1,18 @@
+/*
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Module             | Partition | Slices*       | Slice Reg     | LUTs          | LUTRAM        | BRAM/FIFO | DSP48A1 | BUFG  | BUFIO | BUFR  | DCM   | PLL_ADV   | Full Hierarchical  |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| eg_comb/           |           | 49/49         | 0/0           | 153/153       | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | eg_comb            |
+| eg_comb/           |           | 42/42         | 0/0           | 134/134       | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | eg_comb            |
+| eg_comb/           |           | 39/39         | 0/0           | 129/129       | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | eg_comb            |
+| eg_comb/           |           | 43/43         | 0/0           | 122/122       | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | eg_comb            |
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
+*/
+
 module eg_comb(
-	input [ 2:0] state,
+	input attack,
 	input [ 4:0] arate,
 	input [ 4:0] base_rate,
 	input [ 4:0] keycode,
@@ -14,12 +27,6 @@ module eg_comb(
 	output       cnt_lsb,
 	output reg	[ 9:0]	eg_limited	
 );
-
-localparam ATTACK=3'd0;
-
-reg ar_off;
-
-always @(*) ar_off = arate == 5'h1f;
 
 reg		[6:0]	pre_rate;
 reg		[5:0]	rate;
@@ -41,38 +48,27 @@ always @(*)
 
 reg		[2:0]	cnt;
 
+reg [4:0] mux_sel;
+always @(*) begin
+	mux_sel = attack ? (rate[5:2]+4'd1): {1'b0,rate[5:2]};
+end // always @(*)
+
 always @(*) 
-	if( state == ATTACK )
-		case( rate[5:2] )
-			4'h0: cnt = eg_cnt[13:11];
-			4'h1: cnt = eg_cnt[12:10];
-			4'h2: cnt = eg_cnt[11: 9];
-			4'h3: cnt = eg_cnt[10: 8];
-			4'h4: cnt = eg_cnt[ 9: 7];
-			4'h5: cnt = eg_cnt[ 8: 6];
-			4'h6: cnt = eg_cnt[ 7: 5];
-			4'h7: cnt = eg_cnt[ 6: 4];
-			4'h8: cnt = eg_cnt[ 5: 3];
-			4'h9: cnt = eg_cnt[ 4: 2];
-			4'ha: cnt = eg_cnt[ 3: 1];
-			default: cnt = eg_cnt[ 2: 0];
-		endcase
-	else
-		case( rate[5:2] )
-			4'h0: cnt = eg_cnt[14:12];
-			4'h1: cnt = eg_cnt[13:11];
-			4'h2: cnt = eg_cnt[12:10];
-			4'h3: cnt = eg_cnt[11: 9];
-			4'h4: cnt = eg_cnt[10: 8];
-			4'h5: cnt = eg_cnt[ 9: 7];
-			4'h6: cnt = eg_cnt[ 8: 6];
-			4'h7: cnt = eg_cnt[ 7: 5];
-			4'h8: cnt = eg_cnt[ 6: 4];
-			4'h9: cnt = eg_cnt[ 5: 3];
-			4'ha: cnt = eg_cnt[ 4: 2];
-			4'hb: cnt = eg_cnt[ 3: 1];
-			default: cnt = eg_cnt[ 2: 0];
-		endcase
+	case( mux_sel )
+		5'h0: cnt = eg_cnt[14:12];
+		5'h1: cnt = eg_cnt[13:11];
+		5'h2: cnt = eg_cnt[12:10];
+		5'h3: cnt = eg_cnt[11: 9];
+		5'h4: cnt = eg_cnt[10: 8];
+		5'h5: cnt = eg_cnt[ 9: 7];
+		5'h6: cnt = eg_cnt[ 8: 6];
+		5'h7: cnt = eg_cnt[ 7: 5];
+		5'h8: cnt = eg_cnt[ 6: 4];
+		5'h9: cnt = eg_cnt[ 5: 3];
+		5'ha: cnt = eg_cnt[ 4: 2];
+		5'hb: cnt = eg_cnt[ 3: 1];
+		default: cnt = eg_cnt[ 2: 0];
+	endcase
 
 ////////////////////////////////
 reg step;
@@ -80,7 +76,7 @@ reg [7:0] step_idx;
 
 always @(*) begin : rate_step
 	if( rate[5:4]==2'b11 ) begin // 0 means 1x, 1 means 2x
-		if( rate[5:2]==4'hf && state == ATTACK)
+		if( rate[5:2]==4'hf && attack)
 			step_idx = 8'b11111111; // Maximum attack speed, rates 60&61
 		else
 		case( rate[1:0] )
@@ -91,7 +87,7 @@ always @(*) begin : rate_step
 		endcase
 	end
 	else begin
-		if( rate[5:2]==4'd0 && state != ATTACK)
+		if( rate[5:2]==4'd0 && !attack)
 			step_idx = 8'b11111110; // limit slowest decay rate
 		else
 		case( rate[1:0] )
@@ -130,47 +126,34 @@ always @(*) begin
 	egatt = {4'd0, att} + eg_in;
 end
 
-reg [8:0] ar_sum0;
-reg [9:0] ar_result, ar_sum;
+reg [ 8:0] ar_sum0, ar_sum1;
+reg [10:0] ar_result;
+reg [ 9:0] ar_sum;
 
 always @(*) begin : ar_calculation
 	casez( rate[5:2] )
-		default: ar_sum0 = {2'd0, eg_in[9:4]} + 8'd1;
-		4'b1100: ar_sum0 = {2'd0, eg_in[9:4]} + 8'd1;
-		4'b1101: ar_sum0 = {1'd0, eg_in[9:3]} + 8'd1;
-		4'b111?: ar_sum0 = eg_in[9:2] + 8'd1;
+		default: ar_sum0 = {2'd0, eg_in[9:4]};
+		4'b1101: ar_sum0 = {1'd0, eg_in[9:3]};
+		4'b111?: ar_sum0 = eg_in[9:2];
 	endcase
+	ar_sum1 = ar_sum0+9'd1;
 	if( rate[5:4] == 2'b11 )
-		ar_sum = step ? { ar_sum0, 1'b0 } : { 1'b0, ar_sum0 };
+		ar_sum = step ? { ar_sum1, 1'b0 } : { 1'b0, ar_sum1 };
 	else
-		ar_sum = step ? { 1'b0, ar_sum0 } : 10'd0;
-	ar_result = ar_sum<eg_in ? eg_in-ar_sum : 10'd0;
+		ar_sum = step ? { 1'b0, ar_sum1 } : 10'd0;
+	ar_result = rate[5:1]==5'h1F ? 11'd0 : eg_in-ar_sum;
 end
 
 reg [9:0] eg_pure;
 
 always @(*) begin
-	if( ar_off ) begin
-		eg_pure = 10'd0;
+	if(sum_up) begin
+		if( attack  )
+			eg_pure = ar_result[10] ? 10'd0: ar_result[9:0];
+		else 
+			eg_pure = egatt[10] ? 10'h3FF : egatt[9:0];
 	end
-	else
-	if( state == ATTACK ) begin
-		if( sum_up && eg_in != 10'd0 )
-			if( rate[5:1]==5'h1f )
-				eg_pure = 10'd0;
-			else
-				eg_pure = ar_result;
-		else
-			eg_pure = eg_in;
-	end
-	else begin : DECAY_SUM
-		if( sum_up ) begin
-			if ( egatt<= 11'd1023 )
-				eg_pure = egatt[9:0];
-			else eg_pure = 10'h3FF;
-		end
-		else eg_pure = eg_in;
-	end
+	else eg_pure = eg_in;
 end
 
 //////////////////////////////////////////////////////////////
@@ -180,7 +163,7 @@ reg	[11:0]	sum_eg_tl_am;
 reg	[ 5:0]	am_inverted;
 
 always @(*) begin
-	am_inverted = {6{lfo_mod[6]}} ^ lfo_mod[5:0];
+	am_inverted = lfo_mod[6] ? ~lfo_mod[5:0] : lfo_mod[5:0];
 end
 
 always @(*) begin
