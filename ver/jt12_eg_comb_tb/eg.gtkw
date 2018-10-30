@@ -1,0 +1,88 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Tue Oct 30 18:41:36 2018
+[*]
+[dumpfile] "/home/jtejada/repo/github/jt12/ver/jt12_eg_comb_tb/test.vcd"
+[dumpfile_mtime] "Tue Oct 30 18:40:05 2018"
+[dumpfile_size] 7137647
+[savefile] "/home/jtejada/repo/github/jt12/ver/jt12_eg_comb_tb/eg.gtkw"
+[timestart] 4652000
+[size] 1680 995
+[pos] -1 -1
+*-17.198502 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.test.
+[treeopen] TOP.test.uut.
+[sst_width] 223
+[signals_width] 224
+[sst_expanded] 1
+[sst_vpaned_height] 291
+@28
+TOP.ams[1:0]
+TOP.amsen
+@22
+TOP.rate1[4:0]
+TOP.rate2[4:0]
+TOP.rrate[3:0]
+@28
+TOP.ssg_eg[2:0]
+TOP.cnt_in
+TOP.cnt_lsb
+@22
+TOP.eg_cnt[14:0]
+TOP.eg_in[9:0]
+@8022
+TOP.eg_out[9:0]
+@20000
+-
+-
+@200
+-CTRL
+@22
+TOP.test.uut.u_ctrl.sustain[4:0]
+@28
+TOP.keyoff_now
+TOP.keyon_now
+TOP.state_in[2:0]
+TOP.state_next[2:0]
+@200
+-STEP
+@c00022
+TOP.test.uut.u_step.base_rate[4:0]
+@28
+(0)TOP.test.uut.u_step.base_rate[4:0]
+(1)TOP.test.uut.u_step.base_rate[4:0]
+(2)TOP.test.uut.u_step.base_rate[4:0]
+(3)TOP.test.uut.u_step.base_rate[4:0]
+(4)TOP.test.uut.u_step.base_rate[4:0]
+@1401200
+-group_end
+@22
+TOP.test.uut.u_step.rate[5:0]
+@c00022
+TOP.test.uut.step_rate_out[5:0]
+@28
+(0)TOP.test.uut.step_rate_out[5:0]
+(1)TOP.test.uut.step_rate_out[5:0]
+(2)TOP.test.uut.step_rate_out[5:0]
+(3)TOP.test.uut.step_rate_out[5:0]
+(4)TOP.test.uut.step_rate_out[5:0]
+(5)TOP.test.uut.step_rate_out[5:0]
+@1401200
+-group_end
+@200
+-PURE
+@c00022
+TOP.test.uut.u_pure.rate[5:1]
+@28
+(0)TOP.test.uut.u_pure.rate[5:1]
+(1)TOP.test.uut.u_pure.rate[5:1]
+(2)TOP.test.uut.u_pure.rate[5:1]
+(3)TOP.test.uut.u_pure.rate[5:1]
+(4)TOP.test.uut.u_pure.rate[5:1]
+@1401200
+-group_end
+@28
+TOP.test.uut.sum_up
+[pattern_trace] 1
+[pattern_trace] 0
