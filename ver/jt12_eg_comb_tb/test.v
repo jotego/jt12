@@ -66,9 +66,6 @@ jt12_eg_comb uut(
 	// SSG output inversion
 	.ssg_inv_in		( ssg_inv_in	),
 	.ssg_inv_out	( ssg_inv_out	),
-	// SSG output hold
-	.ssg_lock_in	( ssg_lock_in	),
-	.ssg_lock_out	( ssg_lock_out	),
 
 	.base_rate		( base_rate		),
 	.state_next		( state_next	),

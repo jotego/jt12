@@ -13,10 +13,10 @@ class Stim {
 public:
 	// inputs
 	int keyon_now, keyoff_now, state_in, eg_in, arate, rate1, rate2, rrate, sl, ssg_en,
-		ssg_eg, ssg_inv_in, ssg_lock_in, keycode, eg_cnt, cnt_in, ks,
+		ssg_eg, ssg_inv_in, keycode, eg_cnt, cnt_in, ks,
 		lfo_mod, amsen, ams, tl;
 	// outputs
-	int ssg_inv_out, ssg_lock_out, state_next, pg_rst, cnt_lsb, pure_eg_out, eg_out;
+	int ssg_inv_out, state_next, pg_rst, cnt_lsb, pure_eg_out, eg_out;
 	void reset();
 	void apply(Vtest* dut);
 	void get(Vtest* dut);
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 void Stim::reset() {
 	keyon_now=0, keyoff_now=0, state_in=0, eg_in=0x3ff, arate=0, rate1=0, 
 	rate2=0, rrate=0, sl=0, ssg_en=0,
-	ssg_eg=0, ssg_inv_in=0, ssg_lock_in=0, keycode=0, eg_cnt=0, cnt_in=0, ks=0,
+	ssg_eg=0, ssg_inv_in=0, keycode=0, eg_cnt=0, cnt_in=0, ks=0,
 	lfo_mod=0, amsen=0, ams=0, tl=0;
 	wait_count=0;
 }
@@ -99,7 +99,6 @@ void Stim::apply(Vtest* dut) {
 	
 	dut->ssg_eg		= ssg_eg;
 	dut->ssg_inv_in	= ssg_inv_in;
-	dut->ssg_lock_in= ssg_lock_in;
 	dut->keycode	= keycode;
 	dut->eg_cnt		= eg_cnt;
 	dut->cnt_in		= cnt_in;
@@ -113,7 +112,6 @@ void Stim::apply(Vtest* dut) {
 
 void Stim::get(Vtest* dut) {
 	ssg_inv_out	= dut->ssg_inv_out;
-	ssg_lock_out= dut->ssg_lock_out;
 	state_next	= dut->state_next;
 	pg_rst		= dut->pg_rst;
 	cnt_lsb		= dut->cnt_lsb;
@@ -129,7 +127,6 @@ void Stim::next(Vtest* dut) {
 	get(dut);
 	state_in = state_next;
 	ssg_inv_in = ssg_inv_out;
-	ssg_lock_in = ssg_lock_out;
 	eg_in = pure_eg_out;
 	cnt_in = cnt_lsb;
 	eg_cnt++;

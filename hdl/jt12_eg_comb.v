@@ -36,9 +36,6 @@ module jt12_eg_comb(
 	// SSG output inversion
 	input				ssg_inv_in,
 	output reg			ssg_inv_out,
-	// SSG output hold
-	input				ssg_lock_in,
-	output reg			ssg_lock_out,
 
 	output reg	[4:0]	base_rate,
 	output reg	[2:0]	state_next,
@@ -92,9 +89,6 @@ jt12_eg_ctrl u_ctrl(
 	// SSG output inversion
 	.ssg_inv_in		( ssg_inv_in	),
 	.ssg_inv_out	( ssg_inv_out	),
-	// SSG output hold
-	.ssg_lock_in	( ssg_lock_in	),
-	.ssg_lock_out	( ssg_lock_out	),
 
 	.base_rate		( base_rate		),
 	.state_next		( state_next	),

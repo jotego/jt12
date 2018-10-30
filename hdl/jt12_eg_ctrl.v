@@ -36,9 +36,6 @@ module jt12_eg_ctrl(
 	// SSG output inversion
 	input				ssg_inv_in,
 	output reg			ssg_inv_out,
-	// SSG output hold
-	input				ssg_lock_in,
-	output reg			ssg_lock_out,
 
 	output reg	[4:0]	base_rate,
 	output reg	[2:0]	state_next,
@@ -83,24 +80,19 @@ always @(*)
 			base_rate	= arate;
 			state_next	= ATTACK;
 			ssg_inv_out	= ssg_att & ssg_en;
-			ssg_lock_out= 1'b0;
 		end
 		{2'b00, ATTACK}: 
 			if( eg==10'd0 ) begin
 				base_rate	= rate1;
 				state_next	= DECAY;
-				// ssg_inv_out	= ssg_en & (ssg_alt ^ ssg_inv_in);
 				ssg_inv_out	= ssg_inv_in;
-				ssg_lock_out= 1'b0;
 			end
 			else begin
 				base_rate	= arate;
 				state_next	= ATTACK;
 				ssg_inv_out	= ssg_inv_in;
-				ssg_lock_out= ssg_lock_in;
 			end
 		{2'b00, DECAY}: begin
-			ssg_lock_out= 1'b0;
 			if( ssg_over ) begin
 				base_rate	= ssg_hold ? 5'd0 : arate;
 				state_next	= ssg_hold ? HOLD : ATTACK;
@@ -116,12 +108,10 @@ always @(*)
 			base_rate	= 5'd0;
 			state_next	= HOLD;
 			ssg_inv_out	= ssg_inv_in;
-			ssg_lock_out= 1'b1;
 		end
 		default: begin // RELEASE, note that keyoff_now==1 will enter this state too
 			base_rate	= { rrate, 1'b1 };
 			state_next	= RELEASE;	// release
-			ssg_lock_out= 1'b0;
 			ssg_inv_out	= 1'b0; // this can produce a glitch in the output
 				// But to release from SSG cannot be done nicely while
 				// inverting the ouput
