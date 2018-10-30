@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
 	if(trace) vcd->dump(main_time);
 
 	do {
+		stim.lfo_mod++;
 		stim.next( top );
 		stim.keyon_now = 0;
 		if(trace) vcd->dump(main_time);
