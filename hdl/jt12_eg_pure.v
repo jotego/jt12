@@ -64,18 +64,20 @@ always @(*) begin : ar_calculation
 		ar_sum = step ? { ar_sum1, 1'b0 } : { 1'b0, ar_sum1 };
 	else
 		ar_sum = step ? { 1'b0, ar_sum1 } : 10'd0;
-	ar_result = rate[5:1]==5'h1F ? 11'd0 : eg_in-ar_sum;
+	ar_result = eg_in-ar_sum;
 end
 ///////////////////////////////////////////////////////////
 // rate not used below this point
+reg [9:0] eg_pre_fastar; // pre fast attack rate
 always @(*) begin
 	if(sum_up) begin
 		if( attack  )
-			eg_pure = ar_result[10] ? 10'd0: ar_result[9:0];
+			eg_pre_fastar = ar_result[10] ? 10'd0: ar_result[9:0];
 		else 
-			eg_pure = dr_result[10] ? 10'h3FF : dr_result[9:0];
+			eg_pre_fastar = dr_result[10] ? 10'h3FF : dr_result[9:0];
 	end
-	else eg_pure = eg_in;
+	else eg_pre_fastar = eg_in;
+	eg_pure = (attack&rate[5:1]==5'h1F) ? 10'd0 : eg_pre_fastar;
 	eg_next = ssg_inv ? (10'h200-eg_pure) : eg_pure;
 end
 

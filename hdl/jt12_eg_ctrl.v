@@ -87,10 +87,11 @@ always @(*)
 		end
 		{2'b00, ATTACK}: 
 			if( eg==10'd0 ) begin
-				base_rate	= ssg_lock_in ? 5'd0 : rate1;
-				state_next	= ssg_lock_in ? HOLD : DECAY;
-				ssg_inv_out	= ssg_en & (ssg_alt ^ ssg_inv_in);
-				ssg_lock_out= ssg_hold;
+				base_rate	= rate1;
+				state_next	= DECAY;
+				// ssg_inv_out	= ssg_en & (ssg_alt ^ ssg_inv_in);
+				ssg_inv_out	= ssg_inv_in;
+				ssg_lock_out= 1'b0;
 			end
 			else begin
 				base_rate	= arate;
@@ -99,16 +100,16 @@ always @(*)
 				ssg_lock_out= ssg_lock_in;
 			end
 		{2'b00, DECAY}: begin
-			ssg_inv_out = ssg_inv_in;
+			ssg_lock_out= 1'b0;
 			if( ssg_over ) begin
-				base_rate	= arate;
-				state_next	= ATTACK;
-				ssg_lock_out= ssg_hold;
+				base_rate	= ssg_hold ? 5'd0 : arate;
+				state_next	= ssg_hold ? HOLD : ATTACK;
+				ssg_inv_out	= ssg_en & (ssg_alt ^ ssg_inv_in);
 			end
 			else begin
 				base_rate	=  eg[9:5] >= sustain ? rate2 : rate1;
 				state_next	= DECAY;
-				ssg_lock_out= 1'b0;
+				ssg_inv_out = ssg_inv_in;
 			end
 		end
 		{2'b00, HOLD}: begin
