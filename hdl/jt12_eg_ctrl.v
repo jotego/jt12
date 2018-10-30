@@ -21,11 +21,28 @@
 
 module jt12_eg_ctrl(
 	input			 	rst,
+	input				keyon_now,
+	input				keyoff_now,
+	input		[3:0]	state_in,
+	// envelope configuration	
+	input		[4:0]	arate, // attack  rate
+	input		[4:0]	rate1, // decay   rate
+	input		[4:0]	rate2, // sustain rate
+	input		[3:0]	rrate,
 	input		[3:0]	d1l,   // sustain level
 
+	output reg	[3:0]	base_rate,
+	output reg			attack,
+	output reg			state_next,
+	output reg			pg_rst
 );
 
-localparam ATTACK=3'd0, DECAY1=3'd1, DECAY2=3'd2, RELEASE=3'd7, HOLD=3'd3;
+localparam 	ATTACK = 3'b001, 
+			DECAY1 = 3'b010, 
+			DECAY2 = 3'b100, 
+			RELEASE= 3'b000; // default state is release 
+
+wire is_decaying = state_in[1] | state_in[2];
 
 reg		[4:0]	d1level;
 
@@ -36,97 +53,75 @@ always @(*) if( clk_en ) begin
 		d1level = {1'b0, d1l};
 end
 
-//	Register Cycle II
-reg	[4:0] cfg_III;
 wire	ssg_en_out;
-wire	keyon_last_II;
-reg		ssg_en_in_II;
+wire	keyon_last;
+reg		ssg_en_in;
 
-wire	ar_off_II = arate_II == 5'h1f;
-
-wire	keyon_now_II  = !keyon_last_II && keyon_II;
-wire	keyoff_now_II = keyon_last_II && !keyon_II;
+wire	ar_off = arate == 5'h1f;
 
 always @(*) begin
-	// ar_off_III	<= arate_II == 5'h1f;
+	pg_rst = keyon_now | ssg_pg_rst;
+	ssg_invertion = state[0] ? 1'b0 : ssg_invertion; // no invertion during attack
+end
+
+always @(*) begin
+	// ar_off	= arate == 5'h1f;
 	// trigger release
-	if( keyoff_now_II ) begin
-		cfg_III <= { rrate_II, 1'b1 };
-		state_III <= RELEASE;
-		pg_rst_III	<= 1'b0;
-		ar_off_III <= 1'b0;
+	if( keyoff_now ) begin
+		base_rate = { rrate, 1'b1 };
+		state_next = RELEASE;
 	end
 	else begin
 		// trigger 1st decay
-		if( keyon_now_II ) begin
-			cfg_III <= arate_II;
-			state_III <= ATTACK;
-			pg_rst_III <= 1'b1;
-			ar_off_III <= ar_off_II;
+		if( keyon_now ) begin
+			base_rate = arate;
+			state_next = ATTACK;
 		end
 		else begin : sel_rate
-			pg_rst_III <= (eg_II==10'h3FF) ||ssg_pg_rst;
-			if( (state_II==DECAY1 ||state_II==DECAY2) && ssg_en_II && eg_II >= 10'h200 ) begin
-				ssg_invertion_III <= ssg_alt_II ^ ssg_invertion_II;
-				if( ssg_hold_II ) begin
-					cfg_III <= 5'd0;
-					state_III <= HOLD; // repeats!
-					ar_off_III <= 1'b0;
+			if( is_decaying && ssg_en && eg >= 10'h200 ) begin
+				ssg_invertion = ssg_alt ^ ssg_invertion;
+				if( ssg_hold ) begin
+					base_rate	= 5'd0;
+					state_next	= DECAY2; // it will get locked here forever (hold the value)
 				end
 				else begin
-					cfg_III	<=	rate2_II;
-					state_III <= ATTACK; // repeats!
-					ar_off_III <= 1'b1;
+					base_rate  = arate;
+					state_next = ATTACK; // repeats!
 				end
 			end
 			else begin
-				ssg_invertion_III <= state_II==RELEASE ? 1'b0 : ssg_invertion_II;
-				case ( state_II )
-					ATTACK: begin
-						if( eg_II==10'd0 ) begin
-							state_III <= DECAY1;
-							cfg_III		 <= rate1_II;
+				case ( state_in )
+					ATTACK: 
+						if( eg==10'd0 ) begin
+							base_rate  = rate1;
+							state_next = DECAY1;
 						end
 						else begin
-							state_III <= state_II; // attack
-							cfg_III		 <= arate_II;
+							base_rate  = arate;
+							state_next = ATTACK;
 						end
-						ar_off_III <= 1'b0;
-						end
-					DECAY1: begin
-						if( eg_II[9:5] >= d1level ) begin
-							cfg_III <= rate2_II;
-							state_III <= DECAY2;
+					DECAY1: 
+						if( eg[9:5] >= d1level ) begin
+							base_rate  = rate2;
+							state_next = DECAY2;
 						end
 						else begin
-							cfg_III	<=	rate1_II;
-							state_III <= state_II;	// decay1
-						end
-						ar_off_III <= 1'b0;
+							base_rate	= rate1;
+							state_next	= DECAY1;	// decay1
 						end
 					DECAY2:
 						begin
-							cfg_III	<=	rate2_II;
-							state_III <= state_II;	// decay2
-							ar_off_III <= 1'b0;
+							base_rate	= rate2;
+							state_next	= DECAY2;	// decay2
 						end
-					RELEASE: begin
-							cfg_III	<=	{ rrate_II, 1'b1 };
-							state_III <= state_II;	// release
-							ar_off_III <= 1'b0;
+					default: begin // RELEASE
+							base_rate	= { rrate, 1'b1 };
+							state_next  = RELEASE;	// release
 						end
-					HOLD: begin
-							cfg_III <= 5'd0;
-							state_III <= HOLD; // repeats!
-							ar_off_III <= 1'b0;
-						end
-					default:;
 				endcase
 			end
 		end
 	end
-
-	eg_III <= eg_II;
 end
 
 

@@ -48,7 +48,7 @@ module jt12_eg2 (
 	input				amsen_VII,
 
 	output	reg	[9:0]	eg_IX,
-	output	reg			pg_rst_III
+	output	reg			pg_rst_I
 );
 
 wire [14:0] eg_cnt;
@@ -65,7 +65,6 @@ jt12_eg_cnt u_egcnt(
 wire keyon_last_I;
 wire keyon_now_I  = !keyon_last_I && keyon_I;
 wire keyoff_now_I = keyon_last_I && !keyon_I;
-
 
 wire cnt_out, cnt_in, step_II;
 wire [5:0] rate_II;
