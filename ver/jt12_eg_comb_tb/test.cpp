@@ -130,6 +130,7 @@ void Stim::next(Vtest* dut) {
 	eg_in = pure_eg_out;
 	cnt_in = cnt_lsb;
 	eg_cnt++;
+	lfo_mod++;
 	if( wait_count>0 ) wait_count--;
 }
 
