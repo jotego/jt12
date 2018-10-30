@@ -20,15 +20,16 @@
 	*/
 
 module jt12_eg_step(
-	input attack,
-	input [ 4:0] base_rate,
-	input [ 4:0] keycode,
-	input [14:0] eg_cnt,
-	input        cnt_in,
-	input [ 1:0] ks,
-	output       cnt_lsb,
+	input 			attack,
+	input [ 4:0] 	base_rate,
+	input [ 4:0] 	keycode,
+	input [14:0] 	eg_cnt,
+	input        	cnt_in,
+	input [ 1:0] 	ks,
+	output       	cnt_lsb,
 	output		 reg step,
-	output reg [5:0] rate
+	output reg [5:0] rate,
+	output reg		sum_up
 );
 
 reg		[6:0]	pre_rate;
@@ -102,7 +103,6 @@ always @(*) begin : rate_step
 	step = rate[5:1]==5'd0 ? 1'b0 : step_idx[ cnt ];
 end
 
-reg sum_up;
 assign cnt_lsb = cnt[0];
 always @(*) begin
 	sum_up = cnt[0] != cnt_in;

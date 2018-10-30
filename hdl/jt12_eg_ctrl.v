@@ -20,10 +20,10 @@
 	*/
 
 module jt12_eg_ctrl(
-	input			 	rst,
 	input				keyon_now,
 	input				keyoff_now,
 	input		[2:0]	state_in,
+	input		[9:0]	eg,
 	// envelope configuration	
 	input		[4:0]	arate, // attack  rate
 	input		[4:0]	rate1, // decay   rate
@@ -32,7 +32,7 @@ module jt12_eg_ctrl(
 	input		[3:0]	sl,   // sustain level
 	// SSG operation
 	input				ssg_en,
-	input				ssg_eg,
+	input		[2:0]	ssg_eg,
 	// SSG output inversion
 	input				ssg_inv_in,
 	output reg			ssg_inv_out,
@@ -40,8 +40,7 @@ module jt12_eg_ctrl(
 	input				ssg_lock_in,
 	output reg			ssg_lock_out,
 
-	output reg	[3:0]	base_rate,
-	output reg			attack,
+	output reg	[4:0]	base_rate,
 	output reg	[2:0]	state_next,
 	output reg			pg_rst
 );
@@ -55,93 +54,78 @@ wire is_decaying = state_in[1] | state_in[2];
 
 reg		[4:0]	sustain;
 
-always @(*) if( clk_en ) begin
+always @(*) 
 	if( sl == 4'd15 )
 		sustain = 5'h1f; // 93dB
 	else
 		sustain = {1'b0, sl};
-end
 
 wire	ssg_en_out;
-wire	keyon_last;
 reg		ssg_en_in, ssg_pg_rst;
 
 // aliases
 wire ssg_att  = ssg_eg[2];
 wire ssg_alt  = ssg_eg[1];
 wire ssg_hold = ssg_eg[0] & ssg_en;
+
 reg ssg_over;
 
 
 always @(*) begin
-	ssg_over = ssg_en && (eg[9:8] >= 2'd0); // eg >=10'h200
+	ssg_over = ssg_en && eg[9]; // eg >=10'h200
 	ssg_pg_rst = ssg_over && !( ssg_alt || ssg_hold );
 	pg_rst = keyon_now | ssg_pg_rst;
 end
 
-always @(*) begin
-	// ar_off	= arate == 5'h1f;
-	// trigger release
-	if( keyoff_now ) begin
-		base_rate = { rrate, 1'b1 };
-		state_next = RELEASE;
-		ssg_inv_out = ssg_inv_in & ssg_en;
-		ssg_lock_out= 1'b0;
-	end
-	else begin
-		// trigger 1st decay
-		if( keyon_now ) begin
+always @(*) 
+	casez ( { keyoff_now, keyon_now, state_in} )
+		5'b01_???: begin // key on
 			base_rate	= arate;
 			state_next	= ATTACK;
 			ssg_inv_out	= ssg_att & ssg_en;
 			ssg_lock_out= 1'b0;
 		end
-		else begin : sel_rate
-			case ( state_in )
-				ATTACK: 
-					if( eg==10'd0 ) begin
-						base_rate	= ssg_lock_in ? 5'd0 : rate1;
-						state_next	= ssg_lock_in ? HOLD : DECAY;
-						ssg_inv_out	= ssg_en & (ssg_alt ^ ssg_inv_in);
-						ssg_lock_out= ssg_hold;
-					end
-					else begin
-						base_rate	= arate;
-						state_next	= ATTACK;
-						ssg_inv_out	= ssg_inv_in;
-						ssg_lock_out= ssg_lock_in;
-					end
-				DECAY: begin
-					ssg_inv_out = ssg_inv_in;
-					if( ssg_over ) begin
-						base_rate	= arate;
-						state_next	= ATTACK;
-						ssg_lock_out= ssg_hold;
-					end
-					else begin
-						base_rate	=  eg[9:5] >= sustain ? rate2 : rate1;
-						state_next	= DECAY;
-						ssg_lock_out= 1'b0;
-					end
-				end
-				HOLD: begin
-					base_rate	= 5'd0;
-					state_next	= HOLD;
-					ssg_inv_out	= ssg_inv_in;
-					ssg_lock_out= 1'b1;
-				end
-				default: begin // RELEASE
-					base_rate	= { rrate, 1'b1 };
-					state_next	= RELEASE;	// release
-					ssg_lock_out= 1'b0;
-					ssg_inv_out	= 1'b0; // this can produce a glitch in the output
-						// But to release from SSG cannot be done nicely while
-						// inverting the ouput
-				end
-			endcase
+		{2'b00, ATTACK}: 
+			if( eg==10'd0 ) begin
+				base_rate	= ssg_lock_in ? 5'd0 : rate1;
+				state_next	= ssg_lock_in ? HOLD : DECAY;
+				ssg_inv_out	= ssg_en & (ssg_alt ^ ssg_inv_in);
+				ssg_lock_out= ssg_hold;
+			end
+			else begin
+				base_rate	= arate;
+				state_next	= ATTACK;
+				ssg_inv_out	= ssg_inv_in;
+				ssg_lock_out= ssg_lock_in;
+			end
+		{2'b00, DECAY}: begin
+			ssg_inv_out = ssg_inv_in;
+			if( ssg_over ) begin
+				base_rate	= arate;
+				state_next	= ATTACK;
+				ssg_lock_out= ssg_hold;
+			end
+			else begin
+				base_rate	=  eg[9:5] >= sustain ? rate2 : rate1;
+				state_next	= DECAY;
+				ssg_lock_out= 1'b0;
+			end
 		end
-	end
-end
+		{2'b00, HOLD}: begin
+			base_rate	= 5'd0;
+			state_next	= HOLD;
+			ssg_inv_out	= ssg_inv_in;
+			ssg_lock_out= 1'b1;
+		end
+		default: begin // RELEASE, note that keyoff_now==1 will enter this state too
+			base_rate	= { rrate, 1'b1 };
+			state_next	= RELEASE;	// release
+			ssg_lock_out= 1'b0;
+			ssg_inv_out	= 1'b0; // this can produce a glitch in the output
+				// But to release from SSG cannot be done nicely while
+				// inverting the ouput
+		end
+	endcase
 
 
 endmodule // jt12_eg_ctrl

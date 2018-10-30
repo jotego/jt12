@@ -24,7 +24,7 @@ module jt12_eg_final(
 	input        amsen,
 	input [ 1:0] ams,
 	input [ 6:0] tl,
-	input [ 9:0] eg_pure,
+	input [ 9:0] eg_pream,
 	output reg	[9:0] eg_limited
 );
 
@@ -44,7 +44,7 @@ always @(*) begin
 		3'b1_10: am_final = { 3'd0, am_inverted 		};
 		3'b1_11: am_final = { 2'd0, am_inverted, 1'b0	};
 	endcase
-	sum_eg_tl = {  tl,   3'd0 } + eg_pure;
+	sum_eg_tl = {  tl,   3'd0 } + eg_pream;
 	sum_eg_tl_am = sum_eg_tl + { 3'd0, am_final };
 end
 
