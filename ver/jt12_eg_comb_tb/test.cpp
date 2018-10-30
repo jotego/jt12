@@ -74,6 +74,7 @@ void Stim::next(Vtest* dut) {
 	ssg_inv_in = ssg_inv_out;
 	ssg_lock_in = ssg_inv_out;
 	eg_in = pure_eg_out;
+	cnt_in = cnt_lsb;
 	eg_cnt++;
 }
 
@@ -115,16 +116,29 @@ int main(int argc, char *argv[]) {
 	}	
 	// Try attack
 	stim.reset();
-	stim.arate = 0x20;
-	stim.rate1 = 0x20;
-	stim.sl = 4;
-	stim.rate2 = 0x10;
+	stim.arate = 0x10;
+	stim.rate1 = 0x7;
+	stim.sl = 7;
+	stim.rate2 = 0;
+	stim.rrate = 0x8;
 	stim.keyon_now = 1;
+	// time 0 state:
+	stim.apply(top); top->eval();
+	if(trace) vcd->dump(main_time);
+
 	do {
 		stim.next( top );
 		stim.keyon_now = 0;
 		if(trace) vcd->dump(main_time);
-	} while( main_time<1'000'000 );
+	} while( main_time<5'000'000 );
+	stim.keyoff_now = 1;
+	stim.next( top );
+	if(trace) vcd->dump(main_time);
+	stim.keyoff_now = 0;
+	do {
+		stim.next( top );
+		if(trace) vcd->dump(main_time);
+	} while( main_time<10'000'000 );
 
 	quit:
 	if(trace) vcd->close();	
