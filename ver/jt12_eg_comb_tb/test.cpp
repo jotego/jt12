@@ -1,3 +1,22 @@
+/*
+
+	This file runs a simulation on the purely combinational logic of the envelope generator.
+	The simulation is controlled via text files
+
+	The text file is a sequence of write commands that will configure the inputs to the logic
+	then a wait command will kick the simulation for a given number of clocks
+
+	The LFO is always running. The simulations show that SSG is well implemented and that
+	the circuit behaves within bounds for extreme cases
+
+	The core logic of the ASDR envelope is simulated on separate test bench eg2.
+
+	Arguments:
+		-w write VCD	(always enabled, uncomment to evaluate this argument)
+		-o path-to-test-file
+
+*/
+
 #include <cstring>
 #include <iostream>
 #include <fstream>
@@ -38,15 +57,11 @@ int main(int argc, char *argv[]) {
 	Stim stim;
 	int err_code=0;
 	VerilatedVcdC* vcd = new VerilatedVcdC;
-	bool trace=false;
-	// bool do_attack=true, do_decay=true,do_am=true;
+	bool trace=true;
 
 	for(int k=1; k<argc; k++ ) {
-		if( strcmp(argv[k],"-w")==0 ) { trace=true; continue; }
+		// if( strcmp(argv[k],"-w")==0 ) { trace=true; continue; }
 		if( strcmp(argv[k],"-o")==0 ) { stim.open(argv[++k]); continue; }
-		// if( strcmp(argv[k],"-noar")==0 ) { do_attack=false; continue; }
-		// if( strcmp(argv[k],"-nodr")==0 ) { do_decay=false; continue; }
-		// if( strcmp(argv[k],"-noam")==0 ) { do_am=false; continue; }
 		cout << "ERROR: unknown argument " << argv[k] << '\n';
 		err_code = 2;
 		goto quit;
