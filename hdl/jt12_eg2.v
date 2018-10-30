@@ -29,16 +29,16 @@ module jt12_eg2 (
 	input				zero,
 	input				eg_stop,
 	// envelope configuration
-	input		[4:0]	keycode_III,
-	input		[4:0]	arate_II, // attack  rate
-	input		[4:0]	rate1_II, // decay   rate
-	input		[4:0]	rate2_II, // sustain rate
-	input		[3:0]	rrate_II, // release rate
-	input		[3:0]	d1l_I,   // sustain level
-	input		[1:0]	ks_III,	   // key scale
+	input		[4:0]	keycode_II,
+	input		[4:0]	arate_I, // attack  rate
+	input		[4:0]	rate1_I, // decay   rate
+	input		[4:0]	rate2_I, // sustain rate
+	input		[3:0]	rrate_I, // release rate
+	input		[3:0]	sl_I,   // sustain level
+	input		[1:0]	ks_II,	   // key scale
 	// SSG operation
-	input				ssg_en_II,
-	input		[2:0]	ssg_eg_II,
+	input				ssg_en_I,
+	input		[2:0]	ssg_eg_I,
 	// envelope operation
 	input				keyon_I,
 	// envelope number
@@ -66,59 +66,97 @@ wire keyon_last_I;
 wire keyon_now_I  = !keyon_last_I && keyon_I;
 wire keyoff_now_I = keyon_last_I && !keyon_I;
 
-wire cnt_out, cnt_in, step_II;
-wire [5:0] rate_II;
+wire cnt_in_II, cnt_lsb_II, step_II;
 
-// II stage
-jt12_eg_step u_step(
-	input attack,
-	input [ 4:0] base_rate,
-	.keycode	( keycode_II),
-	.eg_cnt		( eg_cnt 	),
-	.cnt_in		( cnt_in	),
-	.ks			( ks_II		),
-	.cnt_lsb	( cnt_out	),
-	.step		( step_II	),
-	.rate		( rate_II	),
+wire ssg_inv_in_I, ssg_inv_out_I;
+wire [2:0] state_in_I, state_next_I;
+
+reg attack_II;
+reg [5:0] base_rate_II;
+wire step_II;
+
+
+jt12_eg_comb uut(
+	///////////////////////////////////
+	// I
+	.keyon_now		( keyon_now_I	),
+	.keyoff_now		( keyoff_now_I	),
+	.state_in		( state_in_I	),
+	.eg_in			( eg_in_I		),
+	// envelope configuration	
+	.arate			( arate_I		), // attack  rate
+	.rate1			( rate1_I		), // decay   rate
+	.rate2			( rate2_I		), // sustain rate
+	.rrate			( rrate_I		),
+	.sl				( sl_I			),   // sustain level
+	// SSG operation
+	.ssg_en			( ssg_en_I		),
+	.ssg_eg			( ssg_eg_I		),
+	// SSG output inversion
+	.ssg_inv_in		( ssg_inv_in_I	),
+	.ssg_inv_out	( ssg_inv_out_I	),
+
+	.base_rate		( base_rate_I	),
+	.state_next		( state_next_I	),
+	.pg_rst			( pg_rst_I		),
+	///////////////////////////////////
+	// II
+	.step_attack	( attack_II		),
+	.step_rate_in	( base_rate_II	),
+	.keycode		( keycode_II	),
+	.eg_cnt			( eg_cnt		),
+	.cnt_in			( cnt_in_II		),
+	.ks				( ks_II			),
+	.cnt_lsb		( cnt_lsb_II	),
+	.step			( step_II		),
+	.step_rate_out	( rate_out_II	),
+	///////////////////////////////////
+	// III
+	.pure_attack	( attack_III		),
+	.pure_step		( step_III			) ,
+	.pure_rate		( rate_in_III[5:1]	),
+	.pure_ssg_en	( ssg_en_III		), // from I
+	.pure_ssg_inv	( ssg_inv_out_III	), // from I
+	.pure_eg_in		( eg_in_III			),
+	.pure_eg_out	( pure_eg_out_III	),
+	.eg_next		( eg_next_III		),
+	///////////////////////////////////
+	// IV
+	.lfo_mod		( lfo_mod_IV	),
+	.amsen			( amsen_IV		),
+	.ams			( ams_IV		),
+	.tl				( tl_IV			),
+	.final_eg_in	( eg_next_IV	),
+	.final_eg_out	( eg_out_IV		)
 );
 
+
+// II stage
+always @(posedge clk) if(clk_en) begin
+	attack_II <= state_next_I[0];
+end
 // III stage
 reg [5:1] rate_III;
 reg step_III;
 always @(posedge clk) 
 	if(clk_en) begin
-		rate_III <= rate_II[5:1];
+		rate_in_III <= rate_out_II[5:1];
 		step_III <= step_II;
 	end
 
 
 wire [9:0] eg_IIIin, eg_IIIout;
-jt12_eg_pure u_pure(
-	input attack,
-	.rate	( rate_III	),
-	.eg_in	( eg_IIIin	),
-	.eg_pure( eg_IIIout	)
-);
 
 // IV stage
 reg [9:0] eg_IV;
 always @(posedge clk) 
 	if(clk_en) eg_IV <= eg_IIIout;
 
-jt12_eg_final u_final(
-	.lfo_mod( lfo_mod	),
-	.amsen	( amsen_IV	),
-	.ams	( ams_IV	),
-	.tl		( tl_IV		),
-	.eg_pure( eg_IV		),
-	output reg	[9:0] eg_limited
-);
-
 jt12_sh #( .width(1), .stages(24) ) u_cntsh(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
-	.din	( cnt_out	),
-	.drop	( cnt_in	)
+	.din	( cnt_lsb_II	),
+	.drop	( cnt_in_II	)
 );
 
 jt12_sh_rst #( .width(10), .stages(24), .rstval(1'b1) ) u_egsh(
