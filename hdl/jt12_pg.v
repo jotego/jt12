@@ -51,7 +51,7 @@ module jt12_pg(
 	input				zero,
 	input				pg_stop,
 	
-	output  reg [ 4:0]  keycode_III,
+	output  reg [ 4:0]  keycode_II,
 	output	reg	[ 9:0]	phase_VIII
 );
 
@@ -59,7 +59,6 @@ wire pg_rst_VI;
 
 //////////////////////////////////////////////////
 // I
-reg [4:0] keycode_II;
 reg [ 2:0] block_II;
 reg [12:0] fnum_II;
 wire signed [7:0] pm_offset_I;
@@ -107,7 +106,6 @@ always @(posedge clk) if ( clk_en ) begin // phase_calculation_II
 		3'd6: phinc_III <= { 1'd0, fnum_II, 4'd0 };
 		3'd7: phinc_III <= {       fnum_II, 5'd0 };
 	endcase
-	keycode_III <= keycode_II;
 end
 
 //////////////////////////////////////////////////

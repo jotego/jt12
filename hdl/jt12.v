@@ -45,7 +45,7 @@ wire	[ 2:0]	dt1_II;
 wire	[ 3:0]	mul_V;
 wire	[ 6:0]	tl_IV;
 
-wire	[ 4:0]	keycode_III;
+wire	[ 4:0]	keycode_II;
 wire	[ 4:0]	ar_I;
 wire	[ 4:0]	d1r_I;
 wire	[ 4:0]	d2r_I;
@@ -219,7 +219,7 @@ jt12_pg u_pg(
 	.pg_rst_III	( pg_rst_III	),
 	.zero		( zero			),
 	.pg_stop	( pg_stop		),
-	.keycode_III( keycode_III	),
+	.keycode_II	( keycode_II	),
 	.phase_VIII	( phase_VIII 	)
 );
 
@@ -236,7 +236,7 @@ jt12_eg u_eg(
 	.zero			( zero			),
 	.eg_stop		( eg_stop		),	
 	// envelope configuration
-.keycode_II		( keycode_III	),// FIX THIS!!
+	.keycode_II		( keycode_II	),
 	.arate_I		( ar_I			), // attack  rate
 	.rate1_I		( d1r_I			), // decay   rate
 	.rate2_I		( d2r_I			), // sustain rate
