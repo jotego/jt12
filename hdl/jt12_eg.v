@@ -74,7 +74,7 @@ wire [2:0] state_in_I, state_next_I;
 reg attack_II, attack_III;
 wire [4:0] base_rate_I;
 reg  [4:0] base_rate_II;
-reg  [5:0] rate_out_II;
+wire  [5:0] rate_out_II;
 reg  [5:1] rate_in_III;
 reg step_III, ssg_en_II, ssg_en_III;
 
