@@ -35,11 +35,11 @@ module jt12_eg_comb(
 	input		[2:0]	ssg_eg,
 	// SSG output inversion
 	input				ssg_inv_in,
-	output reg			ssg_inv_out,
+	output 			ssg_inv_out,
 
-	output reg	[4:0]	base_rate,
-	output reg	[2:0]	state_next,
-	output reg			pg_rst,
+	output 	[4:0]	base_rate,
+	output 	[2:0]	state_next,
+	output 			pg_rst,
 	///////////////////////////////////
 	// II
 	input 			step_attack,
@@ -49,8 +49,8 @@ module jt12_eg_comb(
 	input        	cnt_in,
 	input [ 1:0] 	ks,
 	output       	cnt_lsb,
-	output		 reg step,
-	output reg [5:0] step_rate_out,
+	output		  step,
+	output  [5:0] step_rate_out,
 	///////////////////////////////////
 	// III
 	input 			pure_attack,
@@ -58,7 +58,7 @@ module jt12_eg_comb(
 	input [ 5:1] 	pure_rate,
 	input 			pure_ssg_en,
 	input [ 9:0] 	pure_eg_in,
-	output reg  [9:0] pure_eg_out,
+	output   [9:0] pure_eg_out,
 	///////////////////////////////////
 	// IV
 	input [ 6:0] 	lfo_mod,
@@ -67,7 +67,7 @@ module jt12_eg_comb(
 	input [ 6:0] 	tl,
 	input [ 9:0] 	final_eg_in,
 	input 			final_ssg_inv,
-	output reg	[9:0] final_eg_out
+	output 	[9:0] final_eg_out
 );
 
 // I
