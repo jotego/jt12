@@ -88,21 +88,21 @@ module jt12_reg(
 	output		[ 2:0]	dt1_II,
 	
 	// EG
-	output		[4:0]	ar_II,	// attack  rate
-	output		[4:0]	d1r_II, // decay   rate
-	output		[4:0]	d2r_II, // sustain rate
-	output		[3:0]	rr_II,	// release rate
-	output		[3:0]	d1l_I,   // sustain level
-	output		[1:0]	ks_III,	   // key scale
-	output				ssg_en_II,
-	output		[2:0]	ssg_eg_II,
-	output		[6:0]	tl_VII,
+	output		[4:0]	ar_I,	// attack  rate
+	output		[4:0]	d1r_I, // decay   rate
+	output		[4:0]	d2r_I, // sustain rate
+	output		[3:0]	rr_I,	// release rate
+	output		[3:0]	sl_I,   // sustain level
+	output		[1:0]	ks_II,	   // key scale
+	output				ssg_en_I,
+	output		[2:0]	ssg_eg_I,
+	output		[6:0]	tl_IV,
 	output		[2:0]	pms_I,
-	output		[1:0]	ams_VII,
-	output				amsen_VII,
+	output		[1:0]	ams_IV,
+	output				amsen_IV,
 
 	// envelope operation
-	output			keyon_II
+	output			keyon_I
 );
 
 
@@ -171,11 +171,11 @@ jt12_sumch u_opch_V  ( .chin(req_opch_IV ), .chout(req_opch_V)   );
 wire update_op_I  = cur == req_opch_I;
 wire update_op_II = cur == req_opch_II;
 wire update_op_III= cur == req_opch_III;
-// wire update_op_IV = cur == opch_IV;
+wire update_op_IV = cur == req_opch_IV;
 wire update_op_V  = cur == req_opch_V;
 // wire update_op_VI = cur == opch_VI;
-wire [2:0] op_plus1 = op+2'd1;
-wire update_op_VII= cur == { op_plus1[1:0], ch };
+// wire [2:0] op_plus1 = op+2'd1;
+// wire update_op_VII= cur == { op_plus1[1:0], ch };
 
 // key on/off
 wire	[3:0]	keyon_op = din[7:4];
@@ -196,37 +196,39 @@ wire	[4:0]	ar_in	= din[4:0];
 wire			amen_in	= din[7];
 wire	[4:0]	d1r_in	= din[4:0];
 wire	[4:0]	d2r_in	= din[4:0];
-wire	[3:0]	d1l_in	= din[7:4];
+wire	[3:0]	sl_in	= din[7:4];
 wire	[3:0]	rr_in	= din[3:0];
 wire	[3:0]	ssg_in	= din[3:0];
 
 wire	[3:0]	ssg;
 
 wire	update_ch_I  = cur_ch == ch;
+wire	update_ch_IV = { ~cur_ch[2], cur_ch[1:0]} == ch;
 
 wire up_alg_ch	= up_alg	& update_ch_I;
 wire up_fnumlo_ch=up_fnumlo & update_ch_I;
 wire up_pms_ch	= up_pms	& update_ch_I;
+wire up_ams_ch	= up_pms	& update_ch_IV;
 
 // DT1 & MUL
 wire up_dt1_op	= up_dt1	& update_op_II;
 wire up_mul_op	= up_dt1	& update_op_V;
 // TL
-wire up_tl_op	= up_tl		& update_op_VII;
+wire up_tl_op	= up_tl		& update_op_IV;
 // KS & AR
-wire up_ks_op	= up_ks_ar	& update_op_III;
-wire up_ar_op	= up_ks_ar	& update_op_II;
+wire up_ks_op	= up_ks_ar	& update_op_II;
+wire up_ar_op	= up_ks_ar	& update_op_I;
 // AM ON, D1R
-wire up_amen_op	= up_amen_dr& update_op_VII;
-wire up_dr_op	= up_amen_dr& update_op_II;
+wire up_amen_op	= up_amen_dr& update_op_IV;
+wire up_dr_op	= up_amen_dr& update_op_I;
 // Sustain Rate (D2R)
-wire up_sr_op	= up_sr	& update_op_II;
+wire up_sr_op	= up_sr	& update_op_I;
 // D1L & RR
 wire up_sl_op	= up_sl_rr	& update_op_I;
-wire up_rr_op	= up_sl_rr	& update_op_II;
+wire up_rr_op	= up_sl_rr	& update_op_I;
 // SSG
 //wire up_ssgen_op = up_ssgeg	& update_op_I;
-wire up_ssg_op	= up_ssgeg	& update_op_II;
+wire up_ssg_op	= up_ssgeg	& update_op_I;
 
 always @(*) begin
 	// next = cur==5'd23 ? 5'd0 : cur +1'b1;
@@ -254,7 +256,7 @@ jt12_kon u_kon(
 	// .flag_A		( flag_A	),
 	.overflow_A	( overflow_A),
 	
-	.keyon_II	( keyon_II	)
+	.keyon_I	( keyon_I	)
 );
 
 jt12_mod u_mod(
@@ -287,23 +289,23 @@ jt12_opram u_opram(
 );
 
 assign regop_in = {
-	up_tl_op	? tl_in  : tl_VII, // 7
+	up_tl_op	? tl_in  : tl_IV, // 7
 	up_dt1_op	? dt1_in : dt1_II,	// 3
 	up_mul_op	? mul_in : mul_V,	// 4 - 7
-	up_ks_op	? ks_in	 : ks_III,	// 2 - 16
-	up_ar_op	? ar_in	 : ar_II,	// 5 - 21
-	up_amen_op	? amen_in: amsen_VII,// 1 - 22
-	up_dr_op	? d1r_in : d1r_II,	// 5 - 25
-	up_sr_op	? d2r_in : d2r_II,	// 5 - 30
-	up_sl_op	? d1l_in : d1l_I,	// 4 - 34
-	up_rr_op	? rr_in	 : rr_II,	// 4 - 38
-	up_ssg_op	? ssg_in[3]   : ssg_en_II,	// 1 - 39
-	up_ssg_op	? ssg_in[2:0] : ssg_eg_II	// 3 - 42
+	up_ks_op	? ks_in	 : ks_II,	// 2 - 16
+	up_ar_op	? ar_in	 : ar_I,	// 5 - 21
+	up_amen_op	? amen_in: amsen_IV,// 1 - 22
+	up_dr_op	? d1r_in : d1r_I,	// 5 - 25
+	up_sr_op	? d2r_in : d2r_I,	// 5 - 30
+	up_sl_op	? sl_in  : sl_I,	// 4 - 34
+	up_rr_op	? rr_in	 : rr_I,	// 4 - 38
+	up_ssg_op	? ssg_in[3]   : ssg_en_I,	// 1 - 39
+	up_ssg_op	? ssg_in[2:0] : ssg_eg_I	// 3 - 42
 };
 
-assign { tl_VII, dt1_II, mul_V, ks_III, 
-			ar_II,	amsen_VII, d1r_II, d2r_II, d1l_I, rr_II,
-			ssg_en_II,	ssg_eg_II 				} = regop_out;
+assign { tl_IV, dt1_II, mul_V, ks_II, 
+			ar_I,	amsen_IV, d1r_I, d2r_I, sl_I, rr_I,
+			ssg_en_I,	ssg_eg_I 				} = regop_out;
 
 
 // memory for CH registers
@@ -316,11 +318,12 @@ wire [regch_width-1:0] regch_out;
 wire [regch_width-1:0] regch_in = {
 	up_fnumlo_ch? { latch_fnum, fnlo_in } : { block_I_raw, fnum_I_raw }, // 14
 	up_alg_ch	? { fb_in, alg_in } : { fb_I, alg },//3+3
-	up_pms_ch	? { ams_in, pms_in } : { ams_VII, pms_I }//2+2+3
+	up_ams_ch	?            ams_in : ams_IV, //2
+	up_pms_ch	?            pms_in : pms_I   //3
 }; 
 
 assign { 	block_I_raw, fnum_I_raw, 
-			fb_I, alg, ams_VII, pms_I } = regch_out;
+			fb_I, alg, ams_IV, pms_I } = regch_out;
 
 jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 	.clk	( clk		),

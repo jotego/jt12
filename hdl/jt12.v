@@ -40,25 +40,26 @@ wire			zero; // Single-clock pulse at the begginig of s1_enters
 wire	[2:0]	lfo_freq;
 wire			lfo_en;
 // Operators
-wire			amsen_VII;
+wire			amsen_IV;
 wire	[ 2:0]	dt1_II;
 wire	[ 3:0]	mul_V;
-wire	[ 6:0]	tl_VII;
+wire	[ 6:0]	tl_IV;
 
-wire	[4:0]	keycode_III;
-wire	[ 4:0]	ar_II;
-wire	[ 4:0]	d1r_II;
-wire	[ 4:0]	d2r_II;
-wire	[ 3:0]	rr_II;
-wire	[ 3:0]	d1l_I;
-wire	[ 1:0]	ks_III;
+wire	[ 4:0]	keycode_II;
+reg		[ 4:0]	keycode_III;
+wire	[ 4:0]	ar_I;
+wire	[ 4:0]	d1r_I;
+wire	[ 4:0]	d2r_I;
+wire	[ 3:0]	rr_I;
+wire	[ 3:0]	sl_I;
+wire	[ 1:0]	ks_II;
 // SSG operation
-wire			ssg_en_II;
-wire	[2:0]	ssg_eg_II;
+wire			ssg_en_I;
+wire	[2:0]	ssg_eg_I;
 // envelope operation
-wire			keyon_II;
+wire			keyon_I;
 wire	[9:0]	eg_IX;
-wire			pg_rst_III;
+reg				pg_rst_III;
 // Channel
 wire	[10:0]	fnum_I;
 wire	[ 2:0]	block_I;
@@ -66,7 +67,7 @@ wire	[ 1:0]	rl;
 wire	[ 2:0]	fb_II;
 wire	[ 2:0]	alg;
 wire	[ 2:0]	pms_I;
-wire	[ 1:0]	ams_VII;
+wire	[ 1:0]	ams_IV;
 // PCM
 wire			pcm_en;
 wire	[ 8:0]	pcm;
@@ -139,25 +140,25 @@ jt12_mmr u_mmr(
 	.fb_II		( fb_II		),
 	.alg		( alg		),
 	.pms_I		( pms_I		),
-	.ams_VII	( ams_VII	),
-	.amsen_VII	( amsen_VII	),
+	.ams_IV		( ams_IV	),
+	.amsen_IV	( amsen_IV	),
 	.dt1_II		( dt1_II	),
 	.mul_V		( mul_V		),
-	.tl_VII		( tl_VII	),
+	.tl_IV		( tl_IV	),
 
-	.ar_II		( ar_II		),
-	.d1r_II		( d1r_II	),
-	.d2r_II		( d2r_II	),
-	.rr_II		( rr_II		),
-	.d1l_I		( d1l_I		),
-	.ks_III		( ks_III	),
+	.ar_I		( ar_I		),
+	.d1r_I		( d1r_I		),
+	.d2r_I		( d2r_I		),
+	.rr_I		( rr_I		),
+	.sl_I		( sl_I		),
+	.ks_II		( ks_II	),
 
 	.eg_stop	( eg_stop	),	
 	// SSG operation
-	.ssg_en_II	( ssg_en_II	),
-	.ssg_eg_II	( ssg_eg_II	),
+	.ssg_en_I	( ssg_en_I	),
+	.ssg_eg_I	( ssg_eg_I	),
 
-	.keyon_II	( keyon_II	),
+	.keyon_I	( keyon_I	),
 	// Operator
 	.zero		( zero		),
 	.s1_enters	( s1_enters	),
@@ -201,6 +202,8 @@ jt12_lfo u_lfo(
 
 `ifndef TIMERONLY
 
+always @(posedge clk) if(clk_en) keycode_III<=keycode_II;
+
 jt12_pg u_pg(
 	.rst		( rst			),
 	.clk		( clk			),
@@ -223,6 +226,9 @@ jt12_pg u_pg(
 	.phase_VIII	( phase_VIII 	)
 );
 
+wire pg_rst_II;
+wire [9:0] eg_V;
+
 jt12_eg u_eg(
 	`ifdef TEST_SUPPORT
 	.test_eg		( test_eg		),
@@ -233,27 +239,36 @@ jt12_eg u_eg(
 	.zero			( zero			),
 	.eg_stop		( eg_stop		),	
 	// envelope configuration
-	.keycode_III	( keycode_III	),
-	.arate_II		( ar_II			), // attack  rate
-	.rate1_II		( d1r_II		), // decay   rate
-	.rate2_II		( d2r_II		), // sustain rate
-	.rrate_II		( rr_II			), // release rate
-	.d1l_I			( d1l_I			), // sustain level
-	.ks_III			( ks_III		), // key scale
+	.keycode_II		( keycode_II	),
+	.arate_I		( ar_I			), // attack  rate
+	.rate1_I		( d1r_I			), // decay   rate
+	.rate2_I		( d2r_I			), // sustain rate
+	.rrate_I		( rr_I			), // release rate
+	.sl_I			( sl_I			), // sustain level
+	.ks_II			( ks_II			), // key scale
 	// SSG operation
-	.ssg_en_II		( ssg_en_II		),
-	.ssg_eg_II		( ssg_eg_II		),
+	.ssg_en_I		( ssg_en_I		),
+	.ssg_eg_I		( ssg_eg_I		),
 	// envelope operation
-	.keyon_II		( keyon_II		),
+	.keyon_I		( keyon_I		),
 	// envelope number
 	.lfo_mod		( lfo_mod		),
-	.tl_VII			( tl_VII		),
-	.ams_VII		( ams_VII		),
-	.amsen_VII		( amsen_VII		),
+	.tl_IV			( tl_IV			),
+	.ams_IV			( ams_IV		),
+	.amsen_IV		( amsen_IV		),
 
-	.eg_IX			( eg_IX 		),
-	.pg_rst_III		( pg_rst_III	)
+	.eg_V			( eg_V 			),
+	.pg_rst_II		( pg_rst_II		)
 );
+
+jt12_sh #(.width(10),.stages(4)) u_egpad(
+	.clk	( clk		),
+	.clk_en	( clk_en	),
+	.din	( eg_V		),
+	.drop	( eg_IX		)
+);
+
+always @(posedge clk) if(clk_en) pg_rst_III<=pg_rst_II;
 
 wire	[8:0]	op_result;
 

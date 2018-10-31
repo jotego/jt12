@@ -69,24 +69,24 @@ module jt12_mmr(
 	output	[ 2:0]	fb_II,
 	output	[ 2:0]	alg,
 	output	[ 2:0]	pms_I,
-	output	[ 1:0]	ams_VII,
-	output			amsen_VII,
+	output	[ 1:0]	ams_IV,
+	output			amsen_IV,
 	output	[ 2:0]	dt1_II,
 	output	[ 3:0]	mul_V,
-	output	[ 6:0]	tl_VII,
+	output	[ 6:0]	tl_IV,
 	output	reg		eg_stop,
 
-	output	[ 4:0]	ar_II,
-	output	[ 4:0]	d1r_II,
-	output	[ 4:0]	d2r_II,
-	output	[ 3:0]	rr_II,
-	output	[ 3:0]	d1l_I,
-	output	[ 1:0]	ks_III,
+	output	[ 4:0]	ar_I,
+	output	[ 4:0]	d1r_I,
+	output	[ 4:0]	d2r_I,
+	output	[ 3:0]	rr_I,
+	output	[ 3:0]	sl_I,
+	output	[ 1:0]	ks_II,
 	// SSG operation
-	output			ssg_en_II,
-	output	[2:0]	ssg_eg_II,
+	output			ssg_en_I,
+	output	[2:0]	ssg_eg_I,
 
-	output			keyon_II,
+	output			keyon_I,
 
 //	output	[ 1:0]	cur_op,
 	// Operator
@@ -346,27 +346,26 @@ jt12_reg u_reg(
 	.dt1_II		(	dt1_II	),
 
 	// EG
-	.ar_II		(ar_II		),	// attack  rate
-	.d1r_II		(d1r_II		), // decay   rate
-	.d2r_II		(d2r_II		), // sustain rate
-	.rr_II		(rr_II		),	// release rate
-	.d1l_I		(d1l_I		),   // sustain level
-	.ks_III		(ks_III		),	   // key scale
+	.ar_I		(ar_I		), // attack  rate
+	.d1r_I		(d1r_I		), // decay   rate
+	.d2r_I		(d2r_I		), // sustain rate
+	.rr_I		(rr_I		), // release rate
+	.sl_I		(sl_I		), // sustain level
+	.ks_II		(ks_II		), // key scale
 	// SSG operation
-	.ssg_en_II	( ssg_en_II	),
-	.ssg_eg_II	( ssg_eg_II	),
+	.ssg_en_I	( ssg_en_I	),
+	.ssg_eg_I	( ssg_eg_I	),
 	// envelope number
-	.tl_VII		(tl_VII		),
+	.tl_IV		(tl_IV		),
 	.pms_I		(pms_I		),
-	.ams_VII	(ams_VII	),
-	.amsen_VII	(amsen_VII	),
+	.ams_IV		(ams_IV		),
+	.amsen_IV	(amsen_IV	),
 	// channel configuration
 	.rl			( rl		),
 	.fb_II		( fb_II		),
 	.alg		( alg		),
-	.keyon_II	( keyon_II	),
+	.keyon_I	( keyon_I	),
 
-	//.cur_op		( cur_op	),
 	.zero		( zero		),
 	.s1_enters	( s1_enters	),
 	.s2_enters	( s2_enters	),
