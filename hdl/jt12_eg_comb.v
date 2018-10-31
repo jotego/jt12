@@ -57,10 +57,8 @@ module jt12_eg_comb(
 	input 			pure_step,
 	input [ 5:1] 	pure_rate,
 	input 			pure_ssg_en,
-	input 			pure_ssg_inv,
 	input [ 9:0] 	pure_eg_in,
 	output reg  [9:0] pure_eg_out,
-	output reg  [9:0] eg_next,
 	///////////////////////////////////
 	// IV
 	input [ 6:0] 	lfo_mod,
@@ -68,6 +66,7 @@ module jt12_eg_comb(
 	input [ 1:0] 	ams,
 	input [ 6:0] 	tl,
 	input [ 9:0] 	final_eg_in,
+	input 			final_ssg_inv,
 	output reg	[9:0] final_eg_out
 );
 
@@ -120,10 +119,8 @@ jt12_eg_pure u_pure(
 	.step	( pure_step		),
 	.rate	( pure_rate		),
 	.ssg_en	( pure_ssg_en	),
-	.ssg_inv( pure_ssg_inv	),
 	.eg_in	( pure_eg_in	),
 	.eg_pure( pure_eg_out	),
-	.eg_next( eg_next		),
 	.sum_up	( sum_up		)
 );
 
@@ -134,7 +131,8 @@ jt12_eg_final u_final(
 	.amsen		( amsen			),
 	.ams		( ams			),
 	.tl			( tl			),
-	.eg_pream	( final_eg_in	),
+	.ssg_inv	( final_ssg_inv	),
+	.eg_pure_in	( final_eg_in	),
 	.eg_limited	( final_eg_out	)
 );
 

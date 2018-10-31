@@ -24,11 +24,9 @@ module jt12_eg_pure(
 	input			step,
 	input [ 5:1]	rate,
 	input [ 9:0]	eg_in,
-	input 			ssg_en,
-	input 			ssg_inv,
+	input 			ssg_en,	
 	input 			sum_up,
-	output reg  [9:0] eg_pure,
-	output reg  [9:0] eg_next
+	output reg  [9:0] eg_pure
 );
 
 reg [ 3:0] 	dr_sum;
@@ -78,7 +76,6 @@ always @(*) begin
 	end
 	else eg_pre_fastar = eg_in;
 	eg_pure = (attack&rate[5:1]==5'h1F) ? 10'd0 : eg_pre_fastar;
-	eg_next = ssg_inv ? (10'h200-eg_pure) : eg_pure;
 end
 
 endmodule // jt12_eg_pure

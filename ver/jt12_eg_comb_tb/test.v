@@ -47,7 +47,6 @@ wire [4:0]	base_rate;
 wire 		attack = state_next[0];
 wire		step;
 wire [5:0] step_rate_out;
-wire [9:0] eg_next;
 
 jt12_eg_comb uut(
 	.keyon_now		( keyon_now		),
@@ -87,17 +86,16 @@ jt12_eg_comb uut(
 	.pure_step		( step			) ,
 	.pure_rate		(step_rate_out[5:1]),
 	.pure_ssg_en	( ssg_en		), // from I
-	.pure_ssg_inv	( ssg_inv_out	), // from I
 	.pure_eg_in		( eg_in			),
 	.pure_eg_out	( pure_eg_out	),
-	.eg_next		( eg_next		),
 	///////////////////////////////////
 	// IV
 	.lfo_mod		( lfo_mod		),
 	.amsen			( amsen			),
 	.ams			( ams			),
 	.tl				( tl			),
-	.final_eg_in	( eg_next		),
+	.final_ssg_inv	( ssg_inv_out	), // from I
+	.final_eg_in	( pure_eg_out	),
 	.final_eg_out	( eg_out		)
 );
 
