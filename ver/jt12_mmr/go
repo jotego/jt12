@@ -18,13 +18,9 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi     
-    if [[ $1 = "-mul" || $1 = "-cont" || $1 = "-tl" || $1 = "-zero" ]]; then
-    	EXTRA=$EXTRA" "$1
-        shift
-        continue
-    fi
-	echo Unrecognized option
-    exit 1
+	#Pass all unrecognized options to inputs.cc
+	EXTRA=$EXTRA" "$1
+	shift
 done
 
 if ! g++ inputs.cc -o inputs; then
@@ -32,14 +28,19 @@ if ! g++ inputs.cc -o inputs; then
 fi
 
 #echo $EXTRA
+echo Preparing stimuli file
 ./inputs $EXTRA > inputs.vh 
 #exit 0
 
 rm -f s
 
 if expr match "$(uname -v)" ".*Ubuntu.*" > /dev/null; then
+	echo "LINT check (only DUT files)"
+	verilator -f gather_dut.f --lint-only
+	# Actual simulation
+	echo Simulation start
     iverilog -f gather.f -s $TOP -o sim -I../../hdl -DDISPLAY_STEP \
-    	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT && sim -lxt > s
+    	-D$DUMPSIGNALS -DRANDWAIT=$RANDWAIT -DTEST_SUPPORT -DSIMULATION && sim -lxt > s
     #exit 0
     if [ $? -ne 0 ]; then
 	    cat s
@@ -54,6 +55,10 @@ else
 		rm s
 		exit 1
 	fi
+fi
+
+if grep ERROR s; then
+	exit 1;
 fi
 
 cat s | awk 'BEGIN{ g=0 }

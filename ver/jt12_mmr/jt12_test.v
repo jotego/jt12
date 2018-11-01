@@ -22,7 +22,7 @@ initial begin
 	flag_B = 0;
     #5 rst = 1;
     #20 rst = 0;
- //   #(1000*1000*1000) $finish;
+    //$finish;
 end
 /*
 always @(posedge clk)
@@ -46,21 +46,21 @@ wire	[1:0]	rl;
 wire	[2:0]	fb_II;
 wire	[2:0]	con;
 wire	[10:0]	fnum_I;
-wire	[2:0]	pms;
-wire	[1:0]	ams_VII;
+wire	[2:0]	pms_I;
+wire	[1:0]	ams_IV;
 wire	[2:0]	dt1_II;
 wire	[3:0]	mul_V;
-wire	[6:0]	tl_VII;
-wire	[1:0]	ks_III;
-wire	[4:0]	ar_II;
-wire			amsen_VII;
-wire	[4:0]	d1r_II;
-wire	[4:0]	d2r_II;
-wire	[3:0]	d1l;
-wire	[3:0]	rr_II;
-wire			ssg_en_II;
-wire	[2:0]	ssg_eg_II;
-wire			keyon_II;
+wire	[6:0]	tl_IV;
+wire	[1:0]	ks_II;
+wire	[4:0]	ar_I;
+wire			amsen_IV;
+wire	[4:0]	d1r_I;
+wire	[4:0]	d2r_I;
+wire	[3:0]	sl_I;
+wire	[3:0]	rr_I;
+wire			ssg_en_I;
+wire	[2:0]	ssg_eg_I;
+wire			keyon_I;
 //wire	[1:0]	cur_op;
 wire			zero;
 	
@@ -93,8 +93,8 @@ end
 
 always @(posedge clk) begin
 	$display("%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X", 
-    	s_hot, dt1_II, mul_V, tl_VII, ks_III, ar_II,
-    	amsen_VII, d1r_II, d2r_II, d1l, rr_II, ssg_en_II, ssg_eg_II );
+    	s_hot, dt1_II, mul_V, tl_IV, ks_II, ar_I,
+    	amsen_IV, d1r_I, d2r_I, sl_I, rr_I, ssg_en_I, ssg_eg_I );
 end
 
 always @(posedge clk) begin
@@ -161,24 +161,24 @@ jt12_mmr u_uut(
 	.rl(rl),
 	.fb_II(fb_II),
 	.alg(alg),
-	.pms(	pms),
-	.ams_VII(ams_VII),
-	.amsen_VII(amsen_VII),    
+	.pms_I(	pms_I),
+	.ams_IV(ams_IV),
+	.amsen_IV(amsen_IV),    
 	.dt1_II(	dt1_II),
 	.mul_V(	mul_V ),
-	.tl_VII(	tl_VII ),
+	.tl_IV(	tl_IV ),
 
-	.ar_II(	ar_II ),
-	.d1r_II(	d1r_II ),
-	.d2r_II(	d2r_II ),
-	.rr_II(	rr_II ),
-	.d1l(	d1l ),
-	.ks_III(	ks_III ),
+	.ar_I(	ar_I ),
+	.d1r_I(	d1r_I ),
+	.d2r_I(	d2r_I ),
+	.rr_I(	rr_I ),
+	.sl_I(	sl_I ),
+	.ks_II(	ks_II ),
 	// SSG operation
-	.ssg_en_II(ssg_en_II),
-	.ssg_eg_II(ssg_eg_II),
+	.ssg_en_I(ssg_en_I),
+	.ssg_eg_I(ssg_eg_I),
         
-	.keyon_II(keyon_II),
+	.keyon_I(keyon_I),
 
 //	output	[ 1:0]	cur_op,
 	// Operator

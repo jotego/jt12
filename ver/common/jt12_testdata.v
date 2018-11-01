@@ -45,10 +45,11 @@ module jt12_testdata
 	reg [ 3:0] state, next;
 	reg [15:0] waitcnt;
 	
-	parameter WAIT_FREE=0, WR_ADDR=1, WR_VAL=2, DONE=3, WRITE=4, 
+	localparam WAIT_FREE=0, WR_ADDR=1, WR_VAL=2, DONE=3, WRITE=4, 
 		BLANK=5, WAIT_CNT=6;
+	localparam BUSY_TIMEOUT=500;
     
-    integer rnd_count;
+    integer rnd_count, timeout;
 
 	always @(posedge clk or posedge rst) begin
 		if( rst ) begin
@@ -61,18 +62,26 @@ module jt12_testdata
 			dout		<= 8'h0;
             rnd_count	<= 0;
 			waitcnt		<= 16'h0;
+			timeout		<= BUSY_TIMEOUT;
 		end
 		else begin
 			case( state )
 				BLANK:	begin
                 	if( rnd_count>0 )
                     	rnd_count <= rnd_count -1;
-                    else
+                    else begin
                     	state <= WAIT_FREE;
+                    	timeout <= BUSY_TIMEOUT;
+                    end
                 end
 				WAIT_FREE: begin
 					// a0 <= 1'b0;
 					{ cs_n, wr_n } <= 2'b01;
+					timeout <= timeout-1;
+					if(timeout==0) begin
+						$display("ERROR: timeout while waiting for BUSY\n");
+						$finish;
+					end
 					if( !din[7] ) begin
 						case( cfg[data_cnt][15:8] )
 							8'h0: state <= DONE;							
@@ -89,6 +98,7 @@ module jt12_testdata
 				WAIT_CNT: begin
 						if( waitcnt==16'd0 ) begin
 							data_cnt <= data_cnt + 1'b1;
+							timeout <= BUSY_TIMEOUT;							
 							state <= WAIT_FREE;
 						end
 						else waitcnt <= waitcnt-1'b1;

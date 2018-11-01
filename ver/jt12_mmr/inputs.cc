@@ -139,13 +139,17 @@ int main( int argc, char *argv[] ) {
     JT12_REG regs;
     
     int base_start = 3, base_end = 0xd;
+    int quick=-1;
 	enum { use_cont, use_zero, use_rand } use=use_rand;
     srand(0);
     for( int k=1; k<argc; k++ ) {
-    	if( string(argv[k]) == "-mul" ) { base_end=4; }
-		if( string(argv[k]) == "-tl" ) { base_start=4; base_end=5; }
-		if( string(argv[k]) == "-cont" ) { use=use_cont; };
-		if( string(argv[k]) == "-zero" ) { use=use_zero; };
+    	if( string(argv[k]) == "-mul" ) { base_end=4; continue; }
+		if( string(argv[k]) == "-tl" ) { base_start=4; base_end=5; continue; }
+		if( string(argv[k]) == "-cont" ) { use=use_cont; continue; };
+		if( string(argv[k]) == "-zero" ) { use=use_zero; continue; };
+		if( string(argv[k]) == "-quick" ) { quick=20; continue; };
+		cout << "ERROR: Unknown argument " << argv[k] << '\n';
+		return 1;
     }
     
 	for( int base=base_start; base<base_end; base++ )     
@@ -169,8 +173,10 @@ int main( int argc, char *argv[] ) {
         	cout << " // CH=" << (ch+(bank?3:0)) << " OP=" << op << '\n';
         	cont++;
 		}
+		if( quick>0 ) quick--;
+		if( quick==0 ) goto finish;
     }
-	
+	finish:
 	// Finish
     cout << "\ncfg["<<cont<<"] = { 1'b0, 8'h0, 8'h00 }; // done\n";
     regs.save();

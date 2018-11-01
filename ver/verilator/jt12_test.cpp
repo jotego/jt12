@@ -65,7 +65,28 @@ double sc_time_stamp () {	   // Called by $time in Verilog
    return main_time;		   // converts to double, to match
 							   // what SystemC does
 }
+/*
+class YMReg {
+	int ch, op, val;
+	string name;
+	int and_mask, bit0, int pos;
+	int *sim;
+	bool assert(int cur_ch, cur_op );
+	YMReg( string _name, int _ch, int _op, int _val, 
+		int _and, int _bit0, int _pos, int* _sim ) {
+		name = _name, and_mask = _and,
+		ch = _ch, op = _op, val = _val, 
+		bit0 =  _bit0, pos=_pos, sim =  _sim;
+}
 
+bool YMReg::assert(int cur_ch, cur_op ) {
+	if( sim==NULL ) return false;
+	if( cur_ch == ch && cur_op == op)
+		return (val&and_mask)==(*sim&and_mask);
+	else 
+		return true;
+}
+*/
 
 class CmdWritter {
 	int addr, cmd, val;
@@ -79,6 +100,7 @@ class CmdWritter {
 		int (*filter)(int);
 	};
 	list<Block_def>blocks;
+	// map<int>YMReg mirror;
 public:
 	CmdWritter( Vjt12* _top );
 	void Write( int _addr, int _cmd, int _val );
@@ -391,6 +413,9 @@ CmdWritter::CmdWritter( Vjt12* _top ) {
 	features.push_back( FeatureUse("KS",   0xF0, 0x50, 0xC0, [](char v)->bool{return v!=0;} ));
 	features.push_back( FeatureUse("AM",   0xF0, 0x60, 0x80, [](char v)->bool{return v!=0;} ));
 	features.push_back( FeatureUse("SSG",  0xF0, 0x90, 0x08, [](char v)->bool{return v!=0;} ));
+
+	CData *p = &top->jt12__DOT__u_pg__DOT__dt1_III;
+	//add_op_mirror( 0x30, "DT", 0x70, 2, )
 }
 
 void CmdWritter::Write( int _addr, int _cmd, int _val ) {
