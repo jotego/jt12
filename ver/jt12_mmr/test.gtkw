@@ -1,0 +1,48 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Thu Nov  1 18:47:57 2018
+[*]
+[dumpfile] "/home/jtejada/repo/github/jt12/ver/jt12_mmr/jt12_test.lxt"
+[dumpfile_mtime] "Thu Nov  1 18:47:54 2018"
+[dumpfile_size] 2172180
+[savefile] "/home/jtejada/repo/github/jt12/ver/jt12_mmr/test.gtkw"
+[timestart] 0
+[size] 1680 995
+[pos] -37 -37
+*-27.577719 959230000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] jt12_test.
+[treeopen] jt12_test.u_uut.
+[sst_width] 223
+[signals_width] 206
+[sst_expanded] 1
+[sst_vpaned_height] 291
+@22
+jt12_test.u_uut.selected_register[7:0]
+[color] 7
+jt12_test.u_uut.din[7:0]
+jt12_test.u_uut.din_copy[7:0]
+@24
+[color] 2
+jt12_test.u_uut.u_reg.ch[2:0]
+[color] 2
+jt12_test.u_uut.u_reg.op[1:0]
+@22
+jt12_test.u_uut.latch_fnum[5:0]
+@201
+-
+@22
+jt12_test.u_uut.fnum_sep.ch0s1[10:0]
+jt12_test.u_uut.fnum_sep.ch1s1[10:0]
+jt12_test.u_uut.fnum_sep.ch2s1[10:0]
+jt12_test.u_uut.fnum_sep.ch3s1[10:0]
+jt12_test.u_uut.fnum_sep.ch3s2[10:0]
+jt12_test.u_uut.fnum_sep.ch3s3[10:0]
+jt12_test.u_uut.fnum_sep.ch3s4[10:0]
+jt12_test.u_uut.fnum_sep.ch4s1[10:0]
+jt12_test.u_uut.fnum_sep.ch5s1[10:0]
+@28
+jt12_test.u_uut.up_chreg[2:0]
+@22
+jt12_test.u_uut.up_opreg[6:0]
+[pattern_trace] 1
+[pattern_trace] 0
