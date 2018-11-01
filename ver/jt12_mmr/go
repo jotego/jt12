@@ -3,7 +3,7 @@
 TOP=jt12_test
 DUMPSIGNALS=DONT
 EXTRA=
-RANDWAIT=0
+RANDWAIT=1
 
 while [ $# -gt 0 ]; do
 	if [ $1 = "-w" ]; then
@@ -12,9 +12,9 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi   
-	if [ $1 = "-randwait" ]; then
-		echo "Random wait enabled"
-		RANDWAIT=1
+	if [ $1 = "-norandwait" ]; then
+		echo "Random wait disabled"
+		RANDWAIT=0
 		shift
 		continue
 	fi     
@@ -29,7 +29,9 @@ fi
 
 #echo $EXTRA
 echo Preparing stimuli file
-./inputs $EXTRA > inputs.vh 
+if ! ./inputs $EXTRA > inputs.vh; then
+	exit 1
+fi
 #exit 0
 
 rm -f s
@@ -70,7 +72,6 @@ sort output.csv > output_sorted.csv
 sort verify.csv > verify_sorted.csv
 diff output_sorted.csv verify_sorted.csv
 if [ $? -eq 0 ]; then
-	echo Note that order within each operator output is not checked
 	echo TEST PASS
 else
 	echo TEST FAIL

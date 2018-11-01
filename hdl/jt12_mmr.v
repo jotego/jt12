@@ -215,8 +215,8 @@ always @(posedge clk) begin : memory_mapped_registers
 				// Global registers
 				din_copy <= din;
 				up_keyon <= selected_register == REG_KON;
-            	up_ch <= {addr[1], selected_register[1:0]};
-            	up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
+				up_ch <= {addr[1], selected_register[1:0]};
+				up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
 				case( selected_register)
 					//REG_TEST:	lfo_rst <= 1'b1; // regardless of din
 					`ifdef TEST_SUPPORT
@@ -254,22 +254,25 @@ always @(posedge clk) begin : memory_mapped_registers
 					8'hA4, 8'hA5, 8'hA6, 8'hAD, 8'hAC, 8'hAE: latch_fnum <= din[5:0];
 					default:;	// avoid incomplete-case warning
 				endcase
-            	casez( selected_register )
-					// channel registers
-					8'hA0, 8'hA1, 8'hA2:    { up_chreg, up_opreg } <= { 3'h1, 7'd0 }; // up_fnumlo
-					// FB + Algorithm
-					8'hB0, 8'hB1, 8'hB2: { up_chreg, up_opreg } <= { 3'h2, 7'd0 }; // up_alg
-					8'hB4, 8'hB5, 8'hB6: { up_chreg, up_opreg } <= { 3'h4, 7'd0 }; // up_pms
-					// operator registers
-					8'h3?: { up_chreg, up_opreg } <= { 3'h0, 7'h01 }; // up_dt1
-					8'h4?: { up_chreg, up_opreg } <= { 3'h0, 7'h02 }; // up_tl
-					8'h5?: { up_chreg, up_opreg } <= { 3'h0, 7'h04 }; // up_ks_ar
-					8'h6?: { up_chreg, up_opreg } <= { 3'h0, 7'h08 }; // up_amen_dr
-					8'h7?: { up_chreg, up_opreg } <= { 3'h0, 7'h10 }; // up_sr
-					8'h8?: { up_chreg, up_opreg } <= { 3'h0, 7'h20 }; // up_sl
-					8'h9?: { up_chreg, up_opreg } <= { 3'h0, 7'h40 }; // up_ssgeg
-					default: { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
-            	endcase // selected_register
+				if( selected_register[1:0]==2'b11 ) 
+					{ up_chreg, up_opreg } <= { 3'h0, 7'h0 };
+				else
+					casez( selected_register )
+						// channel registers
+						8'hA0, 8'hA1, 8'hA2:    { up_chreg, up_opreg } <= { 3'h1, 7'd0 }; // up_fnumlo
+						// FB + Algorithm
+						8'hB0, 8'hB1, 8'hB2: { up_chreg, up_opreg } <= { 3'h2, 7'd0 }; // up_alg
+						8'hB4, 8'hB5, 8'hB6: { up_chreg, up_opreg } <= { 3'h4, 7'd0 }; // up_pms
+						// operator registers
+						8'h3?: { up_chreg, up_opreg } <= { 3'h0, 7'h01 }; // up_dt1
+						8'h4?: { up_chreg, up_opreg } <= { 3'h0, 7'h02 }; // up_tl
+						8'h5?: { up_chreg, up_opreg } <= { 3'h0, 7'h04 }; // up_ks_ar
+						8'h6?: { up_chreg, up_opreg } <= { 3'h0, 7'h08 }; // up_amen_dr
+						8'h7?: { up_chreg, up_opreg } <= { 3'h0, 7'h10 }; // up_sr
+						8'h8?: { up_chreg, up_opreg } <= { 3'h0, 7'h20 }; // up_sl
+						8'h9?: { up_chreg, up_opreg } <= { 3'h0, 7'h40 }; // up_ssgeg
+						default: { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
+					endcase // selected_register
 			end
 		end
 		else if(clk_en) begin /* clear once-only bits */

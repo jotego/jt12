@@ -35,6 +35,7 @@ class JT12_REG {
 	void write( int addr, int reg, unsigned val ) {
 		int op = (reg>>2)&3;
 		int ch = (reg&3) + (addr ? 3 : 0);
+		if(reg>=0x30 && ( (reg&3)==3 ) ) return; // ignore writes to invalid register
 		switch( reg>>4 ) {
 			case 3: 
 				dt[mod(op,ch,dt_stg)] = (val>> 4)&7;
@@ -133,48 +134,68 @@ class JT12_REG {
 	}
 };
 
+void write_vh( int cont, int bank, int reg, int val ) {
+	int ch=reg&3;
+	int op=(reg>>2)&3;
+	cout << "cfg[" << cont <<"] = { 1'b" << bank << ", ";
+	cout << "8'h" << hex << reg << ", 8'h" << val << "};" << dec;
+	cout << " // CH=" << (ch+(bank?3:0)) << " OP=" << op << '\n';	
+}
+
 int main( int argc, char *argv[] ) {
 	int aux=0;
 	int cont=0;
 	JT12_REG regs;
 	
-	int base_start = 3, base_end = 0xd;
-	int quick=-1;
+	int base_start = 3, base_end = 0x100;
 	enum { use_cont, use_zero, use_rand } use=use_rand;
 	srand(0);
 	for( int k=1; k<argc; k++ ) {
 		if( string(argv[k]) == "-mul" ) { base_end=4; continue; }
-		if( string(argv[k]) == "-tl" ) { base_start=4; base_end=5; continue; }
+		if( string(argv[k]) == "-tl" ) { base_start=4; base_end=5;  continue; }
 		if( string(argv[k]) == "-cont" ) { use=use_cont; continue; };
 		if( string(argv[k]) == "-zero" ) { use=use_zero; continue; };
-		if( string(argv[k]) == "-quick" ) { quick=20; continue; };
-		cout << "ERROR: Unknown argument " << argv[k] << '\n';
+		cerr << "ERROR: Unknown argument '" << argv[k] << "'\n";
+		cerr << "With no arguments, it will run a long set of random writes to\n"
+			"registers in the 0x30-0xFF space. Expected outputs are dump to the\n"
+			"screen and can be redirected to a text file for comparison with simulation.\n";
+		cerr << "Usage:\n";
+		cerr << "\t-mul\tsimulate only writes to the MUL register\n";
+		cerr << "\t-tl\tsimulate only writes to the TL register\n";
+		cerr << "\t-cont\twrite sequential values to registers\n";
+		cerr << "\t-zero\twrite zero to registers\n";
 		return 1;
 	}
-	
-	for( int base=base_start; base<base_end; base++ ) {
-	int op_max = base<0xa ? 4 : 2;
-	for( int op=0; op<op_max; op++ ) {
-		for( int bank=0; bank<=1; bank++ ) 
-		for( int ch=0; ch<3; ch++ )			
-		{
-				int reg = (base << 4) | (op<<2) | ch;   
-				// cout << "************\nREG= " << hex << reg << "\n";
-				unsigned val=0;
-				switch( use ) {
-					case use_cont: val = cont; break;
-					case use_rand: val = rand()%256; break;
-					case use_zero: val = 0; break;
+	if( use!= use_rand ) {
+		for( int base=base_start; base<base_end; base++ ) {
+		int op_max = base<0xa ? 4 : 2;
+		for( int op=0; op<op_max; op++ ) {
+			for( int bank=0; bank<=1; bank++ ) 
+			for( int ch=0; ch<3; ch++ )			
+			{
+					int reg = (base << 4) | (op<<2) | ch;   
+					// cout << "************\nREG= " << hex << reg << "\n";
+					unsigned val=0;
+					switch( use ) {
+						case use_cont: val = cont; break;
+						case use_rand: val = rand()%256; break;
+						case use_zero: val = 0; break;
+					}
+					regs.write( bank, reg, val );
+					write_vh( cont, bank, reg, val );
+					cont++;
 				}
-				regs.write( bank, reg, val );
-
-				cout << "cfg[" << cont <<"] = { 1'b" << bank << ", ";
-				cout << "8'h" << hex << reg << ", 8'h" << val << "};" << dec;
-				cout << " // CH=" << (ch+(bank?3:0)) << " OP=" << op << '\n';
-				cont++;
 			}
-			if( quick>0 ) quick--;
-			if( quick==0 ) goto finish;
+		}
+	}
+	else {
+		base_start<<=4;		
+		base_end<<=4;
+		for( cont=0; cont<5000; cont++ ) {
+			int bank=rand()%2, val=rand()%256, reg=rand()%256;	
+			while( reg<base_start || reg>=base_end ) reg=rand()%256;
+			regs.write( bank, reg, val );
+			write_vh( cont, bank, reg, val );
 		}
 	}
 	finish:
