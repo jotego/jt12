@@ -24,7 +24,10 @@ class JT12_REG {
 	public:
 	JT12_REG();
 	int mod(int op, int ch, int stg) { 
-		// cout << "Op = " << op << " CH=" << (ch+1) << " STG=" << stg << "\n";
+		// this mod is different from mod6 because this mod is used to store the values
+		// and mod6 is used to extract them
+		// I should change it so operator values are stored without mixing
+		// and sorted at output, like frequency values...
 		int x = op*6+ch+stg-1;
 		if( x==0 ) 
 			return 23;
@@ -32,7 +35,8 @@ class JT12_REG {
 			return (x-1)%24; 
 	}
 	int mod6( int ch, int stg ) {
-		return (ch+stg-1)%6;
+		int x = ch+6-(stg-1);
+		return x%6;
 	}
 	void write( int addr, int reg, unsigned val );
 	void save();
@@ -100,10 +104,11 @@ void JT12_REG::write( int addr, int reg, unsigned val ) {
 					case 0xC: parse_fnum( block_ch3s3, fnum_ch3s3, val ); break;
 					case 0xE: parse_fnum( block_ch3s2, fnum_ch3s2, val ); break;
 				}
-			}	
+			}
+			break;
 		case 0xb:
 			if( (reg&0xf) <= 2) {
-				fb[ch] = (val>>3)&3;
+				fb[ch] = (val>>3)&7;
 				alg[ch]= val&7;
 			}
 			else if( (reg&0xf) <=6 ) {
@@ -129,7 +134,7 @@ void JT12_REG::save() {
 		int op=aux/6;
 		if (ch>2) ch++;
 		// of << k << ',';
-		of << op << ',' << ch << ',';
+		of << op << ',' << ch << ' ';
 		of << dt[k] << ',';
 		of << mul[k] << ',';
 		of << setfill('0') << setw(2) << tl[k] << ',';
@@ -141,10 +146,15 @@ void JT12_REG::save() {
 		of << setw(1) << sl[k] << ',';
 		of << rr[k] << ',';
 		of << ssgen[k] << ',';
-		of << ssg[k] << ',';
+		of << ssg[k] << " / ";
 		// channel info
 		of << block[ch_index] << ',';
-		of << setfill('0') << setw(3) << fnum[ch_index] << setw(0);
+		of << setfill('0') << setw(3) << fnum[ch_index] << setw(0) << ',';
+		of << fb[ mod6(ch_index,2) ] << ',';
+		of << alg[ mod6(ch_index,1) ] << ',';
+		of << lr[ mod6(ch_index,1) ] << ',';
+		of << ams[ mod6(ch_index,4) ] << ',';
+		of << pms[ mod6(ch_index,1) ];
 		of << '\n';
 	}
 }
@@ -164,13 +174,15 @@ int main( int argc, char *argv[] ) {
 	int rand_iter = 5000;
 	
 	int base_start = 3, base_end = 0x10;
-	enum { use_cont, use_zero, use_rand } use=use_rand;
+	enum { use_cont, use_zero, use_rand, full_rand } use=use_rand;
 	srand(0);
 	for( int k=1; k<argc; k++ ) {
 		if( string(argv[k]) == "-mul" ) { base_end=4; continue; }
 		if( string(argv[k]) == "-tl" ) { base_start=4; base_end=5;  continue; }
 		if( string(argv[k]) == "-cont" ) { use=use_cont; continue; };
 		if( string(argv[k]) == "-zero" ) { use=use_zero; continue; };
+		if( string(argv[k]) == "-rand" ) { use=use_rand; continue; };
+		if( string(argv[k]) == "-full_rand" ) { use=full_rand; continue; };
 		if( string(argv[k]) == "-max" ) {
 			if( ++k == argc ) {
 				cerr << "ERROR: expecting maximum number of iterations after -max\n";
@@ -185,17 +197,18 @@ int main( int argc, char *argv[] ) {
 		}
 		cerr << "ERROR: Unknown argument '" << argv[k] << "'\n";
 		cerr << "With no arguments, it will run a long set of random writes to\n"
-			"registers in the 0x30-0xFF space. Expected outputs are dump to the\n"
+			"registers in the 0x30-0xFF space in random order. Expected outputs are dump to the\n"
 			"screen and can be redirected to a text file for comparison with simulation.\n";
 		cerr << "Usage:\n";
 		cerr << "\t-mul\tsimulate only writes to the MUL register\n";
 		cerr << "\t-tl\tsimulate only writes to the TL register\n";
 		cerr << "\t-cont\twrite sequential values to registers\n";
 		cerr << "\t-zero\twrite zero to registers\n";
-		cerr << "\t-max\number of iterations (only for random stimuli)\n";
+		cerr << "\t-max\tnumber of iterations (only for random stimuli)\n";
+		cerr << "\t-rand\twrite random values but in sequential order\n";
 		return 1;
 	}
-	if( use!= use_rand ) {
+	if( use!= full_rand ) {
 		regs.write( 0, 0xa4, 0 ); // set the fnum latch to 0
 		write_vh( cont++, 0, 0xa4, 0 );		
 		for( int base=base_start; base<base_end; base++ ) {
@@ -209,6 +222,7 @@ int main( int argc, char *argv[] ) {
 					unsigned val=0;
 					switch( use ) {
 						case use_cont: val = cont; break;
+						case use_rand: val = rand()%256; break;
 						case use_zero: val = 0; break;
 					}
 					regs.write( bank, reg, val );

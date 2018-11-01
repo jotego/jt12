@@ -92,10 +92,15 @@ initial begin
 end
 
 always @(posedge clk) if(clk_en) begin
-	$display("%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X", 
-    	u_uut.u_reg.cur_op, u_uut.u_reg.cur_ch,dt1_II, mul_V, tl_IV, ks_II, ar_I,
+	$display("%X,%X %X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X,%X / %X,%X,%X,%X,%X,%X,%X", 
+    	u_uut.u_reg.cur_op, u_uut.u_reg.cur_ch,
+
+    	dt1_II, mul_V, tl_IV, ks_II, ar_I,
     	amsen_IV, d1r_I, d2r_I, sl_I, rr_I, ssg_en_I, ssg_eg_I, 
-    	block_I, fnum_I );
+
+    	block_I, fnum_I,
+    	fb_II, alg,
+    	rl, ams_IV, pms_I );
 end
 
 always @(posedge clk) begin
