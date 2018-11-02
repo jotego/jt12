@@ -63,29 +63,17 @@ void JTTParser::parse_chdata(char *txt_arg, int cmd_base) {
 }
 
 JTTParser::JTTParser(int c) : RipParser(c) {
-	op_commands["dt"] = 0x30;
-	op_commands["mul"] = 0x30;
+	op_commands["dt_mul"] = 0x30;
 	op_commands["tl"] = 0x40;
-	op_commands["ar"] = 0x50;
-	op_commands["ks"] = 0x50;
-	op_commands["dr"] = 0x60;
-	op_commands["amon"] = 0x60;
+	op_commands["ks_ar"] = 0x50;
+	op_commands["amon_dr"] = 0x60;
 	op_commands["sr"] = 0x70;
-	op_commands["sl"] = 0x80;
-	op_commands["rr"] = 0x80;
-	op_commands["ssg-eg"] = 0x90;
+	op_commands["sl_rr"] = 0x80;
 	op_commands["ssg"] = 0x90;
-	ch_commands["fnum"] = 0xa0;
 	ch_commands["fnum_lsb"] = 0xa0;
-	ch_commands["block"] = 0xa4;
 	ch_commands["blk_fnum"] = 0xa4;
-	ch_commands["fnum_msb"] = 0xa4;
-	ch_commands["fb"] = 0xb0;
-	ch_commands["alg"] = 0xb0;
-	ch_commands["conn"] = 0xb0;
-	ch_commands["lr"] = 0xb4;
-	ch_commands["ams"] = 0xb4;
-	ch_commands["pms"] = 0xb4;
+	ch_commands["fb_con"] = 0xb0;
+	ch_commands["lr_ams_pms"] = 0xb4;
 	global_commands["kon"] = 0x28;
 	global_commands["lfo"] = 0x22;
 	default_ch = 0;
@@ -130,7 +118,7 @@ int JTTParser::parse() {
 				sscanf( txt_arg, "%d", &aux );
 				wait = aux;
 				wait *= 24*clk_period;
-				cout << "Wait for " << wait << '\n';
+				// cout << "Wait for " << wait << '\n';
 				return cmd_wait;
 			}
 

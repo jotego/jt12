@@ -101,5 +101,6 @@ if [[ $DUMPSIGNALS == "-trace" && -e jt12_test.vcd ]]; then
 	echo Converting VCD to FST
 	if vcd2fst -p -v jt12_test.vcd -f jt12_test.fst; then
 		rm jt12_test.vcd
+		echo Done
 	fi
 fi

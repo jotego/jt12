@@ -47,7 +47,7 @@ public:
 		else {
 			main_time = main_next;
 			if( --verbose_ticks == 0 ) {
-				cout << "Current time " << dec << (int)(main_time/1000000) << " ms\n";				
+				cerr << "Current time " << dec << (int)(main_time/1000000) << " ms\n";				
 				verbose_ticks = 48000*24/2;
 			}
 			toggle=false;

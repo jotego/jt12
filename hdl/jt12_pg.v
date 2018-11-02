@@ -54,8 +54,8 @@ module jt12_pg(
 	output		[ 9:0]	phase_VIII
 );
 
-wire [7:0] pm_I;
-reg  [7:0] pm_II;
+// wire [7:0] pm_I;
+// reg  [7:0] pm_II;
 wire [4:0] keycode_I;
 wire signed [5:0] detune_mod_I;
 reg signed [5:0] detune_mod_II;
@@ -66,7 +66,7 @@ wire [ 9:0] phase_II;
 
 always @(posedge clk) if(clk_en) begin
 	keycode_II		<= keycode_I;
-	pm_II			<= pm_I;
+	//pm_II			<= pm_I;
 	detune_mod_II	<= detune_mod_I;
 	phinc_II		<= phinc_I;
 end
@@ -77,7 +77,7 @@ jt12_pg_comb u_comb(
 	// Phase Modulation
 	.lfo_mod	( lfo_mod[6:2]	),
 	.pms		( pms_I			),
-	.pm_out		( pm_I			),
+	//.pm_out		( pm_I			),
 
 	// Detune
 	.detune		( dt1_I			),
@@ -89,7 +89,7 @@ jt12_pg_comb u_comb(
 	.mul		( mul_II		),
 	.phase_in	( phase_drop	),
 	.pg_rst		( pg_rst_II		),
-	.pm_in		( pm_II			),
+	//.pm_in		( pm_II			),
 	.detune_in	( detune_mod_II	),
 	.phinc_in	( phinc_II		),
 

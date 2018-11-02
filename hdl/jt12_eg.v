@@ -85,7 +85,7 @@ reg  [9:0] eg_in_II, eg_in_III, eg_in_IV;
 
 
 
-jt12_eg_comb uut(
+jt12_eg_comb u_comb(
     ///////////////////////////////////
     // I
     .keyon_now      ( keyon_now_I   ),
