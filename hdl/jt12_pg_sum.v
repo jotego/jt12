@@ -28,9 +28,8 @@ module jt12_pg_sum (
 	input		[ 3:0]	mul,		
 	input		[19:0]	phase_in,
 	input				pg_rst,
-	input signed [7:0]	pm_offset,
 	input signed [5:0]  detune_signed,
-	input		[16:0]  phinc_pure,
+	input		[18:0]  phinc_pure,
 
 	output reg	[19:0]	phase_out,
 	output reg	[ 9:0]	phase_op
@@ -39,12 +38,11 @@ module jt12_pg_sum (
 reg [19:0] phinc_premul, phinc_mul, ph_mod;
 
 always @(*) begin
-	phinc_premul = {{3{1'b0}},phinc_pure} + {{14{detune_signed[5]}},detune_signed};
+	phinc_premul = {1'b0,phinc_pure} + {{14{detune_signed[5]}},detune_signed};
 	phinc_mul	 = ( mul==4'd0 ) ? (phinc_premul>>1) : (phinc_premul * mul);
 	
 	phase_out   = pg_rst ? 20'd0 : (phase_in + phinc_mul);
-	ph_mod		= phase_out + {{12{pm_offset[7]}},pm_offset};
-	phase_op	= ph_mod[19:10];
+	phase_op	= phase_out[19:10];
 end
 
 endmodule // jt12_pg_sum

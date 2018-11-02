@@ -1,4 +1,5 @@
 #include <cstring>
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include "Vtest.h"
@@ -131,7 +132,7 @@ int main(int argc, char *argv[]) {
 	int first_note=0, last_note=10;
 	int first_block=0, last_block=7;
 	int first_mul=1, last_mul=1;
-	int mul=1;
+	int mul=1, pms=0;
 	
 	for(int k=1; k<argc; k++ ) {
 		if( strcmp(argv[k],"-w")==0 ) { top.trace_on(); continue; }
@@ -156,18 +157,26 @@ int main(int argc, char *argv[]) {
 			if( mul<0 || mul>15 ) { cerr << "ERROR: expecting mul (0-15) after -mul argument\n"; return 3; }
 			continue;
 		}
+		if( strcmp(argv[k],"-pms")==0 ) { 
+			if( ++k==argc ) { cerr << "ERROR: expecting pms (0-15) after -pms argument\n"; return 3; }
+			if( sscanf( argv[k], "%d", &pms)!=1 ) { cerr << "ERROR: expecting pms (0-7) after -pms argument\n"; return 3; }
+			if( pms<0 || pms>7 ) { cerr << "ERROR: expecting pms (0-7) after -pms argument\n"; return 3; }
+			continue;
+		}		
 		cout << "ERROR: unknown argument " << argv[k] << '\n';
 		return 2;
 	}
 	//                   0  1   2   3    4   5   6   7   8     9    10
 	int fnum_test[] = { 654,692,734,823,872,924,979,1038,1099,1165,1234 };
 	top.reset();
+	top.pms = pms;
 	for( top.mul = first_mul; top.mul<=last_mul; top.mul++)
 	for( top.block=first_block; top.block<=last_block; top.block++) {
 	for( int k=first_note; k<=last_note; k++ ) 
 	{
 		top.lfo_mod= top.detune=0;
 		top.fnum = fnum_test[k];
+		top.phase_in = 0;
 		float base_freq = get_freq(top);
 
 		printf("(%2d) %d,%2d,%4d,", top.mul, top.block, top.keycode&3, top.fnum );
@@ -179,11 +188,16 @@ int main(int argc, char *argv[]) {
 				printf("%.3f, ", detune_freq );
 			}}
 		if( do_pm ) {
-			int offsets[] = {0x1f,0x0f};
+			int offsets[] = {0x17,0x07};
 			for( int j=0; j<sizeof(offsets)/sizeof(int); j++  ) {
 				top.lfo_mod=offsets[j];
-				float pm_freq = get_freq(top) - base_freq;
-				printf("%.3f, ", pm_freq );
+				float interval = get_freq(top) / base_freq;
+				if( interval==0 )
+					cout << "N/A, ";
+				else {
+					float cent = 3986*log10(interval);
+					printf("%.2f cent, ", cent );
+				}
 			}
 		}
 		cout << '\n';

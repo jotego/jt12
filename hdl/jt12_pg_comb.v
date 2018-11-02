@@ -37,14 +37,14 @@ module jt12_pg_comb(
 	output reg	[ 4:0]	keycode,
 	output reg signed [5:0] detune_out,
 	// Phase increment	
-	output reg	[16:0]  phinc_out,
+	output reg	[18:0]  phinc_out,
 	// Phase add
 	input		[ 3:0]	mul,
 	input		[19:0]	phase_in,
 	input				pg_rst,
 	input signed [7:0]	pm_in,
 	input signed [5:0]  detune_in,
-	input		[16:0]  phinc_in,
+	input		[18:0]  phinc_in,
 
 	output reg	[19:0]	phase_out,
 	output reg	[ 9:0]	phase_op
@@ -71,7 +71,8 @@ jt12_pg_dt u_dt(
 jt12_pg_inc u_inc(
 	.block		( block		),
 	.fnum		( fnum		),
-	.phinc_pure	( phinc_out)
+	.pm_offset	( pm_in		),
+	.phinc_pure	( phinc_out	)
 );
 
 // pg_sum uses the output from the previous blocks
@@ -80,7 +81,6 @@ jt12_pg_sum u_sum(
 	.mul			( mul			),
 	.phase_in		( phase_in		),
 	.pg_rst			( pg_rst		),
-	.pm_offset		( pm_in			),
 	.detune_signed	( detune_in		),
 	.phinc_pure		( phinc_in		),
 	.phase_out		( phase_out		),
