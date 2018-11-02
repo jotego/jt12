@@ -162,7 +162,7 @@ jt12_sh #( .width(1), .stages(24) ) u_cntsh(
 	.drop	( cnt_in_II	)
 );
 
-jt12_sh_rst #( .width(10), .stages(21), .rstval(1'b1) ) u_egsh(
+jt12_sh_rst #( .width(10), .stages(20), .rstval(1'b1) ) u_egsh(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.rst	( rst		),

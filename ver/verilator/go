@@ -96,3 +96,10 @@ fi
 echo Simulation start...
 echo obj_dir/Vjt12 $DUMPSIGNALS $EXTRA  $GYM_ARG "$GYM_FILE"
 obj_dir/Vjt12 $DUMPSIGNALS $EXTRA $GYM_ARG "$GYM_FILE"
+
+if [[ $DUMPSIGNALS == "-trace" && -e jt12_test.vcd ]]; then
+	echo Converting VCD to FST
+	if vcd2fst -p -v jt12_test.vcd -f jt12_test.fst; then
+		rm jt12_test.vcd
+	fi
+fi

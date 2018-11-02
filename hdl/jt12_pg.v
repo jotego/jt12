@@ -54,7 +54,6 @@ module jt12_pg(
 	output		[ 9:0]	phase_VIII
 );
 
-wire pg_rst_VI;
 wire [7:0] pm_I;
 reg  [7:0] pm_II;
 wire [4:0] keycode_I;
