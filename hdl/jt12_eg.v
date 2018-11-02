@@ -188,7 +188,7 @@ jt12_sh_rst #( .width(1), .stages(22), .rstval(1'b0) ) u_ssg_inv(
     .clk_en ( clk_en        ),
     .rst    ( rst           ),
     .din    ( ssg_inv_III   ),
-    .drop   ( ssg_inv_out_I )
+    .drop   ( ssg_inv_in_I  )
 );
 
 jt12_sh_rst #( .width(1), .stages(24), .rstval(1'b0) ) u_konsh(
