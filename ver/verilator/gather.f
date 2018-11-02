@@ -12,6 +12,10 @@
 ../../hdl/jt12_opram.v
 ../../hdl/jt12_op.v
 ../../hdl/jt12_pg.v
+../../hdl/jt12_pg_comb.v
+../../hdl/jt12_pg_dt.v
+../../hdl/jt12_pg_inc.v
+../../hdl/jt12_pg_sum.v
 ../../hdl/jt12_phrom.v
 ../../hdl/jt12_reg.v
 ../../hdl/jt12_sh24.v

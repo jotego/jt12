@@ -414,7 +414,6 @@ CmdWritter::CmdWritter( Vjt12* _top ) {
 	features.push_back( FeatureUse("AM",   0xF0, 0x60, 0x80, [](char v)->bool{return v!=0;} ));
 	features.push_back( FeatureUse("SSG",  0xF0, 0x90, 0x08, [](char v)->bool{return v!=0;} ));
 
-	CData *p = &top->jt12__DOT__u_pg__DOT__dt1_III;
 	//add_op_mirror( 0x30, "DT", 0x70, 2, )
 }
 

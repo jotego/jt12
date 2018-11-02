@@ -83,9 +83,9 @@ module jt12_reg(
 	output reg	[2:0]	fb_II,
 	output		[2:0]	alg,
 	// Operator multiplying
-	output		[ 3:0]	mul_V,
+	output		[ 3:0]	mul_II,
 	// Operator detuning
-	output		[ 2:0]	dt1_II,
+	output		[ 2:0]	dt1_I,
 	
 	// EG
 	output		[4:0]	ar_I,	// attack  rate
@@ -211,8 +211,8 @@ wire up_pms_ch	= up_pms	& update_ch_I;
 wire up_ams_ch	= up_pms	& update_ch_IV;
 
 // DT1 & MUL
-wire up_dt1_op	= up_dt1	& update_op_II;
-wire up_mul_op	= up_dt1	& update_op_V;
+wire up_dt1_op	= up_dt1	& update_op_I;
+wire up_mul_op	= up_dt1	& update_op_II;
 // TL
 wire up_tl_op	= up_tl		& update_op_IV;
 // KS & AR
@@ -290,8 +290,8 @@ jt12_opram u_opram(
 
 assign regop_in = {
 	up_tl_op	? tl_in  : tl_IV, // 7
-	up_dt1_op	? dt1_in : dt1_II,	// 3
-	up_mul_op	? mul_in : mul_V,	// 4 - 7
+	up_dt1_op	? dt1_in : dt1_I,	// 3
+	up_mul_op	? mul_in : mul_II,	// 4 - 7
 	up_ks_op	? ks_in	 : ks_II,	// 2 - 16
 	up_ar_op	? ar_in	 : ar_I,	// 5 - 21
 	up_amen_op	? amen_in: amsen_IV,// 1 - 22
@@ -303,7 +303,7 @@ assign regop_in = {
 	up_ssg_op	? ssg_in[2:0] : ssg_eg_I	// 3 - 42
 };
 
-assign { tl_IV, dt1_II, mul_V, ks_II, 
+assign { tl_IV, dt1_I, mul_II, ks_II, 
 			ar_I,	amsen_IV, d1r_I, d2r_I, sl_I, rr_I,
 			ssg_en_I,	ssg_eg_I 				} = regop_out;
 

@@ -41,8 +41,8 @@ wire	[2:0]	lfo_freq;
 wire			lfo_en;
 // Operators
 wire			amsen_IV;
-wire	[ 2:0]	dt1_II;
-wire	[ 3:0]	mul_V;
+wire	[ 2:0]	dt1_I;
+wire	[ 3:0]	mul_II;
 wire	[ 6:0]	tl_IV;
 
 wire	[ 4:0]	keycode_II;
@@ -58,7 +58,7 @@ wire	[2:0]	ssg_eg_I;
 // envelope operation
 wire			keyon_I;
 wire	[9:0]	eg_IX;
-reg				pg_rst_III;
+wire			pg_rst_II;
 // Channel
 wire	[10:0]	fnum_I;
 wire	[ 2:0]	block_I;
@@ -141,16 +141,16 @@ jt12_mmr u_mmr(
 	.pms_I		( pms_I		),
 	.ams_IV		( ams_IV	),
 	.amsen_IV	( amsen_IV	),
-	.dt1_II		( dt1_II	),
-	.mul_V		( mul_V		),
-	.tl_IV		( tl_IV	),
+	.dt1_I		( dt1_I		),
+	.mul_II		( mul_II	),
+	.tl_IV		( tl_IV		),
 
 	.ar_I		( ar_I		),
 	.d1r_I		( d1r_I		),
 	.d2r_I		( d2r_I		),
 	.rr_I		( rr_I		),
 	.sl_I		( sl_I		),
-	.ks_II		( ks_II	),
+	.ks_II		( ks_II		),
 
 	.eg_stop	( eg_stop	),	
 	// SSG operation
@@ -205,25 +205,23 @@ jt12_pg u_pg(
 	.rst		( rst			),
 	.clk		( clk			),
 	.clk_en		( clk_en		),
-	// Phase modulation by LFO
-	.pms_I		( pms_I			),
-	.lfo_mod	( lfo_mod		),
 	// Channel frequency
 	.fnum_I		( fnum_I		),
 	.block_I	( block_I		),
 	// Operator multiplying
-	.mul_V		( mul_V 		),
+	.mul_II		( mul_II 		),
 	// Operator detuning
-	.dt1_II		( dt1_II 		), // same as JT51's DT1
+	.dt1_I		( dt1_I 		), // same as JT51's DT1
+	// Phase modulation by LFO
+	.lfo_mod	( lfo_mod		),
+	.pms_I		( pms_I			),
 	// phase operation
-	.pg_rst_III	( pg_rst_III	),
-	.zero		( zero			),
+	.pg_rst_II	( pg_rst_II		),
 	.pg_stop	( pg_stop		),
 	.keycode_II	( keycode_II	),
 	.phase_VIII	( phase_VIII 	)
 );
 
-wire pg_rst_II;
 wire [9:0] eg_V;
 
 jt12_eg u_eg(
@@ -264,8 +262,6 @@ jt12_sh #(.width(10),.stages(4)) u_egpad(
 	.din	( eg_V		),
 	.drop	( eg_IX		)
 );
-
-always @(posedge clk) if(clk_en) pg_rst_III<=pg_rst_II;
 
 wire	[8:0]	op_result;
 

@@ -71,8 +71,8 @@ module jt12_mmr(
 	output	[ 2:0]	pms_I,
 	output	[ 1:0]	ams_IV,
 	output			amsen_IV,
-	output	[ 2:0]	dt1_II,
-	output	[ 3:0]	mul_V,
+	output	[ 2:0]	dt1_I,
+	output	[ 3:0]	mul_II,
 	output	[ 6:0]	tl_IV,
 	output	reg		eg_stop,
 
@@ -345,8 +345,8 @@ jt12_reg u_reg(
 	// PG
 	.fnum_I		(	fnum_I	),
 	.block_I	(	block_I ),
-	.mul_V		(	mul_V	),
-	.dt1_II		(	dt1_II	),
+	.mul_II		(	mul_II	),
+	.dt1_I		(	dt1_I	),
 
 	// EG
 	.ar_I		(ar_I		), // attack  rate
