@@ -34,10 +34,10 @@ module jt12_pg_comb(
 	// Detune
 	input		[ 2:0]	detune,
 
-	output reg	[ 4:0]	keycode,
-	output reg signed [5:0] detune_out,
+	output 	[ 4:0]	keycode,
+	output  signed [5:0] detune_out,
 	// Phase increment	
-	output reg	[18:0]  phinc_out,
+	output 	[18:0]  phinc_out,
 	// Phase add
 	input		[ 3:0]	mul,
 	input		[19:0]	phase_in,
@@ -46,8 +46,8 @@ module jt12_pg_comb(
 	input signed [5:0]  detune_in,
 	input		[18:0]  phinc_in,
 
-	output reg	[19:0]	phase_out,
-	output reg	[ 9:0]	phase_op
+	output 	[19:0]	phase_out,
+	output 	[ 9:0]	phase_op
 );
 
 wire signed [7:0] pm_offset_I;
