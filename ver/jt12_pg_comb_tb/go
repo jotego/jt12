@@ -1,0 +1,23 @@
+#!/bin/bash
+
+TOP=test
+
+# folder for coverage logs
+mkdir -p logs
+
+if ! verilator -f gather.f test.cpp --cc --exe --trace --coverage> s; then
+	cat s; rm s
+	exit $?
+fi
+
+
+if ! make -j -C obj_dir -f V${TOP}.mk V$TOP > s; then
+	cat s; rm s
+	exit $?
+fi
+
+if ! obj_dir/V${TOP} $*; then
+	exit $?
+fi
+
+verilator_coverage logs/coverage.dat --annotate coverage

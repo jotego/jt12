@@ -24,23 +24,27 @@ http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc
 	
 	*/
 
-module jt12_pg_inc (
-	input		[ 2:0] block,
-	input		[10:0] fnum,
-	output reg  [16:0] phinc_pure
+module jt12_pg_sum (
+	input		[ 3:0]	mul,		
+	input		[19:0]	phase_in,
+	input				pg_rst,
+	input signed [7:0]	pm_offset,
+	input signed [5:0]  detune_signed,
+	input		[16:0]  phinc_pure,
+
+	output reg	[19:0]	phase_out,
+	output reg	[ 9:0]	phase_op
 );
 
-always @(*) begin 
-	case ( block )
-		3'd0: phinc_pure = { 7'd0, fnum[10:1] };
-		3'd1: phinc_pure = { 6'd0, fnum[10:0] };
-		3'd2: phinc_pure = { 5'd0, fnum, 1'd0 };
-		3'd3: phinc_pure = { 4'd0, fnum, 2'd0 };
-		3'd4: phinc_pure = { 3'd0, fnum, 3'd0 };
-		3'd5: phinc_pure = { 2'd0, fnum, 4'd0 };
-		3'd6: phinc_pure = { 1'd0, fnum, 5'd0 };
-		3'd7: phinc_pure = {       fnum, 6'd0 };
-	endcase
+reg [19:0] phinc_premul, phinc_mul, ph_mod;
+
+always @(*) begin
+	phinc_premul = {{3{1'b0}},phinc_pure} + {{14{detune_signed[5]}},detune_signed};
+	phinc_mul	 = ( mul==4'd0 ) ? (phinc_premul>>1) : (phinc_premul * mul);
+	
+	phase_out   = pg_rst ? 20'd0 : (phase_in + phinc_mul);
+	ph_mod		= phase_out + {{12{pm_offset[7]}},pm_offset};
+	phase_op	= ph_mod[19:10];
 end
 
-endmodule // jt12_pg_inc
+endmodule // jt12_pg_sum
