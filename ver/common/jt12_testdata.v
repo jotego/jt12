@@ -73,6 +73,7 @@ module jt12_testdata
                     	state <= WAIT_FREE;
                     	timeout <= BUSY_TIMEOUT;
                     end
+                    wr_n <= 1'b1;
                 end
 				WAIT_FREE: begin
 					// a0 <= 1'b0;
