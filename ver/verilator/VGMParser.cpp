@@ -98,6 +98,19 @@ int JTTParser::parse() {
 			// cout << "TXT CMD = " << txt_cmd << "\n";
 			remove_blanks(txt_cmd);
 
+			if( txt_cmd[0]=='$' ) {
+				int aux0, aux1;
+				char *line=txt_cmd+1;
+				if( sscanf( line, "%X,%X", &aux0, &aux1 )!= 2 ) {
+					cout << "ERROR: Incomplete line " << line_cnt << '\n';
+					return cmd_error;
+				}
+				addr = (aux0&0x100) ? 1 : 0;
+				cmd = aux0 & 0xff;
+				val = aux1 & 0xff;
+				return cmd_write;
+			}
+
 			if( strcmp(txt_cmd, "finish")==0 ) {
 				done=true;
 				return cmd_finish;
@@ -189,7 +202,36 @@ void VGMParser::open(const char* filename, int limit) {
 		file.seekg(start);
 	}
 	done=false;
+	// open translation file
+	ftrans.open("last.jtt");
+	cur_time=0;
 	// max_PSG_warning = 10;
+}
+
+VGMParser::~VGMParser() {
+	file.close();
+	ftrans.close();
+}
+
+void VGMParser::translate_cmd() {
+	char line[128];
+	int _cmd = cmd; _cmd&=0xff;
+	int _val = val; _val&=0xff;
+	sprintf(line,"$%d%2X,%02X", addr,_cmd,_val );
+	ftrans << line;
+	if( cmd == 0x28 ) ftrans << " # Keyon ";
+	ftrans << '\n';
+}
+
+void VGMParser::translate_wait() {
+	float ws = wait;
+	ws /= 44100.0; // wait in seconds
+	cur_time += ws;
+	const float Tsyn = 24.0*clk_period*1e-9;
+	float wsyn = ws/Tsyn;
+	ftrans << "wait " << (int)wsyn << " # ";
+	// << cur_time << " s\n";
+	ftrans << wait << " -> " << ws << " Total: " << cur_time << "s \n";
 }
 
 int VGMParser::parse() {
@@ -207,6 +249,7 @@ int VGMParser::parse() {
 				file.read( extra, 2);
 				cmd = extra[0];
 				val = extra[1];
+				translate_cmd();
 				return cmd_write;
 			case 0x53: // A1=1
 			case 0x57:
@@ -214,21 +257,23 @@ int VGMParser::parse() {
 				file.read( extra, 2);
 				cmd = extra[0];
 				val = extra[1];
+				translate_cmd();
 				return cmd_write;
 			case 0x61:
-				file.read( extra, 2);
-				wait = extra[0];
-				wait <<= 8;
-				wait |= extra[1];
-				wait&=0xffff;
+				uint16_t rd_wait;
+				file.read( (char*) &rd_wait, 2);
+				wait = rd_wait;
+				translate_wait();
 				adjust_wait();
 				return cmd_wait; // request wait
 			case 0x62:
 				wait = 735;
+				translate_wait();
 				adjust_wait();
 				return cmd_wait; // wait one frame (NTSC)
 			case 0x63:
 				wait = 882; // wait one frame (PAL)
+				translate_wait();
 				adjust_wait();				
 				return cmd_wait;
 			case 0x66:
@@ -236,22 +281,26 @@ int VGMParser::parse() {
 				return -1; // finish
 				// continue;
 			// wait short commands (bad design option for VGM file designer)
-			case 0x70: wait=1; return 1;
-			case 0x71: wait=2; return 1;
-			case 0x72: wait=3; return 1;
-			case 0x73: wait=4; return 1;
-			case 0x74: wait=5; return 1;
-			case 0x75: wait=6; return 1;
-			case 0x76: wait=7; return 1;
-			case 0x77: wait=8; return 1;
-			case 0x78: wait=9; return 1;
-			case 0x79: wait=0xa; return 1;
-			case 0x7A: wait=0xb; return 1;
-			case 0x7B: wait=0xc; return 1;
-			case 0x7c: wait=0xd; return 1;
-			case 0x7d: wait=0xe; return 1;
-			case 0x7e: wait=0xf; return 1;
-			case 0x7f: wait=0x10; return 1;
+			case 0x70: 
+			case 0x71: 
+			case 0x72: 
+			case 0x73: 
+			case 0x74: 
+			case 0x75: 
+			case 0x76: 
+			case 0x77: 
+			case 0x78: 
+			case 0x79: 
+			case 0x7A: 
+			case 0x7B: 
+			case 0x7c: 
+			case 0x7d: 
+			case 0x7e: 
+			case 0x7f: 
+				wait=(vgm_cmd&0xf)+1; 
+				translate_wait();
+				adjust_wait();
+				return 1;
 			case 0x4F: // PSG command, ignore
 			case 0x50:
 				file.read(extra,1);

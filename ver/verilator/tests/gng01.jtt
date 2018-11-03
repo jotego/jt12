@@ -1,0 +1,46 @@
+blk_fnum 0,12 # block=1, fnum hi=100b
+fnum_lsb 0,dd
+
+fb_con 0,2a
+lr_ams_pms 0,c0
+
+# /|_______
+dt_mul 0,0,11
+dt_mul 0,2,01
+dt_mul 0,1,15
+dt_mul 0,3,11
+
+tl 0,0,13
+tl 0,2,2f
+tl 0,1,07
+tl 0,3,1f
+
+ks_ar 0,0,59
+ks_ar 0,2,5f
+ks_ar 0,1,58
+ks_ar 0,3,4e
+
+amon_dr 0,0,8a
+amon_dr 0,2,80
+amon_dr 0,1,8b
+amon_dr 0,3,84
+
+sr 0,0,00
+sr 0,2,00
+sr 0,1,00
+sr 0,3,00
+
+sl_rr 0,0,16
+sl_rr 0,2,06
+sl_rr 0,1,16
+sl_rr 0,3,06
+
+ssg 0,0,ff
+ssg 0,2,00
+ssg 0,1,00
+ssg 0,3,00
+
+
+kon f0
+wait 90000
+kon 0

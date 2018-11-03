@@ -12,9 +12,10 @@ protected:
 public:
 	char cmd, val, addr;
 	uint64_t wait;
-	virtual void open(const char *filename, int limit=0)=0;
+	virtual void open(const char *filename, int limit=0)=0;	
 	virtual int parse()=0;
 	virtual uint64_t length()=0;
+	virtual ~RipParser() {};
 	RipParser(int c) { clk_period = c; }
 	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1 };
 };
@@ -23,15 +24,25 @@ RipParser* ParserFactory( const char *filename, int clk_period );
 
 class VGMParser : public RipParser {
 	std::ifstream file;	
+	std::ofstream ftrans; // translation to JTT format
+	float cur_time; // used by ftrans
 	int totalwait;
 	bool done;
-	void adjust_wait() { wait*=100000; wait/=441; }
+	void adjust_wait() { 
+		double w=wait;
+		w /= 44100.0;
+		w *= 1e9;
+		wait = (uint64_t)w; 
+	}
+	void translate_cmd();
+	void translate_wait();
 	// int max_PSG_warning;
 public:
 	void open(const char *filename, int limit=0);
 	int parse();
 	uint64_t length();
 	VGMParser(int c) : RipParser(c) {}
+	~VGMParser();
 };
 
 class Gym : public RipParser {
