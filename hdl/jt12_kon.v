@@ -39,7 +39,18 @@ module jt12_kon(
 	output	reg		keyon_I
 );
 
-//reg csm_copy;
+// capture overflow signal so it lasts long enough
+reg overflow2;
+reg [4:0] overflow_cycle;
+
+always @(posedge clk) if( clk_en ) begin
+	if(overflow_A) begin
+		overflow2 <= 1'b1;
+		overflow_cycle <= { cur_op, cur_ch };
+	end else begin
+		if(overflow_cycle == {cur_op, cur_ch}) overflow2<=1'b0;
+	end
+end
 
 reg din, drop_24;
 wire drop_23;
@@ -47,7 +58,7 @@ wire drop_23;
 reg [3:0] cur_op_hot;
 
 always @(posedge clk) if( clk_en ) begin
-	keyon_I <= (csm&&cur_ch==3'd2&&overflow_A) || drop_23;
+	keyon_I <= (csm&&cur_ch==3'd2&&overflow2) || drop_23;
 	drop_24 <= drop_23;
 end
 

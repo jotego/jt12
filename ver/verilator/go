@@ -26,6 +26,12 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
+	if [ "$1" = "-slow" ]; then
+		echo "Clock divider enabled"
+		FAST=
+		shift
+		continue
+	fi	
 	if [ "$1" = "-w1" ]; then
 		echo "Signal dump enabled (only top level)"
 		DUMPSIGNALS="-trace"

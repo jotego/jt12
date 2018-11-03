@@ -74,7 +74,9 @@ JTTParser::JTTParser(int c) : RipParser(c) {
 	ch_commands["blk_fnum"] = 0xa4;
 	ch_commands["fb_con"] = 0xb0;
 	ch_commands["lr_ams_pms"] = 0xb4;
+
 	global_commands["kon"] = 0x28;
+	global_commands["timer"] = 0x27;
 	global_commands["lfo"] = 0x22;
 	default_ch = 0;
 }

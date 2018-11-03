@@ -1,0 +1,35 @@
+# Run "go -slow" to get the internal clock divider enabled
+# this simulation requires it to be accurate.
+#Timer A
+$25,0
+$24,100
+
+tl 3,0,0
+tl 3,1,0
+tl 3,2,0
+tl 3,3,0
+
+ks_ar 3,0,1f
+ks_ar 3,1,1f
+ks_ar 3,2,1f
+ks_ar 3,3,1f
+
+sl_rr 3,0,f
+sl_rr 3,1,f
+sl_rr 3,2,f
+sl_rr 3,3,f
+
+$A6,83
+$A2,F3
+
+$AE,81
+$AA,F1
+
+$AC,82
+$A8,F2
+
+$AD,80
+$A9,F0
+
+timer bf
+wait 100000

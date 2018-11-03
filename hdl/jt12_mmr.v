@@ -276,7 +276,6 @@ always @(posedge clk) begin : memory_mapped_registers
 			end
 		end
 		else if(clk_en) begin /* clear once-only bits */
-			// csm 	<= 1'b0;
 			// lfo_rst <= 1'b0;
 			{ clr_flag_B, clr_flag_A } <= 2'd0;
 		end
