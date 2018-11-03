@@ -219,7 +219,12 @@ void VGMParser::translate_cmd() {
 	int _val = val; _val&=0xff;
 	sprintf(line,"$%d%2X,%02X", addr,_cmd,_val );
 	ftrans << line;
-	if( cmd == 0x28 ) ftrans << " # Keyon ";
+	if( cmd == 0x28 ) {
+		if( val&0xf0 )
+			ftrans << " # Key on";
+		else
+			ftrans << " # Key off";
+	}
 	ftrans << '\n';
 }
 
@@ -230,8 +235,8 @@ void VGMParser::translate_wait() {
 	const float Tsyn = 24.0*clk_period*1e-9;
 	float wsyn = ws/Tsyn;
 	ftrans << "wait " << (int)wsyn << " # ";
-	// << cur_time << " s\n";
-	ftrans << wait << " -> " << ws << " Total: " << cur_time << "s \n";
+	ftrans << cur_time << " s\n";
+	//ftrans << wait << " -> " << ws << " Total: " << cur_time << "s \n";
 }
 
 int VGMParser::parse() {

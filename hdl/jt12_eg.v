@@ -68,7 +68,7 @@ wire keyoff_now_I = keyon_last_I && !keyon_I;
 wire cnt_in_II, cnt_lsb_II, step_II, pg_rst_I;
 
 wire ssg_inv_in_I, ssg_inv_out_I;
-reg  ssg_inv_II, ssg_inv_III;
+reg  ssg_inv_II, ssg_inv_III, ssg_inv_IV;
 wire [2:0] state_in_I, state_next_I;
 
 reg attack_II, attack_III;
@@ -135,7 +135,7 @@ jt12_eg_comb u_comb(
     .amsen          ( amsen_IV      ),
     .ams            ( ams_IV        ),
     .tl             ( tl_IV         ),
-    .final_ssg_inv  ( ssg_inv_III   ), 
+    .final_ssg_inv  ( ssg_inv_IV    ), 
     .final_eg_in    ( eg_in_IV      ),
     .final_eg_out   ( eg_out_IV     )
 );
@@ -156,6 +156,7 @@ always @(posedge clk) if(clk_en) begin
     step_III    <= step_II;
     sum_in_III  <= sum_out_II;
 
+    ssg_inv_IV  <= ssg_inv_III;
     eg_in_IV    <= pure_eg_out_III;
     eg_V        <= eg_out_IV;
 end
@@ -183,11 +184,11 @@ jt12_sh_rst #( .width(3), .stages(24), .rstval(1'b1) ) u_egstate(
     .drop   ( state_in_I    )
 );
 
-jt12_sh_rst #( .width(1), .stages(22), .rstval(1'b0) ) u_ssg_inv(
+jt12_sh_rst #( .width(1), .stages(21), .rstval(1'b0) ) u_ssg_inv(
     .clk    ( clk           ),
     .clk_en ( clk_en        ),
     .rst    ( rst           ),
-    .din    ( ssg_inv_III   ),
+    .din    ( ssg_inv_IV    ),
     .drop   ( ssg_inv_in_I  )
 );
 
