@@ -131,11 +131,11 @@ always @(posedge clk)
         if( s2_enters ) begin
         	sum_all <= 1'b0;
         	// x1 volume
-			// left  <= pre_left;
-			// right <= pre_right;
-			// x2 volume
-			left  <= { pre_left [10:0], pre_left [10] };
-			right <= { pre_right[10:0], pre_right[10] };
+			left  <= pre_left;
+			right <= pre_right;
+			// x2 volume: This will cause problems with some, like "Crying Asia senmei sensou", at the beginning of 1st level
+			//left  <= { pre_left [10:0], pre_left [10] };
+			//right <= { pre_right[10:0], pre_right[10] };
             `ifdef DUMPSOUND
             $strobe("%d\t%d", right, right);
             `endif
