@@ -26,7 +26,7 @@ class VGMParser : public RipParser {
 	std::ifstream file;	
 	std::ofstream ftrans; // translation to JTT format
 	float cur_time; // used by ftrans
-	int totalwait;
+	int totalwait, pending_wait;
 	bool done;
 	void adjust_wait() { 
 		double w=wait;
@@ -36,12 +36,14 @@ class VGMParser : public RipParser {
 	}
 	void translate_cmd();
 	void translate_wait();
+	char *stream_data;
+	uint32_t data_offset;
 	// int max_PSG_warning;
 public:
 	void open(const char *filename, int limit=0);
 	int parse();
 	uint64_t length();
-	VGMParser(int c) : RipParser(c) {}
+	VGMParser(int c) : RipParser(c) {stream_data=NULL;}
 	~VGMParser();
 };
 

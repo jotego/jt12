@@ -207,12 +207,16 @@ void VGMParser::open(const char* filename, int limit) {
 	// open translation file
 	ftrans.open("last.jtt");
 	cur_time=0;
+	if( stream_data != NULL ) { delete stream_data; stream_data=NULL; }
+	data_offset=0;
+	pending_wait=0;
 	// max_PSG_warning = 10;
 }
 
 VGMParser::~VGMParser() {
 	file.close();
 	ftrans.close();
+	if( stream_data != NULL ) { delete stream_data; stream_data=NULL; }
 }
 
 void VGMParser::translate_cmd() {
@@ -243,9 +247,16 @@ void VGMParser::translate_wait() {
 
 int VGMParser::parse() {
 	if(done) return -1;
+	if( pending_wait !=0 ) {
+		wait = pending_wait;
+		translate_wait();
+		adjust_wait();
+		pending_wait = 0;
+		return cmd_wait; // request wait		
+	}
 	while( !file.eof() && file.good() ) {
-		char vgm_cmd;
-		file.read( &vgm_cmd, 1);
+		unsigned char vgm_cmd;
+		file.read( (char*)&vgm_cmd, 1);
 		if( !file.good() ) return -1; // finish immediately
 		// cout << "VGM 0x" << hex << (((int)vgm_cmd)&0xff) << '\n';
 		char extra[2];
@@ -287,23 +298,28 @@ int VGMParser::parse() {
 				done=true;
 				return -1; // finish
 				// continue;
+			case 0x67: // data block: 
+			{
+				file.seekg( 1, ios_base::cur ); // skip 0x66 byte
+				unsigned char type;
+				file.read( (char*)&type, 1 );
+				if( type!=0 ) {// compressed stream
+					cout << "ERROR: Unsupported data block type " << hex << (unsigned)type << '\n';
+					return -2;}
+				uint32_t length;
+				file.read( (char*)&length, 4 );
+				if( length == 0 ) {
+					cout << "WARNING: zero-sized data stream in input file\n";
+					continue; }
+				stream_data = new char[length];
+				file.read( stream_data, length );
+			}
+
 			// wait short commands (bad design option for VGM file designer)
-			case 0x70: 
-			case 0x71: 
-			case 0x72: 
-			case 0x73: 
-			case 0x74: 
-			case 0x75: 
-			case 0x76: 
-			case 0x77: 
-			case 0x78: 
-			case 0x79: 
-			case 0x7A: 
-			case 0x7B: 
-			case 0x7c: 
-			case 0x7d: 
-			case 0x7e: 
-			case 0x7f: 
+			case 0x70: case 0x71: case 0x72: case 0x73: 
+			case 0x74: case 0x75: case 0x76: case 0x77: 
+			case 0x78: case 0x79: case 0x7A: case 0x7B: 
+			case 0x7c: case 0x7d: case 0x7e: case 0x7f: 
 				wait=(vgm_cmd&0xf)+1; 
 				translate_wait();
 				adjust_wait();
@@ -311,6 +327,19 @@ int VGMParser::parse() {
 			case 0x4F: // PSG command, ignore
 			case 0x50:
 				file.read(extra,1);
+				continue;
+			// DAC writes
+			case 0x80: case 0x81: case 0x82: case 0x83: 
+			case 0x84: case 0x85: case 0x86: case 0x87: 
+			case 0x88: case 0x89: case 0x8A: case 0x8B: 
+			case 0x8c: case 0x8d: case 0x8e: case 0x8f: 
+				pending_wait=(vgm_cmd&0xf); // will reply with a wait on next call
+				cmd=0x2a;
+				val=stream_data[data_offset++]; // buffer overrun risk here.
+				translate_cmd();
+				return cmd_write;
+			case 0xe0:
+				file.read( (char*)&data_offset, 4);
 				continue;
 			default:
 				cout << "ERROR: Unsupported VGM command 0x" << hex << (((int)vgm_cmd)&0xff) 
