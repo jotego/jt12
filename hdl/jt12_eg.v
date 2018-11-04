@@ -56,7 +56,7 @@ wire [14:0] eg_cnt;
 jt12_eg_cnt u_egcnt(
     .rst    ( rst   ),
     .clk    ( clk   ),
-    .clk_en ( clk_en),
+    .clk_en ( clk_en & eg_stop ),
     .zero   ( zero  ),
     .eg_cnt ( eg_cnt)
 );

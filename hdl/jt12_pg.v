@@ -48,7 +48,7 @@ module jt12_pg(
 	input		[ 2:0]	pms_I,
 	// phase operation
 	input				pg_rst_II,
-	input				pg_stop,
+	input				pg_stop,	// not implemented
 	
 	output  reg [ 4:0]  keycode_II,
 	output		[ 9:0]	phase_VIII
