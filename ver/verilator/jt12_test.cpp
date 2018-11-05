@@ -137,12 +137,20 @@ int main(int argc, char** argv, char** env) {
 	RipParser *gym;
 	bool forever=true;
 	assert( PERIOD%2 == 0);
+	char wav_filename[512]="";
+	char *gym_filename;
 
 	for( int k=1; k<argc; k++ ) {
 		if( string(argv[k])=="-trace" ) { trace=true; continue; }
 		if( string(argv[k])=="-gym" ) { 
-			gym = ParserFactory( argv[++k], PERIOD );
+			gym_filename = argv[++k];
+			gym = ParserFactory( gym_filename, PERIOD );
 			if( gym==NULL ) return 1;
+			continue;
+		}
+		if( string(argv[k])=="-o" ) { 
+			if( ++k == argc ) { cout << "ERROR: expecting filename after -o\n"; return 1; }
+			strncpy( wav_filename, argv[k], 512 );
 			continue;
 		}
 		if( string(argv[k])=="-time" ) { 
@@ -208,6 +216,12 @@ int main(int argc, char** argv, char** env) {
 		cout << "ERROR: Unknown argument " << argv[k] << "\n";
 		return 1;
 	}
+	if( strlen(wav_filename)==0 ) {
+		strncpy( wav_filename, gym_filename, 512 );
+		int dot = strlen( wav_filename) - 3;
+		wav_filename[dot]=0;
+		strcat( wav_filename, "wav");
+	}
 
 	if( gym->length() != 0 && !sim_time.limited() ) sim_time.set_time_limit( gym->length() );
 
@@ -247,7 +261,7 @@ int main(int argc, char** argv, char** env) {
 	// cout << "Main loop\n";
 	vluint64_t wait=0;
 	int last_sample=0;
-	WaveWritter wav("jt12_test.wav");
+	WaveWritter wav(wav_filename);
 
 	// forced values
 	list<YMcmd> forced_values;
@@ -413,7 +427,7 @@ CmdWritter::CmdWritter( Vjt12* _top ) {
 	features.push_back( FeatureUse("KS",   0xF0, 0x50, 0xC0, [](char v)->bool{return v!=0;} ));
 	features.push_back( FeatureUse("AM",   0xF0, 0x60, 0x80, [](char v)->bool{return v!=0;} ));
 	features.push_back( FeatureUse("SSG",  0xF0, 0x90, 0x08, [](char v)->bool{return v!=0;} ));
-
+	watch_ch = -1;
 	//add_op_mirror( 0x30, "DT", 0x70, 2, )
 }
 

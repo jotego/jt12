@@ -18,6 +18,7 @@ FAST=-DFASTDIV
 VERI_EXTRA=
 # use SIMULATION="-DSIMULATION" to enable simulation statements
 SIMULATION=
+WAV_FILE=
 
 while [ $# -gt 0 ]; do
 	if [ "$1" = "-w" ]; then
@@ -53,6 +54,9 @@ while [ $# -gt 0 ]; do
 		fi
 		GYM_ARG="-gym"
 		GYM_FILE="$1"
+		if [[ "$WAV_FILE" == "" ]]; then
+			WAV_FILE=$(basename "${GYM_FILE}.wav")
+		fi
 		shift
 		continue
 	fi
@@ -62,7 +66,13 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
-	if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "-mute" ]]; then
+	if [ "$1" = "-o" ]; then
+		shift
+		WAV_FILE="$1"
+		shift
+		continue
+	fi	
+	if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "-mute"  ]]; then
 		EXTRA="$EXTRA $1"
 		if [[ "$1" = -mute ]]; then
 			shift
@@ -80,7 +90,9 @@ echo EXTRA="$EXTRA"
 if [[ $(expr match "$GYM_FILE" ".*\.vgz") != 0 ]]; then
 	echo Uncompressing vgz file...
 	gunzip -S vgz "$GYM_FILE" --to-stdout > input.vgm
-	GYM_FILE=input.vgm
+	UNZIP_GYM=input.vgm
+else
+	UNZIP_GYM=$GYM_FILE
 fi
 
 date
@@ -100,8 +112,10 @@ if ! make -j -C obj_dir -f Vjt12.mk Vjt12; then
 	exit $?
 fi
 echo Simulation start...
-echo obj_dir/Vjt12 $DUMPSIGNALS $EXTRA  $GYM_ARG "$GYM_FILE"
-obj_dir/Vjt12 $DUMPSIGNALS $EXTRA $GYM_ARG "$GYM_FILE"
+echo obj_dir/Vjt12 $DUMPSIGNALS $EXTRA  $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
+if ! obj_dir/Vjt12 $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" ; then
+	exit $?
+fi
 
 if [[ $DUMPSIGNALS == "-trace" && -e jt12_test.vcd ]]; then
 	echo Converting VCD to FST
