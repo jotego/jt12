@@ -47,7 +47,8 @@ public:
 		else {
 			main_time = main_next;
 			if( --verbose_ticks == 0 ) {
-				cerr << "Current time " << dec << (int)(main_time/1000000) << " ms\n";				
+				// cerr << "Current time " << dec << (int)(main_time/1000000) << " ms\n";				
+				cerr << '.';
 				verbose_ticks = 48000*24/2;
 			}
 			toggle=false;
@@ -218,6 +219,30 @@ int main(int argc, char** argv, char** env) {
 			}
 			continue;
 		}
+		if( string(argv[k])=="-only") {
+			int ch;
+			if( sscanf(argv[++k],"%d",&ch) != 1 ) {
+				cout << "ERROR: needs channel number after -only\n";
+				return 1;
+			}
+			if( ch<0 || ch>5 ) {
+				cout << "ERROR: channel must be within 0-5 range\n";
+				return 1;
+			}
+			cout << "Only channel " << ch << " will be played\n";
+			for( int k=0; k<6; k++ ) {
+				if( k==ch ) continue;
+				switch(k) {
+					case 0: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==0? 0 : v;} ); break;
+					case 1: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==1? 0 : v;} ); break;
+					case 2: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==2? 0 : v;} ); break;
+					case 3: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==4? 0 : v;} ); break;
+					case 4: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==5? 0 : v;} ); break;
+					case 5: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==6? 0 : v;} ); break;
+				}
+			}
+			continue;
+		}		
 		cout << "ERROR: Unknown argument " << argv[k] << "\n";
 		return 1;
 	}
@@ -374,7 +399,10 @@ finish:
 
 
 void WaveWritter::write( int16_t* lr ) {
-	fsnd.write( (char*)lr, sizeof(int16_t)*2 );
+	int16_t g[2];
+	g[0] = lr[0]<<2;
+	g[1] = lr[1]<<2;
+	fsnd.write( (char*)&g, sizeof(int16_t)*2 );
 }
 
 WaveWritter::WaveWritter(const char *filename) {

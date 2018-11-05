@@ -158,9 +158,10 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 		if( strcmp(argv[k],"-pms")==0 ) { 
-			if( ++k==argc ) { cerr << "ERROR: expecting pms (0-15) after -pms argument\n"; return 3; }
+			if( ++k==argc ) { cerr << "ERROR: expecting pms (0-7) after -pms argument\n"; return 3; }
 			if( sscanf( argv[k], "%d", &pms)!=1 ) { cerr << "ERROR: expecting pms (0-7) after -pms argument\n"; return 3; }
 			if( pms<0 || pms>7 ) { cerr << "ERROR: expecting pms (0-7) after -pms argument\n"; return 3; }
+			do_pm = true;
 			continue;
 		}		
 		cout << "ERROR: unknown argument " << argv[k] << '\n';
@@ -179,7 +180,7 @@ int main(int argc, char *argv[]) {
 		top.phase_in = 0;
 		float base_freq = get_freq(top);
 
-		printf("(%2d) %d,%2d,%4d,", top.mul, top.block, top.keycode&3, top.fnum );
+		printf("(%2d) %d,%2d, %4d,", top.mul, top.block, top.keycode&3, top.fnum );
 		printf("%4.1fHz -> ", base_freq );
 		if( do_detune ) {
 			for( top.detune=1; top.detune<8; top.detune++ ) {
