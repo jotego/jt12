@@ -1,0 +1,52 @@
+# dynamic range of all channels
+
+ks_ar 0,0,1f
+ks_ar 1,0,1f
+ks_ar 2,0,1f
+ks_ar 3,0,1f
+ks_ar 4,0,1f
+ks_ar 5,0,1f
+
+amon_dr 0,0,0
+amon_dr 1,0,0
+amon_dr 2,0,0
+amon_dr 3,0,0
+amon_dr 4,0,0
+amon_dr 5,0,0
+
+tl 0,0,0
+tl 1,0,0
+tl 2,0,0
+tl 3,0,0
+tl 4,0,0
+tl 5,0,0
+
+fb_con 0,7
+fb_con 1,7
+fb_con 2,7
+fb_con 3,7
+fb_con 4,7
+fb_con 5,7
+
+blk_fnum 0,03
+blk_fnum 1,03
+blk_fnum 2,03
+blk_fnum 3,03
+blk_fnum 4,03
+blk_fnum 5,03
+
+fnum_lsb 0,FF
+fnum_lsb 1,FF
+fnum_lsb 2,FF
+fnum_lsb 3,FF
+fnum_lsb 4,FF
+fnum_lsb 5,FF
+
+kon F0
+kon F1
+kon F2
+kon F3
+kon F4
+kon F5
+
+wait 6000

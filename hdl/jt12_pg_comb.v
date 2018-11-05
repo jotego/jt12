@@ -37,14 +37,14 @@ module jt12_pg_comb(
     output  [ 4:0]  keycode,
     output  signed [5:0] detune_out,
     // Phase increment  
-    output  [18:0]  phinc_out,
+    output  [16:0]  phinc_out,
     // Phase add
     input       [ 3:0]  mul,
     input       [19:0]  phase_in,
     input               pg_rst,
     // input signed [7:0]   pm_in,
     input signed [5:0]  detune_in,
-    input       [18:0]  phinc_in,
+    input       [16:0]  phinc_in,
 
     output  [19:0]  phase_out,
     output  [ 9:0]  phase_op

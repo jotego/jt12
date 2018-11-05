@@ -1,0 +1,24 @@
+#dynamic range of one channel
+
+ks_ar 0,0,1f
+ks_ar 0,2,1f
+ks_ar 0,1,1f
+ks_ar 0,3,1f
+
+amon_dr 0,0,0
+amon_dr 0,2,0
+amon_dr 0,1,0
+amon_dr 0,3,0
+
+tl 0,0,0
+tl 0,2,0
+tl 0,1,0
+tl 0,3,0
+
+fb_con 0,7
+
+blk_fnum 0,0F
+fnum_lsb 0,FF
+
+kon F0
+wait 3000

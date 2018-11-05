@@ -186,6 +186,11 @@ int main(int argc, char** argv, char** env) {
 			cout << "All writes to MULT locked to 1\n";
 			writter.block( 0xF0, 0x30, [](int v){ return (v&0x70)|1;} ); 
 			continue;
+		}		
+		if( string(argv[k])=="-nodt") {
+			cout << "All writes to DT locked to 1\n";
+			writter.block( 0xF0, 0x30, [](int v){ return (v&0x0F)|1;} ); 
+			continue;
 		}
 		if( string(argv[k])=="-nossg") {
 			cout << "All writes to SSG locked to 0\n";
@@ -240,7 +245,7 @@ int main(int argc, char** argv, char** env) {
 	top->addr = 0;
 	top->cs_n = 0;
 	top->wr_n = 1;
-	top->limiter_en=0;
+	top->limiter_en=1;
 	// cout << "Reset\n";
 	while( sim_time.get_time() < 256*PERIOD ) {
 		top->eval();

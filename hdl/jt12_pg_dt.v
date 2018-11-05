@@ -20,6 +20,8 @@
 	Based on information posted by Nemesis on:
 http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc&start=167
 
+	Note that detune produces an output even for fnum==0, is that correct?
+
 	Based on jt51_phasegen.v, from JT51	
 	
 	*/

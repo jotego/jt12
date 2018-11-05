@@ -24,6 +24,10 @@
 	Each channel can use the full range of the DAC as they do not
 	get summed in the real chip.
 
+	Operator data is summed up without adding extra bits. This is
+	the case of real YM3438, which was used on Megadrive 2 models.
+
+
 */
 
 
