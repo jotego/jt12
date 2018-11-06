@@ -184,6 +184,10 @@ jt12_timers u_timers(
 	.irq_n		( irq_n			)
 );
 
+// YM2203 does not have LFO
+`ifdef NOLFO
+assign lfo_mod = 7'd0;
+`else
 jt12_lfo u_lfo(
 	.rst		( rst		),
 	.clk		( clk		),
@@ -198,6 +202,7 @@ jt12_lfo u_lfo(
 	.lfo_freq	( lfo_freq	),
 	.lfo_mod	( lfo_mod	)
 );
+`endif
 
 `ifndef TIMERONLY
 

@@ -1,2 +1,0 @@
--¿El PCM funciona en estéreo? En la implementación actual no.
--$27, bits D7,D6 comprobar en la Megadrive

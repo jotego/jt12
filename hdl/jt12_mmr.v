@@ -237,7 +237,9 @@ always @(posedge clk) begin : memory_mapped_registers
 						  enable_irq_B, enable_irq_A,
 						  load_B, load_A } <= din[5:0];
 						end
+					`ifndef NOLFO					
 					REG_LFO:	{ lfo_en, lfo_freq } <= din[3:0];
+					`endif
 					REG_DACTEST:pcm[0] <= din[3];
 					REG_PCM:	pcm[8:1]<= din;
 					REG_PCM_EN:	pcm_en	<= din[7];
