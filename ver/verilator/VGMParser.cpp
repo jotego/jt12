@@ -211,6 +211,7 @@ void VGMParser::open(const char* filename, int limit) {
 	data_offset=0;
 	pending_wait=0;
 	// max_PSG_warning = 10;
+	stream_notmplemented_info = true;
 }
 
 VGMParser::~VGMParser() {
@@ -338,6 +339,41 @@ int VGMParser::parse() {
 				val=stream_data[data_offset++]; // buffer overrun risk here.
 				translate_cmd();
 				return cmd_write;
+			case 0x90: // setup stream control
+			case 0x91: // set stream data
+			case 0x95: // start stream, fast call
+				{
+					if( stream_notmplemented_info ) {
+						cout << "WARNING: Stream commands 0x90-0x95 are not implemented\n";
+						stream_notmplemented_info = false;
+					}
+					int32_t aux;
+					file.read( (char*) & aux, 4 );
+					continue;	// not implemented
+				}
+			case 0x92: // set stream frequency
+				{
+					char tt;
+					int32_t aux;
+					file.read( &tt, 1 ); 
+					file.read( (char*) & aux, 4 );
+					continue;	// not implemented
+				}
+			case 0x93: // start stream 
+				{
+					char tt;
+					int32_t aux;
+					file.read( &tt, 1 ); 
+					file.read( (char*) & aux, 4 );
+					file.read( &tt, 1 ); 
+					file.read( (char*) & aux, 4 );
+					continue;	// not implemented
+				}
+			case 0x94: // stop stream
+				{
+					char ss;
+					file.read( &ss, 1 );
+				}
 			case 0xe0:
 				file.read( (char*)&data_offset, 4);
 				continue;

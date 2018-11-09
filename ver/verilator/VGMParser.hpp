@@ -27,7 +27,7 @@ class VGMParser : public RipParser {
 	std::ofstream ftrans; // translation to JTT format
 	float cur_time; // used by ftrans
 	int totalwait, pending_wait;
-	bool done;
+	bool done, stream_notmplemented_info;
 	void adjust_wait() { 
 		double w=wait;
 		w /= 44100.0;
