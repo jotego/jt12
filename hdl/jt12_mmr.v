@@ -109,7 +109,7 @@ reg cen_int;
 `endif
 
 always @(negedge clk) begin
-	cen_int <= cen_cnt == cen_cnt_lim;
+	cen_int <= cen_cnt == 3'd0;
 	`ifdef FASTDIV
 	// always enabled for fast sims (use with GYM output, timer will not work well)
 	clk_en <= 1'b1;
@@ -208,7 +208,7 @@ always @(posedge clk) begin : memory_mapped_registers
 		pg_stop		<=	1'b0;
 	end else begin
 		// WRITE IN REGISTERS
-		if( (!old_write && write) /*&& !busy*/ ) begin
+		if( write ) begin
 			if( !addr[0] ) begin
 				selected_register <= din;
 			end else begin
