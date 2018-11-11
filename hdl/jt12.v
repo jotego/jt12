@@ -315,7 +315,8 @@ jt12_sh #(.width(10),.stages(4)) u_egpad(
     .drop   ( eg_IX     )
 );
 
-wire    [8:0]   op_result;
+wire    [ 8:0]  op_result;
+wire    [13:0]  full_result;
 
 jt12_op u_op(
     .rst            ( rst           ),
@@ -336,7 +337,8 @@ jt12_op u_op(
     .use_prev2      ( use_prev2     ),
     .use_prev1      ( use_prev1     ),
     .zero           ( zero          ),
-    .op_result      ( op_result     )
+    .op_result      ( op_result     ),
+    .full_result    ( full_result   )
 );
 
 wire signed [11:0] fm_snd_left, fm_snd_right;
