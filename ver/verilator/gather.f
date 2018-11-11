@@ -23,3 +23,8 @@
 ../../hdl/jt12_sh.v
 ../../hdl/jt12_sumch.v
 ../../hdl/jt12_timers.v
+../../jt49/hdl/jt49.v
+../../jt49/hdl/jt49_eg.v
+../../jt49/hdl/jt49_div.v
+../../jt49/hdl/jt49_exp.v
+../../jt49/hdl/jt49_noise.v

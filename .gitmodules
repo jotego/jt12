@@ -1,0 +1,3 @@
+[submodule "jt49"]
+	path = jt49
+	url = git@github.com:jotego/jt49.git
