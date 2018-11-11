@@ -12,6 +12,7 @@ void JTTParser::open(const char* filename, int limit) {
 	cout << "Open " << filename << '\n';
 	done=false;
 	line_cnt = 0;
+	chip_cfg = ym2612;
 }
 
 void JTTParser::remove_blanks( char*& str ) {
@@ -192,6 +193,18 @@ void VGMParser::open(const char* filename, int limit) {
 	char version[2];
 	file.seekg(0x08);
 	file.read( version,2 );
+	// Read the chip frequency
+	chip_cfg = unknown;
+	file.seekg(0x2c); // offset to YM2612
+	file.read( (char*) &ym_freq, 4 );
+	if( ym_freq == 0 ) { // try YM2203
+		file.seekg(0x44); // offset to YM2612
+		file.read( (char*) &ym_freq, 4 );
+		if( ym_freq ) chip_cfg = ym2203;
+	}
+	else chip_cfg = ym2612;
+	cout << "YM Freq = " << ym_freq << "\n";
+	// seek out data start
 	if( version[0]<50 && version[1]==1 ) {
 		cout << "VGM version < 1.50 in this file. Data offset set at 0x40\n";
 		file.seekg(0x40);
@@ -263,13 +276,19 @@ int VGMParser::parse() {
 		char extra[2];
 		switch( vgm_cmd ) {
 			case 0x52: // A1=0
-			case 0x56:
+			case 0x55: // YM2203 write
+			case 0x56:{
 				addr = 0;
 				file.read( extra, 2);
 				cmd = extra[0];
 				val = extra[1];
+				// int _cmd = cmd;
+				// _cmd &= 0xff;
+				// if( _cmd < 0x20 ) { 
+				// 	cout << "INFO: write to register (0x" << hex << _cmd << ") below 0x20\n"; }
 				translate_cmd();
 				return cmd_write;
+			}
 			case 0x53: // A1=1
 			case 0x57:
 				addr = 1;
@@ -394,6 +413,7 @@ void Gym::open(const char* filename, int limit) {
 	count = 0;
 	max_PSG_warning = 10;
 	count_limit = limit;
+	chip_cfg = ym2612;
 }
 
 int Gym::parse() {
@@ -463,4 +483,13 @@ RipParser* ParserFactory( const char *filename, int clk_period ) {
 	}
 	cout << "ERROR: The filename must end in .gym or .vgm\n";
 	return NULL;
+}
+
+int RipParser::period() {
+	return 0;
+}
+
+int VGMParser::period() { 
+	// cout << "Freq = " << ym_freq << '\n';
+	return ym_freq==0 ? 0 : 1000'000/(ym_freq/1000); 
 }

@@ -7,8 +7,11 @@
 
 
 class RipParser {
+public:
+	enum chip_type { ym2203=1, ym2612=2, unknown=0 };
 protected:
 	int clk_period; // synthesizer clock period
+	chip_type chip_cfg;
 public:
 	char cmd, val, addr;
 	uint64_t wait;
@@ -18,6 +21,8 @@ public:
 	virtual ~RipParser() {};
 	RipParser(int c) { clk_period = c; }
 	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1 };
+	chip_type chip() { return chip_cfg; }
+	virtual int period();
 };
 
 RipParser* ParserFactory( const char *filename, int clk_period );
@@ -37,12 +42,13 @@ class VGMParser : public RipParser {
 	void translate_cmd();
 	void translate_wait();
 	char *stream_data;
-	uint32_t data_offset;
+	uint32_t data_offset, ym_freq;	
 	// int max_PSG_warning;
 public:
 	void open(const char *filename, int limit=0);
 	int parse();
 	uint64_t length();
+	int period();
 	VGMParser(int c) : RipParser(c) {stream_data=NULL;}
 	~VGMParser();
 };

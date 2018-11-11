@@ -1,3 +1,29 @@
+/*  This file is part of JT12.
+
+    JT12 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    JT12 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with JT12.  If not, see <http://www.gnu.org/licenses/>.
+    
+    Author: Jose Tejada Gomez. Twitter: @topapate
+    Version: 1.0
+    Date: 14-2-2016
+    
+    Based on information posted by Nemesis on:
+http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc&start=167
+
+    Based on jt51_phasegen.v, from JT51 
+    
+    */
+
 module jt12 (
 	input			rst,		// rst should be at least 6 clk&cen cycles long
 	input			clk,		// CPU clock
@@ -19,6 +45,8 @@ module jt12 (
 	output signed	[8:0]	mux_left,
 	output			mux_sample
 );
+
+parameter use_lfo=1;
 
 wire flag_A, flag_B, busy;
 
@@ -185,24 +213,27 @@ jt12_timers u_timers(
 );
 
 // YM2203 does not have LFO
-`ifdef NOLFO
-assign lfo_mod = 7'd0;
-`else
-jt12_lfo u_lfo(
-	.rst		( rst		),
-	.clk		( clk		),
-	.clk_en		( clk_en	),
-	.zero		( zero		),
-	`ifdef NOLFO
-	.lfo_rst	( 1'b1		),
-	`else
-	.lfo_rst	( 1'b0		),
-	`endif
-	.lfo_en		( lfo_en	),
-	.lfo_freq	( lfo_freq	),
-	.lfo_mod	( lfo_mod	)
-);
-`endif
+generate
+if( use_lfo== 1)
+	jt12_lfo u_lfo(
+		.rst		( rst		),
+		.clk		( clk		),
+		.clk_en		( clk_en	),
+		.zero		( zero		),
+		`ifdef NOLFO
+		.lfo_rst	( 1'b1		),
+		`else
+		.lfo_rst	( 1'b0		),
+		`endif
+		.lfo_en		( lfo_en	),
+		.lfo_freq	( lfo_freq	),
+		.lfo_mod	( lfo_mod	)
+	);
+else
+	assign lfo_mod = 7'd0;
+endgenerate
+
+
 
 `ifndef TIMERONLY
 
