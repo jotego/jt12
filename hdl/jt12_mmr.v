@@ -96,7 +96,7 @@ module jt12_mmr(
     output  reg     psg_wr_n
 );
 
-parameter use_psg=0;
+parameter use_psg=0, num_ch=6;
 
 reg [2:0] cen_cnt;
 reg [2:0] cen_cnt_lim;
@@ -308,7 +308,7 @@ always @(posedge clk)
         end
     end
 
-jt12_reg u_reg(
+jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1
     .clk_en     ( clk_en    ),

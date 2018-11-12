@@ -39,6 +39,8 @@ module jt12_kon(
 	output	reg		keyon_I
 );
 
+parameter num_ch=6;
+
 // capture overflow signal so it lasts long enough
 reg overflow2;
 reg [4:0] overflow_cycle;
@@ -72,7 +74,7 @@ always @(*) begin
 	din = keyon_ch==cur_ch && up_keyon ? |(keyon_op&cur_op_hot) : drop_24;
 end
 
-jt12_sh_rst #(.width(1),.stages(23),.rstval(1'b0)) u_konch(
+jt12_sh_rst #(.width(1),.stages(num_ch*4-1),.rstval(1'b0)) u_konch(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.rst	( rst		),

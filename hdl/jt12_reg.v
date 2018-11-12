@@ -105,6 +105,8 @@ module jt12_reg(
 	output			keyon_I
 );
 
+parameter num_ch=6; // Use only 3 (YM2203/YM2610) or 6 (YM2612/YM2608)
+
 
 reg  [1:0] next_op, cur_op;
 reg  [2:0] next_ch, cur_ch;
@@ -162,11 +164,11 @@ wire [4:0] req_opch_I = { op, ch };
 wire [4:0] 	req_opch_II, req_opch_III, 
 			req_opch_IV, req_opch_V, req_opch_VI;
 				
-jt12_sumch u_opch_II ( .chin(req_opch_I  ), .chout(req_opch_II)  );
-jt12_sumch u_opch_III( .chin(req_opch_II ), .chout(req_opch_III) );
-jt12_sumch u_opch_IV ( .chin(req_opch_III), .chout(req_opch_IV)  );
-jt12_sumch u_opch_V  ( .chin(req_opch_IV ), .chout(req_opch_V)   );
-// jt12_sumch u_opch_VI ( .chin(req_opch_V  ), .chout(req_opch_VI)  );
+jt12_sumch #(.num_ch(num_ch)) u_opch_II ( .chin(req_opch_I  ), .chout(req_opch_II)  );
+jt12_sumch #(.num_ch(num_ch)) u_opch_III( .chin(req_opch_II ), .chout(req_opch_III) );
+jt12_sumch #(.num_ch(num_ch)) u_opch_IV ( .chin(req_opch_III), .chout(req_opch_IV)  );
+jt12_sumch #(.num_ch(num_ch)) u_opch_V  ( .chin(req_opch_IV ), .chout(req_opch_V)   );
+// jt12_sumch #(.num_ch(num_ch)) u_opch_VI ( .chin(req_opch_V  ), .chout(req_opch_VI)  );
 
 wire update_op_I  = cur == req_opch_I;
 wire update_op_II = cur == req_opch_II;
@@ -232,8 +234,13 @@ wire up_ssg_op	= up_ssgeg	& update_op_I;
 
 always @(*) begin
 	// next = cur==5'd23 ? 5'd0 : cur +1'b1;
-	next_op = cur_ch==3'd6 ? cur_op+1'b1 : cur_op;
-	next_ch = cur_ch[1:0]==2'b10 ? cur_ch+2'd2 : cur_ch+1'd1;
+	if( num_ch==6 ) begin
+		next_op = cur_ch==3'd6 ? cur_op+1'b1 : cur_op;
+		next_ch = cur_ch[1:0]==2'b10 ? cur_ch+2'd2 : cur_ch+1'd1;
+	end else begin // 3 channels
+		next_op = cur_ch==3'd2 ? cur_op+1'b1 : cur_op;
+		next_ch = cur_ch[1:0]==2'b10 ? 3'd0 : cur_ch+1'd1;		
+	end
 end
 
 always @(posedge clk) begin : up_counter
@@ -243,7 +250,7 @@ always @(posedge clk) begin : up_counter
 	end
 end
 
-jt12_kon u_kon(
+jt12_kon #(.num_ch(num_ch)) u_kon(
 	.rst		( rst		),
 	.clk		( clk		),
 	.clk_en		( clk_en	),
@@ -274,7 +281,7 @@ jt12_mod u_mod(
 );
 
 // memory for OP registers
-parameter regop_width=44;
+localparam regop_width=44;
 
 wire [regop_width-1:0] regop_in, regop_out;
 
@@ -325,7 +332,7 @@ wire [regch_width-1:0] regch_in = {
 assign { 	block_I_raw, fnum_I_raw, 
 			fb_I, alg, ams_IV, pms_I } = regch_out;
 
-jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
+jt12_sh_rst #(.width(regch_width),.stages(num_ch)) u_regch(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.rst	( rst		),
@@ -335,7 +342,7 @@ jt12_sh_rst #(.width(regch_width),.stages(6)) u_regch(
 
 // RL is on a different register to 
 // have the reset to 1
-jt12_sh_rst #(.width(2),.stages(6),.rstval(1'b1)) u_regch_rl(
+jt12_sh_rst #(.width(2),.stages(num_ch),.rstval(1'b1)) u_regch_rl(
 	.clk	( clk		),
 	.clk_en	( clk_en	),
 	.rst	( rst		),

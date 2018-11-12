@@ -4,7 +4,7 @@
 #include <string>
 #include <string>
 #include <list>
-#include "Vjt12.h"
+#include "Vtop.h"
 #include "verilated_vcd_c.h"
 #include "VGMParser.hpp"
 #include "feature.hpp"
@@ -96,7 +96,7 @@ bool YMReg::assert(int cur_ch, cur_op ) {
 
 class CmdWritter {
     int addr, cmd, val;
-    Vjt12 *top;
+    Vtop *top;
     bool done;
     int last_clk;
     int state;
@@ -108,7 +108,7 @@ class CmdWritter {
     list<Block_def>blocks;
     // map<int>YMReg mirror;
 public:
-    CmdWritter( Vjt12* _top );
+    CmdWritter( Vtop* _top );
     void Write( int _addr, int _cmd, int _val );
     void block( int cmd_mask, int cmd, int (*filter)(int), int blk_addr=3 ) {
         Block_def aux;
@@ -137,7 +137,7 @@ struct YMcmd { int addr; int cmd; int val; };
 
 int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
-    Vjt12* top = new Vjt12;
+    Vtop* top = new Vtop;
     CmdWritter writter(top);
     bool trace = false;
     RipParser *gym;
@@ -277,7 +277,7 @@ int main(int argc, char** argv, char** env) {
     if( trace ) {
         Verilated::traceEverOn(true);
         top->trace(tfp,99);
-        tfp->open("jt12_test.vcd"); 
+        tfp->open("test.vcd"); 
     }
 
     // Reset
@@ -469,7 +469,7 @@ void CmdWritter::report_usage() {
     cout << '\n';
 }
 
-CmdWritter::CmdWritter( Vjt12* _top ) {
+CmdWritter::CmdWritter( Vtop* _top ) {
     top  = _top;
     last_clk = 0;
     done = true;

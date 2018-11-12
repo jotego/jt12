@@ -46,7 +46,7 @@ module jt12 (
     output          mux_sample
 );
 
-parameter use_lfo=1, use_psg=1;
+parameter use_lfo=1, use_psg=0, num_ch=6;
 
 wire flag_A, flag_B, busy;
 
@@ -117,7 +117,7 @@ wire    [3:0]   psg_addr;
 wire    [7:0]   psg_data;
 wire            psg_wr_n;
 
-jt12_mmr #(.use_psg(use_psg)) u_mmr(
+jt12_mmr #(.use_psg(use_psg),.num_ch(num_ch)) u_mmr(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .cen        ( cen       ),  // external clock enable
