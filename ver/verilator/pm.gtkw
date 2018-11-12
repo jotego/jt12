@@ -1,0 +1,94 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sun Oct 28 07:08:59 2018
+[*]
+[dumpfile] "/home/jtejada/github/jt12/ver/verilator/jt12_test.vcd"
+[dumpfile_mtime] "Sun Oct 28 07:08:06 2018"
+[dumpfile_size] 295750197
+[optimize_vcd]
+[savefile] "/home/jtejada/github/jt12/ver/verilator/pm.gtkw"
+[timestart] 202950
+[size] 1920 1031
+[pos] -1 -1
+*-24.553581 1023742962 1023742962 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.jt12.
+[treeopen] TOP.jt12.u_mmr.
+[sst_width] 196
+[signals_width] 285
+[sst_expanded] 1
+[sst_vpaned_height] 307
+@8420
+TOP.snd_left[11:0]
+@20000
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+@24
+TOP.jt12.u_pg.phinc_IV[16:0]
+TOP.jt12.u_pg.phinc_VI[19:0]
+@22
+TOP.jt12.u_pg.mul_V[3:0]
+@8024
+TOP.jt12.u_lfo.lfo_mod[6:0]
+@29
+TOP.jt12.u_pg.pms_I[2:0]
+@c00024
+TOP.jt12.u_pg.phinc_III[16:0]
+@28
+(0)TOP.jt12.u_pg.phinc_III[16:0]
+(1)TOP.jt12.u_pg.phinc_III[16:0]
+(2)TOP.jt12.u_pg.phinc_III[16:0]
+(3)TOP.jt12.u_pg.phinc_III[16:0]
+(4)TOP.jt12.u_pg.phinc_III[16:0]
+(5)TOP.jt12.u_pg.phinc_III[16:0]
+(6)TOP.jt12.u_pg.phinc_III[16:0]
+(7)TOP.jt12.u_pg.phinc_III[16:0]
+(8)TOP.jt12.u_pg.phinc_III[16:0]
+(9)TOP.jt12.u_pg.phinc_III[16:0]
+(10)TOP.jt12.u_pg.phinc_III[16:0]
+(11)TOP.jt12.u_pg.phinc_III[16:0]
+(12)TOP.jt12.u_pg.phinc_III[16:0]
+(13)TOP.jt12.u_pg.phinc_III[16:0]
+(14)TOP.jt12.u_pg.phinc_III[16:0]
+(15)TOP.jt12.u_pg.phinc_III[16:0]
+(16)TOP.jt12.u_pg.phinc_III[16:0]
+@1401200
+-group_end
+@22
+TOP.jt12.u_pg.phinc_IV[16:0]
+@20000
+-
+@c00024
+TOP.jt12.u_pg.fnum_I[10:0]
+@28
+(0)TOP.jt12.u_pg.fnum_I[10:0]
+(1)TOP.jt12.u_pg.fnum_I[10:0]
+(2)TOP.jt12.u_pg.fnum_I[10:0]
+(3)TOP.jt12.u_pg.fnum_I[10:0]
+(4)TOP.jt12.u_pg.fnum_I[10:0]
+(5)TOP.jt12.u_pg.fnum_I[10:0]
+(6)TOP.jt12.u_pg.fnum_I[10:0]
+(7)TOP.jt12.u_pg.fnum_I[10:0]
+(8)TOP.jt12.u_pg.fnum_I[10:0]
+(9)TOP.jt12.u_pg.fnum_I[10:0]
+(10)TOP.jt12.u_pg.fnum_I[10:0]
+@1401200
+-group_end
+@24
+TOP.jt12.u_pg.fnum_II[12:0]
+@8420
+TOP.jt12.u_pg.pm_offset_I[7:0]
+@20000
+-
+[pattern_trace] 1
+[pattern_trace] 0

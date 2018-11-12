@@ -1,6 +1,9 @@
 <<<<<<< HEAD
 *.bak
 *.simvision/
+*.wav
+*.fst
+*.log
 =======
 
 sgdk/sonic/out/

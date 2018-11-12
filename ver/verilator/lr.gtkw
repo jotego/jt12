@@ -1,0 +1,31 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sun Oct 28 11:01:13 2018
+[*]
+[dumpfile] "/home/jtejada/github/jt12/ver/verilator/jt12_test.vcd"
+[dumpfile_mtime] "Sun Oct 28 10:59:59 2018"
+[dumpfile_size] 1878478372
+[optimize_vcd]
+[savefile] "/home/jtejada/github/jt12/ver/verilator/lr.gtkw"
+[timestart] 202950
+[size] 1920 1031
+[pos] -1 -431
+*-26.591711 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[sst_width] 196
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 307
+@8420
+TOP.snd_left[11:0]
+@20000
+-
+-
+@8420
+TOP.snd_right[11:0]
+@20000
+-
+@20001
+-
+[pattern_trace] 1
+[pattern_trace] 0

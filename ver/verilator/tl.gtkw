@@ -1,0 +1,58 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sun Oct 28 15:13:00 2018
+[*]
+[dumpfile] "/home/jtejada/github/jt12/ver/verilator/jt12_test.vcd"
+[dumpfile_mtime] "Sun Oct 28 15:12:39 2018"
+[dumpfile_size] 2360936041
+[savefile] "/home/jtejada/github/jt12/ver/verilator/tl.gtkw"
+[timestart] 202950
+[size] 1920 1031
+[pos] -1 -1
+*-17.422836 257994 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.jt12.
+[treeopen] TOP.jt12.u_mmr.
+[sst_width] 196
+[signals_width] 206
+[sst_expanded] 1
+[sst_vpaned_height] 307
+@22
+TOP.jt12.u_mmr.tl_step.ch0s1[6:0]
+TOP.jt12.u_mmr.tl_step.ch0s2[6:0]
+TOP.jt12.u_mmr.tl_step.ch0s3[6:0]
+TOP.jt12.u_mmr.tl_step.ch0s4[6:0]
+TOP.jt12.u_mmr.tl_step.ch1s1[6:0]
+TOP.jt12.u_mmr.tl_step.ch1s2[6:0]
+TOP.jt12.u_mmr.tl_step.ch1s3[6:0]
+TOP.jt12.u_mmr.tl_step.ch1s4[6:0]
+TOP.jt12.u_mmr.tl_step.ch2s1[6:0]
+TOP.jt12.u_mmr.tl_step.ch2s2[6:0]
+TOP.jt12.u_mmr.tl_step.ch2s3[6:0]
+TOP.jt12.u_mmr.tl_step.ch2s4[6:0]
+TOP.jt12.u_mmr.tl_step.ch3s1[6:0]
+TOP.jt12.u_mmr.tl_step.ch3s2[6:0]
+TOP.jt12.u_mmr.tl_step.ch3s3[6:0]
+TOP.jt12.u_mmr.tl_step.ch3s4[6:0]
+TOP.jt12.u_mmr.tl_step.ch4s1[6:0]
+TOP.jt12.u_mmr.tl_step.ch4s2[6:0]
+TOP.jt12.u_mmr.tl_step.ch4s3[6:0]
+TOP.jt12.u_mmr.tl_step.ch4s4[6:0]
+TOP.jt12.u_mmr.tl_step.ch5s1[6:0]
+TOP.jt12.u_mmr.tl_step.ch5s2[6:0]
+TOP.jt12.u_mmr.tl_step.ch5s3[6:0]
+TOP.jt12.u_mmr.tl_step.ch5s4[6:0]
+TOP.jt12.u_mmr.selected_register[7:0]
+TOP.jt12.u_mmr.din_copy[7:0]
+TOP.jt12.u_mmr.up_opreg[6:0]
+@28
+TOP.jt12.u_mmr.up_ch[2:0]
+TOP.jt12.u_mmr.u_reg.up_tl_op
+[color] 3
+TOP.jt12.u_mmr.u_reg.update_op_I
+TOP.jt12.u_mmr.u_reg.update_op_II
+TOP.jt12.u_mmr.u_reg.update_op_III
+TOP.jt12.u_mmr.u_reg.update_op_V
+TOP.jt12.u_mmr.u_reg.update_op_VII
+[pattern_trace] 1
+[pattern_trace] 0
