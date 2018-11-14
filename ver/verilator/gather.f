@@ -8,6 +8,7 @@
 ../../hdl/jt12_lfo.v
 ../../hdl/jt12_limitamp.v
 ../../hdl/jt12_mmr.v
+../../hdl/jt12_div.v
 ../../hdl/jt12_mod.v
 ../../hdl/jt12_opram.v
 ../../hdl/jt12_op.v

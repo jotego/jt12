@@ -12,6 +12,7 @@ jt12_kon.v
 jt12_lfo.v
 jt12_limitamp.v
 jt12_mmr.v
+jt12_div.v
 jt12_mod.v
 jt12_op.v
 jt12_opram.v

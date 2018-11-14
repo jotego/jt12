@@ -139,7 +139,7 @@ int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
     Vtop* top = new Vtop;
     CmdWritter writter(top);
-    bool trace = false;
+    bool trace = false, slow=false;
     RipParser *gym;
     bool forever=true;
     char wav_filename[512]="";
@@ -148,6 +148,7 @@ int main(int argc, char** argv, char** env) {
 
     for( int k=1; k<argc; k++ ) {
         if( string(argv[k])=="-trace" ) { trace=true; continue; }
+        if( string(argv[k])=="-slow" )  { slow=true;  continue; }
         if( string(argv[k])=="-gym" ) { 
             gym_filename = argv[++k];
             gym = ParserFactory( gym_filename, sim_time.period() );
@@ -267,6 +268,7 @@ int main(int argc, char** argv, char** env) {
     if( gym->period() != 0 ) {
         int clkdiv=6;
         if( gym->chip() == RipParser::ym2203 ) clkdiv=3;
+        if( slow ) clkdiv=1;
         cout << "Setting PERIOD to " << gym->period()*clkdiv << " ns\n";
         sim_time.set_period( gym->period()*clkdiv );
     }

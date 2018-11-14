@@ -24,7 +24,8 @@ module jt12_mmr(
     input           rst,
     input           clk,
     input           cen,
-    output  reg     clk_en,
+    output          clk_en,
+    output          clk_en_ssg,
     input   [7:0]   din,
     input           write,
     input   [1:0]   addr,
@@ -61,7 +62,7 @@ module jt12_mmr(
     // REG
     output  [ 1:0]  rl,
     output  [ 2:0]  fb_II,
-    output  [ 2:0]  alg,
+    output  [ 2:0]  alg_I,
     output  [ 2:0]  pms_I,
     output  [ 1:0]  ams_IV,
     output          amsen_IV,
@@ -96,11 +97,7 @@ module jt12_mmr(
     output  reg     psg_wr_n
 );
 
-parameter use_psg=0, num_ch=6;
-
-reg [2:0] cen_cnt;
-reg [2:0] cen_cnt_lim;
-reg cen_int;
+parameter use_ssg=0, num_ch=6;
 
 `ifdef SIMULATION
     initial begin
@@ -109,23 +106,17 @@ reg cen_int;
     `include "jt12_mmr_sim.vh"
 `endif
 
-always @(negedge clk) begin
-    cen_int <= cen_cnt == 3'd0;
-    `ifdef FASTDIV
-    // always enabled for fast sims (use with GYM output, timer will not work well)
-    clk_en <= 1'b1;
-    `else
-    clk_en  <= cen & cen_int;   
-    `endif
-end
+reg [1:0] div_setting;
 
-always @(posedge clk)
-    if( cen ) begin
-        if( cen_cnt == cen_cnt_lim ) begin
-            cen_cnt <= 3'd0;            
-        end
-        else cen_cnt <= cen_cnt + 3'd1;
-    end
+
+jt12_div #(.use_ssg(use_ssg)) u_div (
+    .rst            ( rst           ),
+    .clk            ( clk           ),
+    .cen            ( cen           ),
+    .div_setting    ( div_setting   ),
+    .clk_en         ( clk_en        ),
+    .clk_en_ssg     ( clk_en_ssg    )
+);
 
 reg [7:0]   selected_register;
 
@@ -173,7 +164,7 @@ always @(posedge clk)
     old_write <= write;
 
 generate
-    if( use_psg ) begin
+    if( use_ssg ) begin
         assign psg_addr = selected_register[3:0];
         assign psg_data = din_copy;
     end else begin
@@ -186,7 +177,7 @@ endgenerate
 always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
         selected_register   <= 8'h0;
-        cen_cnt_lim         <= 3'd5;
+        div_setting         <= 2'b10; // divide by 6
         up_ch               <= 3'd0;
         up_op               <= 2'd0;
         up_keyon            <= 1'd0;
@@ -249,9 +240,9 @@ always @(posedge clk) begin : memory_mapped_registers
                     REG_PCM:    pcm[8:1]<= din;
                     REG_PCM_EN: pcm_en  <= din[7];
                     // clock divider
-                    REG_CLK_N6: cen_cnt_lim <= 3'd5; 
-                    REG_CLK_N3: cen_cnt_lim <= 3'd2;
-                    REG_CLK_N2: cen_cnt_lim <= 3'd1;
+                    REG_CLK_N6: div_setting[1] <= 1'b1; 
+                    REG_CLK_N3: div_setting[0] <= 1'b1; 
+                    REG_CLK_N2: div_setting <= 2'b0;
                     // CH3 special registers
                     8'hA9: { block_ch3op1, fnum_ch3op1 } <= { latch_fnum, din };
                     8'hA8: { block_ch3op3, fnum_ch3op3 } <= { latch_fnum, din };
@@ -373,7 +364,7 @@ jt12_reg #(.num_ch(num_ch)) u_reg(
     // channel configuration
     .rl         ( rl        ),
     .fb_II      ( fb_II     ),
-    .alg        ( alg       ),
+    .alg_I      ( alg_I     ),
     .keyon_I    ( keyon_I   ),
 
     .zero       ( zero      ),

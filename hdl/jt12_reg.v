@@ -81,7 +81,7 @@ module jt12_reg(
 	// channel configuration
 	output		[1:0]	rl,
 	output reg	[2:0]	fb_II,
-	output		[2:0]	alg,
+	output		[2:0]	alg_I,
 	// Operator multiplying
 	output		[ 3:0]	mul_II,
 	// Operator detuning
@@ -271,7 +271,7 @@ jt12_kon #(.num_ch(num_ch)) u_kon(
 );
 
 jt12_mod u_mod(
-	.alg_I		( alg		),
+	.alg_I		( alg_I		),
 	.s1_enters	( s1_enters ),
 	.s3_enters	( s3_enters ),
 	.s2_enters	( s2_enters ),
@@ -328,13 +328,13 @@ parameter regch_width=25;
 wire [regch_width-1:0] regch_out;
 wire [regch_width-1:0] regch_in = {
 	up_fnumlo_ch? { latch_fnum, fnlo_in } : { block_I_raw, fnum_I_raw }, // 14
-	up_alg_ch	? { fb_in, alg_in } : { fb_I, alg },//3+3
+	up_alg_ch	? { fb_in, alg_in } : { fb_I, alg_I },//3+3
 	up_ams_ch	?            ams_in : ams_IV, //2
 	up_pms_ch	?            pms_in : pms_I   //3
 }; 
 
 assign { 	block_I_raw, fnum_I_raw, 
-			fb_I, alg, ams_IV, pms_I } = regch_out;
+			fb_I, alg_I, ams_IV, pms_I } = regch_out;
 
 jt12_sh_rst #(.width(regch_width),.stages(num_ch)) u_regch(
 	.clk	( clk		),

@@ -46,13 +46,13 @@ module jt12 (
     output          mux_sample
 );
 
-parameter use_lfo=1, use_psg=0, num_ch=6;
+parameter use_lfo=1, use_ssg=0, num_ch=6;
 
 wire flag_A, flag_B, busy;
 
 assign dout[7:0] = { busy, 5'd0, flag_B, flag_A };
 wire write = !cs_n && !wr_n;
-wire clk_en;
+wire clk_en, clk_en_ssg;
 
 // Timers
 wire    [9:0]   value_A;
@@ -92,7 +92,7 @@ wire    [10:0]  fnum_I;
 wire    [ 2:0]  block_I;
 wire    [ 1:0]  rl;
 wire    [ 2:0]  fb_II;
-wire    [ 2:0]  alg;
+wire    [ 2:0]  alg_I;
 wire    [ 2:0]  pms_I;
 wire    [ 1:0]  ams_IV;
 // PCM
@@ -117,11 +117,12 @@ wire    [3:0]   psg_addr;
 wire    [7:0]   psg_data;
 wire            psg_wr_n;
 
-jt12_mmr #(.use_psg(use_psg),.num_ch(num_ch)) u_mmr(
+jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch)) u_mmr(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .cen        ( cen       ),  // external clock enable
     .clk_en     ( clk_en    ),  // internal clock enable    
+    .clk_en_ssg ( clk_en_ssg),  // internal clock enable    
     .din        ( din       ),
     .write      ( write     ),
     .addr       ( addr      ),
@@ -159,7 +160,7 @@ jt12_mmr #(.use_psg(use_psg),.num_ch(num_ch)) u_mmr(
     // EG
     .rl         ( rl        ),
     .fb_II      ( fb_II     ),
-    .alg        ( alg       ),
+    .alg_I      ( alg_I     ),
     .pms_I      ( pms_I     ),
     .ams_IV     ( ams_IV    ),
     .amsen_IV   ( amsen_IV  ),
@@ -234,11 +235,11 @@ endgenerate
 // YM2203/YM2610 have a PSG
 wire [9:0] psg_sound;
 generate
-    if( use_psg ) begin
+    if( use_ssg ) begin
         jt49 u_psg( // note that input ports are not multiplexed
             .rst_n      ( ~rst      ),
             .clk        ( clk       ),    // signal on positive edge
-            .clk_en     ( cen       ),    // clock enable on negative edge
+            .clk_en     ( clk_en_ssg),    // clock enable on negative edge
             .addr       ( psg_addr  ),
             .cs_n       ( 1'b0      ),
             .wr_n       ( psg_wr_n  ),  // write
@@ -345,7 +346,7 @@ wire signed [11:0] fm_snd_left, fm_snd_right;
 wire signed [ 8:0] fm_mux_left, fm_mux_right;
 
 generate
-    if( use_psg ) begin
+    if( use_ssg ) begin
         assign snd_left  = fm_snd_left  + { 3'b0, psg_sound[9:1] }; 
         assign snd_right = fm_snd_right + { 3'b0, psg_sound[9:1] }; 
         assign mux_left  = fm_mux_left  + {1'b0, psg_sound[9:2]};
@@ -374,7 +375,7 @@ jt12_acc u_acc(
     .ch6op      ( ch6op     ),
     .pcm_en     ( pcm_en    ),  // only enabled for channel 6
     .pcm        ( pcm       ),
-    .alg        ( alg       ),
+    .alg        ( alg_I       ),
     // combined output
     .left       ( fm_snd_left ),
     .right      ( fm_snd_right),

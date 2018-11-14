@@ -32,6 +32,7 @@ while [ $# -gt 0 ]; do
 	if [ "$1" = "-slow" ]; then
 		echo "Clock divider enabled"
 		FAST=
+		EXTRA="$EXTRA -slow"
 		shift
 		continue
 	fi	
