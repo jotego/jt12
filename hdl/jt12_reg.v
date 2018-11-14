@@ -204,8 +204,12 @@ wire	[3:0]	ssg_in	= din[3:0];
 
 wire	[3:0]	ssg;
 
+
+
 wire	update_ch_I  = cur_ch == ch;
-wire	update_ch_IV = { ~cur_ch[2], cur_ch[1:0]} == ch;
+wire	update_ch_IV = num_ch==6 ? 
+	{ ~cur_ch[2], cur_ch[1:0]} == ch : // 6 channels
+	cur[1:0] == ch[1:0]; // 3 channels
 
 wire up_alg_ch	= up_alg	& update_ch_I;
 wire up_fnumlo_ch=up_fnumlo & update_ch_I;
@@ -340,14 +344,21 @@ jt12_sh_rst #(.width(regch_width),.stages(num_ch)) u_regch(
 	.drop	( regch_out	)
 );
 
-// RL is on a different register to 
-// have the reset to 1
-jt12_sh_rst #(.width(2),.stages(num_ch),.rstval(1'b1)) u_regch_rl(
-	.clk	( clk		),
-	.clk_en	( clk_en	),
-	.rst	( rst		),
-	.din	( up_pms_ch	? rl_in :  rl	),
-	.drop	( rl	)
-);
+generate
+if( num_ch==6 ) begin
+	// RL is on a different register to 
+	// have the reset to 1
+	jt12_sh_rst #(.width(2),.stages(num_ch),.rstval(1'b1)) u_regch_rl(
+		.clk	( clk		),
+		.clk_en	( clk_en	),
+		.rst	( rst		),
+		.din	( up_pms_ch	? rl_in :  rl	),
+		.drop	( rl	)
+	);
+end else begin // 3 channels
+	assign rl=2'b11;
+end
+	
+endgenerate
 
 endmodule
