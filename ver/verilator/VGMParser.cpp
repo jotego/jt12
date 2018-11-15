@@ -203,7 +203,7 @@ void VGMParser::open(const char* filename, int limit) {
 		if( ym_freq ) chip_cfg = ym2203;
 	}
 	else chip_cfg = ym2612;
-	cout << "YM Freq = " << dec << ym_freq << "\n";
+	cout << "YM Freq = " << dec << ym_freq << " Hz\n";
 	// seek out data start
 	if( version[0]<0x50 && version[1]==1 ) {
 		cout << "VGM version < 1.50 in this file. Data offset set at 0x40\n";

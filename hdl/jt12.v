@@ -234,9 +234,12 @@ else
 endgenerate
 
 // YM2203/YM2610 have a PSG
-wire [9:0] psg_sound;
+wire signed [15:0] fm_snd_left, fm_snd_right;
+wire signed [ 8:0] fm_mux_left, fm_mux_right;
+
 generate
-    if( use_ssg ) begin
+    if( use_ssg==1 ) begin
+        wire [9:0] psg_sound;
         jt49 u_psg( // note that input ports are not multiplexed
             .rst_n      ( ~rst      ),
             .clk        ( clk       ),    // signal on positive edge
@@ -249,9 +252,15 @@ generate
             .dout       (           ),
             .sel        ( 1'b0      )   // half clock speed
         );
-    end
-    else begin
-        assign psg_sound = 10'd0;
+        assign snd_left  = fm_snd_left  + { 2'b0, psg_sound[9:1],5'd0}; 
+        assign snd_right = fm_snd_right + { 2'b0, psg_sound[9:1],5'd0}; 
+        assign mux_left  = fm_mux_left  + {1'b0, psg_sound[9:2]};
+        assign mux_right = fm_mux_right + {1'b0, psg_sound[9:2]};
+    end else begin
+        assign snd_left = fm_snd_left;
+        assign snd_right= fm_snd_right;
+        assign mux_left = fm_mux_left;
+        assign mux_right= fm_mux_right;
     end
 endgenerate
 
@@ -342,23 +351,6 @@ jt12_op u_op(
     .op_result      ( op_result     ),
     .full_result    ( full_result   )
 );
-
-wire signed [15:0] fm_snd_left, fm_snd_right;
-wire signed [ 8:0] fm_mux_left, fm_mux_right;
-
-generate
-    if( use_ssg ) begin
-        assign snd_left  = fm_snd_left  + { 2'b0, psg_sound[9:1],5'd0}; 
-        assign snd_right = fm_snd_right + { 2'b0, psg_sound[9:1],5'd0}; 
-        assign mux_left  = fm_mux_left  + {1'b0, psg_sound[9:2]};
-        assign mux_right = fm_mux_right + {1'b0, psg_sound[9:2]};
-    end else begin
-        assign snd_left = fm_snd_left;
-        assign snd_right= fm_snd_right;
-        assign mux_left = fm_mux_left;
-        assign mux_right= fm_mux_right;
-    end
-endgenerate
 
 generate
     if( use_lr==1 ) begin

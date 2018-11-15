@@ -31,26 +31,17 @@ module jt12_div(
 
 parameter use_ssg=0;
 
-reg [2:0] opn_lut[4];
-reg [2:0] ssg_lut[4];
-
-wire [2:0] opn_pres = opn_lut[div_setting];
-wire [2:0] ssg_pres = ssg_lut[div_setting];
-
-initial begin
-    opn_lut[0] = 3'd1;
-    opn_lut[1] = 3'd1;
-    opn_lut[2] = 3'd5;
-    opn_lut[3] = 3'd2;
-
-    ssg_lut[0] = 3'd0;
-    ssg_lut[1] = 3'd0;
-    ssg_lut[2] = 3'd3;
-    ssg_lut[3] = 3'd1;
-end
-
+reg [2:0] opn_pres, ssg_pres;
 reg [2:0] opn_cnt, ssg_cnt;
 reg cen_int, cen_ssg_int;
+
+always @(*)
+    casez( div_setting )
+        2'b0?: { opn_pres, ssg_pres } = { 3'd1, 3'd0 };
+        2'b10: { opn_pres, ssg_pres } = { 3'd5, 3'd3 };
+        2'b11: { opn_pres, ssg_pres } = { 3'd2, 3'd1 };
+    endcase // div_setting
+
 
 always @(negedge clk) begin
     cen_int     <= opn_cnt == 3'd0;

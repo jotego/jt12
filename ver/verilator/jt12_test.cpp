@@ -247,8 +247,8 @@ int main(int argc, char** argv, char** env) {
         sim_time.set_period( period );
     }
     SAMPLING_PERIOD = sim_time.period() * 4 * (gym->chip() == RipParser::ym2203? 3 : 6);
-    // if( slow ) SAMPLING_PERIOD *= gym->chip() == RipParser::ym2203 ? 3 : 6;
-    if( slow ) SAMPLING_PERIOD *= 6;
+    if( slow ) SAMPLING_PERIOD *= gym->chip() == RipParser::ym2203 ? 3 : 6;
+    // if( slow ) SAMPLING_PERIOD *= 6;
     SAMPLERATE = 1.0/(SAMPLING_PERIOD*1e-9);
     cout << "Sample rate " << dec << SAMPLERATE << " Hz. Sampling period " << SAMPLING_PERIOD << "ns\n";
 

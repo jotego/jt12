@@ -172,9 +172,9 @@ jt12_sumch #(.num_ch(num_ch)) u_opch_V  ( .chin(req_opch_IV ), .chout(req_opch_V
 
 wire update_op_I  = cur == req_opch_I;
 wire update_op_II = cur == req_opch_II;
-wire update_op_III= cur == req_opch_III;
+// wire update_op_III= cur == req_opch_III;
 wire update_op_IV = cur == req_opch_IV;
-wire update_op_V  = cur == req_opch_V;
+// wire update_op_V  = cur == req_opch_V;
 // wire update_op_VI = cur == opch_VI;
 // wire [2:0] op_plus1 = op+2'd1;
 // wire update_op_VII= cur == { op_plus1[1:0], ch };
