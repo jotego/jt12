@@ -37,8 +37,8 @@ module jt12 (
     output  [7:0]   dout,
     output          irq_n,
     // combined output
-    output  signed  [11:0]  snd_right,
-    output  signed  [11:0]  snd_left,
+    output  signed  [15:0]  snd_right,
+    output  signed  [15:0]  snd_left,
     output          snd_sample,
     // multiplexed output
     output signed   [8:0]   mux_right,  
@@ -46,7 +46,7 @@ module jt12 (
     output          mux_sample
 );
 
-parameter use_lfo=1, use_ssg=0, num_ch=6;
+parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1;
 
 wire flag_A, flag_B, busy;
 
@@ -117,7 +117,8 @@ wire    [3:0]   psg_addr;
 wire    [7:0]   psg_data;
 wire            psg_wr_n;
 
-jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch)) u_mmr(
+jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm)) 
+    u_mmr(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .cen        ( cen       ),  // external clock enable
@@ -342,13 +343,13 @@ jt12_op u_op(
     .full_result    ( full_result   )
 );
 
-wire signed [11:0] fm_snd_left, fm_snd_right;
+wire signed [15:0] fm_snd_left, fm_snd_right;
 wire signed [ 8:0] fm_mux_left, fm_mux_right;
 
 generate
     if( use_ssg ) begin
-        assign snd_left  = fm_snd_left  + { 3'b0, psg_sound[9:1] }; 
-        assign snd_right = fm_snd_right + { 3'b0, psg_sound[9:1] }; 
+        assign snd_left  = fm_snd_left  + { 2'b0, psg_sound[9:1],5'd0}; 
+        assign snd_right = fm_snd_right + { 2'b0, psg_sound[9:1],5'd0}; 
         assign mux_left  = fm_mux_left  + {1'b0, psg_sound[9:2]};
         assign mux_right = fm_mux_right + {1'b0, psg_sound[9:2]};
     end else begin
@@ -359,32 +360,60 @@ generate
     end
 endgenerate
 
-jt12_acc u_acc(
-    .rst        ( rst       ),
-    .clk        ( clk       ),
-    .clk_en     ( clk_en    ),
-    .op_result  ( op_result ),
-    .rl         ( rl        ),
-    .limiter_en ( limiter_en),
-    // note that the order changes to deal 
-    // with the operator pipeline delay
-    .s1_enters  ( s2_enters ),
-    .s2_enters  ( s1_enters ),
-    .s3_enters  ( s4_enters ),
-    .s4_enters  ( s3_enters ),
-    .ch6op      ( ch6op     ),
-    .pcm_en     ( pcm_en    ),  // only enabled for channel 6
-    .pcm        ( pcm       ),
-    .alg        ( alg_I       ),
-    // combined output
-    .left       ( fm_snd_left ),
-    .right      ( fm_snd_right),
-    .sample     ( snd_sample  ),
-    // muxed output
-    .mux_left   ( fm_mux_left   ),
-    .mux_right  ( fm_mux_right  ),
-    .mux_sample ( mux_sample    )
-);
+generate
+    if( use_lr==1 ) begin
+        jt12_acc #(.num_ch(num_ch)) u_acc(
+            .rst        ( rst       ),
+            .clk        ( clk       ),
+            .clk_en     ( clk_en    ),
+            .op_result  ( op_result ),
+            .rl         ( rl        ),
+            .limiter_en ( limiter_en),
+            // note that the order changes to deal 
+            // with the operator pipeline delay
+            .s1_enters  ( s2_enters ),
+            .s2_enters  ( s1_enters ),
+            .s3_enters  ( s4_enters ),
+            .s4_enters  ( s3_enters ),
+            .ch6op      ( ch6op     ),
+            .pcm_en     ( pcm_en    ),  // only enabled for channel 6
+            .pcm        ( pcm       ),
+            .alg        ( alg_I     ),
+            // combined output
+            .left       ( fm_snd_left   ),
+            .right      ( fm_snd_right  ),
+            .sample     ( snd_sample    ),
+            // muxed output
+            .mux_left   ( fm_mux_left   ),
+            .mux_right  ( fm_mux_right  ),
+            .mux_sample ( mux_sample    )
+        );
+    end else begin
+        wire signed [15:0] mono_snd;
+        assign fm_mux_left  = 9'd0;
+        assign fm_mux_right = 9'd0;
+        assign mux_sample   = 1'd0;
+        assign fm_snd_left  = mono_snd;
+        assign fm_snd_right = mono_snd;
+        assign snd_sample   = zero;
+        jt03_acc u_acc(
+            .rst        ( rst       ),
+            .clk        ( clk       ),
+            .clk_en     ( clk_en    ),
+            .op_result  ( full_result ),
+            // note that the order changes to deal 
+            // with the operator pipeline delay
+            .s1_enters  ( s2_enters ),
+            .s2_enters  ( s1_enters ),
+            .s3_enters  ( s4_enters ),
+            .s4_enters  ( s3_enters ),
+            .alg        ( alg_I     ),
+            .zero       ( zero      ),
+            // combined output
+            .snd        ( mono_snd  )
+        );        
+    end    
+endgenerate
 
 `ifdef SIMULATION
 /* verilator lint_off PINMISSING */

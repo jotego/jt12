@@ -1,6 +1,3 @@
-`timescale 1ns / 1ps
-
-
 /* This file is part of JT12.
 
  
@@ -29,8 +26,6 @@
 
 
 */
-
-
 
 `timescale 1ns / 1ps
 
@@ -65,6 +60,8 @@ module jt12_acc
 	output reg signed	[8:0]	mux_right,	
 	output reg			mux_sample
 );
+
+parameter num_ch=6;
 
 reg signed [11:0] pre_left, pre_right;
 wire signed [8:0] total;
@@ -134,12 +131,8 @@ always @(posedge clk)
 		end
         if( s2_enters ) begin
         	sum_all <= 1'b0;
-        	// x1 volume
 			left  <= pre_left;
 			right <= pre_right;
-			// x2 volume: This will cause problems with some, like "Crying Asia senmei sensou", at the beginning of 1st level
-			//left  <= { pre_left [10:0], pre_left [10] };
-			//right <= { pre_right[10:0], pre_right[10] };
             `ifdef DUMPSOUND
             $strobe("%d\t%d", right, right);
             `endif
@@ -174,14 +167,14 @@ always @(*) begin
 	end
 end
 
-jt12_sh #(.width(9),.stages(6)) u_acc(
+jt12_sh #(.width(9),.stages(num_ch)) u_acc(
 	.clk	( clk	),
 	.clk_en ( clk_en),
 	.din	( opsum	),
 	.drop	( total	)
 );
 
-jt12_sh #(.width(9),.stages(6)) u_buffer(
+jt12_sh #(.width(9),.stages(num_ch)) u_buffer(
 	.clk	( clk		),
 	.clk_en ( clk_en	),
 	.din	( s3_enters ? total : buffer	),

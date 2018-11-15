@@ -205,7 +205,7 @@ void VGMParser::open(const char* filename, int limit) {
 	else chip_cfg = ym2612;
 	cout << "YM Freq = " << ym_freq << "\n";
 	// seek out data start
-	if( version[0]<50 && version[1]==1 ) {
+	if( version[0]<0x50 && version[1]==1 ) {
 		cout << "VGM version < 1.50 in this file. Data offset set at 0x40\n";
 		file.seekg(0x40);
 	}
@@ -289,6 +289,9 @@ int VGMParser::parse() {
 				translate_cmd();
 				return cmd_write;
 			}
+			case 0xA5: // Write to dual YM2203
+				file.read(extra,2); // ignore
+				continue;
 			case 0x53: // A1=1
 			case 0x57:
 				addr = 1;

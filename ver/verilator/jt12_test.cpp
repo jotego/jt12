@@ -27,7 +27,8 @@ public:
         PERIOD =_period;
         PERIOD += PERIOD%2; // make it even
         SEMIPERIOD = PERIOD>>1;
-        CLKSTEP = SEMIPERIOD>>1;
+        // CLKSTEP = SEMIPERIOD>>1;
+        CLKSTEP = SEMIPERIOD;
     }
     int period() { return PERIOD; }
     SimTime() { 
@@ -71,28 +72,6 @@ double sc_time_stamp () {      // Called by $time in Verilog
    return main_time;           // converts to double, to match
                                // what SystemC does
 }
-/*
-class YMReg {
-    int ch, op, val;
-    string name;
-    int and_mask, bit0, int pos;
-    int *sim;
-    bool assert(int cur_ch, cur_op );
-    YMReg( string _name, int _ch, int _op, int _val, 
-        int _and, int _bit0, int _pos, int* _sim ) {
-        name = _name, and_mask = _and,
-        ch = _ch, op = _op, val = _val, 
-        bit0 =  _bit0, pos=_pos, sim =  _sim;
-}
-
-bool YMReg::assert(int cur_ch, cur_op ) {
-    if( sim==NULL ) return false;
-    if( cur_ch == ch && cur_op == op)
-        return (val&and_mask)==(*sim&and_mask);
-    else 
-        return true;
-}
-*/
 
 class CmdWritter {
     int addr, cmd, val;
@@ -170,17 +149,6 @@ int main(int argc, char** argv, char** env) {
             sim_time.set_time_limit( time_limit );
             continue; 
         }
-        /*
-        if( string(argv[k])=="-fast" ) { 
-            int aux;
-            sscanf(argv[++k],"%d",&aux);
-            fast_forward = aux;
-            fast_forward *= 1000000;
-            fast_forward *= 1000;
-            cout << "Fast forward until " << aux << "s\n";
-            continue; 
-        }
-        */
         if( string(argv[k])=="-noam" ) {
             writter.block( 0xF0, 0x60, [](int v){return v&0x7f;} ); 
             continue;
@@ -200,8 +168,13 @@ int main(int argc, char** argv, char** env) {
             continue;
         }
         if( string(argv[k])=="-nossg") {
-            cout << "All writes to SSG locked to 0\n";
+            cout << "All writes to FM's SSG-EG locked to 0\n";
             writter.block( 0xF0, 0x90, [](int v){ return 0;} ); 
+            continue;
+        }
+        if( string(argv[k])=="-nopsg") {
+            cout << "Disabling PSG sound\n";
+            writter.block( 0xF0, 0, [](int v){ return 0;} );
             continue;
         }
         if( string(argv[k])=="-mute") {
@@ -269,7 +242,7 @@ int main(int argc, char** argv, char** env) {
         int clkdiv=6;
         if( gym->chip() == RipParser::ym2203 ) clkdiv=3;
         if( slow ) clkdiv=1;
-        cout << "Setting PERIOD to " << gym->period()*clkdiv << " ns\n";
+        cout << "Setting PERIOD to " << dec << gym->period()*clkdiv << " ns\n";
         sim_time.set_period( gym->period()*clkdiv );
     }
 
@@ -337,8 +310,8 @@ int main(int argc, char** argv, char** env) {
                 int16_t snd[2];
                 // snd[0] = (top->snd_left & 0x800) ? (top->snd_left|0xf000) : top->snd_left;
                 // snd[1] = (top->snd_right & 0x800) ? (top->snd_right|0xf000) : top->snd_right;
-                snd[0] = top->snd_left << 4;
-                snd[1] = top->snd_right << 4;
+                snd[0] = top->snd_left;
+                snd[1] = top->snd_right;
                 // skip initial set of zero's
                 if( !skip_zeros || snd[0]!=0 || snd[1] != 0 ) {
                     skip_zeros=false;
@@ -420,8 +393,8 @@ finish:
 
 void WaveWritter::write( int16_t* lr ) {
     int16_t g[2];
-    g[0] = lr[0]<<2;
-    g[1] = lr[1]<<2;
+    g[0] = lr[0];
+    g[1] = lr[1];
     fsnd.write( (char*)&g, sizeof(int16_t)*2 );
 }
 

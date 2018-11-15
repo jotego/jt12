@@ -97,7 +97,7 @@ module jt12_mmr(
     output  reg     psg_wr_n
 );
 
-parameter use_ssg=0, num_ch=6;
+parameter use_ssg=0, num_ch=6, use_pcm=1;
 
 `ifdef SIMULATION
     initial begin
@@ -177,7 +177,7 @@ endgenerate
 always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
         selected_register   <= 8'h0;
-        div_setting         <= 2'b10; // divide by 6
+        div_setting         <= num_ch==6 ? 2'b10 : 2'b11; // divide by 6 or 3
         up_ch               <= 3'd0;
         up_op               <= 2'd0;
         up_keyon            <= 1'd0;
@@ -236,9 +236,9 @@ always @(posedge clk) begin : memory_mapped_registers
                     `ifndef NOLFO                   
                     REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
                     `endif
-                    REG_DACTEST:pcm[0] <= din[3];
-                    REG_PCM:    pcm[8:1]<= din;
-                    REG_PCM_EN: pcm_en  <= din[7];
+                    REG_DACTEST:if(use_pcm==1) pcm[0] <= din[3];
+                    REG_PCM:    if(use_pcm==1) pcm[8:1]<= din;
+                    REG_PCM_EN: if(use_pcm==1) pcm_en  <= din[7];
                     // clock divider
                     REG_CLK_N6: div_setting[1] <= 1'b1; 
                     REG_CLK_N3: div_setting[0] <= 1'b1; 

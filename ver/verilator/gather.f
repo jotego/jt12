@@ -2,6 +2,7 @@
 ../common/sep24.v
 ../common/sincf.v
 ../../hdl/jt12_acc.v
+../../hdl/jt03_acc.v
 ../../hdl/jt12_eg.v
 ../../hdl/jt12_exprom.v
 ../../hdl/jt12_kon.v
