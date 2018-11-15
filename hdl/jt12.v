@@ -362,6 +362,8 @@ endgenerate
 
 generate
     if( use_lr==1 ) begin
+        assign fm_snd_right[3:0] = 4'd0;
+        assign fm_snd_left [3:0] = 4'd0;
         jt12_acc #(.num_ch(num_ch)) u_acc(
             .rst        ( rst       ),
             .clk        ( clk       ),
@@ -380,8 +382,8 @@ generate
             .pcm        ( pcm       ),
             .alg        ( alg_I     ),
             // combined output
-            .left       ( fm_snd_left   ),
-            .right      ( fm_snd_right  ),
+            .left       ( fm_snd_left [15:4]  ),
+            .right      ( fm_snd_right[15:4]  ),
             .sample     ( snd_sample    ),
             // muxed output
             .mux_left   ( fm_mux_left   ),

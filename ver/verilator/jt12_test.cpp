@@ -13,9 +13,6 @@
 
 using namespace std;
 
-const int SAMPLERATE=48000; // 1.0e9/PERIOD/24;
-const vluint64_t SAMPLING_PERIOD = 1e9/SAMPLERATE;
-
 class SimTime {
     vluint64_t main_time, time_limit, fast_forward;
     vluint64_t main_next;
@@ -107,7 +104,7 @@ public:
 class WaveWritter {
     ofstream fsnd;
 public:
-    WaveWritter(const char *filename);
+    WaveWritter(const char *filename, int sample_rate );
     void write( int16_t *lr );
     ~WaveWritter();
 };
@@ -124,6 +121,8 @@ int main(int argc, char** argv, char** env) {
     char wav_filename[512]="";
     char *gym_filename;
     SimTime sim_time;
+    int SAMPLERATE=0;
+    vluint64_t SAMPLING_PERIOD=0;
 
     for( int k=1; k<argc; k++ ) {
         if( string(argv[k])=="-trace" ) { trace=true; continue; }
@@ -238,13 +237,20 @@ int main(int argc, char** argv, char** env) {
         case RipParser::ym2612: cout << "YM2612 tune.\n"; break;
         default: cout << "ERROR: Unknown chip (" << gym->chip() << ") in VGM file\n"; return 1;
     }
+
     if( gym->period() != 0 ) {
         int clkdiv=6;
         if( gym->chip() == RipParser::ym2203 ) clkdiv=3;
         if( slow ) clkdiv=1;
-        cout << "Setting PERIOD to " << dec << gym->period()*clkdiv << " ns\n";
-        sim_time.set_period( gym->period()*clkdiv );
+        int period = gym->period()*clkdiv;
+        cout << "Setting PERIOD to " << dec << period << " ns\n";
+        sim_time.set_period( period );
     }
+    SAMPLING_PERIOD = sim_time.period() * 4 * (gym->chip() == RipParser::ym2203? 3 : 6);
+    // if( slow ) SAMPLING_PERIOD *= gym->chip() == RipParser::ym2203 ? 3 : 6;
+    if( slow ) SAMPLING_PERIOD *= 6;
+    SAMPLERATE = 1.0/(SAMPLING_PERIOD*1e-9);
+    cout << "Sample rate " << dec << SAMPLERATE << " Hz. Sampling period " << SAMPLING_PERIOD << "ns\n";
 
     if( gym->length() != 0 && !sim_time.limited() ) sim_time.set_time_limit( gym->length() );
 
@@ -284,7 +290,7 @@ int main(int argc, char** argv, char** env) {
     // cout << "Main loop\n";
     vluint64_t wait=0;
     int last_sample=0;
-    WaveWritter wav(wav_filename);
+    WaveWritter wav(wav_filename, SAMPLERATE);
 
     // forced values
     list<YMcmd> forced_values;
@@ -398,7 +404,7 @@ void WaveWritter::write( int16_t* lr ) {
     fsnd.write( (char*)&g, sizeof(int16_t)*2 );
 }
 
-WaveWritter::WaveWritter(const char *filename) {
+WaveWritter::WaveWritter( const char *filename, int sample_rate ) {
     fsnd.open(filename, ios_base::binary);
     // write header
     char zero=0;
@@ -413,9 +419,9 @@ WaveWritter::WaveWritter(const char *filename) {
     fsnd.write( (char*) &number16, 2);
     number16=2;
     fsnd.write( (char*) &number16, 2);
-    number32 = SAMPLERATE; 
+    number32 = sample_rate; 
     fsnd.write( (char*)&number32, 4 );
-    number32 = SAMPLERATE*2*2; 
+    number32 = sample_rate*2*2; 
     fsnd.write( (char*)&number32, 4 );
     number16=2*2;   // Block align
     fsnd.write( (char*) &number16, 2);
