@@ -97,11 +97,6 @@ jt12_sh #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
 
 reg [10:0]  subtresult;
 
-reg [12:0]  etb;
-reg [ 9:0]  etf, mantissa_XI;
-reg [ 2:0]  etg;
-reg [ 3:0]  exponent_XI;
-
 reg [12:0]  shifter, shifter_2, shifter_3;
 
 // REGISTER/CYCLE 1
@@ -197,55 +192,26 @@ always @(*) begin
     atten_internal_IX = { subtresult[9:0], logsin_IX[1:0] } | {12{subtresult[10]}};
 end
 
-wire [44:0] exp_X;
+wire [9:0] mantissa_X;
+reg  [9:0] mantissa_XI;
+reg  [3:0] exponent_X, exponent_XI;
 
 jt12_exprom u_exprom(
     .clk    ( clk       ),
     .clk_en ( clk_en    ),
-    .addr   ( atten_internal_IX[5:1] ),
-    .exp    ( exp_X     )
+    .addr   ( atten_internal_IX[7:0] ),
+    .exp    ( mantissa_X )
 );
 
 always @(posedge clk) if( clk_en ) begin
-    totalatten_X <= atten_internal_IX;
-    signbit_X <= signbit_IX;    
-end
-
-//wire [1:0] et_sel  = totalatten_X[7:6];
-//wire [4:0] et_fine = totalatten_X[5:1];
-
-// REGISTER/CYCLE 10
-// Exponential table
-// Main sine table body
-always @(*) begin    
-    //eta <= explut_jt51[ totalatten_X[5:1] ];  
-    // 2-bit row chooser    
-    case( totalatten_X[7:6] )
-        2'b00: begin
-                etf = { 1'b1, exp_X[44:36]  };
-                etg = { 1'b1, exp_X[35:34] };               
-            end
-        2'b01: begin
-                etf = exp_X[33:24];
-                etg = { 2'b10, exp_X[23] };             
-            end
-        2'b10: begin
-                etf = { 1'b0, exp_X[22:14]  };
-                etg = exp_X[13:11];             
-            end
-        2'b11: begin
-                etf = { 2'b00, exp_X[10:3]  };
-                etg = exp_X[2:0];
-            end
-
-    endcase 
+    exponent_X <= atten_internal_IX[11:8];    
+    signbit_X  <= signbit_IX;    
 end
 
 always @(posedge clk) if( clk_en ) begin
-    //RESULT
-    mantissa_XI <= etf + { 7'd0, ( totalatten_X[0] ? 3'd0 : etg )}; //carry-out discarded
-    exponent_XI <= totalatten_X[11:8];
-    signbit_XI <= signbit_X;     
+    mantissa_XI <= mantissa_X;
+    exponent_XI <= exponent_X;
+    signbit_XI  <= signbit_X;     
 end
 
 // REGISTER/CYCLE 11
