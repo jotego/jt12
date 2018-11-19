@@ -95,9 +95,6 @@ jt12_sh #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
 );
 
 
-reg [18:0]  stb;
-reg [10:0]  stf, stg;
-reg [11:0]  logsin;
 reg [10:0]  subtresult;
 
 reg [12:0]  etb;
@@ -170,7 +167,7 @@ reg [ 9:0]  phase;
 // the fanouts among the duplicates until the fanout of each cell
 // is below the maximum.
 
-reg [ 7:0]  phaselo_IX, aux_VIII;
+reg [ 7:0]  aux_VIII;
 
 always @(*) begin
     phase   = phasemod_VIII + pg_phase_VIII;
@@ -178,63 +175,26 @@ always @(*) begin
 end
 
 always @(posedge clk) if( clk_en ) begin    
-    phaselo_IX <= aux_VIII;
     signbit_IX <= phase[9];     
-
 end
 
-wire [45:0] sta_IX;
+wire [11:0]  logsin_IX;
 
-jt12_phrom u_phrom(
+jt12_logsin u_logsin (
     .clk    ( clk       ),
     .clk_en ( clk_en    ),
-    .addr   ( aux_VIII[5:1] ),
-    .ph     ( sta_IX        )
-);
+    .addr   ( aux_VIII[7:0] ),
+    .logsin ( logsin_IX )
+);  
+
 
 // REGISTER/CYCLE 9
 // Sine table    
 // Main sine table body
 
-
 always @(*) begin
-    //sta_IX <= sinetable[ phaselo_IX[5:1] ];
-    // 2-bit row chooser
-    case( phaselo_IX[7:6] )
-        2'b00: stb = { 10'b0, sta_IX[29], sta_IX[25], 2'b0, sta_IX[18], 
-            sta_IX[14], 1'b0, sta_IX[7] , sta_IX[3] };
-        2'b01: stb = { 6'b0 , sta_IX[37], sta_IX[34], 2'b0, sta_IX[28], 
-            sta_IX[24], 2'b0, sta_IX[17], sta_IX[13], sta_IX[10], sta_IX[6], sta_IX[2] };
-        2'b10: stb = { 2'b0, sta_IX[43], sta_IX[41], 2'b0, sta_IX[36],
-            sta_IX[33], 2'b0, sta_IX[27], sta_IX[23], 1'b0, sta_IX[20],
-            sta_IX[16], sta_IX[12], sta_IX[9], sta_IX[5], sta_IX[1] };
-        default: stb = {
-              sta_IX[45], sta_IX[44], sta_IX[42], sta_IX[40]
-            , sta_IX[39], sta_IX[38], sta_IX[35], sta_IX[32]
-            , sta_IX[31], sta_IX[30], sta_IX[26], sta_IX[22]
-            , sta_IX[21], sta_IX[19], sta_IX[15], sta_IX[11]
-            , sta_IX[8], sta_IX[4], sta_IX[0] };
-    endcase
-    // Fixed value to sum
-    stf = { stb[18:15], stb[12:11], stb[8:7], stb[4:3], stb[0] };
-    // Gated value to sum; bit 14 is indeed used twice
-    if( phaselo_IX[0] )
-        stg = { 2'b0, stb[14], stb[14:13], stb[10:9], stb[6:5], stb[2:1] };
-    else
-        stg = 11'd0;
-    // Sum to produce final logsin value
-    logsin = stf + stg; // Carry-out of 11-bit addition becomes 12th bit
-    // Invert-subtract logsin value from EG attenuation value, with inverted carry
-    // In the actual chip, the output of the above logsin sum is already inverted.
-    // The two LSBs go through inverters (so they're non-inverted); the eg_atten_IX signal goes through inverters.
-    // The adder is normal except the carry-in is 1. It's a 10-bit adder.
-    // The outputs are inverted outputs, including the carry bit.
-    //subtresult = not (('0' & not eg_atten_IX) - ('1' & logsin([11:2])));
-    // After a little pencil-and-paper, turns out this is equivalent to a regular adder!
-    subtresult = eg_atten_IX + logsin[11:2];
-    // Place all but carry bit into result; also two LSBs of logsin
-    // If addition overflowed, make it the largest value (saturate)
-    atten_internal_IX = { subtresult[9:0], logsin[1:0] } | {12{subtresult[10]}};
+    subtresult = eg_atten_IX + logsin_IX[11:2];
+    atten_internal_IX = { subtresult[9:0], logsin_IX[1:0] } | {12{subtresult[10]}};
 end
 
 wire [44:0] exp_X;
