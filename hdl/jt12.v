@@ -356,6 +356,7 @@ generate
     if( use_lr==1 ) begin
         assign fm_snd_right[3:0] = 4'd0;
         assign fm_snd_left [3:0] = 4'd0;
+        assign snd_sample        = zero;
         jt12_acc #(.num_ch(num_ch)) u_acc(
             .rst        ( rst       ),
             .clk        ( clk       ),
@@ -365,6 +366,7 @@ generate
             .limiter_en ( limiter_en),
             // note that the order changes to deal 
             // with the operator pipeline delay
+            .zero       ( zero      ),
             .s1_enters  ( s2_enters ),
             .s2_enters  ( s1_enters ),
             .s3_enters  ( s4_enters ),
@@ -376,7 +378,6 @@ generate
             // combined output
             .left       ( fm_snd_left [15:4]  ),
             .right      ( fm_snd_right[15:4]  ),
-            .sample     ( snd_sample    ),
             // muxed output
             .mux_left   ( fm_mux_left   ),
             .mux_right  ( fm_mux_right  ),

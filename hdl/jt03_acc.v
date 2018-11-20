@@ -54,18 +54,13 @@ always @(*) begin
     endcase
 end
 
-reg signed [15:0] next, acc, current;
-reg overflow;
-
-always @(*) begin
-    current = sum_en ? { {2{op_result[13]}}, op_result } : 16'd0;
-    next = zero ? current : current + acc;
-    overflow = !zero && (current[15] == acc[15]) && (acc[15]!=next[15]);
-end
-
-always @(posedge clk) if( clk_en ) begin
-    acc <= overflow ? {16{acc[15]}} : next;
-    if(zero) snd <= acc;
-end
+jt12_single_acc #(.win(14),.wout(16)) u_mono(
+    .clk        ( clk            ),
+    .clk_en     ( clk_en         ),
+    .op_result  ( op_result      ),
+    .sum_en     ( sum_en         ),
+    .zero       ( zero           ),
+    .snd        ( snd            )
+);
 
 endmodule
