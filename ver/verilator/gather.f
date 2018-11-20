@@ -18,7 +18,7 @@
 ../../hdl/jt12_pg_dt.v
 ../../hdl/jt12_pg_inc.v
 ../../hdl/jt12_pg_sum.v
-../../hdl/jt12_phrom.v
+../../hdl/jt12_logsin.v
 ../../hdl/jt12_reg.v
 ../../hdl/jt12_sh24.v
 ../../hdl/jt12_sh_rst.v
