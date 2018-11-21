@@ -17,7 +17,7 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_mm
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_div.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_mod.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_op.v ]
-set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_opram.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_csr.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_pg.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_pg_inc.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_pg_dt.v ]

@@ -15,7 +15,7 @@ jt12_mmr.v
 jt12_div.v
 jt12_mod.v
 jt12_op.v
-jt12_opram.v
+jt12_csr.v
 jt12_pg.v
 jt12_pg_comb.v
 jt12_pg_inc.v
