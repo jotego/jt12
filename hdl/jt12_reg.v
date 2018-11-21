@@ -175,10 +175,6 @@ wire update_op_IV = cur == req_opch_IV;
 // wire [2:0] op_plus1 = op+2'd1;
 // wire update_op_VII= cur == { op_plus1[1:0], ch };
 
-wire up_midop_I  = { ~cur[4], cur[3:0] } == req_opch_I;
-wire up_midop_II = { ~cur[4], cur[3:0] } == req_opch_II;
-wire up_midop_IV = { ~cur[4], cur[3:0] } == req_opch_IV;
-
 // key on/off
 wire    [3:0]   keyon_op = din[7:4];
 wire    [2:0]   keyon_ch = din[2:0];
@@ -276,69 +272,89 @@ jt12_mod u_mod(
     .use_prev1   ( use_prev1      )
 );
 
-// memory for OP registers
-localparam regop_width=44;
+wire [43:0] shift_out;
 
-wire [regop_width-1:0] regop_in, regop_middle, regop_out;
+generate
+    if( num_ch==6 ) begin
+        // YM2612 / YM3438: Two CSR.
+        wire [43:0] shift_middle;
 
-/*
-jt12_opram u_opram(
-    .clk    ( clk       ),
-    .clk_en ( clk_en    ),
-    .wr_addr( cur       ),
-    .rd_addr( next      ),
-    .data   ( rst ? { ~7'd0, 37'd0 } : regop_in ),
-    .q      ( regop_out )
-);
-*/
+        jt12_csr u_csr0(
+            .rst            ( rst           ),
+            .clk            ( clk           ),
+            .clk_en         ( clk_en        ),
+            .din            ( din           ),
+            .shift_in       ( shift_out     ),
+            .shift_out      ( shift_middle  ),
+            .up_tl          ( up_tl         ),     
+            .up_dt1         ( up_dt1        ),    
+            .up_dt1         ( up_dt1        ),    
+            .up_ks_ar       ( up_ks_ar      ),  
+            .up_ks_ar       ( up_ks_ar      ),  
+            .up_amen_dr     ( up_amen_dr    ),
+            .up_amen_dr     ( up_amen_dr    ),
+            .up_sr          ( up_sr         ),     
+            .up_sl_rr       ( up_sl_rr      ),  
+            .up_sl_rr       ( up_sl_rr      ),  
+            .up_ssgeg       ( up_ssgeg      ),  
+            .update_op_I    ( update_op_I   ),
+            .update_op_II   ( update_op_II  ),
+            .update_op_IV   ( update_op_IV  )
+        );
 
-wire [regop_width-1:0] shift_middle, shift_out;
+        wire up_midop_I  = { ~cur[4], cur[3:0] } == req_opch_I;
+        wire up_midop_II = { ~cur[4], cur[3:0] } == req_opch_II;
+        wire up_midop_IV = { ~cur[4], cur[3:0] } == req_opch_IV;
 
-jt12_csr u_csr0(
-    .rst            ( rst           ),
-    .clk            ( clk           ),
-    .clk_en         ( clk_en        ),
-    .din            ( din           ),
-    .shift_in       ( shift_out     ),
-    .shift_out      ( shift_middle  ),
-    .up_tl          ( up_tl         ),     
-    .up_dt1         ( up_dt1        ),    
-    .up_dt1         ( up_dt1        ),    
-    .up_ks_ar       ( up_ks_ar      ),  
-    .up_ks_ar       ( up_ks_ar      ),  
-    .up_amen_dr     ( up_amen_dr    ),
-    .up_amen_dr     ( up_amen_dr    ),
-    .up_sr          ( up_sr         ),     
-    .up_sl_rr       ( up_sl_rr      ),  
-    .up_sl_rr       ( up_sl_rr      ),  
-    .up_ssgeg       ( up_ssgeg      ),  
-    .update_op_I    ( update_op_I   ),
-    .update_op_II   ( update_op_II  ),
-    .update_op_IV   ( update_op_IV  )
-);
-
-jt12_csr u_csr1(
-    .rst            ( rst           ),
-    .clk            ( clk           ),
-    .clk_en         ( clk_en        ),
-    .din            ( din           ),
-    .shift_in       ( shift_middle  ),
-    .shift_out      ( shift_out     ),
-    .up_tl          ( up_tl         ),     
-    .up_dt1         ( up_dt1        ),    
-    .up_dt1         ( up_dt1        ),    
-    .up_ks_ar       ( up_ks_ar      ),  
-    .up_ks_ar       ( up_ks_ar      ),  
-    .up_amen_dr     ( up_amen_dr    ),
-    .up_amen_dr     ( up_amen_dr    ),
-    .up_sr          ( up_sr         ),     
-    .up_sl_rr       ( up_sl_rr      ),  
-    .up_sl_rr       ( up_sl_rr      ),  
-    .up_ssgeg       ( up_ssgeg      ),  
-    .update_op_I    ( up_midop_I    ),
-    .update_op_II   ( up_midop_II   ),
-    .update_op_IV   ( up_midop_IV   )
-);
+        jt12_csr u_csr1(
+            .rst            ( rst           ),
+            .clk            ( clk           ),
+            .clk_en         ( clk_en        ),
+            .din            ( din           ),
+            .shift_in       ( shift_middle  ),
+            .shift_out      ( shift_out     ),
+            .up_tl          ( up_tl         ),     
+            .up_dt1         ( up_dt1        ),    
+            .up_dt1         ( up_dt1        ),    
+            .up_ks_ar       ( up_ks_ar      ),  
+            .up_ks_ar       ( up_ks_ar      ),  
+            .up_amen_dr     ( up_amen_dr    ),
+            .up_amen_dr     ( up_amen_dr    ),
+            .up_sr          ( up_sr         ),     
+            .up_sl_rr       ( up_sl_rr      ),  
+            .up_sl_rr       ( up_sl_rr      ),  
+            .up_ssgeg       ( up_ssgeg      ),  
+            // update in the middle:
+            .update_op_I    ( up_midop_I    ),
+            .update_op_II   ( up_midop_II   ),
+            .update_op_IV   ( up_midop_IV   )
+        );
+    end
+    else begin // YM2203 only has one CSR
+        jt12_csr u_csr0(
+            .rst            ( rst           ),
+            .clk            ( clk           ),
+            .clk_en         ( clk_en        ),
+            .din            ( din           ),
+            .shift_in       ( shift_out     ),
+            .shift_out      ( shift_out     ),
+            .up_tl          ( up_tl         ),     
+            .up_dt1         ( up_dt1        ),    
+            .up_dt1         ( up_dt1        ),    
+            .up_ks_ar       ( up_ks_ar      ),  
+            .up_ks_ar       ( up_ks_ar      ),  
+            .up_amen_dr     ( up_amen_dr    ),
+            .up_amen_dr     ( up_amen_dr    ),
+            .up_sr          ( up_sr         ),     
+            .up_sl_rr       ( up_sl_rr      ),  
+            .up_sl_rr       ( up_sl_rr      ),  
+            .up_ssgeg       ( up_ssgeg      ),  
+            .update_op_I    ( update_op_I   ),
+            .update_op_II   ( update_op_II  ),
+            .update_op_IV   ( update_op_IV  )
+        );
+    end // else
+endgenerate
 
 assign { tl_IV,   dt1_I,    mul_II,    ks_II, 
          ar_I,    amsen_IV, d1r_I,     d2r_I, 
@@ -350,7 +366,7 @@ assign { tl_IV,   dt1_I,    mul_II,    ks_II,
 // Trying to synthesize this memory as M-9K RAM in Altera devices
 // turns out worse in terms of resource utilization. Probably because
 // this memory is already very small. It is better to leave it as it is.
-parameter regch_width=25;
+localparam regch_width=25;
 wire [regch_width-1:0] regch_out;
 wire [regch_width-1:0] regch_in = {
     up_fnumlo_ch? { latch_fnum, fnlo_in } : { block_I_raw, fnum_I_raw }, // 14
@@ -381,7 +397,7 @@ if( num_ch==6 ) begin
         .din    ( up_pms_ch ? rl_in :  rl   ),
         .drop   ( rl    )
     );
-end else begin // 3 channels
+end else begin // YM2203 has no stereo output
     assign rl=2'b11;
 end
     
