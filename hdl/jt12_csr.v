@@ -42,7 +42,7 @@ module jt12_csr( // Circular Shift Register + input mux
 
 localparam regop_width=44;
 
-wire [regop_width-1:0] regop_in;
+reg [regop_width-1:0] regop_in;
 
 jt12_sh_rst #(.width(regop_width),.stages(12)) u_regch(
     .clk    ( clk          ),
@@ -64,18 +64,19 @@ wire up_sl_op   = up_sl_rr  & update_op_I;
 wire up_rr_op   = up_sl_rr  & update_op_I;
 wire up_ssg_op  = up_ssgeg  & update_op_I;
 
-assign regop_in = {
-    up_tl_op    ? din[6:0]    : shift_in[ 6: 0],      // 7 -  7
-    up_dt1_op   ? din[6:4]    : shift_in[ 9: 7],      // 3 - 10
-    up_mul_op   ? din[3:0]    : shift_in[13:10],      // 4 - 14
-    up_ks_op    ? din[7:6]    : shift_in[15:14],      // 2 - 16
-    up_ar_op    ? din[4:0]    : shift_in[20:16],      // 5 - 21
-    up_amen_op  ? din[7]      : shift_in[   21],      // 1 - 22
-    up_dr_op    ? din[4:0]    : shift_in[26:22],      // 5 - 27
-    up_sr_op    ? din[4:0]    : shift_in[31:27],      // 5 - 32
-    up_sl_op    ? din[7:4]    : shift_in[35:32],      // 4 - 36
-    up_rr_op    ? din[3:0]    : shift_in[39:36],      // 4 - 40
-    up_ssg_op   ? din[3:0]    : shift_in[43:40]       // 4 - 44
-};
+always @(*)
+    regop_in = {
+        up_tl_op    ? din[6:0]    : shift_in[43:37],      // 7 
+        up_dt1_op   ? din[6:4]    : shift_in[36:34],      // 3 
+        up_mul_op   ? din[3:0]    : shift_in[33:30],      // 4 
+        up_ks_op    ? din[7:6]    : shift_in[29:28],      // 2 
+        up_ar_op    ? din[4:0]    : shift_in[27:23],      // 5 
+        up_amen_op  ? din[7]      : shift_in[   22],      // 1 
+        up_dr_op    ? din[4:0]    : shift_in[21:17],      // 5 
+        up_sr_op    ? din[4:0]    : shift_in[16:12],      // 5 
+        up_sl_op    ? din[7:4]    : shift_in[11: 8],      // 4 
+        up_rr_op    ? din[3:0]    : shift_in[ 7: 4],      // 4 
+        up_ssg_op   ? din[3:0]    : shift_in[ 3: 0]       // 4 
+    };
 
 endmodule // jt12_reg

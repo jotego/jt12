@@ -298,9 +298,9 @@ generate
             .update_op_IV   ( update_op_IV  )
         );
 
-        wire up_midop_I  = 1'b0; //{ ~cur[4], cur[3:0] } == req_opch_I;
-        wire up_midop_II = 1'b0; //{ ~cur[4], cur[3:0] } == req_opch_II;
-        wire up_midop_IV = 1'b0; //{ ~cur[4], cur[3:0] } == req_opch_IV;
+        wire up_midop_I  = { ~cur[4], cur[3:0] } == req_opch_I;
+        wire up_midop_II = { ~cur[4], cur[3:0] } == req_opch_II;
+        wire up_midop_IV = { ~cur[4], cur[3:0] } == req_opch_IV;
 
         jt12_csr u_csr1(
             .rst            ( rst           ),
