@@ -11,7 +11,6 @@
 ../../hdl/jt12_mmr.v
 ../../hdl/jt12_div.v
 ../../hdl/jt12_mod.v
-../../hdl/jt12_opram.v
 ../../hdl/jt12_op.v
 ../../hdl/jt12_pg.v
 ../../hdl/jt12_pg_comb.v

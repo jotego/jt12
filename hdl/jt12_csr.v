@@ -20,7 +20,7 @@
 
 */
 
-module jt12_csr(
+module jt12_csr( // Circular Shift Register + input mux
     input           rst,
     input           clk,
     input           clk_en,
@@ -30,13 +30,9 @@ module jt12_csr(
 
     input           up_tl,     
     input           up_dt1,    
-    input           up_dt1,    
     input           up_ks_ar,  
-    input           up_ks_ar,  
-    input           up_amen_dr,
     input           up_amen_dr,
     input           up_sr,     
-    input           up_sl_rr,  
     input           up_sl_rr,  
     input           up_ssgeg,  
     input           update_op_I,
@@ -46,7 +42,7 @@ module jt12_csr(
 
 localparam regop_width=44;
 
-wire [regop_width-1:0] regop_in, regop_out;
+wire [regop_width-1:0] regop_in;
 
 jt12_sh_rst #(.width(regop_width),.stages(12)) u_regch(
     .clk    ( clk          ),
@@ -79,8 +75,7 @@ assign regop_in = {
     up_sr_op    ? din[4:0]    : shift_in[31:27],      // 5 - 32
     up_sl_op    ? din[7:4]    : shift_in[35:32],      // 4 - 36
     up_rr_op    ? din[3:0]    : shift_in[39:36],      // 4 - 40
-    up_ssg_op   ? din[3]      : shift_in[   40],      // 1 - 41
-    up_ssg_op   ? din[2:0]    : shift_in[43:41],      // 3 - 44
+    up_ssg_op   ? din[3:0]    : shift_in[43:40]       // 4 - 44
 };
 
 endmodule // jt12_reg

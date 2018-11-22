@@ -186,6 +186,7 @@ wire    [2:0]   pms_in  = din[2:0];
 wire    [1:0]   ams_in  = din[5:4];
 wire    [7:0]   fnlo_in = din;
 // operator data
+/*
 wire    [2:0]   dt1_in  = din[6:4];
 wire    [3:0]   mul_in  = din[3:0];
 wire    [6:0]   tl_in   = din[6:0];
@@ -197,9 +198,8 @@ wire    [4:0]   d2r_in  = din[4:0];
 wire    [3:0]   sl_in   = din[7:4];
 wire    [3:0]   rr_in   = din[3:0];
 wire    [3:0]   ssg_in  = din[3:0];
-
 wire    [3:0]   ssg;
-
+*/
 
 
 wire    update_ch_I  = cur_ch == ch;
@@ -288,13 +288,9 @@ generate
             .shift_out      ( shift_middle  ),
             .up_tl          ( up_tl         ),     
             .up_dt1         ( up_dt1        ),    
-            .up_dt1         ( up_dt1        ),    
             .up_ks_ar       ( up_ks_ar      ),  
-            .up_ks_ar       ( up_ks_ar      ),  
-            .up_amen_dr     ( up_amen_dr    ),
             .up_amen_dr     ( up_amen_dr    ),
             .up_sr          ( up_sr         ),     
-            .up_sl_rr       ( up_sl_rr      ),  
             .up_sl_rr       ( up_sl_rr      ),  
             .up_ssgeg       ( up_ssgeg      ),  
             .update_op_I    ( update_op_I   ),
@@ -302,9 +298,9 @@ generate
             .update_op_IV   ( update_op_IV  )
         );
 
-        wire up_midop_I  = { ~cur[4], cur[3:0] } == req_opch_I;
-        wire up_midop_II = { ~cur[4], cur[3:0] } == req_opch_II;
-        wire up_midop_IV = { ~cur[4], cur[3:0] } == req_opch_IV;
+        wire up_midop_I  = 1'b0; //{ ~cur[4], cur[3:0] } == req_opch_I;
+        wire up_midop_II = 1'b0; //{ ~cur[4], cur[3:0] } == req_opch_II;
+        wire up_midop_IV = 1'b0; //{ ~cur[4], cur[3:0] } == req_opch_IV;
 
         jt12_csr u_csr1(
             .rst            ( rst           ),
@@ -315,13 +311,9 @@ generate
             .shift_out      ( shift_out     ),
             .up_tl          ( up_tl         ),     
             .up_dt1         ( up_dt1        ),    
-            .up_dt1         ( up_dt1        ),    
             .up_ks_ar       ( up_ks_ar      ),  
-            .up_ks_ar       ( up_ks_ar      ),  
-            .up_amen_dr     ( up_amen_dr    ),
             .up_amen_dr     ( up_amen_dr    ),
             .up_sr          ( up_sr         ),     
-            .up_sl_rr       ( up_sl_rr      ),  
             .up_sl_rr       ( up_sl_rr      ),  
             .up_ssgeg       ( up_ssgeg      ),  
             // update in the middle:
@@ -340,13 +332,9 @@ generate
             .shift_out      ( shift_out     ),
             .up_tl          ( up_tl         ),     
             .up_dt1         ( up_dt1        ),    
-            .up_dt1         ( up_dt1        ),    
             .up_ks_ar       ( up_ks_ar      ),  
-            .up_ks_ar       ( up_ks_ar      ),  
-            .up_amen_dr     ( up_amen_dr    ),
             .up_amen_dr     ( up_amen_dr    ),
             .up_sr          ( up_sr         ),     
-            .up_sl_rr       ( up_sl_rr      ),  
             .up_sl_rr       ( up_sl_rr      ),  
             .up_ssgeg       ( up_ssgeg      ),  
             .update_op_I    ( update_op_I   ),
