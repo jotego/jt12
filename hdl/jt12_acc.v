@@ -53,12 +53,12 @@ module jt12_acc
     input               pcm_en, // only enabled for channel 6
     input   [8:0]       pcm,
     // combined output
-    output reg signed   [11:0]  left,
-    output reg signed   [11:0]  right,
+    output signed   [11:0]  left,
+    output signed   [11:0]  right,
     // multiplexed output
-    output reg signed   [8:0]   mux_left,
-    output reg signed   [8:0]   mux_right,  
-    output reg          mux_sample
+    output signed   [8:0]   mux_left,
+    output signed   [8:0]   mux_right,  
+    output          mux_sample
 );
 
 parameter num_ch=6;
