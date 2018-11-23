@@ -30,7 +30,7 @@ module jt12_single_acc #(parameter win=14, // input data width
     input [win-1:0] op_result,
     input sum_en,
     input zero,
-    output [wout-1:0] snd
+    output reg [wout-1:0] snd
 );
 
 // for full resolution use win=14, wout=16
