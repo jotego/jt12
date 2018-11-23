@@ -185,21 +185,6 @@ wire    [2:0]   alg_in  = din[2:0];
 wire    [2:0]   pms_in  = din[2:0];
 wire    [1:0]   ams_in  = din[5:4];
 wire    [7:0]   fnlo_in = din;
-// operator data
-/*
-wire    [2:0]   dt1_in  = din[6:4];
-wire    [3:0]   mul_in  = din[3:0];
-wire    [6:0]   tl_in   = din[6:0];
-wire    [1:0]   ks_in   = din[7:6];
-wire    [4:0]   ar_in   = din[4:0];
-wire            amen_in = din[7];
-wire    [4:0]   d1r_in  = din[4:0];
-wire    [4:0]   d2r_in  = din[4:0];
-wire    [3:0]   sl_in   = din[7:4];
-wire    [3:0]   rr_in   = din[3:0];
-wire    [3:0]   ssg_in  = din[3:0];
-wire    [3:0]   ssg;
-*/
 
 
 wire    update_ch_I  = cur_ch == ch;
@@ -211,18 +196,6 @@ wire up_alg_ch  = up_alg    & update_ch_I;
 wire up_fnumlo_ch=up_fnumlo & update_ch_I;
 wire up_pms_ch  = up_pms    & update_ch_I;
 wire up_ams_ch  = up_pms    & update_ch_IV;
-
-wire up_tl_op   = up_tl     & update_op_IV;
-wire up_dt1_op  = up_dt1    & update_op_I;
-wire up_mul_op  = up_dt1    & update_op_II;
-wire up_ks_op   = up_ks_ar  & update_op_II;
-wire up_ar_op   = up_ks_ar  & update_op_I;
-wire up_amen_op = up_amen_dr& update_op_IV;
-wire up_dr_op   = up_amen_dr& update_op_I;
-wire up_sr_op   = up_sr     & update_op_I;
-wire up_sl_op   = up_sl_rr  & update_op_I;
-wire up_rr_op   = up_sl_rr  & update_op_I;
-wire up_ssg_op  = up_ssgeg  & update_op_I;
 
 always @(*) begin
     // next = cur==5'd23 ? 5'd0 : cur +1'b1;
