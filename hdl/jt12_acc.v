@@ -76,11 +76,21 @@ always @(*) begin
     endcase
 end
 
+reg [8:0] pcm_data;
+reg pcm_sum;
+
+always @(posedge clk) if(clk_en)
+    if( zero ) pcm_sum <= 1'b1;
+    else if( ch6op ) pcm_sum <= 1'b0;
+
+always @(*)
+    pcm_data = pcm_sum ? { ~pcm[8], pcm[7:0] } : 9'd0;
+
 wire use_pcm = ch6op && pcm_en;
 wire sum_or_pcm = sum_en | use_pcm;
 wire left_en = rl[1];
 wire right_en= rl[0];
-wire [8:0] acc_input =  use_pcm ? { ~pcm[8], pcm[7:0] } : op_result;
+wire [8:0] acc_input =  use_pcm ? pcm_data : op_result;
 
 // Continuous output
 jt12_single_acc #(.win(9),.wout(12)) u_left(

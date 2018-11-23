@@ -173,6 +173,8 @@ generate
     end
 endgenerate
 
+reg part;
+
 // this runs at clk speed, no clock gating here
 always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
@@ -208,12 +210,13 @@ always @(posedge clk) begin : memory_mapped_registers
         // WRITE IN REGISTERS
         if( write ) begin
             if( !addr[0] ) begin
-                selected_register <= din;               
+                selected_register <= din;  
+                part <= addr[1];             
             end else begin
                 // Global registers
                 din_copy <= din;
                 up_keyon <= selected_register == REG_KON;
-                up_ch <= {addr[1], selected_register[1:0]};
+                up_ch <= {part, selected_register[1:0]};
                 up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
                 casez( selected_register)
                     //REG_TEST: lfo_rst <= 1'b1; // regardless of din
