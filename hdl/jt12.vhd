@@ -20,7 +20,7 @@ port
 	-- combined output
 	snd_right  : out std_logic_vector(11 downto 0); -- signed
 	snd_left   : out std_logic_vector(11 downto 0); -- signed
-	snd_sample : out std_logic;
+	snd_sample : out std_logic
 );
 end component;
 

@@ -50,8 +50,8 @@ module jt12_acc
     input               pcm_en, // only enabled for channel 6
     input   [8:0]       pcm,
     // combined output
-    output signed   [11:0]  left,
-    output signed   [11:0]  right
+    output reg signed   [11:0]  left,
+    output reg signed   [11:0]  right
 );
 
 parameter num_ch=6;
