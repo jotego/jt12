@@ -22,6 +22,8 @@
 
 */
 
+//altera message_off 10030
+
 module jt12_logsin
 (
     input [7:0] addr,
