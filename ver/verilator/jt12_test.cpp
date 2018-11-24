@@ -269,7 +269,6 @@ int main(int argc, char** argv, char** env) {
     top->addr = 0;
     top->cs_n = 0;
     top->wr_n = 1;
-    top->limiter_en=1;
     // cout << "Reset\n";
     while( sim_time.get_time() < 256*sim_time.period() ) {
         top->eval();

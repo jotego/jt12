@@ -32,18 +32,13 @@ module jt12 (
     input   [1:0]   addr,
     input           cs_n,
     input           wr_n,
-    input           limiter_en,
     
     output  [7:0]   dout,
     output          irq_n,
     // combined output
     output  signed  [15:0]  snd_right,
     output  signed  [15:0]  snd_left,
-    output          snd_sample,
-    // multiplexed output
-    output signed   [8:0]   mux_right,  
-    output signed   [8:0]   mux_left,
-    output          mux_sample
+    output          snd_sample
 );
 
 parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1;
@@ -254,13 +249,9 @@ generate
         );
         assign snd_left  = fm_snd_left  + { 2'b0, psg_sound[9:1],5'd0}; 
         assign snd_right = fm_snd_right + { 2'b0, psg_sound[9:1],5'd0}; 
-        assign mux_left  = fm_mux_left  + {1'b0, psg_sound[9:2]};
-        assign mux_right = fm_mux_right + {1'b0, psg_sound[9:2]};
     end else begin
         assign snd_left = fm_snd_left;
         assign snd_right= fm_snd_right;
-        assign mux_left = fm_mux_left;
-        assign mux_right= fm_mux_right;
     end
 endgenerate
 
@@ -363,7 +354,6 @@ generate
             .clk_en     ( clk_en    ),
             .op_result  ( op_result ),
             .rl         ( rl        ),
-            .limiter_en ( limiter_en),
             // note that the order changes to deal 
             // with the operator pipeline delay
             .zero       ( zero      ),
@@ -377,17 +367,10 @@ generate
             .alg        ( alg_I     ),
             // combined output
             .left       ( fm_snd_left [15:4]  ),
-            .right      ( fm_snd_right[15:4]  ),
-            // muxed output
-            .mux_left   ( fm_mux_left   ),
-            .mux_right  ( fm_mux_right  ),
-            .mux_sample ( mux_sample    )
+            .right      ( fm_snd_right[15:4]  )
         );
     end else begin
         wire signed [15:0] mono_snd;
-        assign fm_mux_left  = 9'd0;
-        assign fm_mux_right = 9'd0;
-        assign mux_sample   = 1'd0;
         assign fm_snd_left  = mono_snd;
         assign fm_snd_right = mono_snd;
         assign snd_sample   = zero;

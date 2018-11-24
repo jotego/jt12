@@ -27,7 +27,11 @@
 
 */
 
-`timescale 1ns / 1ps
+/* 
+ YM2612 had a limiter to prevent overflow
+ YM3438 did not
+ JT12 always has a limiter enabled
+ */
 
 module jt12_acc
 (
@@ -36,13 +40,6 @@ module jt12_acc
     input               clk_en,
     input signed [8:0]  op_result,
     input        [ 1:0] rl,
-    input               limiter_en, // enables the limiter on
-    // the accumulator to prevent overfow. 
-    // I reckon that:
-    // YM2612 had a limiter
-    // YM3438 did not
-    // note that the order changes to deal 
-    // with the operator pipeline delay
     input               zero,
     input               s1_enters,
     input               s2_enters,
@@ -54,16 +51,10 @@ module jt12_acc
     input   [8:0]       pcm,
     // combined output
     output signed   [11:0]  left,
-    output signed   [11:0]  right,
-    // multiplexed output
-    output signed   [8:0]   mux_left,
-    output signed   [8:0]   mux_right,  
-    output          mux_sample
+    output signed   [11:0]  right
 );
 
 parameter num_ch=6;
-
-reg signed [11:0] pre_left, pre_right;
 
 reg sum_en;
 
@@ -93,15 +84,15 @@ wire right_en= rl[0];
 wire [8:0] acc_input =  use_pcm ? pcm_data : op_result;
 
 // Continuous output
+wire signed   [11:0]  pre_left, pre_right;
 jt12_single_acc #(.win(9),.wout(12)) u_left(
     .clk        ( clk            ),
     .clk_en     ( clk_en         ),
     .op_result  ( acc_input      ),
     .sum_en     ( sum_or_pcm & left_en ),
     .zero       ( zero           ),
-    .snd        ( left           )
+    .snd        ( pre_left       )
 );
-
 
 jt12_single_acc #(.win(9),.wout(12)) u_right(
     .clk        ( clk            ),
@@ -109,13 +100,14 @@ jt12_single_acc #(.win(9),.wout(12)) u_right(
     .op_result  ( acc_input      ),
     .sum_en     ( sum_or_pcm & right_en ),
     .zero       ( zero           ),
-    .snd        ( right          )
+    .snd        ( pre_right      )
 );
 
-// Multiplexed output
-
-assign mux_left = 9'd0;
-assign mux_right = 9'd0;
-assign mux_sample = 1'b0;
+// Output can be amplied by 8/6=1.33 to use full range
+// an easy alternative is to add 1/4th and get 1.25 amplification
+always @(posedge clk) if(clk_en) begin
+    left  <= pre_left  + { {2{left [11]}}, left [11:2] };
+    right <= pre_right + { {2{right[11]}}, right[11:2] };
+end
 
 endmodule
