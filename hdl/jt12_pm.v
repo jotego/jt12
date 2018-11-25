@@ -20,23 +20,7 @@
 
 `timescale 1ns / 1ps
 
-/* Ideally there should be a multiplication to obtain accurate phase shift
- but for cents < 100 a linear approximation is enough. And this can be further
- done discretely without human noticeable distortion.
- The implementation belove makes a lot of sense from the hardware point of view.
- It agrees with die shots documented by Sauraen on spritesmind.net
- It agrees with MAME's fm.cpp, which is said to agree with real hardware
-
- Real implementation may have had this done in several clock cycles, but
- this amount of logic is not too much for modern FPGA's to be done
- in a single clock cycle. As noted below, real hardware may have additional
- savings in the LUT, but that strategy wouldn't payoff on an FPGA where half
- used logic elements are wasted.
-
- Note that MAME's approach requires a 32kByte memory, whereas the same
- is accomplished here with way less hardware.
-
-*/
+// This implementation follows that of Alexey Khokholov (Nuke.YKT) in C language.
 
 module jt12_pm (
 	input [4:0] lfo_mod,
@@ -61,9 +45,6 @@ initial begin
 	$readmemh("lfo_sh2_lut.hex",lfo_sh2_lut);
 end
 
-/* There is some redundacy in the LUT but
- trying to make it smaller may not translate into
- lower usage of FPGA resource beyond this point */
 always @(*) begin
 	lfo_sh1 = lfo_sh1_lut[{pms,index}];
 	lfo_sh2 = lfo_sh2_lut[{pms,index}];
@@ -74,7 +55,6 @@ always @(*) begin
 		3'd7: pm_shifted = {       pm_base, 2'b0 };
 	endcase // pms
 	pm_offset = lfo_mod[4] ? (-{1'b0,pm_shifted[9:2]}) : {1'b0,pm_shifted[9:2]};
-	// $display("pm_offset=%d",pm_offset);
 end // always @(*)
 
 endmodule

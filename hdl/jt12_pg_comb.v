@@ -20,7 +20,7 @@
     Based on information posted by Nemesis on:
 http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc&start=167
 
-    Based on jt51_phasegen.v, from JT51 
+    100% compared with Alexey Khokholov (Nuke.YKT) work with identical results.
 */
 
 module jt12_pg_comb(
