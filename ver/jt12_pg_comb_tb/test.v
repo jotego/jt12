@@ -15,11 +15,13 @@ module test(
 	input				pg_rst,
 
 	output		[19:0]	phase_out,
-	output		[ 9:0]	phase_op
+	output		[ 9:0]	phase_op,
+
+	output		[16:0]  phinc
 );
 
 wire signed [ 5:0]	dt;
-wire		[16:0]  phinc;
+// wire		[16:0]  phinc;
 
 jt12_pg_comb u_uut(
 	.block		( block		),
