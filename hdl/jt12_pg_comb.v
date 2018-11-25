@@ -50,7 +50,7 @@ module jt12_pg_comb(
     output  [ 9:0]  phase_op
 );
 
-wire signed [7:0] pm_offset;
+wire signed [8:0] pm_offset;
 
 /*  pm, pg_dt and pg_inc operate in parallel */ 
 jt12_pm u_pm(

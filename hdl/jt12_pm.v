@@ -42,87 +42,39 @@ module jt12_pm (
 	input [4:0] lfo_mod,
 	input [10:0] fnum,
 	input [2:0] pms,
-	output reg signed [7:0] pm_offset
+	output reg signed [8:0] pm_offset
 );
 
 
 reg [7:0] pm_unsigned;
-reg [4:0] pm_base;
+reg [7:0] pm_base;
+reg [9:0] pm_shifted;
 
 wire [2:0] index = lfo_mod[3] ? (~lfo_mod[2:0]) : lfo_mod[2:0];
+
+reg [2:0] lfo_sh1_lut [0:63];
+reg [2:0] lfo_sh2_lut [0:63];
+reg [2:0] lfo_sh1, lfo_sh2;
+
+initial begin
+	$readmemh("lfo_sh1_lut.hex",lfo_sh1_lut);
+	$readmemh("lfo_sh2_lut.hex",lfo_sh2_lut);
+end
 
 /* There is some redundacy in the LUT but
  trying to make it smaller may not translate into
  lower usage of FPGA resource beyond this point */
 always @(*) begin
-	casez ( {pms, index} )
-		default: pm_base = 5'd0;
-
-		{3'd1, 3'd2 }: pm_base = 5'd0;
-		{3'd1, 3'd3 }: pm_base = 5'd0;
-		{3'd1, 3'd4 }: pm_base = 5'd1;
-		{3'd1, 3'd5 }: pm_base = 5'd1;
-		{3'd1, 3'd6 }: pm_base = 5'd1;
-		{3'd1, 3'd7 }: pm_base = 5'd1;
-
-		{3'd2, 3'd2 }: pm_base = 5'd0;
-		{3'd2, 3'd3 }: pm_base = 5'd1;
-		{3'd2, 3'd4 }: pm_base = 5'd1;
-		{3'd2, 3'd5 }: pm_base = 5'd1;
-		{3'd2, 3'd6 }: pm_base = 5'd2;
-		{3'd2, 3'd7 }: pm_base = 5'd2;
-
-		{3'd3, 3'd2 }: pm_base = 5'd1;
-		{3'd3, 3'd3 }: pm_base = 5'd1;
-		{3'd3, 3'd4 }: pm_base = 5'd2;
-		{3'd3, 3'd5 }: pm_base = 5'd2;
-		{3'd3, 3'd6 }: pm_base = 5'd3;
-		{3'd3, 3'd7 }: pm_base = 5'd3;
-
-		{3'd4, 3'd2 }: pm_base = 5'd1;
-		{3'd4, 3'd3 }: pm_base = 5'd2;
-		{3'd4, 3'd4 }: pm_base = 5'd2;
-		{3'd4, 3'd5 }: pm_base = 5'd2;
-		{3'd4, 3'd6 }: pm_base = 5'd3;
-		{3'd4, 3'd7 }: pm_base = 5'd4;
-
-		{3'd5, 3'd2 }: pm_base = 5'd2;
-		{3'd5, 3'd3 }: pm_base = 5'd3;
-		{3'd5, 3'd4 }: pm_base = 5'd4;
-		{3'd5, 3'd5 }: pm_base = 5'd4;
-		{3'd5, 3'd6 }: pm_base = 5'd5;
-		{3'd5, 3'd7 }: pm_base = 5'd6;
-
-		{3'd6, 3'd2 }: pm_base = 5'd4; // This is the previous set of data x2
-		{3'd6, 3'd3 }: pm_base = 5'd6;
-		{3'd6, 3'd4 }: pm_base = 5'd8;
-		{3'd6, 3'd5 }: pm_base = 5'd8;
-		{3'd6, 3'd6 }: pm_base = 5'd10;
-		{3'd6, 3'd7 }: pm_base = 5'd12;
-
-		{3'd7, 3'd2 }: pm_base = 5'd8;  // This is the previous set of data x2
-		{3'd7, 3'd3 }: pm_base = 5'd12;
-		{3'd7, 3'd4 }: pm_base = 5'd16;
-		{3'd7, 3'd5 }: pm_base = 5'd16;
-		{3'd7, 3'd6 }: pm_base = 5'd20;
-		{3'd7, 3'd7 }: pm_base = 5'd24;
-	endcase
-
-	// The MSB of pm_unsigned must be zero for the
-	// 2's-complement operation to perform correctly
-	// Do not trim it!
-	casez( fnum[10:4] )
-		7'b1??_????: pm_unsigned = { 1'b0, pm_base, 2'd0 };
-		7'b01?_????: pm_unsigned = { 2'b0, pm_base, 1'd0 };
-		7'b001_????: pm_unsigned = { 3'b0, pm_base       };
-		7'b000_1???: pm_unsigned = { 4'b0, pm_base[4:1]  };
-		7'b000_01??: pm_unsigned = { 5'b0, pm_base[4:2]  };
-		7'b000_001?: pm_unsigned = { 6'b0, pm_base[4:3]  };
-		7'b000_0001: pm_unsigned = { 7'b0, pm_base[4]    };
-		default: pm_unsigned = 8'd0;
-	endcase
-
-	pm_offset = lfo_mod[4] ? (~pm_unsigned+8'd1) : pm_unsigned;
+	lfo_sh1 = lfo_sh1_lut[{pms,index}];
+	lfo_sh2 = lfo_sh2_lut[{pms,index}];
+	pm_base = ({1'b0,fnum[10:4]}>>lfo_sh1) + ({1'b0,fnum[10:4]}>>lfo_sh2);
+	case( pms )
+		default: pm_shifted = { 2'b0, pm_base };
+		3'd6: pm_shifted = { 1'b0, pm_base, 1'b0 };
+		3'd7: pm_shifted = {       pm_base, 2'b0 };
+	endcase // pms
+	pm_offset = lfo_mod[4] ? (-{1'b0,pm_shifted[9:2]}) : {1'b0,pm_shifted[9:2]};
+	// $display("pm_offset=%d",pm_offset);
 end // always @(*)
 
 endmodule
