@@ -185,7 +185,7 @@ void VGMParser::open(const char* filename, int limit) {
 	file.open(filename,ios_base::binary);
 	if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
 	cout << "Open " << filename << '\n';
-	cmd = val = addr = 0;
+	stream_id = cmd = val = addr = 0;
 	file.seekg(0x18);
 	file.read((char*)& totalwait, 4);
 	totalwait &= 0xffffffff;
@@ -350,7 +350,23 @@ int VGMParser::parse() {
 			case 0x4F: // PSG command, ignore
 			case 0x50:
 				file.read(extra,1);
-				continue;
+				cmd=extra[0];
+				/* { // Decode command
+					int lsb = cmd&0xf;
+					if( cmd & 0x80 )
+						switch( (cmd>>4)&0x7 ) {
+							case 0: cout << "PSG Tone0 MSB\n"; break;
+							case 1: cout << "PSG Tone1 MSB\n"; break;
+							case 2: cout << "PSG Tone2 MSB\n"; break;
+							case 3: cout << "PSG Noise CTRL\n"; break;
+							case 4: cout << "PSG vol 0 = " << lsb <<'\n'; break;
+							case 5: cout << "PSG vol 1 = " << lsb <<'\n'; break;
+							case 6: cout << "PSG vol 2 = " << lsb <<'\n'; break;
+							case 7: cout << "PSG vol 3 = " << lsb <<'\n'; break;
+						}
+					else cout << "PSG repeat\n";
+				} */
+				return cmd_psg;
 			// DAC writes
 			case 0x80: case 0x81: case 0x82: case 0x83: 
 			case 0x84: case 0x85: case 0x86: case 0x87: 
@@ -362,6 +378,19 @@ int VGMParser::parse() {
 				translate_cmd();
 				return cmd_write;
 			case 0x90: // setup stream control
+				{
+					char aux[4];
+					file.read( aux, 4);
+					stream_id = aux[0];
+					if( aux[1]!=2 ) {
+						cout << "Error: DAC stream different from YM2612 type\n";
+						return cmd_error;
+					}
+					int cmd0 = aux[2], val0=aux[3];
+					cout << "Stream ID " << stream_id << " write " << val0
+						<< " to port " << cmd0 << '\n';
+				}
+				continue;
 			case 0x91: // set stream data
 			case 0x95: // start stream, fast call
 				{

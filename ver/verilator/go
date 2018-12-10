@@ -13,6 +13,7 @@ TEST_NAME=NOTESTNAME
 SSG_TEST=NOSSG_TEST
 GYM_FILE=
 GYM_ARG=
+MEGADRIVE_PSG=-DMEGADRIVE_PSG
 #FAST=
 FAST=-DFASTDIV
 VERI_EXTRA=
@@ -49,7 +50,7 @@ while [ $# -gt 0 ]; do
 		shift
 		continue
 	fi
-	if [ "$1" = "-gym" ]; then
+	if [ "$1" = "-f" ]; then
 		shift
 		if [ ! -e "$1" ]; then
 			echo "Cannot open file " $1 " for GYM parsing"
@@ -78,6 +79,7 @@ while [ $# -gt 0 ]; do
 	if [ $1 = "-3ch" ]; then
 		echo YM2203 mode
 		CHIPTYPE=-DYM2203
+		MEGADRIVE_PSG=
 		shift
 		continue
 	fi
@@ -113,12 +115,12 @@ date
 
 # rm -rf obj_dir
 # export VERILATOR_ROOT=$(which verilator)
-
-if ! verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP -I../../hdl  \
-	-DDISPLAY_STEP --trace -DTEST_SUPPORT \
+if ! verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
+	-I../../hdl -I../../jt89/hdl \
+	-DDISPLAY_STEP --trace -DTEST_SUPPORT $MEGADRIVE_PSG \
     $SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
 	-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
-	-D$POSTPROC $VERI_EXTRA -DICARUS $FAST --exe jt12_test.cpp VGMParser.cpp; then
+	-D$POSTPROC $VERI_EXTRA -DICARUS $FAST --exe test.cpp VGMParser.cpp; then
 	exit $?
 fi
 

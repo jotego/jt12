@@ -43,7 +43,11 @@ module top(
     // combined output
     output  signed  [15:0]  snd_right,
     output  signed  [15:0]  snd_left,
-    output          snd_sample
+    output          snd_sample,
+    // Megadrive PSG
+    input           psg_wr_n,
+    output   [10:0] psg_snd,
+    output          psg_ready
 );
 
 `ifdef YM2203
@@ -67,9 +71,34 @@ u_jt12(
     .dout           ( dout      ),
     .irq_n          ( irq_n     ),
 
-    .snd_right      ( snd_right     ),
-    .snd_left       ( snd_left      ),
-    .snd_sample     ( snd_sample    )
+    .snd_right      ( snd_right ),
+    .snd_left       ( snd_left  ),
+    .snd_sample     ( snd_sample)
 );
+
+`ifdef MEGADRIVE_PSG
+reg psg_cen;
+reg [3:0] psg_cen_cnt;
+
+always @(posedge clk)
+    if( rst ) psg_cen_cnt <= 4'd0;
+    else psg_cen_cnt <= (psg_cen_cnt==4'he) ? 4'h0 : psg_cen_cnt+4'h1;
+
+always @(negedge clk)
+    psg_cen <= !psg_cen_cnt[0] && psg_cen_cnt!=4'he;
+
+jt89 u_jt89(
+    .rst            ( rst       ),        // rst should be at least 6 clk&cen cycles long
+    .clk            ( clk       ),        // CPU clock
+    .clk_en         ( psg_cen   ),
+    .wr_n           ( psg_wr_n  ),
+    .din            ( din       ),
+    .sound          ( psg_snd   ),
+    .ready          ( psg_ready )
+);
+`else 
+    assign psg_snd   = 11'd0;
+    assign psg_ready = 1'b1;
+`endif
 
 endmodule // jt03

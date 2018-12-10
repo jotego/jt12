@@ -109,12 +109,26 @@ public:
     ~WaveWritter();
 };
 
+class PSGCmdWritter {
+    int val;
+    Vtop *top;
+    bool done;
+    int last_clk;
+    int state, write_cnt;
+public:
+    PSGCmdWritter( Vtop* _top );
+    void Write( int _val );
+    void Eval();
+    bool Done() { return done; }
+};
+
 struct YMcmd { int addr; int cmd; int val; };
 
 int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
     Vtop* top = new Vtop;
     CmdWritter writter(top);
+    PSGCmdWritter psg_writter(top);
     bool trace = false, slow=false;
     RipParser *gym;
     bool forever=true;
@@ -269,6 +283,7 @@ int main(int argc, char** argv, char** env) {
     top->addr = 0;
     top->cs_n = 0;
     top->wr_n = 1;
+    top->psg_wr_n = 1;
     // cout << "Reset\n";
     while( sim_time.get_time() < 256*sim_time.period() ) {
         top->eval();
@@ -312,21 +327,20 @@ int main(int argc, char** argv, char** env) {
             top->clk = 1-clk;
             // int dout = top->dout;
             if( sim_time.get_time() > next_sample ) {
-                int16_t snd[2];
-                // snd[0] = (top->snd_left & 0x800) ? (top->snd_left|0xf000) : top->snd_left;
-                // snd[1] = (top->snd_right & 0x800) ? (top->snd_right|0xf000) : top->snd_right;
+                int16_t snd[3];
                 snd[0] = top->snd_left;
                 snd[1] = top->snd_right;
+                snd[2] = top->psg_snd*2;
                 // skip initial set of zero's
-                if( !skip_zeros || snd[0]!=0 || snd[1] != 0 ) {
+                if( !skip_zeros || snd[0]!=0 || snd[1]!=0 || snd[2]!=0) {
                     skip_zeros=false;
-                    // cout << (int)snd[0] << '\n';
                     wav.write( snd );
                 }
                 next_sample = sim_time.get_time() + SAMPLING_PERIOD;
             }
             last_sample = top->snd_sample;
             writter.Eval();
+            psg_writter.Eval();
 
             if( timeout!=0 && sim_time.get_time()>timeout ) {               
                 cout << "Timeout waiting for BUSY to clear\n";
@@ -334,7 +348,7 @@ int main(int argc, char** argv, char** env) {
                 goto finish;
             }
             if( sim_time.get_time() < wait ) continue;
-            if( !writter.Done() ) continue;
+            if( !writter.Done() || !psg_writter.Done() ) continue;
 
             if( !forced_values.empty() ) {
                 const YMcmd &c = forced_values.front();
@@ -344,7 +358,8 @@ int main(int argc, char** argv, char** env) {
                 continue;
             }
 
-            int action = gym->parse();
+            int action;
+            action = gym->parse();
             switch( action ) {
                 default: 
                     if( !sim_time.finish() ) {
@@ -352,6 +367,11 @@ int main(int argc, char** argv, char** env) {
                         continue;
                     }
                     goto finish;
+                case RipParser::cmd_psg:
+                    // cout << "PSG Write @" << sim_time.get_time() <<"\n";
+                    psg_writter.Write(gym->cmd);
+                    timeout = 0;
+                    break;
                 case RipParser::cmd_write: 
                     // if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
                     // /*(gym->addr==0 && gym->cmd>=(char)0x30) || */
@@ -375,7 +395,7 @@ int main(int argc, char** argv, char** env) {
                     goto finish;
                 case RipParser::cmd_error: // unsupported command
                     goto finish;                
-            }       
+            }
         }
         if(trace) tfp->dump(sim_time.get_time());
     }
@@ -398,8 +418,8 @@ finish:
 
 void WaveWritter::write( int16_t* lr ) {
     int16_t g[2];
-    g[0] = lr[0];
-    g[1] = lr[1];
+    g[0] = lr[0]+lr[2]; // Left  + PSG
+    g[1] = lr[1]+lr[2]; // right + PSG
     fsnd.write( (char*)&g, sizeof(int16_t)*2 );
 }
 
@@ -515,6 +535,43 @@ void CmdWritter::Eval() {
                     done = true;
                     state=5;
                 }
+                break;
+            default: break;
+        }
+    }
+    last_clk = clk;
+}
+
+PSGCmdWritter::PSGCmdWritter( Vtop* _top ) {
+    top  = _top;
+    last_clk = 0;
+    done = true;
+}
+
+void PSGCmdWritter::Write( int _val ) {
+    val  = _val;
+    done = false;
+    state = 0;
+}
+
+void PSGCmdWritter::Eval() {   
+    int clk = top->clk; 
+    if( (clk==0) && (last_clk != clk) ) {
+        switch( state ) {
+            case 0: 
+                top->din = val;
+                top->psg_wr_n = 0;
+                state=1;
+                write_cnt=3;
+                break;
+            case 1:
+                if(--write_cnt<=0) {
+                    top->psg_wr_n = 1;
+                    state = 2;
+                }
+                break;
+            case 2:             
+                done = true;
                 break;
             default: break;
         }

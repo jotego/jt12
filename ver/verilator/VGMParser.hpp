@@ -20,7 +20,7 @@ public:
 	virtual uint64_t length()=0;
 	virtual ~RipParser() {};
 	RipParser(int c) { clk_period = c; }
-	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1 };
+	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1, cmd_psg=2 };
 	chip_type chip() { return chip_cfg; }
 	virtual int period();
 };
@@ -31,7 +31,7 @@ class VGMParser : public RipParser {
 	std::ifstream file;	
 	std::ofstream ftrans; // translation to JTT format
 	float cur_time; // used by ftrans
-	int totalwait, pending_wait;
+	int totalwait, pending_wait, stream_id;
 	bool done, stream_notmplemented_info;
 	void adjust_wait() { 
 		double w=wait;
@@ -49,7 +49,7 @@ public:
 	int parse();
 	uint64_t length();
 	int period();
-	VGMParser(int c) : RipParser(c) {stream_data=NULL;}
+	VGMParser(int c) : RipParser(c) {stream_data=NULL; stream_id=0;}
 	~VGMParser();
 };
 
