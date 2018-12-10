@@ -33,10 +33,10 @@ module jt12_interpol6(
     input               cen,    // system clock enable
     input               clk_en, // synthesizer clock enable = cen/6
     input  signed [11:0] snd_in,
-    output signed [15:0] snd_out
+    output reg signed [15:0] snd_out
 );
 
-localparam filterbw=17;
+localparam filterbw=15;
 reg signed [filterbw-1:0] comb1,comb2, last_comb1, inter6, integ1, integ2;
 reg signed [11:0] last;
 
@@ -59,10 +59,12 @@ always @(posedge clk)
         integ1 <= {filterbw{1'b0}};
         integ2 <= {filterbw{1'b0}};
     end else if(cen) begin
-        integ1 <= integ1 + comb2;
+        integ1 <= integ1 + inter6;
         integ2 <= integ2 + integ1;
+        snd_out<= { integ2, 1'b0 } + { integ2[filterbw-1],integ2 };
     end
 
-assign snd_out = integ2[ filterbw-1:1 ];
+//assign snd_out = integ2[ filterbw-1:0 ];
+
 
 endmodule // jt12_interpol6
