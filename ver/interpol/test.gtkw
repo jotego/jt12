@@ -1,0 +1,39 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Thu Dec 13 20:16:03 2018
+[*]
+[dumpfile] "/home/jtejada/github/jt12/ver/interpol/test.lxt"
+[dumpfile_mtime] "Thu Dec 13 20:14:04 2018"
+[dumpfile_size] 24022644
+[savefile] "/home/jtejada/github/jt12/ver/interpol/test.gtkw"
+[timestart] 116328000000
+[size] 1920 1026
+[pos] -1 -1
+*-27.245840 117006700000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] test.
+[sst_width] 196
+[signals_width] 213
+[sst_expanded] 1
+[sst_vpaned_height] 305
+@8420
+test.u_mix.fm_snd[15:0]
+@20001
+-
+@8420
+test.u_mix.fm2[15:0]
+@20000
+-
+@8420
+test.u_mix.fm3[15:0]
+@20000
+-
+@8420
+test.u_mix.fm4[15:0]
+@20000
+-
+@8420
+test.u_mix.fm5[15:0]
+@20000
+-
+[pattern_trace] 1
+[pattern_trace] 0

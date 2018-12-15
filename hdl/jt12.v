@@ -345,8 +345,9 @@ jt12_op u_op(
 
 generate
     if( use_lr==1 ) begin
+        assign fm_snd_right[3:0] = 4'd0;
+        assign fm_snd_left [3:0] = 4'd0;
         assign snd_sample        = zero;
-        wire signed [11:0] pre_left, pre_right;
         jt12_acc #(.num_ch(num_ch)) u_acc(
             .rst        ( rst       ),
             .clk        ( clk       ),
@@ -365,25 +366,9 @@ generate
             .pcm        ( pcm       ),
             .alg        ( alg_I     ),
             // combined output
-            .left       ( pre_left  ),
-            .right      ( pre_right )
+            .left       ( fm_snd_left [15:4]  ),
+            .right      ( fm_snd_right[15:4]  )
         );
-        jt12_interpol6 u_left(
-            .rst        ( rst          ),
-            .clk        ( clk          ),
-            .clk_en     ( clk_en       ),
-            .cen        ( cen          ),
-            .snd_in     ( pre_left     ),
-            .snd_out    ( fm_snd_left  )
-        );
-        jt12_interpol6 u_right(
-            .rst        ( rst          ),
-            .clk        ( clk          ),
-            .clk_en     ( clk_en       ),
-            .cen        ( cen          ),
-            .snd_in     ( pre_right    ),
-            .snd_out    ( fm_snd_right )
-        );        
     end else begin
         wire signed [15:0] mono_snd;
         assign fm_snd_left  = mono_snd;

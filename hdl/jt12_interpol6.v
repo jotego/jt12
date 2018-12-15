@@ -16,7 +16,7 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 27-1-2017 
+    Date: 10-12-2018
     
     Each channel can use the full range of the DAC as they do not
     get summed in the real chip.

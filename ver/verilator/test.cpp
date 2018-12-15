@@ -102,9 +102,10 @@ public:
 };
 
 class WaveWritter {
-    ofstream fsnd;
+    ofstream fsnd, fhex;
+    bool dump_hex;
 public:
-    WaveWritter(const char *filename, int sample_rate );
+    WaveWritter(const char *filename, int sample_rate, bool hex );
     void write( int16_t *lr );
     ~WaveWritter();
 };
@@ -131,7 +132,7 @@ int main(int argc, char** argv, char** env) {
     PSGCmdWritter psg_writter(top);
     bool trace = false, slow=false;
     RipParser *gym;
-    bool forever=true;
+    bool forever=true, dump_hex=false;
     char wav_filename[512]="";
     char *gym_filename;
     SimTime sim_time;
@@ -141,6 +142,7 @@ int main(int argc, char** argv, char** env) {
     for( int k=1; k<argc; k++ ) {
         if( string(argv[k])=="-trace" ) { trace=true; continue; }
         if( string(argv[k])=="-slow" )  { slow=true;  continue; }
+        if( string(argv[k])=="-hex" )  { dump_hex=true;  continue; }
         if( string(argv[k])=="-gym" ) { 
             gym_filename = argv[++k];
             gym = ParserFactory( gym_filename, sim_time.period() );
@@ -304,7 +306,7 @@ int main(int argc, char** argv, char** env) {
     // cout << "Main loop\n";
     vluint64_t wait=0;
     int last_sample=0;
-    WaveWritter wav(wav_filename, SAMPLERATE);
+    WaveWritter wav(wav_filename, SAMPLERATE, dump_hex);
 
     // forced values
     list<YMcmd> forced_values;
@@ -421,10 +423,24 @@ void WaveWritter::write( int16_t* lr ) {
     g[0] = lr[0]+lr[2]; // Left  + PSG
     g[1] = lr[1]+lr[2]; // right + PSG
     fsnd.write( (char*)&g, sizeof(int16_t)*2 );
+    if( dump_hex ) {
+        fhex << hex << g[0] << '\n';
+        fhex << hex << g[1] << '\n';
+    }
 }
 
-WaveWritter::WaveWritter( const char *filename, int sample_rate ) {
+WaveWritter::WaveWritter( const char *filename, int sample_rate, bool hex ) {
     fsnd.open(filename, ios_base::binary);
+    dump_hex = hex;
+    if( dump_hex ) {
+        char *hexname;
+        hexname = new char[strlen(filename)+1];
+        strcpy(hexname,filename);
+        strcpy( hexname+strlen(filename)-4, ".hex" );
+        cout << "Hex file " << hexname << '\n';
+        fhex.open(hexname);
+        delete[] hexname;
+    }
     // write header
     char zero=0;
     for( int k=0; k<45; k++ ) fsnd.write( &zero, 1 );
