@@ -2,26 +2,13 @@
 
 TOP=top
 DUMPSIGNALS=
-DUMPSOUND=DONTDUMPSOUND
-DUMPLFO=DONTDUMPLFO
-LIMITTIME="LIMITTIME=100000"
 EXTRA=
-POSTPROC=NOTPOSTPROC
-RANDWAIT=0
-TIMERONLY=NOTTIMERONLY
-TEST_NAME=NOTESTNAME
-SSG_TEST=NOSSG_TEST
 GYM_FILE=
 GYM_ARG=
-MEGADRIVE_PSG=-DMEGADRIVE_PSG
-#FAST=
 FAST=-DFASTDIV
 VERI_EXTRA=
-# use SIMULATION="-DSIMULATION" to enable simulation statements
-SIMULATION=
 WAV_FILE=
-ADDJT03=
-CHIPTYPE=-DYM2612
+CHIPTYPE="-DYM2612 -DMEGADRIVE_PSG"
 
 while [ $# -gt 0 ]; do
 	if [ "$1" = "-w" ]; then
@@ -53,7 +40,7 @@ while [ $# -gt 0 ]; do
 	fi
 	if [ "$1" = "-sim" ]; then
 		echo "Simulation signals enabled"
-		SIMULATION=-DSIMULATION
+		VERI_EXTRA="$VERI_EXTRA -DSIMULATION"
 		shift
 		continue
 	fi
@@ -85,8 +72,7 @@ while [ $# -gt 0 ]; do
 	fi	
 	if [ $1 = "-3ch" ]; then
 		echo YM2203 mode
-		CHIPTYPE=-DYM2203
-		MEGADRIVE_PSG=
+		CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG"
 		shift
 		continue
 	fi
@@ -122,12 +108,13 @@ date
 
 # rm -rf obj_dir
 # export VERILATOR_ROOT=$(which verilator)
+echo "verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
+	-I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
+    $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp"
+
 if ! verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
-	-I../../hdl -I../../jt89/hdl \
-	-DDISPLAY_STEP --trace -DTEST_SUPPORT $MEGADRIVE_PSG \
-    $SIMULATION -D$TIMERONLY -D$DUMPSOUND -D$LIMITTIME \
-	-D$DUMPLFO -D$TEST_NAME -D$SSG_TEST \
-	-D$POSTPROC $VERI_EXTRA -DICARUS $FAST --exe test.cpp VGMParser.cpp; then
+	-I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
+    $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp; then
 	exit $?
 fi
 
