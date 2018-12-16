@@ -24,4 +24,4 @@ while [ $# -gt 0 ]; do
 done
 
 # echo $EXTRA
-iverilog test.v ../../hdl/jt12_{genmix,interpol}.v $EXTRA -o sim && sim -lxt
+iverilog test.v ../../hdl/jt12_{genmix,interpol,decim}.v $EXTRA -o sim && sim -lxt

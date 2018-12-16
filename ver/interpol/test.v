@@ -105,7 +105,7 @@ initial begin
     `ifdef DUMP_ALL
         $dumpvars(3, test);
     `endif
-    $dumpvars(1, test.u_mix.u_psg1);
+    $dumpvars(1, test.u_mix.u_psg2);
     $dumpvars(0,test.fm_snd);
     $dumpvars(0,test.u_mix.fm2);
     $dumpvars(0,test.u_mix.fm3);
@@ -113,6 +113,9 @@ initial begin
     $dumpvars(0,test.u_mix.fm5);
     $dumpvars(0,test.psg_snd);
     $dumpvars(0,test.u_mix.psg1);
+    $dumpvars(0,test.u_mix.psg2);
+    $dumpvars(0,test.u_mix.psg3);
+    $dumpvars(0,test.u_mix.mixed);
     $dumpon;
 end
 
