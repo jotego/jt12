@@ -57,7 +57,9 @@ always @(posedge clk)
         inter_cnt <= {cntw{1'b0}};
     end else if(cen_out) begin
         inter6 <= inter_cnt=={cntw{1'b0}} ? comb2 : {calcw{1'b0}};
+        /* verilator lint_off WIDTH */
         inter_cnt <= inter_cnt==rate-1'b1 ? {cntw{1'b0}} : inter_cnt+1'b1;
+        /* verilator lint_on WIDTH */
     end
 
 // integrator at clk x cen sampling rate

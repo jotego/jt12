@@ -1,6 +1,7 @@
 `timescale 1 ns / 1 ps
 
 module test;
+/* verilator lint_off STMTDLY */
 
 reg clk, rst;
 reg [15:0] fm_data[0:65535];

@@ -24,4 +24,7 @@ while [ $# -gt 0 ]; do
 done
 
 # echo $EXTRA
+if ! verilator --lint-only jt12_genmix.v -I../../hdl; then
+    exit $?
+fi
 iverilog test.v ../../hdl/jt12_{genmix,interpol,decim}.v $EXTRA -o sim && sim -lxt

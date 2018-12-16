@@ -55,16 +55,16 @@ reg [1:0] psgcnt144;
 
 always @(posedge clk)
     if( rst ) begin
-        psgcnt48  <= 5'd0;
+        psgcnt48  <= 6'd0;
         psgcnt240 <= 3'd0;
-        psgcnt144 <= 8'd0;
+        psgcnt144 <= 2'd0;
         psgcnt1008<= 3'd0;
     end else begin
         psgcnt48  <= psgcnt48 ==6'd47  ? 6'd0 : psgcnt48 +6'd1;
         if( psgcnt48 == 6'd47 ) begin
             psgcnt240 <= psgcnt240==3'd4 ? 3'd0 : psgcnt240+3'd1;
-            psgcnt144  <= psgcnt144 ==3'd2 ? 3'd0 : psgcnt144+3'd1;
-            if( psgcnt144==3'd0 )
+            psgcnt144  <= psgcnt144 ==2'd2 ? 2'd0 : psgcnt144+2'd1;
+            if( psgcnt144==2'd0 )
                 psgcnt1008 <= psgcnt1008==3'd6 ? 3'd0 : psgcnt1008+3'd1;
         end
     end
@@ -73,8 +73,8 @@ reg psg_cen_1008, psg_cen_240, psg_cen_48, psg_cen_144;
 always @(negedge clk) begin
     psg_cen_240 <= psgcnt48 ==6'd47 && psgcnt240 == 3'd0;
     psg_cen_48  <= psgcnt48 ==6'd47;
-    psg_cen_144 <= psgcnt48 ==6'd47 && psgcnt144==3'd0;
-    psg_cen_1008<= psgcnt48 ==6'd47 && psgcnt144==3'd0 && psgcnt1008==3'd0;
+    psg_cen_144 <= psgcnt48 ==6'd47 && psgcnt144==2'd0;
+    psg_cen_1008<= psgcnt48 ==6'd47 && psgcnt144==2'd0 && psgcnt1008==3'd0;
 end
 
 wire signed [10:0] psg1, psg2, psg3; // MSB will always be zero, but needed for
@@ -92,7 +92,7 @@ u_psg1(
 );
 
 // 144
-jt12_decim #(.calcw(18),.inw(11) ) 
+jt12_decim #(.calcw(14),.inw(11) ) 
 u_psg2(
     .clk    ( clk         ),
     .rst    ( rst         ),        
@@ -103,7 +103,7 @@ u_psg2(
 );
 
 // 1008
-jt12_decim #(.calcw(18),.inw(11) ) 
+jt12_decim #(.calcw(14),.inw(11) ) 
 u_psg3(
     .clk    ( clk         ),
     .rst    ( rst         ),        
@@ -119,21 +119,21 @@ u_psg3(
 // 54MHz count up to:
 // 252 -> 63 -> 9 -> 1
 reg [1:0] clkcnt252, clkcnt1008;
-reg [3:0] clkcnt63;
+reg [2:0] clkcnt63;
 reg [3:0] clkcnt9;
 always @(posedge clk)
     if( rst ) begin
         clkcnt1008<= 2'd0;
         clkcnt252 <= 2'd0;
-        clkcnt63  <= 4'd0;
+        clkcnt63  <= 3'd0;
         clkcnt9   <= 4'd0;
     end else begin
         clkcnt9   <= clkcnt9  ==4'd8   ? 4'd0 : clkcnt9  +4'd1;
         if( clkcnt9== 4'd8 ) begin
-            clkcnt63  <= clkcnt63 ==3'd6  ? 3'd0 : clkcnt63 +6'd1;
+            clkcnt63  <= clkcnt63 ==3'd6  ? 3'd0 : clkcnt63 +3'd1;
             if( clkcnt63==3'd6 ) begin
                 clkcnt252 <= clkcnt252+2'd1;
-                if(clkcnt252==3'd3) clkcnt1008<=clkcnt1008+2'd1;
+                if(clkcnt252==2'd3) clkcnt1008<=clkcnt1008+2'd1;
             end
         end
     end 
@@ -150,7 +150,7 @@ wire signed [15:0] fm2,fm3,fm4,fm5;
 
 reg [15:0] mixed;
 always @(posedge clk)
-    mixed <= fm_snd + psg3;
+    mixed <= fm_snd + {{5{psg3[10]}},psg3};
 
 // 1008 --> 252 x4
 localparam wx4=18;
