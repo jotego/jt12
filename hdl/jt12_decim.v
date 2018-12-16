@@ -37,7 +37,6 @@ always @(posedge clk)
     if(rst) begin
         integ1 <= {calcw{1'b0}};
         integ2 <= {calcw{1'b0}};
-        snd_out <= {inw{1'b0}};
     end else if(cen_in) begin
         integ1 <= integ1 + { {wdiff{snd_in[inw-1]}},inw};
         integ2 <= integ2 + integ1;
@@ -58,6 +57,7 @@ always @(posedge clk)
         comb2 <= {calcw{1'b0}};
         last_comb1 <= {calcw{1'b0}};
         last <= {inw{1'b0}};
+        snd_out <= {inw{1'b0}};
     end else if(cen_out) begin
         last <= integ2;
         comb1 <= integ2 - last;
