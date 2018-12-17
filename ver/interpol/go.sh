@@ -27,4 +27,4 @@ done
 if ! verilator --lint-only jt12_genmix.v -I../../hdl; then
     exit $?
 fi
-iverilog test.v ../../hdl/jt12_{genmix,interpol,decim}.v $EXTRA -o sim && sim -lxt
+iverilog test.v ../../hdl/jt12_{genmix,interpol,decim,comb}.v $EXTRA -o sim && sim -lxt

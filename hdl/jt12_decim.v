@@ -33,8 +33,8 @@ module jt12_decim #(parameter calcw=18, inw=16,
     output reg signed [inw-1:0] snd_out
 );
 
-reg signed [calcw-1:0] comb_op, inter6;
-wire signed [calcw-1:0] integ_op;
+reg signed [calcw-1:0] inter6;
+wire signed [calcw-1:0] integ_op, comb_op;
 localparam wdiff = calcw - inw;
 
 // integrator at clk x cen sampling rate
@@ -44,7 +44,7 @@ generate
     assign integ_op = integ_data[n];
     always @(*)
         integ_data[0] = { {wdiff{snd_in[inw-1]}}, snd_in };
-    for(k2=1;k2<n;k2=k2+1) begin    
+    for(k2=1;k2<=n;k2=k2+1) begin    
         always @(posedge clk) 
             if(rst) begin
                 integ_data[k2] <= {calcw{1'b0}};
@@ -64,11 +64,10 @@ always @(posedge clk)
 
 generate
     genvar k;
-    reg [calcw-1:0] comb_data[0:n-1];
-    always @(*)
-        comb_data[0] = inter6;
+    wire [calcw-1:0] comb_data[0:n];
+    assign comb_data[0] = inter6;
     assign comb_op = comb_data[n];
-    for(k=0;k<n-1;k=k+1) begin
+    for(k=0;k<n;k=k+1) begin
         jt12_comb #(.w(calcw),.m(m)) u_comb(
             .rst    ( rst            ),
             .clk    ( clk            ),

@@ -1,38 +1,71 @@
 [*]
-[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
-[*] Thu Dec 13 22:20:24 2018
+[*] GTKWave Analyzer v3.3.93 (w)1999-2018 BSI
+[*] Mon Dec 17 22:22:14 2018
 [*]
-[dumpfile] "/home/jtejada/github/jt12/ver/interpol/test.lxt"
-[dumpfile_mtime] "Thu Dec 13 22:18:49 2018"
-[dumpfile_size] 1330376
-[savefile] "/home/jtejada/github/jt12/ver/interpol/psg.gtkw"
-[timestart] 0
-[size] 1920 1026
+[dumpfile] "/home/jtejada/repo/github/jt12/ver/interpol/test.lxt"
+[dumpfile_mtime] "Mon Dec 17 22:21:18 2018"
+[dumpfile_size] 2365884
+[savefile] "/home/jtejada/repo/github/jt12/ver/interpol/psg.gtkw"
+[timestart] 159910000000
+[size] 1680 996
 [pos] -1 -1
-*-34.658520 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-31.485346 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] test.
 [treeopen] test.u_mix.
-[sst_width] 196
-[signals_width] 191
+[treeopen] test.u_mix.u_psg2.
+[sst_width] 214
+[signals_width] 178
 [sst_expanded] 1
 [sst_vpaned_height] 305
-@8024
+@8420
 test.psg_snd[10:0]
 @20000
 -
 -
--
--
-@8024
+@c08420
 test.psg1[11:0]
+@28
+(0)test.psg1[11:0]
+(1)test.psg1[11:0]
+(2)test.psg1[11:0]
+(3)test.psg1[11:0]
+(4)test.psg1[11:0]
+(5)test.psg1[11:0]
+(6)test.psg1[11:0]
+(7)test.psg1[11:0]
+(8)test.psg1[11:0]
+(9)test.psg1[11:0]
+(10)test.psg1[11:0]
+(11)test.psg1[11:0]
+@1401200
+-group_end
 @20000
 -
 -
+@8420
+test.psg2[11:0]
+@20000
+-
+-
+@c08421
+test.psg3[11:0]
 @29
-test.u_mix.u_psg1.cen_in[0]
-@28
-test.u_mix.u_psg1.cen_out[0]
-@22
-test.u_mix.u_psg1.inter6[16:0]
+(0)test.psg3[11:0]
+(1)test.psg3[11:0]
+(2)test.psg3[11:0]
+(3)test.psg3[11:0]
+(4)test.psg3[11:0]
+(5)test.psg3[11:0]
+(6)test.psg3[11:0]
+(7)test.psg3[11:0]
+(8)test.psg3[11:0]
+(9)test.psg3[11:0]
+(10)test.psg3[11:0]
+(11)test.psg3[11:0]
+@1401201
+-group_end
+@20000
+-
+-
 [pattern_trace] 1
 [pattern_trace] 0

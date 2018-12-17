@@ -81,7 +81,7 @@ wire signed [11:0] psg0, psg1, psg2, psg3;
 assign psg0 = { psg_snd[10], psg_snd };
 
 // 48
-jt12_interpol #(.calcw(21),.inw(12),.rate(5),.m(4),.n(2)) 
+jt12_interpol #(.calcw(19),.inw(12),.rate(5),.m(4),.n(2)) 
 u_psg1(
     .clk    ( clk      ),
     .rst    ( rst      ),        
@@ -92,7 +92,7 @@ u_psg1(
 );
 
 // 144
-jt12_decim #(.calcw(20),.inw(12),.rate(3),.m(2),.n(3) ) 
+jt12_decim #(.calcw(19),.inw(12),.rate(3),.m(2),.n(3) ) 
 u_psg2(
     .clk    ( clk         ),
     .rst    ( rst         ),        
@@ -153,8 +153,7 @@ always @(posedge clk)
     mixed <= fm_snd + {{4{psg3[11]}},psg3};
 
 // 1008 --> 252 x4
-localparam wx4=18;
-jt12_interpol #(.calcw(wx4),.inw(16),.rate(4),.m(1),.n(1)) 
+jt12_interpol #(.calcw(17),.inw(16),.rate(4),.m(1),.n(1)) 
 u_fm2(
     .clk    ( clk      ),
     .rst    ( rst      ),
@@ -165,7 +164,7 @@ u_fm2(
 );
 
 // 252 --> 63 x4
-jt12_interpol #(.calcw(wx4),.inw(16),.rate(4),.m(1),.n(3)) 
+jt12_interpol #(.calcw(19),.inw(16),.rate(4),.m(1),.n(3)) 
 u_fm3(
     .clk    ( clk      ),
     .rst    ( rst      ),    
@@ -176,7 +175,7 @@ u_fm3(
 );
 
 // 63 --> 9 x7
-jt12_interpol #(.calcw(24),.inw(16),.rate(7),.m(2),.n(2)) 
+jt12_interpol #(.calcw(21),.inw(16),.rate(7),.m(2),.n(2)) 
 u_fm4(
     .clk    ( clk      ),
     .rst    ( rst      ),        
@@ -187,7 +186,7 @@ u_fm4(
 );
 
 // 9 --> 1 x9
-jt12_interpol #(.calcw(24),.inw(16),.rate(9),.m(2),.n(2)) 
+jt12_interpol #(.calcw(21),.inw(16),.rate(9),.m(2),.n(2)) 
 u_fm5(
     .clk    ( clk      ),
     .rst    ( rst      ),        

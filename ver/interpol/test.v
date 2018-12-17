@@ -104,7 +104,7 @@ jt12_genmix u_mix(
 initial begin
     $dumpfile("test.lxt");
     `ifdef DUMP_ALL
-        $dumpvars(3, test);
+        $dumpvars(0, test);
     `endif
     $dumpvars(1, test.u_mix.u_psg2);
     $dumpvars(0,test.fm_snd);

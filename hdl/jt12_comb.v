@@ -31,7 +31,6 @@ module jt12_comb #(parameter
     output reg signed [w-1:0] snd_out
 );
 
-reg signed [w-1:0] comb;
 wire signed [w-1:0] prev;
 
 // m-delay stage
@@ -39,7 +38,7 @@ generate
     genvar k;
     reg signed [w-1:0] mem[0:m-1];
     assign prev=mem[m-1];
-    for(k=0;k<m-1;k=k+1) begin
+    for(k=0;k<m;k=k+1) begin
         always @(posedge clk)
             if(rst) begin
                 mem[k] <= {w{1'b0}};
@@ -52,9 +51,9 @@ endgenerate
 // Comb filter at synthesizer sampling rate
 always @(posedge clk)
     if(rst) begin
-        comb <= {w{1'b0}};
+        snd_out <= {w{1'b0}};
     end else if(cen) begin
-        comb <= comb - prev;
+        snd_out <= snd_in - prev;
     end
 
 endmodule // jt12_comb
