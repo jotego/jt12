@@ -20,7 +20,11 @@
     
 */
 
-module jt12_decim #(parameter calcw=18, inw=16)(
+module jt12_decim #(parameter calcw=18, inw=16,
+    n=2,    // number of stages
+    m=1,    // depth of comb filter
+    rate=2  // it will stuff with as many as (rate-1) zeros    
+)(
     input               rst,
     input               clk,
 (* direct_enable *)    input               cen_in,
@@ -29,42 +33,59 @@ module jt12_decim #(parameter calcw=18, inw=16)(
     output reg signed [inw-1:0] snd_out
 );
 
-reg signed [calcw-1:0] comb1,comb2, last, last_comb1, inter6, integ1, integ2;
+reg signed [calcw-1:0] comb_op, inter6;
+wire signed [calcw-1:0] integ_op;
 localparam wdiff = calcw - inw;
 
-// integrator at input sampling rate
-always @(posedge clk) 
-    if(rst) begin
-        integ1 <= {calcw{1'b0}};
-        integ2 <= {calcw{1'b0}};
-    end else if(cen_in) begin
-        integ1 <= integ1 + { {wdiff{snd_in[inw-1]}},snd_in};
-        integ2 <= integ2 + integ1;
+// integrator at clk x cen sampling rate
+generate
+    genvar k2;
+    reg [calcw-1:0] integ_data[0:n];
+    assign integ_op = integ_data[n];
+    always @(*)
+        integ_data[0] = { {wdiff{snd_in[inw-1]}}, snd_in };
+    for(k2=1;k2<n;k2=k2+1) begin    
+        always @(posedge clk) 
+            if(rst) begin
+                integ_data[k2] <= {calcw{1'b0}};
+            end else if(cen_in) begin
+                integ_data[k2] <= integ_data[k2] + integ_data[k2-1];
+            end
     end
+endgenerate
 
 // interpolator 
 always @(posedge clk) 
     if(rst) begin
         inter6 <= {calcw{1'b0}};
     end else if(cen_out) begin
-        inter6 <= integ2;
+        inter6 <= integ_op;
     end
+
+generate
+    genvar k;
+    reg [calcw-1:0] comb_data[0:n-1];
+    always @(*)
+        comb_data[0] = inter6;
+    assign comb_op = comb_data[n];
+    for(k=0;k<n-1;k=k+1) begin
+        jt12_comb #(.w(calcw),.m(m)) u_comb(
+            .rst    ( rst            ),
+            .clk    ( clk            ),
+            .cen    ( cen_out        ),
+            .snd_in ( comb_data[k]   ),
+            .snd_out( comb_data[k+1] )
+        );
+    end
+endgenerate
 
 // Comb filter at synthesizer sampling rate
 always @(posedge clk)
     if(rst) begin
-        comb1 <= {calcw{1'b0}};
-        comb2 <= {calcw{1'b0}};
-        last_comb1 <= {calcw{1'b0}};
-        last <= {calcw{1'b0}};
         snd_out <= {inw{1'b0}};
     end else if(cen_out) begin
-        last <= integ2;
-        comb1 <= integ2 - last;
-        last_comb1 <= comb1;
-        comb2 <= comb1 - last_comb1;
-        snd_out<= comb2[calcw-1:wdiff];
+        snd_out<= comb_op[calcw-1:wdiff];
     end
 
 
-endmodule // jt12_interpol6
+endmodule
