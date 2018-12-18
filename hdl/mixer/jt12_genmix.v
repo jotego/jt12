@@ -35,9 +35,14 @@
 module jt12_genmix(
     input               rst,
     input               clk,
-    input signed [15:0] fm_snd,
+    input signed [15:0] fm_left,
+    input signed [15:0] fm_right,
     input signed [10:0] psg_snd,
-    output reg signed [15:0] snd      // Mixed sound at clk sample rate
+    input fm_en,  // enable FM
+    input psg_en, // enable PSG
+    // Mixed sound at clk sample rate
+    output reg signed [15:0] snd_left,
+    output reg signed [15:0] snd_right
 );
 
 /////////////////////////////////////////////////
@@ -78,7 +83,7 @@ always @(negedge clk) begin
 end
 
 wire signed [11:0] psg0, psg1, psg2, psg3; 
-assign psg0 = { psg_snd[10], psg_snd };
+assign psg0 = psg_en ? { psg_snd[10], psg_snd } : 12'b0;
 
 // 48
 jt12_interpol #(.calcw(19),.inw(12),.rate(5),.m(4),.n(2)) 
@@ -146,59 +151,30 @@ always @(negedge clk) begin
     cen_1008 <= clkcnt9  ==4'd8 && clkcnt63  ==3'd0 && clkcnt252 ==2'd0 && clkcnt1008==2'd0;
 end
 
-wire signed [15:0] fm2,fm3,fm4,fm5;
-
-reg [15:0] mixed;
-always @(posedge clk)
-    mixed <= fm_snd + {{3{psg3[11]}},psg3,1'b0};
-
-// 1008 --> 252 x4
-jt12_interpol #(.calcw(17),.inw(16),.rate(4),.m(1),.n(1)) 
-u_fm2(
-    .clk    ( clk      ),
-    .rst    ( rst      ),
-    .cen_in ( cen_1008 ),
-    .cen_out( cen_252  ),
-    .snd_in ( mixed    ),
-    .snd_out( fm2      )
+jt12_fm_uprate u_left(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .fm_snd     ( fm_left   ),
+    .psg_snd    ( psg3      ),
+    .fm_en      ( fm_en     ),
+    .cen_1008   ( cen_1008  ),
+    .cen_252    ( cen_252   ),
+    .cen_63     ( cen_63    ),
+    .cen_9      ( cen_9     ),
+    .snd        ( snd_left  )      // Mixed sound at clk sample rate
 );
 
-// 252 --> 63 x4
-jt12_interpol #(.calcw(19),.inw(16),.rate(4),.m(1),.n(3)) 
-u_fm3(
-    .clk    ( clk      ),
-    .rst    ( rst      ),    
-    .cen_in ( cen_252  ),
-    .cen_out( cen_63   ),
-    .snd_in ( fm2      ),
-    .snd_out( fm3      )
+jt12_fm_uprate u_right(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .fm_snd     ( fm_right  ),
+    .psg_snd    ( psg3      ),
+    .fm_en      ( fm_en     ),
+    .cen_1008   ( cen_1008  ),
+    .cen_252    ( cen_252   ),
+    .cen_63     ( cen_63    ),
+    .cen_9      ( cen_9     ),
+    .snd        ( snd_right )      // Mixed sound at clk sample rate
 );
-
-// 63 --> 9 x7
-jt12_interpol #(.calcw(21),.inw(16),.rate(7),.m(2),.n(2)) 
-u_fm4(
-    .clk    ( clk      ),
-    .rst    ( rst      ),        
-    .cen_in ( cen_63   ),
-    .cen_out( cen_9    ),
-    .snd_in ( fm3      ),
-    .snd_out( fm4      )
-);
-
-// 9 --> 1 x9
-jt12_interpol #(.calcw(21),.inw(16),.rate(9),.m(2),.n(2)) 
-u_fm5(
-    .clk    ( clk      ),
-    .rst    ( rst      ),        
-    .cen_in ( cen_9    ),
-    .cen_out( 1'b1     ),
-    .snd_in ( fm4      ),
-    .snd_out( fm5      )
-);
-
-wire signed [15:0] psg_snd16 = 16'd0;
-
-always @(posedge clk)
-    snd <= psg_snd16 + fm5;
 
 endmodule // jt12_genmix
