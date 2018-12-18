@@ -35,7 +35,7 @@ port
     fm_en   : in  std_logic;
     psg_en  : in  std_logic;
     -- Mixed sound at 54 MHz
-    snd_left  : out std_logic_vector(15 downto 0)
+    snd_left  : out std_logic_vector(15 downto 0);
     snd_right : out std_logic_vector(15 downto 0)
 );
 end component;

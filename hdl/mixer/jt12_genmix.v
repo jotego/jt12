@@ -41,8 +41,8 @@ module jt12_genmix(
     input fm_en,  // enable FM
     input psg_en, // enable PSG
     // Mixed sound at clk sample rate
-    output reg signed [15:0] snd_left,
-    output reg signed [15:0] snd_right
+    output signed [15:0] snd_left,
+    output signed [15:0] snd_right
 );
 
 /////////////////////////////////////////////////

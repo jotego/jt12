@@ -38,7 +38,7 @@ generate
     genvar k;
     reg signed [w-1:0] mem[0:m-1];
     assign prev=mem[m-1];
-    for(k=0;k<m;k=k+1) begin
+    for(k=0;k<m;k=k+1) begin : mem_gen
         always @(posedge clk)
             if(rst) begin
                 mem[k] <= {w{1'b0}};

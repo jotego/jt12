@@ -39,7 +39,7 @@ module jt12_fm_uprate(
     input cen_252,
     input cen_63,
     input cen_9,
-    output reg signed [15:0] snd      // Mixed sound at clk sample rate
+    output signed [15:0] snd      // Mixed sound at clk sample rate
 );
 
 wire signed [15:0] fm2,fm3,fm4;
