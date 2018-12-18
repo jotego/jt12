@@ -15,7 +15,7 @@ end
 
 `ifdef FINISH_AT
 initial
-    #((`FINISH_AT)*1000) $finish;
+    #((`FINISH_AT)*1000_000) $finish;
 `endif
 
 initial begin

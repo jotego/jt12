@@ -150,7 +150,7 @@ wire signed [15:0] fm2,fm3,fm4,fm5;
 
 reg [15:0] mixed;
 always @(posedge clk)
-    mixed <= fm_snd + {{4{psg3[11]}},psg3};
+    mixed <= fm_snd + {{3{psg3[11]}},psg3,1'b0};
 
 // 1008 --> 252 x4
 jt12_interpol #(.calcw(17),.inw(16),.rate(4),.m(1),.n(1)) 
