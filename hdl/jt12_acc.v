@@ -67,22 +67,23 @@ always @(*) begin
     endcase
 end
 
-reg [8:0] pcm_data;
+wire signed [8:0] pcm_signed = { ~pcm[8], pcm[7:0] };
+//reg [8:0] pcm_data;
 reg pcm_sum;
 
 always @(posedge clk) if(clk_en)
     if( zero ) pcm_sum <= 1'b1;
     else if( ch6op ) pcm_sum <= 1'b0;
 
-always @(*)
-    pcm_data = pcm_sum ? { ~pcm[8], pcm[7:0] } : 9'd0;
+// always @(*)
+//     pcm_data = pcm_sum ? { ~pcm[8], pcm[7:0] } : 9'd0;
 
 wire use_pcm = ch6op && pcm_en;
 wire sum_or_pcm = sum_en | use_pcm;
 wire left_en = rl[1];
 wire right_en= rl[0];
-wire signed [8:0] pcm_data2; // interpolated data
-wire [8:0] acc_input =  use_pcm ? pcm_data2 : op_result;
+wire signed [8:0] pcm_data; // interpolated data
+wire [8:0] acc_input =  use_pcm ? pcm_data : op_result;
 
 // up-rate PCM samples
 reg zero_cen, zeroin_cen;
@@ -102,14 +103,14 @@ always @(negedge clk) begin
     zeroin_cen <= zero_edge && alt2;
 end
 
-jt12_interpol #(.calcw(15),.inw(9),.rate(2),.m(4),.n(2)) 
+jt12_interpol #(.calcw(16),.inw(9),.rate(2),.m(4),.n(2)) 
 u_pcm_up(
     .clk    ( clk         ),
     .rst    ( rst         ),        
     .cen_in ( zeroin_cen  ),
     .cen_out( zero_cen    ),
-    .snd_in ( pcm_data    ),
-    .snd_out( pcm_data2   )
+    .snd_in ( pcm_signed  ),
+    .snd_out( pcm_data    )
 );
 
 // Continuous output
