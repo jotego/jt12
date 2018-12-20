@@ -81,7 +81,36 @@ wire use_pcm = ch6op && pcm_en;
 wire sum_or_pcm = sum_en | use_pcm;
 wire left_en = rl[1];
 wire right_en= rl[0];
-wire [8:0] acc_input =  use_pcm ? pcm_data : op_result;
+wire signed [8:0] pcm_data2; // interpolated data
+wire [8:0] acc_input =  use_pcm ? pcm_data2 : op_result;
+
+// up-rate PCM samples
+reg zero_cen, zeroin_cen;
+reg last_zero, alt2;
+reg zero_edge;
+always @(posedge clk) 
+    if(rst)
+        alt2 <= 1'b0;
+    else begin
+        last_zero <= zero;
+        zero_edge <= !last_zero && zero;
+        alt2 <= (!last_zero && zero) ? ~alt2 : alt2;
+    end
+
+always @(negedge clk) begin
+    zero_cen  <= zero_edge;
+    zeroin_cen <= zero_edge && alt2;
+end
+
+jt12_interpol #(.calcw(15),.inw(9),.rate(2),.m(4),.n(2)) 
+u_pcm_up(
+    .clk    ( clk         ),
+    .rst    ( rst         ),        
+    .cen_in ( zeroin_cen  ),
+    .cen_out( zero_cen    ),
+    .snd_in ( pcm_data    ),
+    .snd_out( pcm_data2   )
+);
 
 // Continuous output
 wire signed   [11:0]  pre_left, pre_right;

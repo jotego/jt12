@@ -24,6 +24,8 @@
 ../../hdl/jt12_sh.v
 ../../hdl/jt12_sumch.v
 ../../hdl/jt12_timers.v
+../../hdl/mixer/jt12_interpol.v
+../../hdl/mixer/jt12_comb.v
 ../../jt49/hdl/jt49.v
 ../../jt49/hdl/jt49_eg.v
 ../../jt49/hdl/jt49_div.v
