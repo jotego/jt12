@@ -9,26 +9,32 @@ module jt12_pcm(
 );
 
 reg [2:0] ratesel;
-reg [2:0] cnt8;
+reg [3:0] cnt8;
+reg wrcnt;
 reg last_zero, wrclr;
 wire zero_edge = !last_zero && zero;
 
 always @(posedge clk)
     if(rst) begin
-        cnt8    <= 3'd0;
+        cnt8    <= 4'd0;
         wrclr   <= 1'd0;
         ratesel <= 3'd0;
+        wrcnt   <= 1'b0;
     end else if(clk_en) begin 
         if( pcm_wr ) begin
-            case( cnt8[2:1] )
-                2'd3: ratesel <= 3'b111; // x8
-                2'd2: ratesel <= 3'b011; // x4
-                2'd1: ratesel <= 3'b001; // x2
-                2'd0: ratesel <= 3'b000; // x1
-            endcase 
-            cnt8 <= 3'd0;
+            if( wrcnt ) begin
+                case( cnt8[3:2] )
+                    2'd3: ratesel <= 3'b111; // x8
+                    2'd2: ratesel <= 3'b011; // x4
+                    2'd1: ratesel <= 3'b001; // x2
+                    2'd0: ratesel <= 3'b000; // x1
+                endcase 
+                cnt8 <= 4'd0;
+                wrcnt <= 1'b0;
+            end
+            else wrcnt <= 1'b1;
         end else 
-            if( cnt8<3'd7 && zero ) cnt8 <= cnt8 + 3'd1;
+            if( cnt8!=4'hf && zero ) cnt8 <= cnt8 + 4'd1;
     end
 
 // up-rate PCM samples
