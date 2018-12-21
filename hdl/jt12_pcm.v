@@ -71,7 +71,7 @@ always @(posedge clk) if( clk_en )
 
 // rate x2
 wire signed [8:0] pcm_in2 = ratesel[1] ? pcm2 : pcm;
-jt12_interpol #(.calcw(11),.inw(9),.rate(2),.m(1),.n(2)) 
+jt12_interpol #(.calcw(10),.inw(9),.rate(2),.m(1),.n(2)) 
 u_uprate_3(
     .clk    ( clk         ),
     .rst    ( rst         ),        
@@ -83,7 +83,7 @@ u_uprate_3(
 
 // rate x2
 wire signed [8:0] pcm_in1 = ratesel[2] ? pcm1 : pcm;
-jt12_interpol #(.calcw(11),.inw(9),.rate(2),.m(1),.n(2)) 
+jt12_interpol #(.calcw(10),.inw(9),.rate(2),.m(1),.n(2)) 
 u_uprate_2(
     .clk    ( clk         ),
     .rst    ( rst         ),        
@@ -94,7 +94,7 @@ u_uprate_2(
 );
 
 // rate x2
-jt12_interpol #(.calcw(11),.inw(9),.rate(2),.m(1),.n(2)) 
+jt12_interpol #(.calcw(10),.inw(9),.rate(2),.m(1),.n(2)) 
 u_uprate_1(
     .clk    ( clk         ),
     .rst    ( rst         ),        
