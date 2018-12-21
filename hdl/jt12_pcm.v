@@ -4,37 +4,31 @@ module jt12_pcm(
 (* direct_enable *) input clk_en,
     input               zero,
     input   signed [8:0] pcm,
-    input               pcm_wr, // runs without gating the clock
+    input               pcm_wr, 
     output signed [8:0] pcm_resampled
 );
 
 reg [2:0] ratesel;
 reg [2:0] cnt8;
-reg [3:0] wrcnt;
 reg last_zero, wrclr;
 wire zero_edge = !last_zero && zero;
-
-always @(posedge clk)
-    if(rst) begin
-        wrcnt   <= 4'd0;
-    end else begin // don't gate the clock to catch pcm_wr
-        pcm_wr <= (cnt8==3'd0 && rate1) ? 4'd0 : (pcm_wr ? wrcnt+4'd1 : wrcnt);
-    end
 
 always @(posedge clk)
     if(rst) begin
         cnt8    <= 3'd0;
         wrclr   <= 1'd0;
         ratesel <= 3'd0;
-    end else if(rate1) begin 
-        cnt8 <= cnt8 + 3'd1;
-        if( wrcnt==3'd7 )
-            case( wrcnt )
-                4'd1:      ratesel <= 3'b111; // x8
-                4'd2:      ratesel <= 3'b011; // x4
-                4'd3,4'd4: ratesel <= 3'b001; // x2
-                default:   ratesel <= 3'b000; // x1
-            endcase // wrcnt
+    end else if(clk_en) begin 
+        if( pcm_wr ) begin
+            case( cnt8[2:1] )
+                2'd3: ratesel <= 3'b111; // x8
+                2'd2: ratesel <= 3'b011; // x4
+                2'd1: ratesel <= 3'b001; // x2
+                2'd0: ratesel <= 3'b000; // x1
+            endcase 
+            cnt8 <= 3'd0;
+        end else 
+            if( cnt8<3'd7 && zero ) cnt8 <= cnt8 + 3'd1;
     end
 
 // up-rate PCM samples
@@ -48,17 +42,20 @@ always @(posedge clk)
     else begin
         last_zero <= zero;
         rate1 <= zero_edge;
-        rate2 <= zero_edge ? ~rate2 : rate2;
-        rate4 <= (zero_edge && !rate2) ? ~rate4 : rate4;
-        rate8 <= (zero_edge && !rate4) ? ~rate4 : rate4;
+        if(zero_edge) begin
+            rate2 <= ~rate2;
+            if(rate2) begin
+                rate4 <= ~rate4;
+                if(rate4) rate8<=~rate8;
+            end
+        end
     end
 
-reg cen1,cen2,cen4,cen8;
 always @(negedge clk) begin
     cen1 <= rate1;
     cen2 <= rate1 && rate2;
-    cen4 <= rate1 && rate4;
-    cen8 <= rate1 && rate8;
+    cen4 <= rate1 && rate2 && rate4;
+    cen8 <= rate1 && rate2 && rate4 && rate8;
 end
 
 wire signed [8:0] pcm2, pcm3, pcm1;

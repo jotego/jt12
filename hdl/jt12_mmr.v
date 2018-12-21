@@ -254,16 +254,16 @@ always @(posedge clk) begin : memory_mapped_registers
                     8'hA4, 8'hA5, 8'hA6, 8'hAD, 8'hAC, 8'hAE: latch_fnum <= din[5:0];
                     default:;   // avoid incomplete-case warning
                 endcase
-                if( use_pcm==1 ) // for YM2612 only
+                if( use_pcm==1 ) begin // for YM2612 only
                     casez( selected_register)
                         REG_DACTEST: pcm[0] <= din[3];
-                        REG_PCM:     begin
+                        REG_PCM:
                             pcm <= { ~din[7], din[6:0], 1'b1 };
-                            pcm_wr <= 1'b1;
-                        end
                         REG_PCM_EN:  pcm_en  <= din[7];
-                        default: pcm_wr <= 1'b0;
+                        default:;
                     endcase
+                    pcm_wr <= selected_register==REG_PCM;
+                end
                 if( selected_register[1:0]==2'b11 ) 
                     { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
                 else
@@ -289,6 +289,7 @@ always @(posedge clk) begin : memory_mapped_registers
             // lfo_rst <= 1'b0;
             { clr_flag_B, clr_flag_A } <= 2'd0;
             psg_wr_n <= 1'b1;
+            pcm_wr <= 1'b0;
         end
     end
 end
