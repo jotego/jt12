@@ -76,8 +76,8 @@ wire use_pcm = ch6op && pcm_en;
 wire sum_or_pcm = sum_en | use_pcm;
 wire left_en = rl[1];
 wire right_en= rl[0];
-wire signed [8:0] pcm_data; // interpolated data
-wire [8:0] acc_input =  use_pcm ? pcm : op_result;
+wire signed [8:0] pcm_data = pcm_sum ? pcm : 9'd0;
+wire [8:0] acc_input =  use_pcm ? pcm_data : op_result;
 
 // Continuous output
 wire signed   [11:0]  pre_left, pre_right;
