@@ -5,7 +5,7 @@ module jt12_pcm(
     input               zero,
     input   signed [8:0] pcm,
     input               pcm_wr, 
-    output signed [8:0] pcm_resampled
+    output reg signed [8:0] pcm_resampled
 );
 
 reg [2:0] ratesel;
