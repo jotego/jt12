@@ -49,6 +49,7 @@ module jt12_mmr(
     // PCM
     output  reg [8:0]   pcm,
     output  reg         pcm_en,
+    output  reg         pcm_wr, // high for one clock cycle when PCM is written
     // Operator
     output          use_prevprev1,
     output          use_internal_x,
@@ -201,6 +202,7 @@ always @(posedge clk) begin : memory_mapped_registers
         // PCM
         pcm         <= 9'h0;
         pcm_en      <= 1'b0;
+        pcm_wr      <= 1'b0;
         // sch          <= 1'b0;
         // Original test features
         eg_stop     <= 1'b0;
@@ -239,9 +241,6 @@ always @(posedge clk) begin : memory_mapped_registers
                     `ifndef NOLFO                   
                     REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
                     `endif
-                    REG_DACTEST:if(use_pcm==1) pcm[0] <= din[3];
-                    REG_PCM:    if(use_pcm==1) pcm[8:1]<= din;
-                    REG_PCM_EN: if(use_pcm==1) pcm_en  <= din[7];
                     // clock divider
                     REG_CLK_N6: div_setting[1] <= 1'b1; 
                     REG_CLK_N3: div_setting[0] <= 1'b1; 
@@ -255,6 +254,16 @@ always @(posedge clk) begin : memory_mapped_registers
                     8'hA4, 8'hA5, 8'hA6, 8'hAD, 8'hAC, 8'hAE: latch_fnum <= din[5:0];
                     default:;   // avoid incomplete-case warning
                 endcase
+                if( use_pcm==1 ) // for YM2612 only
+                    casez( selected_register)
+                        REG_DACTEST: pcm[0] <= din[3];
+                        REG_PCM:     begin
+                            pcm <= { ~din[7], din[6:0], 1'b1 };
+                            pcm_wr <= 1'b1;
+                        end
+                        REG_PCM_EN:  pcm_en  <= din[7];
+                        default: pcm_wr <= 1'b0;
+                    endcase
                 if( selected_register[1:0]==2'b11 ) 
                     { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
                 else
