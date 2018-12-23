@@ -42,13 +42,9 @@ module jt03(
     output  [7:0]   dout,
     output          irq_n,
     // combined output
-    output  signed  [11:0]  snd_right,
-    output  signed  [11:0]  snd_left,
-    output          snd_sample,
-    // multiplexed output
-    output signed   [8:0]   mux_right,  
-    output signed   [8:0]   mux_left,
-    output          mux_sample
+    output  signed  [15:0]  snd_right,
+    output  signed  [15:0]  snd_left,
+    output          snd_sample
 );
 
 
@@ -61,17 +57,13 @@ u_jt12(
     .addr           ( addr      ),
     .cs_n           ( cs_n      ),
     .wr_n           ( wr_n      ),
-    .limiter_en     ( limiter_en),
     
     .dout           ( dout      ),
     .irq_n          ( irq_n     ),
 
     .snd_right      ( snd_right     ),
     .snd_left       ( snd_left      ),
-    .snd_sample     ( snd_sample    ),
-    .mux_right      ( mux_right     ),  
-    .mux_left       ( mux_left      ),
-    .mux_sample     ( mux_sample    )
+    .snd_sample     ( snd_sample    )
 );
 
 endmodule // jt03
