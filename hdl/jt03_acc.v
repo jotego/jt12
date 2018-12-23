@@ -40,7 +40,7 @@ module jt03_acc
     input               zero,
     input   [2:0]       alg,
     // combined output
-    output reg signed   [15:0]  snd
+    output signed [15:0] snd
 );
 
 reg sum_en;

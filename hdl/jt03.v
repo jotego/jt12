@@ -42,13 +42,11 @@ module jt03(
     output  [7:0]   dout,
     output          irq_n,
     // combined output
-    output  signed  [15:0]  snd_right,
-    output  signed  [15:0]  snd_left,
+    output  signed  [15:0]  snd,
     output          snd_sample
 );
 
-
-jt12 #(.use_lfo(0),.use_ssg(1), .num_ch(3), .use_pcm(0)) 
+jt12 #(.use_lfo(0),.use_ssg(1), .num_ch(3), .use_pcm(0), .use_lr(0)) 
 u_jt12(
     .rst            ( rst       ),        // rst should be at least 6 clk&cen cycles long
     .clk            ( clk       ),        // CPU clock
@@ -61,8 +59,8 @@ u_jt12(
     .dout           ( dout      ),
     .irq_n          ( irq_n     ),
 
-    .snd_right      ( snd_right     ),
-    .snd_left       ( snd_left      ),
+    .snd_right      ( snd       ),
+    .snd_left       (           ),
     .snd_sample     ( snd_sample    )
 );
 
