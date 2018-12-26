@@ -34,7 +34,7 @@ module jt03(
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, it not needed leave as 1'b1
     input   [7:0]   din,
-    input   [1:0]   addr,
+    input           addr,
     input           cs_n,
     input           wr_n,
     input           limiter_en,
@@ -48,20 +48,20 @@ module jt03(
 
 jt12 #(.use_lfo(0),.use_ssg(1), .num_ch(3), .use_pcm(0), .use_lr(0)) 
 u_jt12(
-    .rst            ( rst       ),        // rst should be at least 6 clk&cen cycles long
-    .clk            ( clk       ),        // CPU clock
-    .cen            ( cen       ),        // optional clock enable, it not needed leave as 1'b1
-    .din            ( din       ),
-    .addr           ( addr      ),
-    .cs_n           ( cs_n      ),
-    .wr_n           ( wr_n      ),
+    .rst            ( rst          ),        // rst should be at least 6 clk&cen cycles long
+    .clk            ( clk          ),        // CPU clock
+    .cen            ( cen          ),        // optional clock enable, it not needed leave as 1'b1
+    .din            ( din          ),
+    .addr           ( {1'b0, addr} ),
+    .cs_n           ( cs_n         ),
+    .wr_n           ( wr_n         ),
     
-    .dout           ( dout      ),
-    .irq_n          ( irq_n     ),
+    .dout           ( dout         ),
+    .irq_n          ( irq_n        ),
 
-    .snd_right      ( snd       ),
-    .snd_left       (           ),
-    .snd_sample     ( snd_sample    )
+    .snd_right      ( snd          ),
+    .snd_left       (              ),
+    .snd_sample     ( snd_sample   )
 );
 
 endmodule // jt03
