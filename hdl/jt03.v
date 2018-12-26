@@ -37,7 +37,6 @@ module jt03(
     input           addr,
     input           cs_n,
     input           wr_n,
-    input           limiter_en,
     
     output  [7:0]   dout,
     output          irq_n,
