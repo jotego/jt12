@@ -231,7 +231,6 @@ endgenerate
 
 // YM2203/YM2610 have a PSG
 wire signed [15:0] fm_snd_left, fm_snd_right;
-wire signed [ 8:0] fm_mux_left, fm_mux_right;
 
 generate
     if( use_ssg==1 ) begin
