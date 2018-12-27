@@ -54,13 +54,17 @@ always @(*) begin
     endcase
 end
 
-jt12_single_acc #(.win(14),.wout(16)) u_mono(
+localparam res=17;
+wire [res-1:0] hires;
+assign snd = hires[res-1:res-16];
+
+jt12_single_acc #(.win(14),.wout(res)) u_mono(
     .clk        ( clk            ),
     .clk_en     ( clk_en         ),
     .op_result  ( op_result      ),
     .sum_en     ( sum_en         ),
     .zero       ( zero           ),
-    .snd        ( snd            )
+    .snd        ( hires          )
 );
 
 endmodule
