@@ -52,7 +52,7 @@ parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1; // defaults to YM
 
 wire flag_A, flag_B, busy;
 
-assign dout[7:0] = { busy, 5'd0, flag_B, flag_A };
+wire [7:0] fm_dout = { busy, 5'd0, flag_B, flag_A };
 wire write = !cs_n && !wr_n;
 wire clk_en, clk_en_ssg;
 
@@ -116,7 +116,7 @@ wire    [6:0]   lfo_mod;
 wire            lfo_rst;
 // PSG
 wire    [3:0]   psg_addr;
-wire    [7:0]   psg_data;
+wire    [7:0]   psg_data, psg_dout;
 wire            psg_wr_n;
 
 jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm)) 
@@ -252,15 +252,18 @@ generate
             .A          ( psg_A     ),
             .B          ( psg_B     ),
             .C          ( psg_C     ),
-            .dout       (           ),
+            .dout       ( psg_dout  ),
             .sel        ( 1'b0      )   // half clock speed
         );
         assign snd_left  = fm_snd_left  + { 2'b0, psg_snd[9:1],5'd0}; 
         assign snd_right = fm_snd_right + { 2'b0, psg_snd[9:1],5'd0}; 
+        assign dout = addr[0] ? psg_dout : fm_dout;
     end else begin
         assign psg_snd  = 10'd0;
         assign snd_left = fm_snd_left;
         assign snd_right= fm_snd_right;
+        assign psg_dout = 8'd0;
+        assign dout = fm_dout;
     end
 endgenerate
 
