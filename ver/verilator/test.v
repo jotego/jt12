@@ -57,7 +57,7 @@ localparam use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1;
 `endif
 
 
-jt12 #(.use_lfo(use_lfo),.use_ssg(use_ssg), 
+jt12_top #(.use_lfo(use_lfo),.use_ssg(use_ssg), 
     .num_ch(num_ch), .use_pcm(use_pcm), .use_lr(use_lr) ) 
 u_jt12(
     .rst            ( rst       ),        // rst should be at least 6 clk&cen cycles long
@@ -73,7 +73,15 @@ u_jt12(
 
     .snd_right      ( snd_right ),
     .snd_left       ( snd_left  ),
-    .snd_sample     ( snd_sample)
+    .snd_sample     ( snd_sample),
+    // Separated output
+    .psg_A          (),
+    .psg_B          (),
+    .psg_C          (),
+    .fm_snd_left    (),
+    .fm_snd_right   (),
+    // combined output
+    .psg_snd        ()  
 );
 
 `ifdef MEGADRIVE_PSG

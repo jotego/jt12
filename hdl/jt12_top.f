@@ -1,6 +1,5 @@
-jt03.v
 jt12_top.v
-jt03_acc.v
+jt12_acc.v
 jt12_single_acc.v
 jt12_eg.v
 jt12_eg_cnt.v
@@ -32,3 +31,8 @@ jt12_sh24.v
 jt12_sumch.v
 jt12_timers.v
 jt12_pcm.v
+mixer/jt12_genmix.v
+mixer/jt12_decim.v
+mixer/jt12_interpol.v
+mixer/jt12_comb.v
+mixer/jt12_fm_uprate.v

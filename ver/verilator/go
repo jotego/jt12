@@ -127,10 +127,8 @@ if ! obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" ; 
 	exit $?
 fi
 
-if [[ $DUMPSIGNALS == "-trace" && -e test.vcd ]]; then
-	echo Converting VCD to FST
-	if vcd2fst -p -v test.vcd -f test.fst; then
-		rm test.vcd
-		echo Done
-	fi
+if [[ $DUMPSIGNALS == "-trace" ]]; then
+	obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" | vcd2fst -v - -f test.fst
+else
+	obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
 fi

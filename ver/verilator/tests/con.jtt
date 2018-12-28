@@ -1,0 +1,31 @@
+ks_ar 0,0,1f
+sr    0,0,0
+tl    0,0,0
+
+blk_fnum 0,f
+fnum_lsb 0,ff
+
+fb_con 0,7
+fb_con 1,7
+fb_con 2,7
+fb_con 3,7
+fb_con 4,7
+fb_con 5,7
+
+kon 10
+wait 3000
+
+fb_con 0,f # FB=1
+wait 1000
+fb_con 0,17 # FB=2
+wait 1000
+fb_con 0,1f # FB=3
+wait 1000
+fb_con 0,27 # FB=4
+wait 1000
+fb_con 0,2f # FB=5
+wait 1000
+fb_con 0,37 # FB=6
+wait 1000
+fb_con 0,3f # FB=7
+wait 1000
