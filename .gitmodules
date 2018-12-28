@@ -1,3 +1,6 @@
 [submodule "jt49"]
 	path = jt49
 	url = https://github.com/jotego/jt49.git
+[submodule "jt89"]
+	path = jt89
+	url = https://github.com/jotego/jt89.git
