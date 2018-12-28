@@ -123,9 +123,6 @@ if ! make -j -C obj_dir -f V${TOP}.mk V${TOP}; then
 fi
 echo Simulation start...
 echo obj_dir/V${TOP} $DUMPSIGNALS $EXTRA  $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
-if ! obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" ; then
-	exit $?
-fi
 
 if [[ $DUMPSIGNALS == "-trace" ]]; then
 	obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" | vcd2fst -v - -f test.fst
