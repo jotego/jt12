@@ -15,11 +15,11 @@ sl_rr 0,3,f
 blk_fnum 0,f
 fnum_lsb 0,ff
 
-fb_con 0,3
-tl 0,0,10
-tl 0,1,1
-tl 0,2,20
-tl 0,3,5
+fb_con 0,1
+tl 0,0,ff
+tl 0,1,ff
+tl 0,2,ff
+tl 0,3,0
 
 tl 1,0,ff
 tl 1,1,ff
@@ -38,39 +38,40 @@ kon 0
 wait 200
 
 # clean sine S4
-kon 80
-wait 1500
-# modulated S4 by S3
-kon C0
-wait 1500
-# clean sine S4
-kon 80
-wait 1000
-
-# modulated S4 by S2
-kon a0
-wait 1500
-# modulated S4 by S2-S1
-kon b0
-wait 1500
-# like S4 by S2, because set TL of S1 to 7F
-tl 0,0,7f
-wait 1500
-
-kon 0
-wait 200
-# modulated S4 by S2-S1, S3
-tl 0,0,10
 kon f0
 wait 1500
-# modulated S4 by S2, S3
-tl 0,0,7f
-wait 1000
-
-# modulated S4 by S3
-tl 0,1,7f
+tl 0,0,0
+tl 0,1,0
+wait 1500
+# S1, S2 loud should still be clean sine because S3 is off
+tl 0,0,10
 wait 1500
 
-# clean sine
-tl 0,2,7f
+# mute
+tl 0,3,ff
+wait 500
+
+tl 0,0,ff
+tl 0,1,ff
+# modulated S4 by S3
+tl 0,2,10
+tl 0,3,0
+wait 1500
+
+# mute
+tl 0,3,ff
+wait 250
+tl 0,3,0
+
+# add S2
+tl 0,1,15
+wait 1500
+
+# mute
+tl 0,3,ff
+wait 500
+tl 0,3,0
+
+#add S1 again
+tl 0,0,22
 wait 1500

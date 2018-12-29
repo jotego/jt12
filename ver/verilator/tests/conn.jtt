@@ -1,5 +1,16 @@
 ks_ar 0,0,1f
+ks_ar 0,1,1f
+ks_ar 0,2,1f
+ks_ar 0,3,1f
 sr    0,0,0
+sr    0,1,0
+sr    0,2,0
+sr    0,3,0
+
+sl_rr 0,0,f
+sl_rr 0,1,f
+sl_rr 0,2,f
+sl_rr 0,3,f
 
 blk_fnum 0,f
 fnum_lsb 0,ff
@@ -16,26 +27,38 @@ wait 3000
 
 tl    0,0,0
 fb_con 0,f # FB=1
-wait 2000
+wait 1500
 tl    0,0,2
 fb_con 0,17 # FB=2
-wait 2000
+wait 1500
 tl    0,0,4
 fb_con 0,1f # FB=3
-wait 2000
+wait 1500
 
 tl    0,0,6
 fb_con 0,27 # FB=4
-wait 2000
+wait 1500
 
 tl    0,0,8
 fb_con 0,2f # FB=5
-wait 2000
+wait 1500
 
 tl    0,0,c
 fb_con 0,37 # FB=6
-wait 2000
+wait 1500
 
 tl    0,0,10
 fb_con 0,3f # FB=7
-wait 2000
+wait 1500
+
+# now show each operator output independently
+kon f0
+tl 0,0,ff
+tl 0,1,0
+wait 1500
+tl 0,1,ff
+tl 0,2,10
+wait 1500
+tl 0,2,ff
+tl 0,3,15
+wait 1500
