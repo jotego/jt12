@@ -231,7 +231,7 @@ jt12_kon #(.num_ch(num_ch)) u_kon(
     .keyon_I    ( keyon_I   )
 );
 
-jt12_mod u_mod(
+jt12_mod #(.num_ch(num_ch)) u_mod(
     .alg_I      ( alg_I     ),
     .s1_enters  ( s1_enters ),
     .s3_enters  ( s3_enters ),

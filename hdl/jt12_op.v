@@ -63,22 +63,31 @@ reg [11:0]  atten_internal_IX;
 assign op_result   = op_result_internal[13:5];
 assign full_result = op_result_internal;
 
-parameter NUM_VOICES = 6;
+parameter num_ch = 6;
 
 reg         signbit_IX, signbit_X, signbit_XI;
 reg [11:0]  totalatten_X;
 
 wire [13:0] prev1, prevprev1, prev2;
 
-jt12_sh #( .width(14), .stages(NUM_VOICES)) prev1_buffer(
+reg [13:0] prev1_din;
+
+always @(*)
+    if( num_ch==3 ) begin
+        prev1_din = s1_enters ? op_result_internal : prev1;
+    end else begin
+        prev1_din = s2_enters ? op_result_internal : prev1;
+    end
+
+jt12_sh #( .width(14), .stages(num_ch)) prev1_buffer(
 //  .rst    ( rst   ),
     .clk    ( clk   ),
     .clk_en ( clk_en),
-    .din    ( s2_enters ? op_result_internal : prev1 ),
+    .din    ( prev1_din ),
     .drop   ( prev1 )
 );
 
-jt12_sh #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
+jt12_sh #( .width(14), .stages(num_ch)) prevprev1_buffer(
 //  .rst    ( rst   ),
     .clk    ( clk   ),
     .clk_en ( clk_en),
@@ -86,7 +95,7 @@ jt12_sh #( .width(14), .stages(NUM_VOICES)) prevprev1_buffer(
     .drop   ( prevprev1 )
 );
 
-jt12_sh #( .width(14), .stages(NUM_VOICES)) prev2_buffer(
+jt12_sh #( .width(14), .stages(num_ch)) prev2_buffer(
 //  .rst    ( rst   ),
     .clk    ( clk   ),
     .clk_en ( clk_en),
@@ -148,12 +157,18 @@ always @(*) begin
 end
 
 // REGISTER/CYCLE 2-7
-jt12_sh #( .width(10), .stages(NUM_VOICES)) phasemod_sh(
-    .clk    ( clk   ),
-    .clk_en ( clk_en),
-    .din    ( phasemod_II ),
-    .drop   ( phasemod_VIII )
-);
+//generate
+//    if( num_ch==6 )
+        jt12_sh #( .width(10), .stages(6)) phasemod_sh(
+            .clk    ( clk   ),
+            .clk_en ( clk_en),
+            .din    ( phasemod_II ),
+            .drop   ( phasemod_VIII )
+        );
+//     else begin
+//         assign phasemod_VIII = phasemod_II;
+//     end
+// endgenerate
 
 // REGISTER/CYCLE 8
 reg [ 9:0]  phase;

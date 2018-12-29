@@ -332,7 +332,7 @@ jt12_sh #(.width(10),.stages(4)) u_egpad(
 wire    [ 8:0]  op_result;
 wire    [13:0]  full_result;
 
-jt12_op u_op(
+jt12_op #(.num_ch(num_ch)) u_op(
     .rst            ( rst           ),
     .clk            ( clk           ),
     .clk_en         ( clk_en        ),

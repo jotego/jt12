@@ -38,6 +38,8 @@ module jt12_mod(
 	output reg	use_prev1    	
 );
 
+parameter num_ch=6;
+
 reg [7:0] alg_hot;
 
 always @(*) begin
@@ -53,14 +55,27 @@ always @(*) begin
 	endcase
 end
 
-always @(*) begin
-	use_prevprev1 = s1_enters | (s3_enters&alg_hot[5]);
-	use_prev2 = (s3_enters&(|alg_hot[2:0])) | (s4_enters&alg_hot[3]);
-	use_internal_x = s4_enters & alg_hot[2];
-	use_internal_y = s4_enters & (|{alg_hot[4:3],alg_hot[1:0]});
-	use_prev1 = s1_enters | (s3_enters&alg_hot[1]) |
-		(s2_enters&(|{alg_hot[6:3],alg_hot[0]}) )|
-		(s4_enters&(|{alg_hot[5],alg_hot[2]}));
-end
+generate
+	if( num_ch==6 ) begin
+		always @(*) begin
+			use_prevprev1 = s1_enters | (s3_enters&alg_hot[5]);
+			use_prev2 = (s3_enters&(|alg_hot[2:0])) | (s4_enters&alg_hot[3]);
+			use_internal_x = s4_enters & alg_hot[2];
+			use_internal_y = s4_enters & (|{alg_hot[4:3],alg_hot[1:0]});
+			use_prev1 = s1_enters | (s3_enters&alg_hot[1]) |
+				(s2_enters&(|{alg_hot[6:3],alg_hot[0]}) )|
+				(s4_enters&(|{alg_hot[5],alg_hot[2]}));
+		end		
+	end else begin
+		always @(*) begin // 3 ch
+			use_prevprev1  = 1'b0;
+			use_prev2      = 1'b0;
+			use_internal_x = s1_enters;
+			use_internal_y = 1'b0;
+			use_prev1      = s1_enters;
+		end		
+	end
+endgenerate
+
 
 endmodule

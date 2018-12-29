@@ -92,7 +92,7 @@ public:
         aux.cmd = cmd;
         aux.filter = filter;
         aux.blk_addr = blk_addr;
-        cout << "Added block to " << hex << cmd_mask << " - " << cmd << "/ ADDR=" << blk_addr << '\n';
+        cerr << "Added block to " << hex << cmd_mask << " - " << cmd << "/ ADDR=" << blk_addr << '\n';
         blocks.push_back( aux );
     };
     void watch( int addr, int ch ) { watch_addr=addr; watch_ch=ch; }
@@ -150,7 +150,7 @@ int main(int argc, char** argv, char** env) {
             continue;
         }
         if( string(argv[k])=="-o" ) { 
-            if( ++k == argc ) { cout << "ERROR: expecting filename after -o\n"; return 1; }
+            if( ++k == argc ) { cerr << "ERROR: expecting filename after -o\n"; return 1; }
             strncpy( wav_filename, argv[k], 512 );
             continue;
         }
@@ -160,7 +160,7 @@ int main(int argc, char** argv, char** env) {
             vluint64_t time_limit = aux;
             time_limit *= 1000000;
             forever=false;
-            cout << "Simulate until " << time_limit/1000000 << "ms\n";
+            cerr << "Simulate until " << time_limit/1000000 << "ms\n";
             sim_time.set_time_limit( time_limit );
             continue; 
         }
@@ -173,36 +173,36 @@ int main(int argc, char** argv, char** env) {
             continue;
         }
         if( string(argv[k])=="-nomul") {
-            cout << "All writes to MULT locked to 1\n";
+            cerr << "All writes to MULT locked to 1\n";
             writter.block( 0xF0, 0x30, [](int v){ return (v&0x70)|1;} ); 
             continue;
         }       
         if( string(argv[k])=="-nodt") {
-            cout << "All writes to DT locked to 1\n";
+            cerr << "All writes to DT locked to 1\n";
             writter.block( 0xF0, 0x30, [](int v){ return (v&0x0F)|1;} ); 
             continue;
         }
         if( string(argv[k])=="-nossg") {
-            cout << "All writes to FM's SSG-EG locked to 0\n";
+            cerr << "All writes to FM's SSG-EG locked to 0\n";
             writter.block( 0xF0, 0x90, [](int v){ return 0;} ); 
             continue;
         }
         if( string(argv[k])=="-nopsg") {
-            cout << "Disabling PSG sound\n";
+            cerr << "Disabling PSG sound\n";
             writter.block( 0xF0, 0, [](int v){ return 0;} );
             continue;
         }
         if( string(argv[k])=="-mute") {
             int ch;
             if( sscanf(argv[++k],"%d",&ch) != 1 ) {
-                cout << "ERROR: needs channel number after -mute\n";
+                cerr << "ERROR: needs channel number after -mute\n";
                 return 1;
             }
             if( ch<0 || ch>5 ) {
-                cout << "ERROR: muted channel must be within 0-5 range\n";
+                cerr << "ERROR: muted channel must be within 0-5 range\n";
                 return 1;
             }
-            cout << "Channel " << ch << " muted\n";
+            cerr << "Channel " << ch << " muted\n";
             switch(ch) {
                 case 0: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==0? 0 : v;} ); break;
                 case 1: writter.block( 0xFF, 0x28, [](int v)->int{ return (v&0xf)==1? 0 : v;} ); break;
@@ -216,14 +216,14 @@ int main(int argc, char** argv, char** env) {
         if( string(argv[k])=="-only") {
             int ch;
             if( sscanf(argv[++k],"%d",&ch) != 1 ) {
-                cout << "ERROR: needs channel number after -only\n";
+                cerr << "ERROR: needs channel number after -only\n";
                 return 1;
             }
             if( ch<0 || ch>5 ) {
-                cout << "ERROR: channel must be within 0-5 range\n";
+                cerr << "ERROR: channel must be within 0-5 range\n";
                 return 1;
             }
-            cout << "Only channel " << ch << " will be played\n";
+            cerr << "Only channel " << ch << " will be played\n";
             for( int k=0; k<6; k++ ) {
                 if( k==ch ) continue;
                 switch(k) {
@@ -237,7 +237,7 @@ int main(int argc, char** argv, char** env) {
             }
             continue;
         }       
-        cout << "ERROR: Unknown argument " << argv[k] << "\n";
+        cerr << "ERROR: Unknown argument " << argv[k] << "\n";
         return 1;
     }
     if( strlen(wav_filename)==0 ) {
@@ -249,9 +249,9 @@ int main(int argc, char** argv, char** env) {
 
     // determines the chip type
     switch( gym->chip() ) {
-        case RipParser::ym2203: cout << "YM2203 tune.\n"; break;
-        case RipParser::ym2612: cout << "YM2612 tune.\n"; break;
-        default: cout << "ERROR: Unknown chip (" << gym->chip() << ") in VGM file\n"; return 1;
+        case RipParser::ym2203: cerr << "YM2203 tune.\n"; break;
+        case RipParser::ym2612: cerr << "YM2612 tune.\n"; break;
+        default: cerr << "ERROR: Unknown chip (" << gym->chip() << ") in VGM file\n"; return 1;
     }
 
     if( gym->period() != 0 ) {
@@ -259,14 +259,14 @@ int main(int argc, char** argv, char** env) {
         if( gym->chip() == RipParser::ym2203 ) clkdiv=3;
         if( slow ) clkdiv=1;
         int period = gym->period()*clkdiv;
-        cout << "Setting PERIOD to " << dec << period << " ns\n";
+        cerr << "Setting PERIOD to " << dec << period << " ns\n";
         sim_time.set_period( period );
     }
     SAMPLING_PERIOD = sim_time.period() * 4 * (gym->chip() == RipParser::ym2203? 3 : 6);
     if( slow ) SAMPLING_PERIOD *= gym->chip() == RipParser::ym2203 ? 3 : 6;
     // if( slow ) SAMPLING_PERIOD *= 6;
     SAMPLERATE = 1.0/(SAMPLING_PERIOD*1e-9);
-    cout << "Sample rate " << dec << SAMPLERATE << " Hz. Sampling period " << SAMPLING_PERIOD << "ns\n";
+    cerr << "Sample rate " << dec << SAMPLERATE << " Hz. Sampling period " << SAMPLING_PERIOD << "ns\n";
 
     if( gym->length() != 0 && !sim_time.limited() ) sim_time.set_time_limit( gym->length() );
 
@@ -274,7 +274,7 @@ int main(int argc, char** argv, char** env) {
     if( trace ) {
         Verilated::traceEverOn(true);
         top->trace(tfp,99);
-        tfp->open("test.vcd"); 
+        tfp->open("/dev/stdout"); 
     }
 
     // Reset
@@ -286,7 +286,7 @@ int main(int argc, char** argv, char** env) {
     top->cs_n = 0;
     top->wr_n = 1;
     top->psg_wr_n = 1;
-    // cout << "Reset\n";
+    // cerr << "Reset\n";
     while( sim_time.get_time() < 256*sim_time.period() ) {
         top->eval();
         if( sim_time.next_quarter() ) top->clk = 1-top->clk;
@@ -303,7 +303,7 @@ int main(int argc, char** argv, char** env) {
     int next_check=check_step;
     int reg, val;
     bool fail=true;
-    // cout << "Main loop\n";
+    // cerr << "Main loop\n";
     vluint64_t wait=0;
     int last_sample=0;
     WaveWritter wav(wav_filename, SAMPLERATE, dump_hex);
@@ -345,8 +345,8 @@ int main(int argc, char** argv, char** env) {
             psg_writter.Eval();
 
             if( timeout!=0 && sim_time.get_time()>timeout ) {               
-                cout << "Timeout waiting for BUSY to clear\n";
-                cout << "writter.done == " << writter.Done() << '\n';
+                cerr << "Timeout waiting for BUSY to clear\n";
+                cerr << "writter.done == " << writter.Done() << '\n';
                 goto finish;
             }
             if( sim_time.get_time() < wait ) continue;
@@ -354,7 +354,7 @@ int main(int argc, char** argv, char** env) {
 
             if( !forced_values.empty() ) {
                 const YMcmd &c = forced_values.front();
-                cout << "Forced value\n";
+                cerr << "Forced value\n";
                 writter.Write( c.addr, c.cmd, c.val );
                 forced_values.pop_front();
                 continue;
@@ -365,12 +365,12 @@ int main(int argc, char** argv, char** env) {
             switch( action ) {
                 default: 
                     if( !sim_time.finish() ) {
-                        cout << "go on\n";
+                        cerr << "go on\n";
                         continue;
                     }
                     goto finish;
                 case RipParser::cmd_psg:
-                    // cout << "PSG Write @" << sim_time.get_time() <<"\n";
+                    // cerr << "PSG Write @" << sim_time.get_time() <<"\n";
                     psg_writter.Write(gym->cmd);
                     timeout = 0;
                     break;
@@ -378,17 +378,17 @@ int main(int argc, char** argv, char** env) {
                     // if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
                     // /*(gym->addr==0 && gym->cmd>=(char)0x30) || */
                     // ((gym->cmd&(char)0xf0)==(char)0x90)) {
-                    //   cout << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
+                    //   cerr << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
                     //  break; // do not write to RL register
                     // }
-                    // cout << "CMD = " << hex << ((int)gym->cmd&0xff) << '\n';
+                    // cerr << "CMD = " << hex << ((int)gym->cmd&0xff) << '\n';
                     writter.Write( gym->addr, gym->cmd, gym->val );
                     timeout = sim_time.get_time() + sim_time.period()*6*100;
                     break; // parse register
                 case RipParser::cmd_wait: 
-                    // cout << "Waiting\n";
+                    // cerr << "Waiting\n";
                     wait=gym->wait;
-                    // cout << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
+                    // cerr << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
                     // if(trace) wait/=3;
                     wait+=sim_time.get_time();
                     timeout=0;
@@ -404,13 +404,13 @@ int main(int argc, char** argv, char** env) {
 finish:
     writter.report_usage();
     if( skip_zeros ) {
-        cout << "WARNING: Output wavefile is empty. No sound output was produced.\n";
+        cerr << "WARNING: Output wavefile is empty. No sound output was produced.\n";
     }
 
     if( main_time>1000000000 ) { // sim lasted for seconds
-        cout << "$finish at " << dec << sim_time.get_time_s() << "s = " << sim_time.get_time_ms() << " ms\n";
+        cerr << "$finish at " << dec << sim_time.get_time_s() << "s = " << sim_time.get_time_ms() << " ms\n";
     } else {
-        cout << "$finish at " << dec << sim_time.get_time_ms() << "ms = " << sim_time.get_time() << " ns\n";
+        cerr << "$finish at " << dec << sim_time.get_time_ms() << "ms = " << sim_time.get_time() << " ns\n";
     }
     if(trace) tfp->close(); 
     delete gym;
@@ -437,7 +437,7 @@ WaveWritter::WaveWritter( const char *filename, int sample_rate, bool hex ) {
         hexname = new char[strlen(filename)+1];
         strcpy(hexname,filename);
         strcpy( hexname+strlen(filename)-4, ".hex" );
-        cout << "Hex file " << hexname << '\n';
+        cerr << "Hex file " << hexname << '\n';
         fhex.open(hexname);
         delete[] hexname;
     }
@@ -479,10 +479,10 @@ WaveWritter::~WaveWritter() {
 
 
 void CmdWritter::report_usage() {
-    cout << "Features used: \t";
+    cerr << "Features used: \t";
     for( const auto& k : features )
-        if(k.is_used()) cout << k.name() << ' ';
-    cout << '\n';
+        if(k.is_used()) cerr << k.name() << ' ';
+    cerr << '\n';
 }
 
 CmdWritter::CmdWritter( Vtop* _top ) {
@@ -499,7 +499,7 @@ CmdWritter::CmdWritter( Vtop* _top ) {
 }
 
 void CmdWritter::Write( int _addr, int _cmd, int _val ) {
-    // cout << "Writter command\n";
+    // cerr << "Writter command\n";
     for( auto&k : blocks ) {
         int aux = _cmd;
         aux &= k.cmd_mask;
@@ -514,15 +514,15 @@ void CmdWritter::Write( int _addr, int _cmd, int _val ) {
     done = false;
     state = 0;
     if( addr == watch_addr && cmd>=(char)0x30 && (cmd&0x3)==watch_ch )
-        cout << addr << '-' << watch_ch << " CMD = " << hex << (cmd&0xff) << " VAL = " << (val&0xff) << '\n';
+        cerr << addr << '-' << watch_ch << " CMD = " << hex << (cmd&0xff) << " VAL = " << (val&0xff) << '\n';
     for( auto& k : features )
         k.check( cmd, val );    
-    // cout << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
-    // cout  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
+    // cerr << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
+    // cerr  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
 }
 
 void CmdWritter::Eval() {   
-    // cout << "Writter eval " << state << "\n";
+    // cerr << "Writter eval " << state << "\n";
     int clk = top->clk; 
     if( (clk==0) && (last_clk != clk) ) {
         switch( state ) {
@@ -545,6 +545,7 @@ void CmdWritter::Eval() {
             case 3:
                 top->wr_n = 1;
                 state=4;
+                top->addr = 0; // read busy signal
                 break;
             case 4:             
                 if( (((int)top->dout) &0x80 ) == 0 ) {
