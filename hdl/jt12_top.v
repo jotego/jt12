@@ -106,8 +106,8 @@ wire            pg_stop, eg_stop;
 wire    ch6op;
 
 // Operator
-wire            use_internal_x, use_internal_y;
-wire            use_prevprev1, use_prev2, use_prev1;
+wire            xuse_internal, yuse_internal;
+wire            xuse_prevprev1, xuse_prev2, yuse_prev1, yuse_prev2;
 wire    [ 9:0]  phase_VIII;
 wire            s1_enters, s2_enters, s3_enters, s4_enters;
 wire            rst_int;
@@ -152,11 +152,12 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm))
     .pcm_wr     ( pcm_wr        ),
 
     // Operator
-    .use_prevprev1  ( use_prevprev1     ),
-    .use_internal_x ( use_internal_x    ),
-    .use_internal_y ( use_internal_y    ),
-    .use_prev2      ( use_prev2     ),
-    .use_prev1      ( use_prev1     ),
+    .xuse_prevprev1 ( xuse_prevprev1  ),
+    .xuse_internal  ( xuse_internal   ),
+    .yuse_internal  ( yuse_internal   ),  
+    .xuse_prev2     ( xuse_prev2      ),
+    .yuse_prev1     ( yuse_prev1      ),
+    .yuse_prev2     ( yuse_prev2      ),
     // PG
     .fnum_I     ( fnum_I    ),
     .block_I    ( block_I   ),
@@ -345,11 +346,12 @@ jt12_op #(.num_ch(num_ch)) u_op(
     .s2_enters      ( s2_enters     ),
     .s3_enters      ( s3_enters     ),
     .s4_enters      ( s4_enters     ),
-    .use_prevprev1  ( use_prevprev1 ),
-    .use_internal_x ( use_internal_x),
-    .use_internal_y ( use_internal_y),
-    .use_prev2      ( use_prev2     ),
-    .use_prev1      ( use_prev1     ),
+    .xuse_prevprev1 ( xuse_prevprev1),
+    .xuse_internal  ( xuse_internal ),
+    .yuse_internal  ( yuse_internal ),  
+    .xuse_prev2     ( xuse_prev2    ),
+    .yuse_prev1     ( yuse_prev1    ),
+    .yuse_prev2     ( yuse_prev2    ),
     .zero           ( zero          ),
     .op_result      ( op_result     ),
     .full_result    ( full_result   )

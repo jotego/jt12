@@ -65,11 +65,12 @@ module jt12_reg(
     output          s4_enters,
     
     // Operator
-    output          use_prevprev1,
-    output          use_internal_x,
-    output          use_internal_y, 
-    output          use_prev2,
-    output          use_prev1,
+    output          xuse_prevprev1,
+    output          xuse_internal,
+    output          yuse_internal, 
+    output          xuse_prev2,
+    output          yuse_prev1,
+    output          yuse_prev2,
     
     // PG
     output      [10:0]  fnum_I,
@@ -238,11 +239,12 @@ jt12_mod #(.num_ch(num_ch)) u_mod(
     .s2_enters  ( s2_enters ),
     .s4_enters  ( s4_enters ),
     
-    .use_prevprev1 ( use_prevprev1  ),
-    .use_internal_x( use_internal_x ),
-    .use_internal_y( use_internal_y ),  
-    .use_prev2   ( use_prev2      ),
-    .use_prev1   ( use_prev1      )
+    .xuse_prevprev1 ( xuse_prevprev1  ),
+    .xuse_internal  ( xuse_internal   ),
+    .yuse_internal  ( yuse_internal   ),  
+    .xuse_prev2     ( xuse_prev2      ),
+    .yuse_prev1     ( yuse_prev1      ),
+    .yuse_prev2     ( yuse_prev2      )
 );
 
 wire [43:0] shift_out;

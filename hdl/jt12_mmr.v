@@ -51,11 +51,12 @@ module jt12_mmr(
     output  reg         pcm_en,
     output  reg         pcm_wr, // high for one clock cycle when PCM is written
     // Operator
-    output          use_prevprev1,
-    output          use_internal_x,
-    output          use_internal_y,
-    output          use_prev2,
-    output          use_prev1,
+    output          xuse_prevprev1,
+    output          xuse_internal,
+    output          yuse_internal, 
+    output          xuse_prev2,
+    output          yuse_prev1,
+    output          yuse_prev2,
     // PG
     output  [10:0]  fnum_I,
     output  [ 2:0]  block_I,
@@ -348,11 +349,12 @@ jt12_reg #(.num_ch(num_ch)) u_reg(
     .block_ch3op1( block_ch3op1 ),
     .latch_fnum ( latch_fnum    ),
     // Operator
-    .use_prevprev1(use_prevprev1),
-    .use_internal_x(use_internal_x),
-    .use_internal_y(use_internal_y),
-    .use_prev2  ( use_prev2 ),
-    .use_prev1  ( use_prev1 ),
+    .xuse_prevprev1 ( xuse_prevprev1  ),
+    .xuse_internal  ( xuse_internal   ),
+    .yuse_internal  ( yuse_internal   ),  
+    .xuse_prev2     ( xuse_prev2      ),
+    .yuse_prev1     ( yuse_prev1      ),
+    .yuse_prev2     ( yuse_prev2      ),
     // PG
     .fnum_I     (   fnum_I  ),
     .block_I    (   block_I ),

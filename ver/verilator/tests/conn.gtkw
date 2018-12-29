@@ -1,0 +1,106 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Sat Dec 29 17:32:39 2018
+[*]
+[dumpfile] "/home/jtejada/github/jt12/ver/verilator/test.fst"
+[dumpfile_mtime] "Sat Dec 29 17:31:14 2018"
+[dumpfile_size] 4684809
+[savefile] "/home/jtejada/github/jt12/ver/verilator/tests/conn.gtkw"
+[timestart] 193420400
+[size] 1280 995
+[pos] -1 -1
+*-12.991238 149382288 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.top.
+[treeopen] TOP.top.u_jt12.
+[treeopen] TOP.top.u_jt12.genblk6.
+[treeopen] TOP.top.u_jt12.u_eg.
+[treeopen] TOP.top.u_jt12.u_mmr.
+[treeopen] TOP.top.u_jt12.u_mmr.u_reg.
+[treeopen] TOP.top.u_jt12.u_mmr.u_reg.genblk2.
+[treeopen] TOP.top.u_jt12.u_mmr.u_reg.genblk2.u_csr0.
+[treeopen] TOP.top.u_jt12.u_op.
+[sst_width] 215
+[signals_width] 275
+[sst_expanded] 1
+[sst_vpaned_height] 294
+@8420
+TOP.top.snd_left[15:0]
+@20000
+-
+-
+-
+@24
+TOP.top.u_jt12.u_mmr.u_reg.alg_I[2:0]
+@28
+TOP.top.u_jt12.u_op.s1_enters
+TOP.top.u_jt12.u_op.s3_enters
+TOP.top.u_jt12.u_op.s2_enters
+TOP.top.u_jt12.u_op.s4_enters
+@24
+TOP.top.u_jt12.u_mmr.fb_II[2:0]
+[color] 2
+TOP.top.u_jt12.u_mmr.u_reg.cur_ch[2:0]
+[color] 2
+TOP.top.u_jt12.u_mmr.u_reg.cur_op[1:0]
+@420
+TOP.top.u_jt12.u_op.prev1[13:0]
+TOP.top.u_jt12.u_op.prevprev1[13:0]
+TOP.top.u_jt12.u_op.prev2[13:0]
+@25
+[color] 1
+TOP.top.u_jt12.u_mmr.u_reg.u_mod.xusage[1:0]
+@23
+[color] 1
+TOP.top.u_jt12.u_mmr.u_reg.u_mod.yusage[1:0]
+@200
+-OP
+@420
+TOP.top.u_jt12.u_op.x[13:0]
+TOP.top.u_jt12.u_op.y[13:0]
+TOP.top.u_jt12.u_op.pm_preshift_II[14:0]
+TOP.top.u_jt12.u_op.phasemod_VIII[9:0]
+@22
+TOP.top.u_jt12.u_op.eg_atten_IX[9:0]
+@200
+-ACC
+@420
+[color] 2
+TOP.top.u_jt12.genblk6.u_acc.op_result[13:0]
+@24
+TOP.top.u_jt12.genblk6.u_acc.alg[2:0]
+@28
+TOP.top.u_jt12.genblk6.u_acc.sum_en
+@200
+-EG
+@28
+TOP.top.u_jt12.u_eg.keyoff_now_I
+TOP.top.u_jt12.u_eg.keyon_now_I
+@22
+TOP.top.u_jt12.u_eg.tl_IV[6:0]
+TOP.top.u_jt12.u_eg.eg_out_IV[9:0]
+@24
+TOP.top.u_jt12.u_eg.state_in_I[2:0]
+TOP.top.u_jt12.u_eg.state_next_I[2:0]
+@200
+-PG
+@24
+TOP.top.u_jt12.u_pg.phase_VIII[9:0]
+@200
+-MMR
+@28
+TOP.top.u_jt12.u_mmr.u_reg.keyon_I
+@22
+TOP.top.u_jt12.u_mmr.selected_register[7:0]
+TOP.top.u_jt12.u_mmr.din[7:0]
+TOP.top.u_jt12.u_mmr.tl_IV[6:0]
+@28
+TOP.top.u_jt12.u_mmr.u_reg.up_tl
+TOP.top.u_jt12.u_mmr.u_reg.ch[2:0]
+TOP.top.u_jt12.u_mmr.u_reg.op[1:0]
+TOP.top.u_jt12.u_mmr.u_reg.update_op_I
+TOP.top.u_jt12.u_mmr.u_reg.update_op_II
+TOP.top.u_jt12.u_mmr.u_reg.update_op_IV
+TOP.top.u_jt12.u_mmr.u_reg.genblk2.u_csr0.up_tl_op
+[pattern_trace] 1
+[pattern_trace] 0

@@ -33,11 +33,12 @@ module jt12_op(
     input   [9:0]   pg_phase_VIII,
     input   [9:0]   eg_atten_IX,        // output from envelope generator
     input   [2:0]   fb_II,      // voice feedback
-    input           use_prevprev1,
-    input           use_internal_x,
-    input           use_internal_y,    
-    input           use_prev2,
-    input           use_prev1,
+    input           xuse_prevprev1,
+    input           xuse_prev2,
+    input           xuse_internal,
+    input           yuse_prev1,
+    input           yuse_prev2,
+    input           yuse_internal, 
     input           test_214,
     
     input           s1_enters,
@@ -70,39 +71,41 @@ reg [11:0]  totalatten_X;
 
 wire [13:0] prev1, prevprev1, prev2;
 
-reg [13:0] prev1_din, prevprev1_din;
+reg [13:0] prev1_din, prevprev1_din, prev2_din;
 
 always @(*)
     if( num_ch==3 ) begin
         prev1_din     = s1_enters ? op_result_internal : prev1;
         prevprev1_din = s3_enters ? op_result_internal : prevprev1;
+        prev2_din     = s2_enters ? op_result_internal : prev2;
     end else begin // 6 channels
         prev1_din     = s2_enters ? op_result_internal : prev1;
         prevprev1_din = s2_enters ? prev1 : prevprev1;
+        prev2_din     = s1_enters ? op_result_internal : prev2;
     end
 
 jt12_sh #( .width(14), .stages(num_ch)) prev1_buffer(
-//  .rst    ( rst   ),
-    .clk    ( clk   ),
-    .clk_en ( clk_en),
+//  .rst    ( rst       ),
+    .clk    ( clk       ),
+    .clk_en ( clk_en    ),
     .din    ( prev1_din ),
-    .drop   ( prev1 )
+    .drop   ( prev1     )
 );
 
 jt12_sh #( .width(14), .stages(num_ch)) prevprev1_buffer(
-//  .rst    ( rst   ),
-    .clk    ( clk   ),
-    .clk_en ( clk_en),
+//  .rst    ( rst           ),
+    .clk    ( clk           ),
+    .clk_en ( clk_en        ),
     .din    ( prevprev1_din ),
-    .drop   ( prevprev1 )
+    .drop   ( prevprev1     )
 );
 
 jt12_sh #( .width(14), .stages(num_ch)) prev2_buffer(
-//  .rst    ( rst   ),
-    .clk    ( clk   ),
-    .clk_en ( clk_en),
-    .din    ( s1_enters ? op_result_internal : prev2 ),
-    .drop   ( prev2 )
+//  .rst    ( rst       ),
+    .clk    ( clk       ),
+    .clk_en ( clk_en    ),
+    .din    ( prev2_din ),
+    .drop   ( prev2     )
 );
 
 
@@ -117,11 +120,18 @@ reg [14:0]  xs, ys, pm_preshift_II;
 reg         s1_II;
 
 always @(*) begin
-    x  = ( {14{use_prevprev1}}  & prevprev1 ) |
-          ( {14{use_internal_x}} & op_result_internal ) |
-          ( {14{use_prev2}}      & prev2 );
-    y  = ( {14{use_prev1}}      & prev1 ) |
-          ( {14{use_internal_y}} & op_result_internal );
+    casez( {xuse_prevprev1, xuse_prev2, xuse_internal })
+        3'b1??: x = prevprev1;
+        3'b01?: x = prev2;
+        3'b001: x = op_result_internal;
+        default: x = 14'd0;
+    endcase
+    casez( {yuse_prev1, yuse_prev2, yuse_internal })
+        3'b1??: y = prev1;
+        3'b01?: y = prev2;
+        3'b001: y = op_result_internal;
+        default: y = 14'd0;
+    endcase    
     xs = { x[13], x }; // sign-extend
     ys = { y[13], y }; // sign-extend
 end
