@@ -72,7 +72,10 @@ generate
 			use_prev2      = 1'b0;
 			use_internal_x = s1_enters;
 			use_internal_y = 1'b0;
-			use_prev1      = s1_enters | (s2_enters&alg_hot[6]);
+			use_prev1      = s1_enters | 
+				(s2_enters&(|{alg_hot[6:3],alg_hot[0]})) | // S2, CON 6-3, CON 0
+				(s3_enters&alg_hot[5]) | // S3, CON 5
+				(s4_enters&(alg_hot[5]|alg_hot[2])); // S4, CON 5, CON 2
 		end		
 	end
 endgenerate
