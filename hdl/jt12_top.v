@@ -270,7 +270,7 @@ endgenerate
 
 `ifndef TIMERONLY
 
-jt12_pg u_pg(
+jt12_pg #(.num_ch(num_ch)) u_pg(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .clk_en     ( clk_en        ),
@@ -293,7 +293,7 @@ jt12_pg u_pg(
 
 wire [9:0] eg_V;
 
-jt12_eg u_eg(
+jt12_eg #(.num_ch(num_ch)) u_eg(
     .rst            ( rst           ),
     .clk            ( clk           ),
     .clk_en         ( clk_en        ),
@@ -408,10 +408,10 @@ generate
             .op_result  ( full_result ),
             // note that the order changes to deal 
             // with the operator pipeline delay
-            .s1_enters  ( s2_enters ),
-            .s2_enters  ( s1_enters ),
-            .s3_enters  ( s4_enters ),
-            .s4_enters  ( s3_enters ),
+            .s1_enters  ( s1_enters ),
+            .s2_enters  ( s2_enters ),
+            .s3_enters  ( s3_enters ),
+            .s4_enters  ( s4_enters ),
             .alg        ( alg_I     ),
             .zero       ( zero      ),
             // combined output

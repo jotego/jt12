@@ -72,7 +72,7 @@ generate
 			use_prev2      = 1'b0;
 			use_internal_x = s1_enters;
 			use_internal_y = 1'b0;
-			use_prev1      = s1_enters;
+			use_prev1      = s1_enters | (s2_enters&alg_hot[6]);
 		end		
 	end
 endgenerate
