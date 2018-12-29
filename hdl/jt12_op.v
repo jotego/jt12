@@ -70,13 +70,15 @@ reg [11:0]  totalatten_X;
 
 wire [13:0] prev1, prevprev1, prev2;
 
-reg [13:0] prev1_din;
+reg [13:0] prev1_din, prevprev1_din;
 
 always @(*)
     if( num_ch==3 ) begin
-        prev1_din = s1_enters ? op_result_internal : prev1;
-    end else begin
-        prev1_din = s2_enters ? op_result_internal : prev1;
+        prev1_din     = s1_enters ? op_result_internal : prev1;
+        prevprev1_din = s3_enters ? op_result_internal : prevprev1;
+    end else begin // 6 channels
+        prev1_din     = s2_enters ? op_result_internal : prev1;
+        prevprev1_din = s2_enters ? prev1 : prevprev1;
     end
 
 jt12_sh #( .width(14), .stages(num_ch)) prev1_buffer(
@@ -91,7 +93,7 @@ jt12_sh #( .width(14), .stages(num_ch)) prevprev1_buffer(
 //  .rst    ( rst   ),
     .clk    ( clk   ),
     .clk_en ( clk_en),
-    .din    ( s2_enters ? prev1 : prevprev1 ),
+    .din    ( prevprev1_din ),
     .drop   ( prevprev1 )
 );
 

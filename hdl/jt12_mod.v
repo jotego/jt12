@@ -68,7 +68,7 @@ generate
 		end		
 	end else begin
 		always @(*) begin // 3 ch
-			use_prevprev1  = 1'b0;
+			use_prevprev1  = s4_enters&(|alg_hot[4:0]); // S4, CON<=4
 			use_prev2      = 1'b0;
 			use_internal_x = s1_enters;
 			use_internal_y = 1'b0;
