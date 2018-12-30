@@ -9,132 +9,140 @@ FAST=-DFASTDIV
 VERI_EXTRA=
 WAV_FILE=
 CHIPTYPE="-DYM2612 -DMEGADRIVE_PSG"
+SKIPMAKE=FALSE
 
 while [ $# -gt 0 ]; do
-	if [ "$1" = "-w" ]; then
-		echo "Signal dump enabled"
-		DUMPSIGNALS="-trace"
-		shift
-		continue
-	fi
-	if [ "$1" = "-slow" ]; then
-		echo "Clock divider enabled"
-		FAST=
-		EXTRA="$EXTRA -slow"
-		shift
-		continue
-	fi	
-	if [ "$1" = "-hex" ]; then
-		echo "Hexadecimal dump enabled"
-		FAST=
-		EXTRA="$EXTRA -hex"
-		shift
-		continue
-	fi	
-	if [ "$1" = "-w1" ]; then
-		echo "Signal dump enabled (only top level)"
-		DUMPSIGNALS="-trace"
-		VERI_EXTRA="$VERI_EXTRA --trace-depth 1"
-		shift
-		continue
-	fi
-	if [ "$1" = "-sim" ]; then
-		echo "Simulation signals enabled"
-		VERI_EXTRA="$VERI_EXTRA -DSIMULATION"
-		shift
-		continue
-	fi
-	if [ "$1" = "-f" ]; then
-		shift
-		if [ ! -e "$1" ]; then
-			echo "Cannot open file " $1 " for GYM parsing"
-			exit 1
-		fi
-		GYM_ARG="-gym"
-		GYM_FILE="$1"
-		if [[ "$WAV_FILE" == "" ]]; then
-			WAV_FILE=$(basename "${GYM_FILE}.wav")
-		fi
-		shift
-		continue
-	fi
-	if [ "$1" = "-time" ]; then
-		shift
-		EXTRA="$EXTRA -time $1"
-		shift
-		continue
-	fi
-	if [ "$1" = "-o" ]; then
-		shift
-		WAV_FILE="$1"
-		shift
-		continue
-	fi	
-	if [ $1 = "-3ch" ]; then
-		echo YM2203 mode
-		CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG"
-		shift
-		continue
-	fi
-	if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "-mute"  ]]; then
-		EXTRA="$EXTRA $1"
-		if [[ "$1" = -mute ]]; then
-			shift
-			EXTRA="$EXTRA $1"
-		fi
-		shift
-		continue
-	fi
-	echo Unrecognized option
+    if [ "$1" = "-w" ]; then
+        echo "Signal dump enabled"
+        DUMPSIGNALS="-trace"
+        shift
+        continue
+    fi
+    if [ "$1" = "-slow" ]; then
+        echo "Clock divider enabled"
+        FAST=
+        EXTRA="$EXTRA -slow"
+        shift
+        continue
+    fi  
+    if [ "$1" = "-hex" ]; then
+        echo "Hexadecimal dump enabled"
+        FAST=
+        EXTRA="$EXTRA -hex"
+        shift
+        continue
+    fi  
+    if [ "$1" = "-w1" ]; then
+        echo "Signal dump enabled (only top level)"
+        DUMPSIGNALS="-trace"
+        VERI_EXTRA="$VERI_EXTRA --trace-depth 1"
+        shift
+        continue
+    fi
+    if [ "$1" = "-sim" ]; then
+        echo "Simulation signals enabled"
+        VERI_EXTRA="$VERI_EXTRA -DSIMULATION"
+        shift
+        continue
+    fi
+    if [ "$1" = "-f" ]; then
+        shift
+        if [ ! -e "$1" ]; then
+            echo "Cannot open file " $1 " for GYM parsing"
+            exit 1
+        fi
+        GYM_ARG="-gym"
+        GYM_FILE="$1"
+        if [[ "$WAV_FILE" == "" ]]; then
+            WAV_FILE=$(basename "$GYM_FILE" .vgm).wav
+        fi
+        shift
+        continue
+    fi
+    if [ "$1" = "-time" ]; then
+        shift
+        EXTRA="$EXTRA -time $1"
+        shift
+        continue
+    fi
+    if [ "$1" = "-o" ]; then
+        shift
+        WAV_FILE="$1"
+        shift
+        continue
+    fi  
+    if [ $1 = "-3ch" ]; then
+        echo YM2203 mode
+        CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG"
+        shift
+        continue
+    fi
+    if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "$1" = "-mute"  ]]; then
+        EXTRA="$EXTRA $1"
+        if [[ "$1" = -mute ]]; then
+            shift
+            EXTRA="$EXTRA $1"
+        fi
+        shift
+        continue
+    fi
+    if [ "$1" = "-runonly" ]; then
+        echo Skipping Verilator and make steps
+        SKIPMAKE=TRUE
+        shift
+        continue
+    fi  
+    echo go: unrecognized option
     exit 1
 done
 
 # $readmem does not open local files in verilator, so I need to link them here
 for i in ../../hdl/*hex; do
-	x=$(basename $i)
-	if [ ! -e $x ]; then
-		ln -s $i
-	fi
+    x=$(basename $i)
+    if [ ! -e $x ]; then
+        ln -s $i
+    fi
 done
 
 if [[ "$GYM_FILE" = "" ]]; then
-	echo "Specify the VGM/GYM/JTT file to parse using the argument -gym file_name"
-	exit 1
+    echo "Specify the VGM/GYM/JTT file to parse using the argument -gym file_name"
+    exit 1
 fi
 
 echo EXTRA="$EXTRA"
 
 if [[ $(expr match "$GYM_FILE" ".*\.vgz") != 0 ]]; then
-	echo Uncompressing vgz file...
-	gunzip -S vgz "$GYM_FILE" --to-stdout > input.vgm
-	UNZIP_GYM=input.vgm
+    echo Uncompressing vgz file...
+    UNZIP_GYM=$(basename "$GYM_FILE" .vgz).vgm
+    WAV_FILE=$(basename "$UNZIP_GYM" .vgm).wav
+    gunzip -S vgz "$GYM_FILE" --to-stdout > "$UNZIP_GYM"
 else
-	UNZIP_GYM=$GYM_FILE
+    UNZIP_GYM=$GYM_FILE
 fi
 
 date
 
-# rm -rf obj_dir
-# export VERILATOR_ROOT=$(which verilator)
-echo "verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
-	-I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
-    $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp"
+if [ $SKIPMAKE = FALSE ]; then
+    echo "verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
+        -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
+        $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp"
 
-if ! verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
-	-I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
-    $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp; then
-	exit $?
-fi
+    if ! verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
+        -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
+        $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp; then
+        exit $?
+    fi
 
-if ! make -j -C obj_dir -f V${TOP}.mk V${TOP}; then
-	exit $?
+    if ! make -j -C obj_dir -f V${TOP}.mk V${TOP}; then
+        exit $?
+    fi
+    echo Simulation start...
+    echo obj_dir/V${TOP} $DUMPSIGNALS $EXTRA  $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
 fi
-echo Simulation start...
-echo obj_dir/V${TOP} $DUMPSIGNALS $EXTRA  $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
 
 if [[ $DUMPSIGNALS == "-trace" ]]; then
-	echo VCD to FST conversion running in parallel
-	obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" | vcd2fst -v - -f test.fst
+    echo VCD to FST conversion running in parallel
+    obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" | vcd2fst -v - -f test.fst
 else
-	obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
+    obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
 fi

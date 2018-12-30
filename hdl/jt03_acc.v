@@ -54,7 +54,7 @@ always @(*) begin
     endcase
 end
 
-localparam res=17;
+localparam res=18;
 wire [res-1:0] hires;
 assign snd = hires[res-1:res-16];
 
