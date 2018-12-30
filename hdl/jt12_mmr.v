@@ -111,7 +111,7 @@ parameter use_ssg=0, num_ch=6, use_pcm=1;
 reg [1:0] div_setting;
 
 
-jt12_div #(.use_ssg(use_ssg)) u_div (
+jt12_div #(.use_ssg(use_ssg),.num_ch(num_ch)) u_div (
     .rst            ( rst           ),
     .clk            ( clk           ),
     .cen            ( cen           ),

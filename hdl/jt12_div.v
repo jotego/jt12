@@ -29,22 +29,27 @@ module jt12_div(
     output  reg     clk_en_ssg
 );
 
-parameter use_ssg=0;
+parameter use_ssg=0, num_ch;
 
-reg [2:0] opn_pres, ssg_pres;
-reg [2:0] opn_cnt, ssg_cnt;
+reg [3:0] opn_pres, opn_cnt;
+reg [2:0] ssg_pres, ssg_cnt;
 reg cen_int, cen_ssg_int;
 
 always @(*)
+    if( num_ch==6 ) begin
+        opn_pres = 4'd5;
+        ssg_pres = 3'd3; // unused, really
+    end
+    else
     casez( div_setting )
-        2'b0?: { opn_pres, ssg_pres } = { 3'd1, 3'd0 };
-        2'b10: { opn_pres, ssg_pres } = { 3'd5, 3'd3 };
-        2'b11: { opn_pres, ssg_pres } = { 3'd2, 3'd1 };
+        2'b0?: { opn_pres, ssg_pres } = { 4'd3 , 3'd0 };
+        2'b10: { opn_pres, ssg_pres } = { 4'd11, 3'd3 };
+        2'b11: { opn_pres, ssg_pres } = { 4'd5 , 3'd1 };
     endcase // div_setting
 
 
 always @(negedge clk) begin
-    cen_int     <= opn_cnt == 3'd0;
+    cen_int     <= opn_cnt == 4'd0;
     cen_ssg_int <= ssg_cnt == 3'd0;
     `ifdef FASTDIV
     // always enabled for fast sims (use with GYM output, timer will not work well)
@@ -60,9 +65,9 @@ end
 always @(posedge clk)
     if( cen ) begin
         if( opn_cnt == opn_pres ) begin
-            opn_cnt <= 3'd0;            
+            opn_cnt <= 4'd0;            
         end
-        else opn_cnt <= opn_cnt + 3'd1;
+        else opn_cnt <= opn_cnt + 4'd1;
     end
 
 // SSG
