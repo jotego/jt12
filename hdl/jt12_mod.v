@@ -77,7 +77,7 @@ generate
         reg [2:0] yuse_s4, yuse_s3, yuse_s2, yuse_s1;
         always @(*) begin // 3 ch
             // S1
-            { xuse_s1, yuse_s1 } = { 3'b100, 3'b100 };
+            { xuse_s1, yuse_s1 } = { 3'b001, 3'b100 };
             // S2
             casez( 1'b1 )
                 // S2 modulated by S1

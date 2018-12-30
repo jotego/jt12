@@ -55,3 +55,14 @@ wait 1500
 # modulated S4
 kon C0
 wait 1500
+
+#mute
+tl 0,1,ff
+tl 0,3,ff
+wait 500
+
+# sum both outputs
+tl 0,1,10
+tl 0,3,10
+kon f0
+wait 1500

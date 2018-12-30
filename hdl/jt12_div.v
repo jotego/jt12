@@ -42,9 +42,9 @@ always @(*)
     end
     else
     casez( div_setting )
-        2'b0?: { opn_pres, ssg_pres } = { 4'd3 , 3'd0 };
-        2'b10: { opn_pres, ssg_pres } = { 4'd11, 3'd3 };
-        2'b11: { opn_pres, ssg_pres } = { 4'd5 , 3'd1 };
+        2'b0?: { opn_pres, ssg_pres } = { 4'd1, 3'd0 };
+        2'b10: { opn_pres, ssg_pres } = { 4'd5, 3'd3 };
+        2'b11: { opn_pres, ssg_pres } = { 4'd3, 3'd1 };
     endcase // div_setting
 
 

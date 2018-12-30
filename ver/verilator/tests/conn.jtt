@@ -25,31 +25,58 @@ fb_con 5,7
 kon 10
 wait 3000
 
+#mute
+tl 0,0,ff
+wait 200
+
 tl    0,0,0
 fb_con 0,f # FB=1
 wait 1500
+#mute
+tl 0,0,ff
+wait 200
+
 tl    0,0,2
 fb_con 0,17 # FB=2
 wait 1500
+#mute
+tl 0,0,ff
+wait 200
+
 tl    0,0,4
 fb_con 0,1f # FB=3
 wait 1500
+#mute
+tl 0,0,ff
+wait 200
 
 tl    0,0,6
 fb_con 0,27 # FB=4
 wait 1500
+#mute
+tl 0,0,ff
+wait 200
 
 tl    0,0,8
 fb_con 0,2f # FB=5
 wait 1500
+#mute
+tl 0,0,ff
+wait 200
 
 tl    0,0,c
 fb_con 0,37 # FB=6
 wait 1500
+#mute
+tl 0,0,ff
+wait 200
 
 tl    0,0,10
 fb_con 0,3f # FB=7
 wait 1500
+#mute
+tl 0,0,ff
+wait 200
 
 # now show each operator output independently
 kon f0
