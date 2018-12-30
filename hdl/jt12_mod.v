@@ -112,7 +112,7 @@ generate
                 // S4 modulated by S3+S1
                 alg_hot[2]:
                     { xuse_s4, yuse_s4 } = { 3'b100, 3'b100 }; // prevprev1+prev1
-                default:  { xuse_s3, yuse_s3 } =  6'd0;
+                default:  { xuse_s4, yuse_s4 } =  6'd0;
             endcase                       
             case( {s4_enters, s3_enters, s2_enters, s1_enters})
                 4'b1000: begin
