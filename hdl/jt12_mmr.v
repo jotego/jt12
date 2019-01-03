@@ -101,13 +101,6 @@ module jt12_mmr(
 
 parameter use_ssg=0, num_ch=6, use_pcm=1;
 
-`ifdef SIMULATION
-    initial begin
-        cen_cnt = 3'd0;
-    end
-    `include "jt12_mmr_sim.vh"
-`endif
-
 reg [1:0] div_setting;
 
 

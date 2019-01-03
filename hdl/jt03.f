@@ -32,3 +32,9 @@ jt12_sh24.v
 jt12_sumch.v
 jt12_timers.v
 jt12_pcm.v
+../jt49/hdl/jt49.v      
+../jt49/hdl/jt49_div.v  
+../jt49/hdl/jt49_eg.v   
+../jt49/hdl/jt49_exp.v  
+../jt49/hdl/jt49_noise.v
+../jt49/hdl/jt49_cen.v  

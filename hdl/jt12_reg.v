@@ -180,7 +180,6 @@ wire update_op_IV = cur == req_opch_IV;
 wire    [3:0]   keyon_op = din[7:4];
 wire    [2:0]   keyon_ch = din[2:0];
 // channel data
-wire    [1:0]   rl_in   = din[7:6];
 wire    [2:0]   fb_in   = din[5:3];
 wire    [2:0]   alg_in  = din[2:0];
 wire    [2:0]   pms_in  = din[2:0];
@@ -353,6 +352,7 @@ generate
 if( num_ch==6 ) begin
     // RL is on a different register to 
     // have the reset to 1
+    wire [1:0] rl_in   = din[7:6];	 
     jt12_sh_rst #(.width(2),.stages(num_ch),.rstval(1'b1)) u_regch_rl(
         .clk    ( clk       ),
         .clk_en ( clk_en    ),

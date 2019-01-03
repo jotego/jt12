@@ -421,56 +421,5 @@ generate
         );        
     end    
 endgenerate
-
-`ifdef SIMULATION
-/* verilator lint_off PINMISSING */
-reg [4:0] sep24_cnt;
-
-wire [9:0] eg_ch0s1, eg_ch1s1, eg_ch2s1, eg_ch3s1, eg_ch4s1, eg_ch5s1,
-        eg_ch0s2, eg_ch1s2, eg_ch2s2, eg_ch3s2, eg_ch4s2, eg_ch5s2,
-        eg_ch0s3, eg_ch1s3, eg_ch2s3, eg_ch3s3, eg_ch4s3, eg_ch5s3,
-        eg_ch0s4, eg_ch1s4, eg_ch2s4, eg_ch3s4, eg_ch4s4, eg_ch5s4;
-
-always @(posedge clk) if( clk_en )
-    sep24_cnt <= !zero ? sep24_cnt+1'b1 : 5'd0;
-
-sep24 #( .width(10), .pos0(5'd0)) egsep
-(
-    .clk    ( clk       ),
-    .clk_en ( clk_en    ),
-    .mixed  ( eg_IX     ),
-    .mask   ( 24'd0     ),
-    .cnt    ( sep24_cnt ),
-
-    .ch0s1 (eg_ch0s1), 
-    .ch1s1 (eg_ch1s1), 
-    .ch2s1 (eg_ch2s1), 
-    .ch3s1 (eg_ch3s1), 
-    .ch4s1 (eg_ch4s1), 
-    .ch5s1 (eg_ch5s1), 
-
-    .ch0s2 (eg_ch0s2), 
-    .ch1s2 (eg_ch1s2), 
-    .ch2s2 (eg_ch2s2), 
-    .ch3s2 (eg_ch3s2), 
-    .ch4s2 (eg_ch4s2), 
-    .ch5s2 (eg_ch5s2), 
-
-    .ch0s3 (eg_ch0s3), 
-    .ch1s3 (eg_ch1s3), 
-    .ch2s3 (eg_ch2s3), 
-    .ch3s3 (eg_ch3s3), 
-    .ch4s3 (eg_ch4s3), 
-    .ch5s3 (eg_ch5s3), 
-
-    .ch0s4 (eg_ch0s4), 
-    .ch1s4 (eg_ch1s4), 
-    .ch2s4 (eg_ch2s4), 
-    .ch3s4 (eg_ch3s4), 
-    .ch4s4 (eg_ch4s4), 
-    .ch5s4 (eg_ch5s4)
-);
-`endif
-/* verilator lint_on PINMISSING */
 `endif
 endmodule
