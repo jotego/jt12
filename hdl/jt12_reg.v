@@ -117,6 +117,8 @@ reg last;
 initial begin
     cur_op = 2'd0;
     cur_ch = 3'd0;
+    next_op = 2'd0;
+    next_ch = 3'd1;
     last    = 1'b0;
     zero    = 1'b1;
 end
@@ -155,11 +157,9 @@ assign block_I =( {3{effect_on_s1}} & block_ch3op1 ) |
                 ( {3{effect_on_s3}} & block_ch3op3 ) |
                 ( {3{noeffect}}  & block_I_raw  );
                 
-wire [2:0] ch_II, ch_III, ch_IV, ch_V, ch_VI;
-
 wire [4:0] req_opch_I = { op, ch };
 wire [4:0]  req_opch_II, req_opch_III, 
-            req_opch_IV, req_opch_V, req_opch_VI;
+            req_opch_IV, req_opch_V; //, req_opch_VI;
                 
 jt12_sumch #(.num_ch(num_ch)) u_opch_II ( .chin(req_opch_I  ), .chout(req_opch_II ) );
 jt12_sumch #(.num_ch(num_ch)) u_opch_III( .chin(req_opch_II ), .chout(req_opch_III) );

@@ -31,8 +31,8 @@ module jt12_div(
 
 parameter use_ssg=0, num_ch=6;
 
-reg [3:0] opn_pres, opn_cnt;
-reg [2:0] ssg_pres, ssg_cnt;
+reg [3:0] opn_pres, opn_cnt=4'd0;
+reg [2:0] ssg_pres, ssg_cnt=3'd0;
 reg cen_int, cen_ssg_int;
 
 always @(*)

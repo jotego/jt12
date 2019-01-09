@@ -124,8 +124,6 @@ reg [6:0] up_opreg; // hot-one encoding. tells which operator register gets upda
 reg [2:0] up_chreg; // hot-one encoding. tells which channel register gets updated next
 reg up_keyon;
 
-wire            busy_reg;
-
 parameter   REG_TESTYM  =   8'h21,
             REG_LFO     =   8'h22,
             REG_CLKA1   =   8'h24,
@@ -202,6 +200,13 @@ always @(posedge clk) begin : memory_mapped_registers
         eg_stop     <= 1'b0;
         pg_stop     <= 1'b0;
         psg_wr_n    <= 1'b1;
+        // 
+        { block_ch3op1, fnum_ch3op1 } <= {3'd0, 11'd0 };
+        { block_ch3op3, fnum_ch3op3 } <= {3'd0, 11'd0 };
+        { block_ch3op2, fnum_ch3op2 } <= {3'd0, 11'd0 };
+        latch_fnum <= 6'd0;
+        din_copy   <= 8'd0;
+        part       <= 1'b0;
     end else begin
         // WRITE IN REGISTERS
         if( write ) begin
