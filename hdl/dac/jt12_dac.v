@@ -35,7 +35,7 @@ module jt12_dac #(parameter width=12)
     input	signed	[width-1:0] din,
     output	dout
 );
-parameter acc_w = width+1;
+localparam acc_w = width+1;
 
 reg [width-1:0] nosign;
 reg [acc_w-1:0] acc;

@@ -11,7 +11,6 @@ jt12_eg_ctrl.v
 jt12_exprom.v
 jt12_kon.v
 jt12_lfo.v
-jt12_limitamp.v
 jt12_mmr.v
 jt12_div.v
 jt12_mod.v

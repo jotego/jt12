@@ -256,8 +256,8 @@ generate
             .dout       ( psg_dout  ),
             .sel        ( 1'b0      )   // half clock speed
         );
-        assign snd_left  = fm_snd_left  + { 2'b0, psg_snd[9:1],5'd0}; 
-        assign snd_right = fm_snd_right + { 2'b0, psg_snd[9:1],5'd0}; 
+        assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0}; 
+        assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0}; 
         assign dout = addr[0] ? psg_dout : fm_dout;
     end else begin
         assign psg_snd  = 10'd0;
