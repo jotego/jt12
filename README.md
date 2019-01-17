@@ -2,8 +2,8 @@
 ===================================================================
 
 You can show your appreciation through
-    * Patreon: https://patreon.com/topapate
-    * Paypal: https://paypal.me/topapate
+* [Patreon](https://patreon.com/topapate), by supporting releases
+* [Paypal](https://paypal.me/topapate), with a donation
 
 
 JT12 is an FM sound source written in Verilog, fully compatible with YM2612 and YM2203.
