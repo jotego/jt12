@@ -1,6 +1,12 @@
-# jt12
+# JT12 FPGA Clone of Yamaha OPN hardware by Jose Tejada (@topapate)
+===================================================================
 
-FM sound source written in Verilog, fully compatible with YM2612 and YM2203.
+You can show your appreciation through
+    * Patreon: https://patreon.com/topapate
+    * Paypal: https://paypal.me/topapate
+
+
+JT12 is an FM sound source written in Verilog, fully compatible with YM2612 and YM2203.
 
 The implementation tries to be as close to original hardware as possible. Low usage of FPGA resources has also been a design goal. Except in the operator section (jt12_op) where an exact replica of the original circuit is done. This could be done in less space with a different style but because this piece of the circuit was reversed engineered by Sauraen, I decided to use that knowledge.
 
