@@ -16,14 +16,13 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 27-12-2018
+    Date: 21-03-2019
 */
 
-// Wrapper to output only combined channels. Defaults to YM2203 mode.
+// YM2610 wrapper
+// Clock enabled at 7.5 - 8.5MHz
 
-
-
-module jt03(
+module jt10(
     input           rst,        // rst should be at least 6 clk&cen cycles long
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
@@ -34,6 +33,12 @@ module jt03(
     
     output  [7:0]   dout,
     output          irq_n,
+    // ADPCM pins
+    output  [19:0]  pcma_addr,  // real hardware has 10 pins multiplexed through RMPX pin
+    output  [3:0]   pcma_bank,
+    output          pcma_roe_n, // ADPCM-A ROM output enable
+    output  [23:0]  pcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
+    output          pcmb_roe_n, // ADPCM-B ROM output enable
     // Separated output
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
