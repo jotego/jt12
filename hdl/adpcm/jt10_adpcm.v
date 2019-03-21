@@ -44,25 +44,13 @@ parameter CHCNT = 6;
 localparam stepw = 16;
 localparam xw    = 15;
 
-wire signed [xw-1:0] xn0_III;
-reg signed [xw-1:0] dn, xn;
-reg [14:0] step;
-reg [7:0] step_val;
-
-reg [3:0]  d0_II;   // new input data
-reg [18:0] d_II;
-reg [15:0] d_III;
-
-reg [23:0] step2_II;
-reg [stepw-1:0] step_III, step2_IV, step2_V;
-reg signed [xw:0] xn_IV;
-reg signed [xw-1:0] xn_V;
-assign pcm = xn_V;
+reg signed [xw-1:0] x1, x2, x3, x4, x5, x6;
+reg [stepw-1:0] step1, step2, step3, step4, step5, step6;
+assign pcm = x6;
 
 wire [16:0] step2b = step2[23:6];
-reg dsign_II, dsign_III, dsign_IV;
 wire [15:0] xn0_III;
-wire [xw:0] xn0_sgnext_III = { xn0_III[xw-1], xn0_III };
+wire [xw:0] x3_sgnext = { x3[xw-1], x3 };
 
 always @(*) begin
     case (data[2:0])
@@ -72,7 +60,7 @@ always @(*) begin
         3'b1_10: step_val = 8'd128;
         3'b1_11: step_val = 8'd153;
     endcase // data[2:0]
-    d_II      = d0_II    * step_II; // 4 + 15 = 19 bits -> div by 8 -> 16 bits
+    d3l       = d2    * step2; // 4 + 15 = 19 bits -> div by 8 -> 16 bits
     step2_III = step_lut * step_III; // 15 bits + 8 bits = 23 bits -> div 64 -> 17 bits
 end
 
@@ -82,55 +70,47 @@ end
 
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
-        xn <= 'd0;
+        x1 <= 'd0; step1 <= 'd0; 
+        x2 <= 'd0; step2 <= 'd0;
+        x3 <= 'd0; step3 <= 'd0;
+        x4 <= 'd0; step4 <= 'd0;
+        x5 <= 'd0; step5 <= 'd0;
+        x6 <= 'd0; step6 <= 'd0;
     end else if(cen) begin
         // I
-        d0_II     <= {data[2:0],1'b1};
-        dsign_II  <= data[3];
+        d2        <= {data[2:0],1'b1};
+        sign2     <= data[3];
+        x2        <= x1;
+        step2     <= step1;
         // II: step is first used here
-        d_III     <= d_II[18:3]; // 16 bits
-        dsign_III <= dsign_II;
-        step_III  <= step_II;
+        d3        <= d3l[18:3]; // 16 bits
+        sign3     <= sign2;
+        x3        <= x2;
+        step3     <= step2;
         // III: old data first used here 
-        xn_IV     <= dsign_III ? (xn0_sgnext_III-d_III) : (xn0_sgnext_III+d_III);
-        dsign_IV  <= dsign_III;
-        xsign_IV  <= xn0_III[xw-1];
-        step2_IV  <= step2_III[23:6];
+        x4        <= sign3 ? (x3_sgnext-d3) : (x3_sgnext+d3);
+        sign4     <= sign3;
+        x3sign    <= x3[xw-1];
+        step4     <= step2_III[23:6];
         // IV: limit outputs
-        if( (xn_IV[xw] != xsign_IV) && ( xn_IV[xw] == dsign_IV ) )
-            xn_V <= !xsign_IV ? 16'h8000 : 16'h7FFF;
+        if( (x4[xw] != x3sign) && ( xn_IV[xw] == sign4 ) )
+            x5 <= !x3sign ? 16'h8000 : 16'h7FFF;
         else
-            xn_V <= xn_IV[xw-1:0];
-        // step size for next data
-        if( step2_IV < 17'd127 )
-            step2_V  <= 17'd127;
-        else if( step2_IV > 17'd24576 )
-            step2_V  <= 17'd24576;
+            x5 <= x4[xw-1:0];
+
+        if( step4 < 17'd127 )
+            step5  <= 17'd127;
+        else if( step4 > 17'd24576 )
+            step5  <= 17'd24576;
         else
-            step2_V <= step2_IV;
-        // V:
-        xn_VI     <= Xn_V;
-        step2_VI  <= step2_V;
-        // VI:
-        xn_VII    <= Xn_VI;
-        step2_VII <= step2_VII;
+            step5 <= step4;
+        // V: pad one cycle
+        x6     <= x5;
+        step6  <= step5;
+        // VI: close the loop
+        x1    <= x6;
+        step1 <= step6;
     end
-
-jt12_sh_rst #( .width(xw), .stages(CHCNT)) u_pcm_data(
-    .clk    ( clk       ),
-    .clk_en ( clk_en    ),
-    .rst    ( ~rst_n    ),  
-    .din    ( xn_V      ),
-    .drop   ( xn0_III   )
-);
-
-jt12_sh_rst #( .width(stepw), .stages(CHCNT)) u_step_data(
-    .clk    ( clk       ),
-    .clk_en ( clk_en    ),
-    .rst    ( ~rst_n    ),  
-    .din    ( step2_V   ),
-    .drop   ( step_II   )
-);
 
 
 endmodule // jt10_adpcm    
