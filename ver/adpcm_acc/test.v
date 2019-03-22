@@ -15,27 +15,34 @@ initial begin
     rst_n = #1 1'b1;
 end
 
-reg [15:0] pcm_in;
-reg [15:0] sine[0:127];
+reg signed [15:0] pcm_in=16'd0;
+reg signed [15:0] sine[0:127];
 integer cnt=0;
 
 initial $readmemh("sine.hex", sine);
 
 always @(posedge clk) begin
     ch <= ch==3'd5 ? 3'd0 : (ch+3'd1);
-    pcm_in <= ch==3'd5 ? sine[cnt] : 16'd0;
+    case( ch )
+        3'd0: pcm_in <= sine[ { cnt[4:0], 2'b0 } ] >>> 2;
+        3'd5: pcm_in <= sine[cnt];
+        default: pcm_in <= 'd0;
+    endcase // ch
     if( ch==3'd5 ) cnt <= cnt+1;
     if( cnt==127 ) $finish;
 end
 
-initial #1000 $finish;
+reg cen55=1'b1;
+
+always @(negedge clk) cen55 <= ~cen55;
 
 wire [15:0] pcm_out;
 
 jt10_adpcm_acc uut(
     .rst_n  ( rst_n   ),
     .clk    ( clk     ),        // CPU clock
-    .cen    ( 1'b1    ),        // optional clock enable, if not needed leave as 1'b1
+    .cen111 ( 1'b1    ),
+    .cen55  ( cen55   ),
     .ch     ( ch      ),
     .pcm_in ( pcm_in  ),
     .pcm_out( pcm_out )

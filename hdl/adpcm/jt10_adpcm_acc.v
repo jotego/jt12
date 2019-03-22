@@ -25,35 +25,53 @@
 module jt10_adpcm_acc(
     input           rst_n,
     input           clk,        // CPU clock
-    input           cen,        // optional clock enable, if not needed leave as 1'b1
+    input           cen55,      //  55 kHz
+    input           cen111,     // 111 kHz
     input   [2:0]   ch,
     input      signed [15:0] pcm_in,    // 18.5 kHz
     output reg signed [15:0] pcm_out    // 55.5 kHz
 );
 
 wire signed [17:0] pcmin_long = { {2{pcm_in[15]}}, pcm_in };
-reg  signed [17:0] acc, next, pcm_full;
+reg  signed [17:0] acc, last, pcm_full;
 reg  signed [17:0] step;
 
-wire signed [17:0] diff = pcm_full - acc;
+reg signed [17:0] diff;
+reg signed [22:0] diff_ext, step_full; 
+
+always @(*) begin
+    diff = acc-last;
+    diff_ext = { {5{diff[17]}}, diff };
+    step_full = diff_ext        // 1/128
+        + ( diff_ext << 1 )     // 1/64
+        + ( diff_ext << 3 )     // 1/16
+        + ( diff_ext << 5 );    // 1/4
+
+end
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         step <= 'd0;
-        pcm_full <= 18'd0;
-        acc <= 18'd0;
-    end else if(cen) begin
+        acc  <= 18'd0;
+        last <= 18'd0;
+    end else if(cen111) begin
         acc <= ch==3'd0 ? pcmin_long : ( pcmin_long + acc );
         if( ch == 3'd0 ) begin
             // step = diff * (1/4+1/16+1/64+1/128)
-            step <= {{2{diff[17]}},diff[17:2]} // 1 / 4 
-                + {{4{diff[17]}},diff[17:5]}   // 1 / 16 
-                + {{6{diff[17]}},diff[17:7]}   // 1 / 64
-                + {{7{diff[17]}},diff[17:8]};  // 1 / 128
+            step <= step_full>>>7;
+            last <= acc;
         end
-        pcm_full <= pcm_full + step;
-        if( ^pcm_full[17:15] ) // overflow
-            pcm_out <= pcm_full[17] ? 16'h8000 : 16'h0; // saturate
+    end
+
+wire overflow = |pcm_full[17:15] & ~&pcm_full[17:15];
+
+always @(posedge clk or negedge rst_n)
+    if( !rst_n ) begin
+        pcm_full <= 18'd0;
+    end else if(cen55) begin
+        pcm_full <= ch==3'd0 ? last : pcm_full + step;
+        if( overflow )
+            pcm_out <= pcm_full[17] ? 16'h8000 : 16'h7fff; // saturate
         else
             pcm_out <= pcm_full[15:0];
     end

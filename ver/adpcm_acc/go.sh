@@ -6,5 +6,5 @@ if which ncverilog &> /dev/null; then
     ncverilog +access+r +nc64bit +define+NCVERILOG \
         test.v ../../hdl/adpcm/jt10_adpcm_acc.v
 else
-    echo iverilog
+    echo "To do: add iverilog simulation statement"
 fi

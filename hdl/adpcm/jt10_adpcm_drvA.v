@@ -188,4 +188,14 @@ jt10_adpcm_gain u_gain(
     output reg signed [15:0] pcm_r
 );
 
+jt10_adpcm_acc(
+    input           rst_n,
+    input           clk,        // CPU clock
+    input           cen55,      //  55 kHz
+    input           cen111,     // 111 kHz
+    input   [2:0]   ch,
+    input      signed [15:0] pcm_in,    // 18.5 kHz
+    output reg signed [15:0] pcm_out    // 55.5 kHz
+);
+
 endmodule // jt10_adpcm_drvA
