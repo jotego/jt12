@@ -23,16 +23,32 @@ module jt10_adpcm_cnt(
     input           rst_n,
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
-    output  [11:0]  addr_start,
-    output  [11:0]  addr_end,
+    input   [11:0]  addr_in,
+    input   [ 2:0]  ch,
+    input           we_start,
+    input           we_end,
     output          aon,
     output          aoff,
     output  reg [19:0]  cnt,
     output          sel
 );
 
+parameter CHID = 0; // channel ID
+
 reg on;
 wire done = cnt[19:8] == addr_end;
+reg [11:0] addr_start, addr_end;
+
+wire this_ch = CHID == ch;
+
+always @(posedge clk or negedge rst_n) 
+    if( !rst_n ) begin
+        addr_start <= 'd0;
+        addr_end   <= 'd0;
+    end else if( cen ) begin
+        addr_start <= this_ch & we_start ? addr_in;
+        addr_end   <= this_ch & we_end   ? addr_in;
+    end
 
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin

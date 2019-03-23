@@ -25,8 +25,7 @@
 module jt10_adpcm_acc(
     input           rst_n,
     input           clk,        // CPU clock
-    input           cen55,      //  55 kHz
-    input           cen111,     // 111 kHz
+    input           cen,        // 111 kHz
     input   [2:0]   ch,
     input      signed [15:0] pcm_in,    // 18.5 kHz
     output reg signed [15:0] pcm_out    // 55.5 kHz
@@ -68,8 +67,11 @@ wire overflow = |pcm_full[17:15] & ~&pcm_full[17:15];
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         pcm_full <= 18'd0;
-    end else if(cen55) begin
-        pcm_full <= ch==3'd0 ? last : pcm_full + step;
+    end else if(cen) begin
+        case( cs )
+            3'd0: pcm_full <= last;
+            3'd2, 3'd4: pcm_full <= pcm_full + step;
+        endcase
         if( overflow )
             pcm_out <= pcm_full[17] ? 16'h8000 : 16'h7fff; // saturate
         else

@@ -193,14 +193,21 @@ void VGMParser::open(const char* filename, int limit) {
 	char version[2];
 	file.seekg(0x08);
 	file.read( version,2 );
-	// Read the chip frequency
+	// Read the chip frequency, this is located at different
+	// positions depending on the chip type so it also determines
+	// which chip is used in the file
 	chip_cfg = unknown;
 	file.seekg(0x2c); // offset to YM2612
 	file.read( (char*) &ym_freq, 4 );
 	if( ym_freq == 0 ) { // try YM2203
 		file.seekg(0x44); // offset to YM2612
 		file.read( (char*) &ym_freq, 4 );
-		if( ym_freq ) chip_cfg = ym2203;
+		if( ym_freq ==0 ) { // try YM2610
+			file.seekg(0x4C); // offset to YM2610
+			file.read( (char*) &ym_freq, 4 );
+			if( ym_freq ) chip_cfg = ym2610;
+		}
+		else chip_cfg = ym2203;
 	}
 	else chip_cfg = ym2612;
 	cout << "YM Freq = " << dec << ym_freq << " Hz\n";

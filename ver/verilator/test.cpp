@@ -251,6 +251,7 @@ int main(int argc, char** argv, char** env) {
     switch( gym->chip() ) {
         case RipParser::ym2203: cerr << "YM2203 tune.\n"; break;
         case RipParser::ym2612: cerr << "YM2612 tune.\n"; break;
+        case RipParser::ym2610: cerr << "YM2610 tune.\n"; break;
         default: cerr << "ERROR: Unknown chip (" << gym->chip() << ") in VGM file\n"; return 1;
     }
 

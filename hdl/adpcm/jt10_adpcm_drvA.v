@@ -20,65 +20,54 @@
 */
 
 module jt10_adpcm_drvA(
-    input           rst_n,        // rst should be at least 6 clk&cen cycles long
-    input           clk,        // CPU clock
-    input           cen,        // optional clock enable, if not needed leave as 1'b1
+    input           rst_n,  // rst should be at least 6 clk&cen cycles long
+    input           clk,    // CPU clock
+    input           cen,    // clk & cen must be 111 kHz
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
     output  [3:0]   bank,
     output          roe_n, // ADPCM-A ROM output enable
 
+    // Control Registers
     input   [5:0]   atl,        // ADPCM Total Level
-    input   [7:0]   datain,
+    input   [7:0]   lracl_in,
+    input           we_lracl,
+    input   [2:0]   ch,
+
+    input   [11:0]  addr_in,
+    input           we_start,
+    input           we_end,
+
     input   [7:0]   aon_cmd,    // ADPCM ON equivalent to key on for FM
 
-    input   [11:0]  start0,
-    input   [11:0]  start1,
-    input   [11:0]  start2,
-    input   [11:0]  start3,
-    input   [11:0]  start4,
-    input   [11:0]  start5,
+    input   [7:0]   datain,
 
-    input   [11:0]  end0,
-    input   [11:0]  end1,
-    input   [11:0]  end2,
-    input   [11:0]  end3,
-    input   [11:0]  end4,
-    input   [11:0]  end5,
-
-    input   [ 7:0]  lr_acl0,
-    input   [ 7:0]  lr_acl1,
-    input   [ 7:0]  lr_acl2,
-    input   [ 7:0]  lr_acl3,
-    input   [ 7:0]  lr_acl4,
-    input   [ 7:0]  lr_acl5,
-
-    output signed [15:0]  pcm
+    output signed [15:0]  pcm55_l,
+    output signed [15:0]  pcm55_r
 );
 
 wire [19:0] cnt0, cnt1, cnt2, cnt3, cnt4, cnt5;
-wire [5:0] sel;
+wire [5:0] sel; // use upper or lower nibble of input byte
 reg  [5:0] aon, aoff;
 
-reg [2:0] ch;
+reg nibble_sel;
+
+always @(*)
+    case( ch )
+        3'd0:   nibble_sel = sel[5];
+        3'd1:   nibble_sel = sel[0];
+        3'd2:   nibble_sel = sel[1];
+        3'd3:   nibble_sel = sel[2];
+        3'd4:   nibble_sel = sel[3];
+        3'd5:   nibble_sel = sel[4];
+    endcase
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
-        ch <= 3'b0;
         data <= 4'd0;
     end else if(cen) begin
-        ch <= ch==3'd5 ? 3'd0 : (ch+3'd1);
-        case( ch )
-            3'd0:   data <= sel[5] ? datain[7:4] : datain[3:0];
-            3'd1:   data <= sel[0] ? datain[7:4] : datain[3:0];
-            3'd2:   data <= sel[1] ? datain[7:4] : datain[3:0];
-            3'd3:   data <= sel[2] ? datain[7:4] : datain[3:0];
-            3'd4:   data <= sel[3] ? datain[7:4] : datain[3:0];
-            3'd5:   data <= sel[4] ? datain[7:4] : datain[3:0];
-        endcase
+        data <= nibble_sel ? datain[7:4] : datain[3:0];
     end
-
-integer aux;
 
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
@@ -176,26 +165,36 @@ jt10_adpcm u_decoder(
     .pcm    ( pcmdec    )
 );
 
+wire signed [15:0] pcm18_l, pcm18_r;
+
 jt10_adpcm_gain u_gain(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
     .cen    ( cen       ),
-    input   [7:0]   lracl,
+    .lracl  ( lracl_in  ),
     .atl    ( atl       ),        // ADPCM Total Level
-    input           we,
+    .we     ( we_lracl  ),
     .pcm_in ( pcmdec    ),
-    output reg signed [15:0] pcm_l,
-    output reg signed [15:0] pcm_r
+    .pcm_l  ( pcm18_l   ),
+    .pcm_r  ( pcm18_r   )
 );
 
-jt10_adpcm_acc(
-    input           rst_n,
-    input           clk,        // CPU clock
-    input           cen55,      //  55 kHz
-    input           cen111,     // 111 kHz
-    input   [2:0]   ch,
-    input      signed [15:0] pcm_in,    // 18.5 kHz
-    output reg signed [15:0] pcm_out    // 55.5 kHz
+jt10_adpcm_acc u_acc_left(
+    .rst_n  ( rst_n     ),
+    .clk    ( clk       ),
+    .cen    ( cen       ),
+    .ch     ( ch        ),
+    .pcm_in ( pcm18_l   ),    // 18.5 kHz
+    .pcm_out( pcm55_l   )     // 55.5 kHz
+);
+
+jt10_adpcm_acc u_acc_right(
+    .rst_n  ( rst_n     ),
+    .clk    ( clk       ),
+    .cen    ( cen       ),
+    .ch     ( ch        ),
+    .pcm_in ( pcm18_r   ),    // 18.5 kHz
+    .pcm_out( pcm55_r   )     // 55.5 kHz
 );
 
 endmodule // jt10_adpcm_drvA

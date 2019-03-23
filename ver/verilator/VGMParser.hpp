@@ -8,7 +8,7 @@
 
 class RipParser {
 public:
-	enum chip_type { ym2203=1, ym2612=2, unknown=0 };
+	enum chip_type { ym2203=1, ym2612=2, ym2610=3, unknown=0 };
 protected:
 	int clk_period; // synthesizer clock period
 	chip_type chip_cfg;

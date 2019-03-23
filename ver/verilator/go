@@ -92,12 +92,12 @@ while [ $# -gt 0 ]; do
         shift
         continue
     fi  
-    echo go: unrecognized option
+    echo go: unrecognized option $1
     exit 1
 done
 
 if [[ "$GYM_FILE" = "" ]]; then
-    echo "Specify the VGM/GYM/JTT file to parse using the argument -gym file_name"
+    echo "Specify the VGM/GYM/JTT file to parse using the argument -f file_name"
     exit 1
 fi
 

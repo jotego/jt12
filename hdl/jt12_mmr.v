@@ -50,6 +50,14 @@ module jt12_mmr(
     output  reg [8:0]   pcm,
     output  reg         pcm_en,
     output  reg         pcm_wr, // high for one clock cycle when PCM is written
+    // ADPCM-A
+    // output  reg  [ 7:0] aon_a,      // ON
+    // output  reg  [ 5:0] atl_a,      // TL
+    // output       [11:0] addr_a,     // address latch
+    // output              we_start,   // write enable start address latch
+    // output              we_end,     // write enable end address latch
+    // output       [ 7:0] lracl,      // L/R ADPCM Channel Level
+    // output              we_lracl,
     // Operator
     output          xuse_prevprev1,
     output          xuse_internal,
@@ -99,7 +107,7 @@ module jt12_mmr(
     output  reg     psg_wr_n
 );
 
-parameter use_ssg=0, num_ch=6, use_pcm=1;
+parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0;
 
 reg [1:0] div_setting;
 
@@ -115,7 +123,6 @@ jt12_div #(.use_ssg(use_ssg),.num_ch(num_ch)) u_div (
 
 reg [7:0]   selected_register;
 
-//reg       sch; // 0 => CH1~CH3 only available. 1=>CH4~CH6
 /*
 reg     irq_zero_en, irq_brdy_en, irq_eos_en,
         irq_tb_en, irq_ta_en;
@@ -124,7 +131,7 @@ reg [6:0] up_opreg; // hot-one encoding. tells which operator register gets upda
 reg [2:0] up_chreg; // hot-one encoding. tells which channel register gets updated next
 reg up_keyon;
 
-parameter   REG_TESTYM  =   8'h21,
+localparam  REG_TESTYM  =   8'h21,
             REG_LFO     =   8'h22,
             REG_CLKA1   =   8'h24,
             REG_CLKA2   =   8'h25,
@@ -137,7 +144,12 @@ parameter   REG_TESTYM  =   8'h21,
             REG_DACTEST =   8'h2C,
             REG_CLK_N6  =   8'h2D,
             REG_CLK_N3  =   8'h2E,
-            REG_CLK_N2  =   8'h2F;
+            REG_CLK_N2  =   8'h2F,
+            // ADPCM (YM2610)
+            REG_ADPCMA_ON   = 8'h00,
+            REG_ADPCMA_TL   = 8'h01,
+            REG_ADPCMA_TEST = 8'h02;
+
 
 
 reg csm, effect;
@@ -195,7 +207,9 @@ always @(posedge clk) begin : memory_mapped_registers
         pcm         <= 9'h0;
         pcm_en      <= 1'b0;
         pcm_wr      <= 1'b0;
-        // sch          <= 1'b0;
+        // ADPCM
+        // aon_a       <=  'd0;
+        // atl_a       <=  'd0;
         // Original test features
         eg_stop     <= 1'b0;
         pg_stop     <= 1'b0;
@@ -253,7 +267,8 @@ always @(posedge clk) begin : memory_mapped_registers
                     8'hA4, 8'hA5, 8'hA6, 8'hAD, 8'hAC, 8'hAE: latch_fnum <= din[5:0];
                     default:;   // avoid incomplete-case warning
                 endcase
-                if( use_pcm==1 ) begin // for YM2612 only
+                // YM2612 PCM support
+                if( use_pcm==1 ) begin
                     casez( selected_register)
                         REG_DACTEST: pcm[0] <= din[3];
                         REG_PCM:
@@ -263,6 +278,22 @@ always @(posedge clk) begin : memory_mapped_registers
                     endcase
                     pcm_wr <= selected_register==REG_PCM;
                 end
+                // YM2610 ADPCM-A support, A1=1, regs 0-2D
+                /*
+                if( use_adpcm==1 ) begin
+                    if(part && selected_register[7:6]==2'b0) begin
+                        casez( selected_register[4:0] )
+                            REG_ADPCMA_ON:
+                            REG_ADPCMA_TL:
+                            // Start addr (low)
+                            5'h10, 5'h11, 5'h12, 5'h13, 5'h14, 5'h15: begin
+                                addr_a[7:0] <= din;
+                                up_adpcma_addr;
+                            end
+
+                        endcase
+                    end
+                end*/
                 if( selected_register[1:0]==2'b11 ) 
                     { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
                 else

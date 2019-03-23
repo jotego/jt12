@@ -28,7 +28,9 @@ module jt10_adpcm_gain(
     input           we,
     input signed [15:0] pcm_in,
     output reg signed [15:0] pcm_l,
-    output reg signed [15:0] pcm_r
+    output reg signed [15:0] pcm_r,
+    output reg      aen_l,
+    output reg      aen_r
 );
 
 reg [7:0] lracl1, lracl2, lracl3, lracl4, lracl5, lracl6;
@@ -72,7 +74,7 @@ always @(posedge clk or negedge rst_n)
         pcm_mul6 <= pcm_mul5[25:10];
         lracl6   <= lracl5;
         // VI close the loop
-        lracl6 <= lracl1;
+        lracl1 <= lracl6;
         pcm_l  <= lracl6[7] ? pcm_mul6 : 16'd0;
         pcm_r  <= lracl6[6] ? pcm_mul6 : 16'd0;
     end
