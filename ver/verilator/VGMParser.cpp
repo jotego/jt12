@@ -333,7 +333,7 @@ int VGMParser::parse() {
 				file.seekg( 1, ios_base::cur ); // skip 0x66 byte
 				unsigned char type;
 				file.read( (char*)&type, 1 );
-				if( type!=0 ) {// compressed stream
+				if( type!=0 || type !=0x82) {// compressed stream
 					cout << "ERROR: Unsupported data block type " << hex << (unsigned)type << '\n';
 					return -2;}
 				uint32_t length;
