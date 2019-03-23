@@ -284,7 +284,8 @@ int VGMParser::parse() {
 		switch( vgm_cmd ) {
 			case 0x52: // A1=0
 			case 0x55: // YM2203 write
-			case 0x56:{
+			case 0x56:
+			case 0x58: // YM2610
 				addr = 0;
 				file.read( extra, 2);
 				cmd = extra[0];
@@ -295,12 +296,12 @@ int VGMParser::parse() {
 				// 	cout << "INFO: write to register (0x" << hex << _cmd << ") below 0x20\n"; }
 				translate_cmd();
 				return cmd_write;
-			}
 			case 0xA5: // Write to dual YM2203
 				file.read(extra,2); // ignore
 				continue;
 			case 0x53: // A1=1
 			case 0x57:
+			case 0x59: // YM2610
 				addr = 1;
 				file.read( extra, 2);
 				cmd = extra[0];
@@ -333,7 +334,7 @@ int VGMParser::parse() {
 				file.seekg( 1, ios_base::cur ); // skip 0x66 byte
 				unsigned char type;
 				file.read( (char*)&type, 1 );
-				if( type!=0 || type !=0x82) {// compressed stream
+				if( !(type==0 || (type >=0x80 && type<0xc0))  ) {// compressed stream
 					cout << "ERROR: Unsupported data block type " << hex << (unsigned)type << '\n';
 					return -2;}
 				uint32_t length;
@@ -341,8 +342,12 @@ int VGMParser::parse() {
 				if( length == 0 ) {
 					cout << "WARNING: zero-sized data stream in input file\n";
 					continue; }
-				stream_data = new char[length];
-				file.read( stream_data, length );
+				if( type == 0 ) { // uncompressed data
+					stream_data = new char[length];
+					file.read( stream_data, length );
+				} else {
+					file.seekg( length, ios_base::cur ); // skip it
+				}
 			}
 
 			// wait short commands (bad design option for VGM file designer)
