@@ -30,8 +30,15 @@ jt12_sh24.v
 jt12_sumch.v
 jt12_timers.v
 jt12_pcm.v
+jt12_rst.v
 mixer/jt12_genmix.v
 mixer/jt12_decim.v
 mixer/jt12_interpol.v
 mixer/jt12_comb.v
 mixer/jt12_fm_uprate.v
+adpcm/jt10_adpcm_acc.v
+adpcm/jt10_adpcm_cnt.v
+adpcm/jt10_adpcm_dbrom.v
+adpcm/jt10_adpcm_drvA.v
+adpcm/jt10_adpcm_gain.v
+adpcm/jt10_adpcm.v

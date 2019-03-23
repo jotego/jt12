@@ -19,6 +19,10 @@ public:
 	virtual int parse()=0;
 	virtual uint64_t length()=0;
 	virtual ~RipParser() {};
+	virtual uint8_t ADPCM(int offset) {
+		std::cout << "ERROR: No ADPCM buffer available\n";
+		throw 1;
+	}
 	RipParser(int c) { clk_period = c; }
 	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1, cmd_psg=2 };
 	chip_type chip() { return chip_cfg; }
@@ -43,13 +47,27 @@ class VGMParser : public RipParser {
 	void translate_wait();
 	char *stream_data;
 	uint32_t data_offset, ym_freq;	
+	char *ADPCM_data;
 	// int max_PSG_warning;
 public:
 	void open(const char *filename, int limit=0);
 	int parse();
 	uint64_t length();
 	int period();
-	VGMParser(int c) : RipParser(c) {stream_data=NULL; stream_id=0;}
+	uint8_t ADPCM(int offset) {
+		if( offset > 12*1024*1024 ) {
+			std::cout << "ERROR: ADPCM offset too long\n";
+			throw 1;
+		}
+		if( ADPCM_data==NULL ) {
+			return 0;
+		}
+		if(offset!=0)std::cout << "INFO: read ADPCM at " << offset << '\n';
+		return ADPCM_data[offset];
+	}
+	VGMParser(int c) : RipParser(c) {
+		stream_data=NULL; stream_id=0; ADPCM_data=0;
+	}
 	~VGMParser();
 };
 

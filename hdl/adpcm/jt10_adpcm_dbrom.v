@@ -19,6 +19,8 @@
     Date: 21-03-2019
 */
 
+// dB to linear
+
 module jt10_adpcm_dbrom(
     input           clk,        // CPU clock
     input   [5:0]   db,

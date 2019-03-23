@@ -12,16 +12,16 @@
 
     You should have received a copy of the GNU General Public License
     along with JT12.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
     Date: 14-2-2016
-    
+
     Based on information posted by Nemesis on:
 http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc&start=167
 
-    Based on jt51_phasegen.v, from JT51 
-    
+    Based on jt51_phasegen.v, from JT51
+
     */
 
 module jt12_top (
@@ -32,9 +32,16 @@ module jt12_top (
     input   [1:0]   addr,
     input           cs_n,
     input           wr_n,
-    
+
     output  [7:0]   dout,
     output          irq_n,
+    // ADPCM pins
+    output  [19:0]  adpcma_addr,  // real hardware has 10 pins multiplexed through RMPX pin
+    output  [3:0]   adpcma_bank,
+    output          adpcma_roe_n, // ADPCM-A ROM output enable
+    input   [7:0]   adpcma_data,  // Data from RAM
+    output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
+    output          adpcmb_roe_n, // ADPCM-B ROM output enable
     // Separated output
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
@@ -48,7 +55,10 @@ module jt12_top (
     output                 snd_sample
 );
 
-parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1; // defaults to YM2612
+// parameters to select the features for each chip type
+// defaults to YM2612
+parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1;
+parameter use_adpcm=0;
 
 wire flag_A, flag_B, busy;
 
@@ -103,7 +113,8 @@ wire    [ 8:0]  pcm;
 // Test
 wire            pg_stop, eg_stop;
 
-wire    ch6op;
+wire            ch6op;
+wire    [ 2:0]  cur_ch;
 
 // Operator
 wire            xuse_internal, yuse_internal;
@@ -118,19 +129,72 @@ wire            lfo_rst;
 wire    [3:0]   psg_addr;
 wire    [7:0]   psg_data, psg_dout;
 wire            psg_wr_n;
+// ADPCM-A
+wire signed [15:0]  pcm55_l, pcm55_r;
+wire [11:0] adpcma_addr_latch;
+wire up_addr_start, up_addr_end, up_lracl;
+wire [7:0] aon_cmd, lracl_in;
+wire [5:0] atl;     // ADPCM Total Level
 
-jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm)) 
+
+generate
+if( use_adpcm==1 ) begin
+    wire rst_n;
+    
+    jt12_rst u_rst(
+        .rst    ( rst   ),
+        .clk    ( clk   ),
+        .rst_n  ( rst_n )
+    );
+
+    jt10_adpcm_drvA u_adpcm_a(
+        .rst_n      (  rst_n        ),
+        .clk        (  clk          ),
+        .cen        (  cen          ),  // clk & cen must be 111 kHz
+
+        .addr       ( adpcma_addr   ),  // real hardware has 10 pins multiplexed through RMPX pin
+        .bank       ( adpcma_bank   ),
+        .roe_n      ( adpcma_roe_n  ),  // ADPCM-A ROM output enable
+        .datain     ( adpcma_data   ),
+
+        // Control Registers
+        .atl        (  atl          ),        // ADPCM Total Level
+        .lracl_in   (  lracl_in     ),
+        .we_lracl   (  up_lracl     ),
+        .cur_ch     (  cur_ch       ),
+
+        .addr_in    ( adpcma_addr_latch ),
+        .up_start   ( up_addr_start ),
+        .up_end     ( up_addr_end   ),
+
+        .aon_cmd    ( aon_cmd       ),    // ADPCM ON equivalent to key on for FM
+
+
+        .pcm55_l    (  pcm55_l      ),
+        .pcm55_r    (  pcm55_r      )
+    );
+end else begin
+    assign pcm55_l      = 'd0;
+    assign pcm55_r      = 'd0;
+    assign adpcma_addr  = 'd0;
+    assign adpcma_bank  = 'd0;
+    assign adpcma_roe_n = 'b1;
+end
+endgenerate
+
+jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm))
     u_mmr(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .cen        ( cen       ),  // external clock enable
-    .clk_en     ( clk_en    ),  // internal clock enable    
-    .clk_en_ssg ( clk_en_ssg),  // internal clock enable    
+    .clk_en     ( clk_en    ),  // internal clock enable
+    .clk_en_ssg ( clk_en_ssg),  // internal clock enable
     .din        ( din       ),
     .write      ( write     ),
     .addr       ( addr      ),
     .busy       ( busy      ),
     .ch6op      ( ch6op     ),
+    .cur_ch     ( cur_ch    ),
     // LFO
     .lfo_freq   ( lfo_freq  ),
     .lfo_en     ( lfo_en    ),
@@ -154,7 +218,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm))
     // Operator
     .xuse_prevprev1 ( xuse_prevprev1  ),
     .xuse_internal  ( xuse_internal   ),
-    .yuse_internal  ( yuse_internal   ),  
+    .yuse_internal  ( yuse_internal   ),
     .xuse_prev2     ( xuse_prev2      ),
     .yuse_prev1     ( yuse_prev1      ),
     .yuse_prev2     ( yuse_prev2      ),
@@ -180,7 +244,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm))
     .sl_I       ( sl_I      ),
     .ks_II      ( ks_II     ),
 
-    .eg_stop    ( eg_stop   ),  
+    .eg_stop    ( eg_stop   ),
     // SSG operation
     .ssg_en_I   ( ssg_en_I  ),
     .ssg_eg_I   ( ssg_eg_I  ),
@@ -195,10 +259,10 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm))
     // PSG interace
     .psg_addr   ( psg_addr  ),
     .psg_data   ( psg_data  ),
-    .psg_wr_n   ( psg_wr_n  )    
+    .psg_wr_n   ( psg_wr_n  )
 );
 
-jt12_timers u_timers( 
+jt12_timers u_timers(
     .clk        ( clk           ),
     .clk_en     ( clk_en | fast_timers  ),
     .rst        ( rst           ),
@@ -240,7 +304,7 @@ endgenerate
 // YM2203/YM2610 have a PSG
 
 generate
-    if( use_ssg==1 ) begin        
+    if( use_ssg==1 ) begin
         jt49 u_psg( // note that input ports are not multiplexed
             .rst_n      ( ~rst      ),
             .clk        ( clk       ),    // signal on positive edge
@@ -261,8 +325,8 @@ generate
             .IOA_in     (8'd0),
             .IOB_in     (8'd0)
         );
-        assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0}; 
-        assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0}; 
+        assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0};
+        assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0};
         assign dout = addr[0] ? psg_dout : fm_dout;
     end else begin
         assign psg_snd  = 10'd0;
@@ -304,7 +368,7 @@ jt12_eg #(.num_ch(num_ch)) u_eg(
     .clk            ( clk           ),
     .clk_en         ( clk_en        ),
     .zero           ( zero          ),
-    .eg_stop        ( eg_stop       ),  
+    .eg_stop        ( eg_stop       ),
     // envelope configuration
     .keycode_II     ( keycode_II    ),
     .arate_I        ( ar_I          ), // attack  rate
@@ -353,7 +417,7 @@ jt12_op #(.num_ch(num_ch)) u_op(
     .s4_enters      ( s4_enters     ),
     .xuse_prevprev1 ( xuse_prevprev1),
     .xuse_internal  ( xuse_internal ),
-    .yuse_internal  ( yuse_internal ),  
+    .yuse_internal  ( yuse_internal ),
     .xuse_prev2     ( xuse_prev2    ),
     .yuse_prev1     ( yuse_prev1    ),
     .yuse_prev2     ( yuse_prev2    ),
@@ -388,7 +452,7 @@ generate
             .clk_en     ( clk_en    ),
             .op_result  ( op_result ),
             .rl         ( rl        ),
-            // note that the order changes to deal 
+            // note that the order changes to deal
             // with the operator pipeline delay
             .zero       ( zero      ),
             .s1_enters  ( s2_enters ),
@@ -413,7 +477,7 @@ generate
             .clk        ( clk       ),
             .clk_en     ( clk_en    ),
             .op_result  ( full_result ),
-            // note that the order changes to deal 
+            // note that the order changes to deal
             // with the operator pipeline delay
             .s1_enters  ( s1_enters ),
             .s2_enters  ( s2_enters ),
@@ -423,8 +487,8 @@ generate
             .zero       ( zero      ),
             // combined output
             .snd        ( mono_snd  )
-        );        
-    end    
+        );
+    end
 endgenerate
 `endif
 endmodule

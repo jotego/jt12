@@ -28,9 +28,7 @@ module jt10_adpcm_gain(
     input           we,
     input signed [15:0] pcm_in,
     output reg signed [15:0] pcm_l,
-    output reg signed [15:0] pcm_r,
-    output reg      aen_l,
-    output reg      aen_r
+    output reg signed [15:0] pcm_r
 );
 
 reg [7:0] lracl1, lracl2, lracl3, lracl4, lracl5, lracl6;
@@ -39,6 +37,7 @@ wire [8:0] lin_gain3;
 wire [9:0] lin_gain4;
 reg  [6:0] db2, db3;
 reg [25:0] pcm_mul5;
+reg [15:0] pcm_mul6;
 
 jt10_adpcm_dbrom u_rom(
     .clk    ( clk       ),
@@ -65,8 +64,8 @@ always @(posedge clk or negedge rst_n)
         db3     <= db2;
         // III
         lracl4 <= lracl3;
-        lin_gain4 <=  db3==6'd0 ? 10'h200 : 
-            ( db3[6] ? 10'h0 : { 1'b0, lin_gain3 } )
+        lin_gain4 <=  db3==7'd0 ? 10'h200 : 
+            ( db3[6] ? 10'h0 : { 1'b0, lin_gain3 } );
         // IV: new data is accepted here
         lracl5   <= we ? lracl : lracl4;
         pcm_mul5 <= pcm_in * lin_gain4; // multiplier

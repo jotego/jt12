@@ -77,6 +77,12 @@ while [ $# -gt 0 ]; do
         shift
         continue
     fi
+    if [ $1 = "-2610" ]; then
+        echo "YM2610 mode"
+        CHIPTYPE="-DYM2610"
+        shift
+        continue
+    fi    
     if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "$1" = "-mute"  ]]; then
         EXTRA="$EXTRA $1"
         if [[ "$1" = -mute ]]; then

@@ -26,7 +26,7 @@ module jt10_adpcm_acc(
     input           rst_n,
     input           clk,        // CPU clock
     input           cen,        // 111 kHz
-    input   [2:0]   ch,
+    input   [2:0]   cur_ch,
     input      signed [15:0] pcm_in,    // 18.5 kHz
     output reg signed [15:0] pcm_out    // 55.5 kHz
 );
@@ -53,11 +53,11 @@ always @(posedge clk or negedge rst_n)
         step <= 'd0;
         acc  <= 18'd0;
         last <= 18'd0;
-    end else if(cen111) begin
-        acc <= ch==3'd0 ? pcmin_long : ( pcmin_long + acc );
-        if( ch == 3'd0 ) begin
+    end else if(cen) begin
+        acc <= cur_ch==3'd0 ? pcmin_long : ( pcmin_long + acc );
+        if( cur_ch == 3'd0 ) begin
             // step = diff * (1/4+1/16+1/64+1/128)
-            step <= step_full>>>7;
+            step <= { {2{step_full[22]}}, step_full[22:7] }; // >>>7;
             last <= acc;
         end
     end
@@ -68,9 +68,10 @@ always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         pcm_full <= 18'd0;
     end else if(cen) begin
-        case( cs )
+        case( cur_ch )
             3'd0: pcm_full <= last;
-            3'd2, 3'd4: pcm_full <= pcm_full + step;
+            3'b010, 3'b101: pcm_full <= pcm_full + step;
+            default:;
         endcase
         if( overflow )
             pcm_out <= pcm_full[17] ? 16'h8000 : 16'h7fff; // saturate

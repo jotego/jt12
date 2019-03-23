@@ -31,6 +31,7 @@ module jt12_mmr(
     input   [1:0]   addr,
     output  reg     busy,
     output          ch6op,
+    output  [2:0]   cur_ch,
     // LFO
     output  reg [2:0]   lfo_freq,
     output  reg         lfo_en,
@@ -235,7 +236,7 @@ always @(posedge clk) begin : memory_mapped_registers
                 up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
                 casez( selected_register)
                     //REG_TEST: lfo_rst <= 1'b1; // regardless of din
-                    8'h0?: psg_wr_n <= 1'b0;
+                    8'h0?: if(!part) psg_wr_n <= 1'b0;
                     REG_TESTYM: begin
                         eg_stop <= din[5];
                         pg_stop <= din[3];
@@ -368,6 +369,7 @@ jt12_reg #(.num_ch(num_ch)) u_reg(
     .overflow_A ( overflow_A),
 
     .ch6op      ( ch6op     ),
+    .cur_ch     ( cur_ch    ),
     // CH3 Effect-mode operation
     .effect     ( effect    ),      // allows independent freq. for CH 3
     .fnum_ch3op2( fnum_ch3op2 ),

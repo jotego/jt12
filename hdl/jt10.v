@@ -34,11 +34,12 @@ module jt10(
     output  [7:0]   dout,
     output          irq_n,
     // ADPCM pins
-    output  [19:0]  pcma_addr,  // real hardware has 10 pins multiplexed through RMPX pin
-    output  [3:0]   pcma_bank,
-    output          pcma_roe_n, // ADPCM-A ROM output enable
-    output  [23:0]  pcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
-    output          pcmb_roe_n, // ADPCM-B ROM output enable
+    output  [19:0]  adpcma_addr,  // real hardware has 10 pins multiplexed through RMPX pin
+    output  [3:0]   adpcma_bank,
+    output          adpcma_roe_n, // ADPCM-A ROM output enable
+    input   [7:0]   adpcma_data,  // Data from RAM
+    output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
+    output          adpcmb_roe_n, // ADPCM-B ROM output enable
     // Separated output
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
@@ -62,6 +63,13 @@ u_jt12(
     
     .dout           ( dout         ),
     .irq_n          ( irq_n        ),
+    // ADPCM pins
+    .adpcma_addr    ( adpcma_addr  ), // real hardware has 10 pins multiplexed through RMPX pin
+    .adpcma_bank    ( adpcma_bank  ),
+    .adpcma_roe_n   ( adpcma_roe_n ), // ADPCM-A ROM output enable
+    .adpcma_data    ( adpcma_data  ), // Data from RAM
+    .adpcmb_addr    ( adpcmb_addr  ), // real hardware has 12 pins multiplexed through PMPX pin
+    .adpcmb_roe_n   ( adpcmb_roe_n ), // ADPCM-B ROM output enable
     // Separated output
     .psg_A          ( psg_A        ),
     .psg_B          ( psg_B        ),

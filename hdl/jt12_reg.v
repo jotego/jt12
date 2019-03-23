@@ -46,7 +46,8 @@ module jt12_reg(
     input           up_sl_rr,
     input           up_ssgeg,
 
-    output  reg     ch6op,  // 1 when the operator belongs to CH6
+    output reg       ch6op,  // 1 when the operator belongs to CH6
+    output reg [2:0] cur_ch,
     
     // CH3 Effect-mode operation
     input           effect,
@@ -106,7 +107,7 @@ parameter num_ch=6; // Use only 3 (YM2203/YM2610) or 6 (YM2612/YM2608)
 
 
 reg  [1:0] next_op, cur_op;
-reg  [2:0] next_ch, cur_ch;
+reg  [2:0] next_ch;
 reg last;
 
 `ifdef SIMULATION

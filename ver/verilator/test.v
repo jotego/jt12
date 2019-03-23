@@ -40,6 +40,13 @@ module top(
     
     output  [7:0]   dout,
     output          irq_n,
+    // ADPCM pins
+    output  [19:0]  adpcma_addr,  // real hardware has 10 pins multiplexed through RMPX pin
+    output  [3:0]   adpcma_bank,
+    output          adpcma_roe_n, // ADPCM-A ROM output enable
+    input   [7:0]   adpcma_data,  // Data from RAM
+    output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
+    output          adpcmb_roe_n, // ADPCM-B ROM output enable
     // combined output
     output  signed  [15:0]  snd_right,
     output  signed  [15:0]  snd_left,
@@ -51,14 +58,16 @@ module top(
 );
 
 `ifdef YM2203
-localparam use_lfo=0, use_ssg=1, num_ch=3, use_pcm=0, use_lr=0;
+localparam use_lfo=0, use_ssg=1, num_ch=3, use_pcm=0, use_lr=0, use_adpcm=0;
+`elsif YM2610
+localparam use_lfo=1, use_ssg=1, num_ch=6, use_pcm=0, use_lr=1, use_adpcm=1;
 `else // YM2612
-localparam use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1;
+localparam use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1, use_adpcm=0;
 `endif
 
 
 jt12_top #(.use_lfo(use_lfo),.use_ssg(use_ssg), 
-    .num_ch(num_ch), .use_pcm(use_pcm), .use_lr(use_lr) ) 
+    .num_ch(num_ch), .use_pcm(use_pcm), .use_lr(use_lr), .use_adpcm(use_adpcm) ) 
 u_jt12(
     .rst            ( rst       ),        // rst should be at least 6 clk&cen cycles long
     .clk            ( clk       ),        // CPU clock
@@ -70,6 +79,13 @@ u_jt12(
     
     .dout           ( dout      ),
     .irq_n          ( irq_n     ),
+    // ADPCM
+    .adpcma_addr    ( adpcma_addr  ), // real hardware has 10 pins multiplexed through RMPX pin
+    .adpcma_bank    ( adpcma_bank  ),
+    .adpcma_roe_n   ( adpcma_roe_n ), // ADPCM-A ROM output enable
+    .adpcma_data    ( adpcma_data  ), // Data from RAM
+    .adpcmb_addr    ( adpcmb_addr  ), // real hardware has 12 pins multiplexed through PMPX pin
+    .adpcmb_roe_n   ( adpcmb_roe_n ), // ADPCM-B ROM output enable
 
     .snd_right      ( snd_right ),
     .snd_left       ( snd_left  ),

@@ -101,7 +101,7 @@ always @( posedge clk or negedge rst_n )
         else if( step4 > 17'd24576 )
             step5  <= 15'd24576;
         else
-            step5 <= step4[15:0];
+            step5 <= step4[14:0];
         // V: pad one cycle
         x6     <= x5;
         step6  <= step5;

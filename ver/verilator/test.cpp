@@ -324,6 +324,12 @@ int main(int argc, char** argv, char** env) {
     int next_verbosity = 200;
     vluint64_t next_sample=0;
     while( forever || !sim_time.finish() ) {
+        if( top->adpcma_roe_n == 0 ) {
+            int addr = top->adpcma_addr;
+            int bank = top->adpcma_bank;
+            addr |= bank<<20;
+            top->adpcma_data = gym->ADPCM(addr);
+        }
         top->eval();
         if( sim_time.next_quarter() ) {
             int clk = top->clk;
