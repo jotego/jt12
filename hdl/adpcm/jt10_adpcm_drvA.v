@@ -22,7 +22,8 @@
 module jt10_adpcm_drvA(
     input           rst_n,
     input           clk,    // CPU clock
-    input           cen,    // clk & cen must be 111 kHz
+    input           cen,    // clk & cen = 333 kHz
+    input           cen3,   // clk & cen = 111 kHz
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
     output  [3:0]   bank,
@@ -94,7 +95,7 @@ always @(posedge clk or negedge rst_n)
         up_end_sr   <= 'd0;
         aon_sr      <= 'd0;
         aoff_sr     <= 'd0;
-    end else if(cen) begin
+    end else if(cen3) begin
         chlin <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
         up_start_sr <= { up_start == chlin, up_start_sr[5:1] };
         up_end_sr <= { up_end == chlin, up_end_sr[5:1] };
@@ -105,7 +106,7 @@ always @(posedge clk or negedge rst_n)
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
-    .cen         ( cen             ),
+    .cen         ( cen3            ),   //
     .addr_in     ( addr_in         ),
     .up_start    ( up_start[0]     ),
     .up_end      ( up_end[0]       ),

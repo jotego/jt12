@@ -136,7 +136,7 @@ wire [2:0] up_start, up_end, up_lracl;
 wire [7:0] aon_a, lracl;
 wire [5:0] atl_a;     // ADPCM Total Level
 
-wire clk_en_adpcm;
+wire clk_en_adpcm, clk_en_adpcm3;
 
 generate
 if( use_adpcm==1 ) begin: gen_adpcm
@@ -149,9 +149,10 @@ if( use_adpcm==1 ) begin: gen_adpcm
     );
 
     jt10_adpcm_drvA u_adpcm_a(
-        .rst_n      (  rst_n        ),
-        .clk        (  clk          ),
-        .cen        (  clk_en_adpcm ),  // clk & cen must be 111 kHz
+        .rst_n      ( rst_n         ),
+        .clk        ( clk           ),
+        .cen        ( clk_en_adpcm  ),  // clk & cen must be 55   kHz
+        .cen3       ( clk_en_adpcm3 ),  // clk & cen must be 18.5 kHz
 
         .addr       ( adpcma_addr   ),  // real hardware has 10 pins multiplexed through RMPX pin
         .bank       ( adpcma_bank   ),
@@ -189,7 +190,8 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .cen        ( cen       ),  // external clock enable
     .clk_en     ( clk_en    ),  // internal clock enable
     .clk_en_ssg ( clk_en_ssg),  // internal clock enable
-    .clk_en_adpcm( clk_en_adpcm ),
+    .clk_en_adpcm ( clk_en_adpcm  ),
+    .clk_en_adpcm3( clk_en_adpcm3 ),
     .din        ( din       ),
     .write      ( write     ),
     .addr       ( addr      ),
