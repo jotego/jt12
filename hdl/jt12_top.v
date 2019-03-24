@@ -292,7 +292,7 @@ jt12_timers u_timers(
 
 // YM2203 does not have LFO
 generate
-if( use_lfo== 1)
+if( use_lfo== 1) begin : gen_lfo
     jt12_lfo u_lfo(
         .rst        ( rst       ),
         .clk        ( clk       ),
@@ -307,14 +307,15 @@ if( use_lfo== 1)
         .lfo_freq   ( lfo_freq  ),
         .lfo_mod    ( lfo_mod   )
     );
-else
+end else begin : gen_nolfo
     assign lfo_mod = 7'd0;
+end
 endgenerate
 
 // YM2203/YM2610 have a PSG
 
 generate
-    if( use_ssg==1 ) begin
+    if( use_ssg==1 ) begin : gen_ssg
         jt49 u_psg( // note that input ports are not multiplexed
             .rst_n      ( ~rst      ),
             .clk        ( clk       ),    // signal on positive edge
@@ -338,7 +339,7 @@ generate
         assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0};
         assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0};
         assign dout = addr[0] ? psg_dout : fm_dout;
-    end else begin
+    end else begin : gen_nossg
         assign psg_snd  = 10'd0;
         assign snd_left = fm_snd_left;
         assign snd_right= fm_snd_right;

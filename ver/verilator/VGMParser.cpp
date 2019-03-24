@@ -8,16 +8,25 @@ using namespace std;
 
 void JTTParser::open(const char* filename, int limit) {
     file.open(filename);
-    if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
-    cout << "Open " << filename << '\n';
+    if ( !file.good() ) cerr << "Failed to open file: " << filename << '\n';
+    cerr << "Open " << filename << '\n';
     done=false;
     line_cnt = 0;
-    chip_cfg = ym2612;
+    // try to get the chip type from the 1st line
+    char typestr[128];
+    file.getline( typestr, 128 );
+    if( strcmp( typestr, "ym2203")==0 ) chip_cfg=ym2203;
+    else if( strcmp( typestr, "ym2612")==0 ) chip_cfg=ym2612;
+    else if( strcmp( typestr, "ym2610")==0 ) chip_cfg=ym2610;
+    else {
+        chip_cfg = ym2612;
+        file.seekg(0,ios_base::beg);
+    }
 }
 
 void JTTParser::remove_blanks( char*& str ) {
     if( str==NULL ) {
-        cout << "Syntax error at line " << line_cnt << '\n';
+        cerr << "Syntax error at line " << line_cnt << '\n';
         throw 0;
     }
     while( *str!=0 && (*str==' ' || *str=='\t') ) str++;
@@ -27,7 +36,7 @@ void JTTParser::parse_opdata(char *txt_arg, int cmd_base) {
     int ch, op, int_val, read=0;
     read=sscanf( txt_arg, " %X , %X , %X ", &ch, &op, &int_val );
     if( read != 3 ) {
-        cout << "Syntax error at line " << line_cnt << '\n';
+        cerr << "Syntax error at line " << line_cnt << '\n';
         throw 0;
     }
     addr = ch < 3 ? 0 : 1;
@@ -53,7 +62,7 @@ void JTTParser::parse_chdata(char *txt_arg, int cmd_base) {
         ch = default_ch;
     }
     else if( read != 2 ) {
-        cout << "Missing arguments at line " << line_cnt << '\n';
+        cerr << "Missing arguments at line " << line_cnt << '\n';
         throw 0;
     }
     addr = ch < 3 ? 0 : 1;
@@ -71,12 +80,12 @@ void JTTParser::parse_adpcma_data(char *txt_arg, int cmd_base) {
         ch = default_ch;
     }
     else if( read != 2 ) {
-        cout << "Missing arguments at line " << line_cnt << '\n';
+        cerr << "Missing arguments at line " << line_cnt << '\n';
         throw 0;
     }
     addr = 1; // ADPCM-A always uses A1=1
     val = int_val;
-    cmd = cmd_base | ch;
+    cmd = cmd_base>2 ? (cmd_base | ch) : cmd_base; // commands 0-2 are global
 }
 
 JTTParser::JTTParser(int c) : RipParser(c) {
@@ -122,14 +131,14 @@ int JTTParser::parse() {
             char line2[128];
             strncpy( line2, line, 128 ); line2[127]=0;
             char *txt_cmd = strtok( line2, "#" );
-            // cout << "TXT CMD = " << txt_cmd << "\n";
+            // cerr << "TXT CMD = " << txt_cmd << "\n";
             remove_blanks(txt_cmd);
 
             if( txt_cmd[0]=='$' ) {
                 int aux0, aux1;
                 char *line=txt_cmd+1;
                 if( sscanf( line, "%X,%X", &aux0, &aux1 )!= 2 ) {
-                    cout << "ERROR: Incomplete line " << line_cnt << '\n';
+                    cerr << "ERROR: Incomplete line " << line_cnt << '\n';
                     return cmd_error;
                 }
                 addr = (aux0&0x100) ? 1 : 0;
@@ -145,8 +154,8 @@ int JTTParser::parse() {
             char *txt_arg = strchr( txt_cmd, ' ');
             char cmd_base;
             if( txt_arg==NULL ) {
-                cout << "ERROR: Incomplete line " << line_cnt << '\n';
-                cout << "txt_cmd = " << txt_cmd << '\n';
+                cerr << "ERROR: Incomplete line " << line_cnt << '\n';
+                cerr << "txt_cmd = " << txt_cmd << '\n';
                 done=true;
                 return cmd_error;
             }
@@ -158,7 +167,7 @@ int JTTParser::parse() {
                 sscanf( txt_arg, "%d", &aux );
                 wait = aux;
                 wait *= 24*clk_period;
-                // cout << "Wait for " << wait << '\n';
+                // cerr << "Wait for " << wait << '\n';
                 return cmd_wait;
             }
             // OP commands
@@ -188,7 +197,7 @@ int JTTParser::parse() {
                 cmd = global_cmd->second;
                 int aux;
                 if( sscanf( txt_arg,"%X", &aux) != 1 ) {
-                    cout << "ERROR: Expecting value in line " << line_cnt << '\n';
+                    cerr << "ERROR: Expecting value in line " << line_cnt << '\n';
                     return cmd_error;
                 }
                 val = (char)aux;
@@ -196,8 +205,8 @@ int JTTParser::parse() {
                 return cmd_write;
             }
 
-            cout << "ERROR: incorrect syntax at line " << line_cnt << '\n';
-            cout << '\t' << line << '\n';
+            cerr << "ERROR: incorrect syntax at line " << line_cnt << '\n';
+            cerr << '\t' << line << '\n';
             done=true;
             return cmd_error;
         }
@@ -214,8 +223,8 @@ uint64_t VGMParser::length() {
 
 void VGMParser::open(const char* filename, int limit) {
     file.open(filename,ios_base::binary);
-    if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
-    cout << "Open " << filename << '\n';
+    if ( !file.good() ) cerr << "Failed to open file: " << filename << '\n';
+    cerr << "Open " << filename << '\n';
     stream_id = cmd = val = addr = 0;
     file.seekg(0x18);
     file.read((char*)& totalwait, 4);
@@ -241,10 +250,10 @@ void VGMParser::open(const char* filename, int limit) {
         else chip_cfg = ym2203;
     }
     else chip_cfg = ym2612;
-    cout << "YM Freq = " << dec << ym_freq << " Hz\n";
+    cerr << "YM Freq = " << dec << ym_freq << " Hz\n";
     // seek out data start
     if( version[0]<0x50 && version[1]==1 ) {
-        cout << "VGM version < 1.50 in this file. Data offset set at 0x40\n";
+        cerr << "VGM version < 1.50 in this file. Data offset set at 0x40\n";
         file.seekg(0x40);
     }
     else {
@@ -310,7 +319,7 @@ int VGMParser::parse() {
         unsigned char vgm_cmd;
         file.read( (char*)&vgm_cmd, 1);
         if( !file.good() ) return -1; // finish immediately
-        // cout << "VGM 0x" << hex << (((int)vgm_cmd)&0xff) << '\n';
+        // cerr << "VGM 0x" << hex << (((int)vgm_cmd)&0xff) << '\n';
         char extra[2];
         switch( vgm_cmd ) {
             case 0x52: // A1=0
@@ -324,7 +333,7 @@ int VGMParser::parse() {
                 // int _cmd = cmd;
                 // _cmd &= 0xff;
                 // if( _cmd < 0x20 ) {
-                //  cout << "INFO: write to register (0x" << hex << _cmd << ") below 0x20\n"; }
+                //  cerr << "INFO: write to register (0x" << hex << _cmd << ") below 0x20\n"; }
                 translate_cmd();
                 return cmd_write;
             case 0xA5: // Write to dual YM2203
@@ -339,7 +348,7 @@ int VGMParser::parse() {
                 val = extra[1];
                 // int icmd = ((int)cmd)&0xff;
                 // if( icmd < 0x30 ) {
-                //  cout << "ADPCM command " << hex << icmd << " - " << (val&0xff) << '\n';
+                //  cerr << "ADPCM command " << hex << icmd << " - " << (val&0xff) << '\n';
                 // }
                 translate_cmd();
                 return cmd_write;
@@ -371,12 +380,12 @@ int VGMParser::parse() {
                 unsigned char type;
                 file.read( (char*)&type, 1 );
                 if( !(type==0 || (type >=0x80 && type<0xc0))  ) {// compressed stream
-                    cout << "ERROR: Unsupported data block type " << hex << (unsigned)type << '\n';
+                    cerr << "ERROR: Unsupported data block type " << hex << (unsigned)type << '\n';
                     return -2;}
                 uint32_t length;
                 file.read( (char*)&length, 4 );
                 if( length == 0 ) {
-                    cout << "WARNING: zero-sized data stream in input file\n";
+                    cerr << "WARNING: zero-sized data stream in input file\n";
                     continue; }
                 switch( type ) {
                     case 0: { // uncompressed data
@@ -388,26 +397,26 @@ int VGMParser::parse() {
                         uint32_t rom_size, rom_start;
                         file.read( (char*)&rom_size, 4 ); // ROM length
                         file.read( (char*)&rom_start, 4 );
-                        // cout << hex << rom_size << " - " << rom_start << '\n';
+                        // cerr << hex << rom_size << " - " << rom_start << '\n';
                         if( length==0 ) break;
                         if( ADPCM_data == NULL ) {
                             ADPCM_data = new char[12*1024*1024]; // Max 12 Mbyte
                         }
                         if( rom_start+length-8 > 12*1024*1024 ) {
-                            cout << "ERROR: ADPCM length is limited to 12 Mbyte\n";
+                            cerr << "ERROR: ADPCM length is limited to 12 Mbyte\n";
                             throw 1;
                         }
                         char *buf = &ADPCM_data[rom_start];
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
-                            cout << "INFO: read " << dec << length << " bytes into ADPCM ROM" << '\n';
+                            cerr << "INFO: read " << dec << length << " bytes into ADPCM ROM" << '\n';
                         }
                         break;
                     }
                     default: {
                         int skip = length;
-                        cout << "INFO: skipping unsupported block type "
+                        cerr << "INFO: skipping unsupported block type "
                             << hex << (type&0xff) <<
                             " of length " << dec << skip << '\n';
                         if( skip!= 0 ) file.seekg( skip, ios_base::cur );
@@ -433,16 +442,16 @@ int VGMParser::parse() {
                     int lsb = cmd&0xf;
                     if( cmd & 0x80 )
                         switch( (cmd>>4)&0x7 ) {
-                            case 0: cout << "PSG Tone0 MSB\n"; break;
-                            case 1: cout << "PSG Tone1 MSB\n"; break;
-                            case 2: cout << "PSG Tone2 MSB\n"; break;
-                            case 3: cout << "PSG Noise CTRL\n"; break;
-                            case 4: cout << "PSG vol 0 = " << lsb <<'\n'; break;
-                            case 5: cout << "PSG vol 1 = " << lsb <<'\n'; break;
-                            case 6: cout << "PSG vol 2 = " << lsb <<'\n'; break;
-                            case 7: cout << "PSG vol 3 = " << lsb <<'\n'; break;
+                            case 0: cerr << "PSG Tone0 MSB\n"; break;
+                            case 1: cerr << "PSG Tone1 MSB\n"; break;
+                            case 2: cerr << "PSG Tone2 MSB\n"; break;
+                            case 3: cerr << "PSG Noise CTRL\n"; break;
+                            case 4: cerr << "PSG vol 0 = " << lsb <<'\n'; break;
+                            case 5: cerr << "PSG vol 1 = " << lsb <<'\n'; break;
+                            case 6: cerr << "PSG vol 2 = " << lsb <<'\n'; break;
+                            case 7: cerr << "PSG vol 3 = " << lsb <<'\n'; break;
                         }
-                    else cout << "PSG repeat\n";
+                    else cerr << "PSG repeat\n";
                 } */
                 return cmd_psg;
             // DAC writes
@@ -461,11 +470,11 @@ int VGMParser::parse() {
                     file.read( aux, 4);
                     stream_id = aux[0];
                     if( aux[1]!=2 ) {
-                        cout << "Error: DAC stream different from YM2612 type\n";
+                        cerr << "Error: DAC stream different from YM2612 type\n";
                         return cmd_error;
                     }
                     int cmd0 = aux[2], val0=aux[3];
-                    cout << "Stream ID " << stream_id << " write " << val0
+                    cerr << "Stream ID " << stream_id << " write " << val0
                         << " to port " << cmd0 << '\n';
                 }
                 continue;
@@ -473,7 +482,7 @@ int VGMParser::parse() {
             case 0x95: // start stream, fast call
                 {
                     if( stream_notmplemented_info ) {
-                        cout << "WARNING: Stream commands 0x90-0x95 are not implemented\n";
+                        cerr << "WARNING: Stream commands 0x90-0x95 are not implemented\n";
                         stream_notmplemented_info = false;
                     }
                     int32_t aux;
@@ -507,7 +516,7 @@ int VGMParser::parse() {
                 file.read( (char*)&data_offset, 4);
                 continue;
             default:
-                cout << "ERROR: Unsupported VGM command 0x" << hex << (((int)vgm_cmd)&0xff)
+                cerr << "ERROR: Unsupported VGM command 0x" << hex << (((int)vgm_cmd)&0xff)
                     << " at offset 0x" << (int)file.tellg() << '\n';
                 return -2;
         }
@@ -517,8 +526,8 @@ int VGMParser::parse() {
 
 void Gym::open(const char* filename, int limit) {
     file.open(filename,ios_base::binary);
-    if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
-    cout << "Open " << filename << '\n';
+    if ( !file.good() ) cerr << "Failed to open file: " << filename << '\n';
+    cerr << "Open " << filename << '\n';
     cmd = val = addr = 0;
     count = 0;
     max_PSG_warning = 10;
@@ -532,10 +541,10 @@ int Gym::parse() {
         if( ! file.good() ) return -1; // finish
         file.read( &c, 1);
         count++;
-        // cout << "Read "  << (int)c << '\n';
-        // cout << (int) c << " @ " << file.tellg() << '\n';
+        // cerr << "Read "  << (int)c << '\n';
+        // cerr << (int) c << " @ " << file.tellg() << '\n';
         if( count> count_limit && count_limit>0 ) {
-            cout << "GYM command limit achieved.\n";
+            cerr << "GYM command limit achieved.\n";
             return -1;
         }
         switch(c) {
@@ -567,7 +576,7 @@ int Gym::parse() {
                 continue;
         }
     }while(file.good());
-    // cout << "Done\n";
+    // cerr << "Done\n";
     return -1;
 }
 
@@ -575,7 +584,7 @@ RipParser* ParserFactory( const char *filename, int clk_period ) {
     string aux(filename);
     auto ext = aux.find_last_of('.');
     if( ext == string::npos ) {
-        cout << "ERROR: The filename must end in .gym or .vgm\n";
+        cerr << "ERROR: The filename must end in .gym or .vgm\n";
         return NULL;
     }
     RipParser *gym;
@@ -591,7 +600,7 @@ RipParser* ParserFactory( const char *filename, int clk_period ) {
         gym = new JTTParser(clk_period); gym->open(filename);
         return gym;
     }
-    cout << "ERROR: The filename must end in .gym or .vgm\n";
+    cerr << "ERROR: The filename must end in .gym or .vgm\n";
     return NULL;
 }
 
@@ -600,6 +609,11 @@ int RipParser::period() {
 }
 
 int VGMParser::period() {
-    // cout << "Freq = " << ym_freq << '\n';
+    // cerr << "Freq = " << ym_freq << '\n';
     return ym_freq==0 ? 0 : 1000'000/(ym_freq/1000);
+}
+
+int JTTParser::period() {
+    if( chip_cfg == ym2610 ) return 125;
+    else return 0;
 }

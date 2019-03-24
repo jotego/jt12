@@ -58,33 +58,6 @@ always @(posedge clk or negedge rst_n)
         data <= nibble_sel ? datain[7:4] : datain[3:0];
     end
 
-reg [5:0] up_start_dec, up_end_dec;
-
-always @(posedge clk or negedge rst_n) 
-    if( !rst_n ) begin
-        up_start_dec <= 6'd0;
-        up_end_dec   <= 6'd0;
-    end else if(cen) begin  // no clock enable for address setting
-        case( up_start )
-            3'd0: up_start_dec <= 6'b000_001;
-            3'd1: up_start_dec <= 6'b000_010;
-            3'd2: up_start_dec <= 6'b000_100;
-            3'd3: up_start_dec <= 6'b001_000;
-            3'd4: up_start_dec <= 6'b010_000;
-            3'd5: up_start_dec <= 6'b100_000;
-            default: up_start_dec <= 6'd0;
-        endcase
-        case( up_end )
-            3'd0: up_end_dec <= 6'b000_001;
-            3'd1: up_end_dec <= 6'b000_010;
-            3'd2: up_end_dec <= 6'b000_100;
-            3'd3: up_end_dec <= 6'b001_000;
-            3'd4: up_end_dec <= 6'b010_000;
-            3'd5: up_end_dec <= 6'b100_000;
-            default: up_end_dec <= 6'd0;
-        endcase
-    end
-
 reg [5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
 reg [2:0] chlin;
 
@@ -97,10 +70,10 @@ always @(posedge clk or negedge rst_n)
         aoff_sr     <= 'd0;
     end else if(cen) begin
         chlin <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
-        up_start_sr <= { up_start == chlin, up_start_sr[5:1] };
-        up_end_sr <= { up_end == chlin, up_end_sr[5:1] };
-        aon_sr    <= chlin==0 && aon_cmd[7]  ? aon_cmd[5:0] : { aon_sr[0], aon_sr[5:1] };
-        aoff_sr   <= chlin==0 && !aon_cmd[7] ? aon_cmd[5:0] : { aoff_sr[0], aoff_sr[5:1] };
+        up_start_sr <= up_start==3'd7 ? 6'd0 : { up_start == chlin, up_start_sr[5:1] };
+        up_end_sr   <=   up_end==3'd7 ? 6'd0 : { up_end == chlin, up_end_sr[5:1] };
+        aon_sr    <= chlin==5 && !aon_cmd[7] ? aon_cmd[5:0] : { aon_sr[0], aon_sr[5:1] };
+        aoff_sr   <= chlin==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { aoff_sr[0], aoff_sr[5:1] };
     end
 
 reg [2:0] div3;

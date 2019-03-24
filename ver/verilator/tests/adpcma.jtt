@@ -1,0 +1,8 @@
+ym2610
+astart_lsb 0,BC
+astart_msb 0,A
+aend_lsb 0,BD
+aend_msb 0,A
+atl 12
+aon 1
+wait 400

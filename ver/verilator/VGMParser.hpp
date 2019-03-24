@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+// Do not output to cout because it will interfere with
+// signal dumping!
 
 class RipParser {
 public:
@@ -20,7 +22,7 @@ public:
 	virtual uint64_t length()=0;
 	virtual ~RipParser() {};
 	virtual uint8_t ADPCM(int offset) {
-		std::cout << "ERROR: No ADPCM buffer available\n";
+		std::cerr << "ERROR: No ADPCM buffer available\n";
 		throw 1;
 	}
 	RipParser(int c) { clk_period = c; }
@@ -56,13 +58,13 @@ public:
 	int period();
 	uint8_t ADPCM(int offset) {
 		if( offset > 12*1024*1024 ) {
-			std::cout << "ERROR: ADPCM offset too long\n";
+			std::cerr << "ERROR: ADPCM offset too long\n";
 			throw 1;
 		}
 		if( ADPCM_data==NULL ) {
 			return 0;
 		}
-		if(offset!=0)std::cout << "INFO: read ADPCM at " << offset << '\n';
+		if(offset!=0)std::cerr << "INFO: read ADPCM at " << offset << '\n';
 		return ADPCM_data[offset];
 	}
 	VGMParser(int c) : RipParser(c) {
@@ -105,7 +107,8 @@ public:
 	uint64_t length() { return 0; }
 	uint8_t ADPCM(int offset) {
 		return offset&0xff;
-	}	
+	}
+	int period();
 };
 
 
