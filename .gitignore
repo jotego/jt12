@@ -1,10 +1,16 @@
-<<<<<<< HEAD
 *.bak
 *.simvision/
 *.wav
 *.fst
 *.log
-=======
+*.vcd
+*.vgm
+*.lxt
+ver/vgm/*
+last.jtt
+history
+sim
+*.hex
+db/*
+obj_dir
 
-sgdk/sonic/out/
->>>>>>> realhw

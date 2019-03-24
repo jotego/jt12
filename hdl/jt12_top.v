@@ -131,14 +131,14 @@ wire    [7:0]   psg_data, psg_dout;
 wire            psg_wr_n;
 // ADPCM-A
 wire signed [15:0]  pcm55_l, pcm55_r;
-wire [11:0] adpcma_addr_latch;
-wire up_addr_start, up_addr_end, up_lracl;
-wire [7:0] aon_cmd, lracl_in;
-wire [5:0] atl;     // ADPCM Total Level
+wire [11:0] addr_a;
+wire [2:0] up_start, up_end, up_lracl;
+wire [7:0] aon_a, lracl;
+wire [5:0] atl_a;     // ADPCM Total Level
 
 
 generate
-if( use_adpcm==1 ) begin
+if( use_adpcm==1 ) begin: gen_adpcm
     wire rst_n;
 
     jt12_rst u_rst(
@@ -158,22 +158,21 @@ if( use_adpcm==1 ) begin
         .datain     ( adpcma_data   ),
 
         // Control Registers
-        .atl        (  atl          ),        // ADPCM Total Level
-        .lracl_in   (  lracl_in     ),
-        .we_lracl   (  up_lracl     ),
+        .atl        (  atl_a        ),        // ADPCM Total Level
         .cur_ch     (  cur_ch       ),
+        .addr_in    (  addr_a       ),
+        .lracl_in   (  lracl        ),
+        .up_start   (  up_start     ),
+        .up_end     (  up_end       ),
+        .up_lracl   (  up_lracl     ),
 
-        .addr_in    ( adpcma_addr_latch ),
-        .up_start   ( up_addr_start ),
-        .up_end     ( up_addr_end   ),
-
-        .aon_cmd    ( aon_cmd       ),    // ADPCM ON equivalent to key on for FM
+        .aon_cmd    ( aon_a         ),    // ADPCM ON equivalent to key on for FM
 
 
         .pcm55_l    (  pcm55_l      ),
         .pcm55_r    (  pcm55_r      )
     );
-end else begin
+end else begin : gen_adpcm_no
     assign pcm55_l      = 'd0;
     assign pcm55_r      = 'd0;
     assign adpcma_addr  = 'd0;
@@ -214,7 +213,14 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .pcm        ( pcm           ),
     .pcm_en     ( pcm_en        ),
     .pcm_wr     ( pcm_wr        ),
-
+    // ADPCM-A
+    .aon_a      ( aon_a         ),   // ON
+    .atl_a      ( atl_a         ),   // TL
+    .addr_a     ( addr_a        ),   // address latch
+    .lracl      ( lracl         ),   // L/R ADPCM Channel Level
+    .up_start   ( up_start      ),   // write enable start address latch
+    .up_end     ( up_end        ),   // write enable end address latch
+    .up_lracl   ( up_lracl      ),
     // Operator
     .xuse_prevprev1 ( xuse_prevprev1  ),
     .xuse_internal  ( xuse_internal   ),
@@ -427,7 +433,7 @@ jt12_op #(.num_ch(num_ch)) u_op(
 );
 
 generate
-    if( use_adpcm==1 ) begin // YM2610 accumulator
+    if( use_adpcm==1 ) begin: gen_adpcm_acc // YM2610 accumulator
         assign snd_sample   = zero;
         jt10_acc u_acc(
             .clk        ( clk           ),
@@ -448,7 +454,7 @@ generate
             .right      ( fm_snd_right  )
         );
     end
-    if( use_pcm==1 ) begin // YM2612 accumulator
+    if( use_pcm==1 ) begin: gen_pcm_acc // YM2612 accumulator
         assign fm_snd_right[3:0] = 4'd0;
         assign fm_snd_left [3:0] = 4'd0;
         assign snd_sample        = zero;
@@ -489,7 +495,7 @@ generate
             .right      ( fm_snd_right[15:4]  )
         );
     end
-    if( use_pcm==0 && use_adpcm==0 ) begin // YM2203 accumulator
+    if( use_pcm==0 && use_adpcm==0 ) begin : gen_2203_acc // YM2203 accumulator
         wire signed [15:0] mono_snd;
         assign fm_snd_left  = mono_snd;
         assign fm_snd_right = mono_snd;

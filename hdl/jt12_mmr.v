@@ -52,13 +52,13 @@ module jt12_mmr(
     output  reg         pcm_en,
     output  reg         pcm_wr, // high for one clock cycle when PCM is written
     // ADPCM-A
-    // output  reg  [ 7:0] aon_a,      // ON
-    // output  reg  [ 5:0] atl_a,      // TL
-    // output       [11:0] addr_a,     // address latch
-    // output              we_start,   // write enable start address latch
-    // output              we_end,     // write enable end address latch
-    // output       [ 7:0] lracl,      // L/R ADPCM Channel Level
-    // output              we_lracl,
+    output  reg  [ 7:0] aon_a,      // ON
+    output  reg  [ 5:0] atl_a,      // TL
+    output       [11:0] addr_a,     // address latch
+    output       [ 7:0] lracl,      // L/R ADPCM Channel Level
+    output       [ 2:0] up_start,   // write enable start address latch
+    output       [ 2:0] up_end,     // write enable end address latch
+    output       [ 2:0] up_lracl,
     // Operator
     output          xuse_prevprev1,
     output          xuse_internal,
@@ -151,8 +151,6 @@ localparam  REG_TESTYM  =   8'h21,
             REG_ADPCMA_TL   = 8'h01,
             REG_ADPCMA_TEST = 8'h02;
 
-
-
 reg csm, effect;
 
 reg [ 2:0] block_ch3op2,  block_ch3op3,  block_ch3op1;
@@ -209,8 +207,8 @@ always @(posedge clk) begin : memory_mapped_registers
         pcm_en      <= 1'b0;
         pcm_wr      <= 1'b0;
         // ADPCM
-        // aon_a       <=  'd0;
-        // atl_a       <=  'd0;
+        aon_a       <=  'd0;
+        atl_a       <=  'd0;
         // Original test features
         eg_stop     <= 1'b0;
         pg_stop     <= 1'b0;
@@ -280,21 +278,38 @@ always @(posedge clk) begin : memory_mapped_registers
                     pcm_wr <= selected_register==REG_PCM;
                 end
                 // YM2610 ADPCM-A support, A1=1, regs 0-2D
-                /*
                 if( use_adpcm==1 ) begin
                     if(part && selected_register[7:6]==2'b0) begin
-                        casez( selected_register[4:0] )
-                            REG_ADPCMA_ON:
-                            REG_ADPCMA_TL:
-                            // Start addr (low)
-                            5'h10, 5'h11, 5'h12, 5'h13, 5'h14, 5'h15: begin
-                                addr_a[7:0] <= din;
-                                up_adpcma_addr;
+                        casez( selected_register[5:0] )
+                            6'h0: aon_a <= din;
+                            6'h1: atl_a <= din[5:0];
+                            // LRACL
+                            6'h8, 6'h9, 6'hA, 6'hB, 6'hC, 6'hD: begin
+                                lracl <= din;
+                                up_lracl <= selected_register[2:0];
                             end
-
+                            6'b01_????, 6'b10_????: begin
+                                if( !selected_register[3] ) addr_a[ 7:0] <= din;
+                                if( selected_register[3]  ) addr_a[11:8] <= din[3:0];
+                                case( selected_register[5:4] )
+                                    2'b01: begin
+                                        up_start <= selected_register[2:0];
+                                        up_end   <= 3'd7; // do not update the end address
+                                    end
+                                    2'b10: begin
+                                        up_start <= 3'd7; // do not update the end address
+                                        up_end   <= selected_register[2:0];
+                                    end
+                                    default: begin
+                                        up_start <= 3'd7;
+                                        up_end   <= 3'd7;
+                                    end
+                                endcase
+                            end
+                            default:;
                         endcase
                     end
-                end*/
+                end
                 if( selected_register[1:0]==2'b11 ) 
                     { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
                 else

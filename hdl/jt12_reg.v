@@ -26,7 +26,7 @@ module jt12_reg(
     input           clk_en,
     input   [7:0]   din,
     
-    input   [2:0]   ch,
+    input   [2:0]   ch,     // channel to update
     input   [1:0]   op,
     
     input           csm,

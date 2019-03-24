@@ -25,7 +25,7 @@ module jt10_adpcm_gain(
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input   [7:0]   lracl,
     input   [5:0]   atl,        // ADPCM Total Level
-    input           we,
+    input           up,
     input signed [15:0] pcm_in,
     output reg signed [15:0] pcm_l,
     output reg signed [15:0] pcm_r
@@ -67,7 +67,7 @@ always @(posedge clk or negedge rst_n)
         lin_gain4 <=  db3==7'd0 ? 10'h200 : 
             ( db3[6] ? 10'h0 : { 1'b0, lin_gain3 } );
         // IV: new data is accepted here
-        lracl5   <= we ? lracl : lracl4;
+        lracl5   <= up ? lracl : lracl4;
         pcm_mul5 <= pcm_in * lin_gain4; // multiplier
         // V
         pcm_mul6 <= pcm_mul5[25:10];

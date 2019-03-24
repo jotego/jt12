@@ -328,7 +328,9 @@ int main(int argc, char** argv, char** env) {
             int addr = top->adpcma_addr;
             int bank = top->adpcma_bank;
             addr |= bank<<20;
-            top->adpcma_data = gym->ADPCM(addr);
+            int adpcma_data = gym->ADPCM(addr);
+            top->adpcma_data = adpcma_data;
+            cout << "ADPCM (" << hex << addr << ") = " << hex << adpcma_data << '\n';
         }
         top->eval();
         if( sim_time.next_quarter() ) {
