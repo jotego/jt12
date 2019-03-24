@@ -58,16 +58,18 @@ module top(
 );
 
 `ifdef YM2203
-localparam use_lfo=0, use_ssg=1, num_ch=3, use_pcm=0, use_lr=0, use_adpcm=0;
+localparam use_lfo=0, use_ssg=1, num_ch=3, use_pcm=0, use_adpcm=0;
 `elsif YM2610
-localparam use_lfo=1, use_ssg=1, num_ch=6, use_pcm=0, use_lr=1, use_adpcm=1;
+localparam use_lfo=1, use_ssg=1, num_ch=6, use_pcm=0, use_adpcm=1;
 `else // YM2612
-localparam use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1, use_adpcm=0;
+localparam use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0;
 `endif
 
 
-jt12_top #(.use_lfo(use_lfo),.use_ssg(use_ssg), 
-    .num_ch(num_ch), .use_pcm(use_pcm), .use_lr(use_lr), .use_adpcm(use_adpcm) ) 
+jt12_top #(
+    .use_lfo(use_lfo),
+    .use_ssg(use_ssg), .num_ch(num_ch), 
+    .use_pcm(use_pcm), .use_adpcm(use_adpcm) ) 
 u_jt12(
     .rst            ( rst       ),        // rst should be at least 6 clk&cen cycles long
     .clk            ( clk       ),        // CPU clock

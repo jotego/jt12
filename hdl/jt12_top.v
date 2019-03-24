@@ -57,7 +57,7 @@ module jt12_top (
 
 // parameters to select the features for each chip type
 // defaults to YM2612
-parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1, use_lr=1;
+parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1;
 parameter use_adpcm=0;
 
 wire flag_A, flag_B, busy;
@@ -140,7 +140,7 @@ wire [5:0] atl;     // ADPCM Total Level
 generate
 if( use_adpcm==1 ) begin
     wire rst_n;
-    
+
     jt12_rst u_rst(
         .rst    ( rst   ),
         .clk    ( clk   ),
@@ -400,7 +400,7 @@ jt12_sh #(.width(10),.stages(4)) u_egpad(
 );
 
 wire    [ 8:0]  op_result;
-wire    [13:0]  full_result;
+wire    [13:0]  op_result_hd;
 
 jt12_op #(.num_ch(num_ch)) u_op(
     .rst            ( rst           ),
@@ -423,11 +423,32 @@ jt12_op #(.num_ch(num_ch)) u_op(
     .yuse_prev2     ( yuse_prev2    ),
     .zero           ( zero          ),
     .op_result      ( op_result     ),
-    .full_result    ( full_result   )
+    .full_result    ( op_result_hd  )
 );
 
 generate
-    if( use_lr==1 ) begin
+    if( use_adpcm==1 ) begin // YM2610 accumulator
+        assign snd_sample   = zero;
+        jt10_acc u_acc(
+            .clk        ( clk           ),
+            .clk_en     ( clk_en        ),
+            .op_result  ( op_result_hd  ),
+            .rl         ( rl            ),
+            .zero       ( zero          ),
+            .s1_enters  ( s2_enters     ),
+            .s2_enters  ( s1_enters     ),
+            .s3_enters  ( s4_enters     ),
+            .s4_enters  ( s3_enters     ),
+            .cur_ch     ( cur_ch        ),
+            .alg        ( alg_I         ),
+            .adpcma_l   ( pcm55_l       ),
+            .adpcma_r   ( pcm55_r       ),
+            // combined output
+            .left       ( fm_snd_left   ),
+            .right      ( fm_snd_right  )
+        );
+    end
+    if( use_pcm==1 ) begin // YM2612 accumulator
         assign fm_snd_right[3:0] = 4'd0;
         assign fm_snd_left [3:0] = 4'd0;
         assign snd_sample        = zero;
@@ -446,7 +467,7 @@ generate
             .pcm_resampled ( pcm2   )
         );
 
-        jt12_acc #(.num_ch(num_ch)) u_acc(
+        jt12_acc u_acc(
             .rst        ( rst       ),
             .clk        ( clk       ),
             .clk_en     ( clk_en    ),
@@ -467,7 +488,8 @@ generate
             .left       ( fm_snd_left [15:4]  ),
             .right      ( fm_snd_right[15:4]  )
         );
-    end else begin
+    end
+    if( use_pcm==0 && use_adpcm==0 ) begin // YM2203 accumulator
         wire signed [15:0] mono_snd;
         assign fm_snd_left  = mono_snd;
         assign fm_snd_right = mono_snd;
@@ -476,7 +498,7 @@ generate
             .rst        ( rst       ),
             .clk        ( clk       ),
             .clk_en     ( clk_en    ),
-            .op_result  ( full_result ),
+            .op_result  ( op_result_hd ),
             // note that the order changes to deal
             // with the operator pipeline delay
             .s1_enters  ( s1_enters ),

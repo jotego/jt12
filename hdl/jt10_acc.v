@@ -27,30 +27,31 @@
 
 */
 
-/* 
- YM2612 had a limiter to prevent overflow
- YM3438 did not
- JT12 always has a limiter enabled
- */
+// YM2610
+// ADPCM inputs
+// Full OP resolution
+// No PCM
+// 4 OP channels
 
-module jt12_acc(
-    input               rst,
+// ADPCM-A input is added for the time assigned to FM channel 0_10 (i.e. 3)
+
+module jt10_acc(
     input               clk,
     input               clk_en,
-    input signed [8:0]  op_result,
+    input signed [13:0] op_result,
     input        [ 1:0] rl,
     input               zero,
     input               s1_enters,
     input               s2_enters,
     input               s3_enters,
     input               s4_enters,
-    input               ch6op,
+    input       [2:0]   cur_ch,
     input   [2:0]       alg,
-    input               pcm_en, // only enabled for channel 6
-    input   signed [8:0] pcm,
+    input signed [15:0] adpcma_l,
+    input signed [15:0] adpcma_r,
     // combined output
-    output reg signed   [11:0]  left,
-    output reg signed   [11:0]  right
+    output reg signed   [15:0]  left,
+    output reg signed   [15:0]  right
 );
 
 reg sum_en;
@@ -64,44 +65,46 @@ always @(*) begin
     endcase
 end
 
-reg pcm_sum;
-
-always @(posedge clk) if(clk_en)
-    if( zero ) pcm_sum <= 1'b1;
-    else if( ch6op ) pcm_sum <= 1'b0;
-
-wire use_pcm = ch6op && pcm_en;
-wire sum_or_pcm = sum_en | use_pcm;
 wire left_en = rl[1];
 wire right_en= rl[0];
-wire signed [8:0] pcm_data = pcm_sum ? pcm : 9'd0;
-wire [8:0] acc_input =  use_pcm ? pcm_data : op_result;
+wire signed [15:0] opext = { {2{op_result[13]}}, op_result };
+reg  signed [15:0] acc_input_l, acc_input_r;
+reg acc_en_l, acc_en_r;
+
+always @(*)
+    case(cur_ch)
+        3'b0_10: begin
+            acc_input_l = adpcma_l;
+            acc_input_r = adpcma_r;
+            acc_en_l    = 1'b1;
+            acc_en_r    = 1'b1;
+        end
+        default: begin
+            acc_input_l = opext;
+            acc_input_r = opext;
+            acc_en_l    = sum_en & left_en;
+            acc_en_r    = sum_en & right_en;
+        end
+    endcase
 
 // Continuous output
-wire signed   [11:0]  pre_left, pre_right;
-jt12_single_acc #(.win(9),.wout(12)) u_left(
+
+jt12_single_acc #(.win(16),.wout(16)) u_left(
     .clk        ( clk            ),
     .clk_en     ( clk_en         ),
-    .op_result  ( acc_input      ),
-    .sum_en     ( sum_or_pcm & left_en ),
+    .op_result  ( acc_input_l    ),
+    .sum_en     ( acc_en_l       ),
     .zero       ( zero           ),
-    .snd        ( pre_left       )
+    .snd        ( left           )
 );
 
-jt12_single_acc #(.win(9),.wout(12)) u_right(
+jt12_single_acc #(.win(16),.wout(16)) u_right(
     .clk        ( clk            ),
     .clk_en     ( clk_en         ),
-    .op_result  ( acc_input      ),
-    .sum_en     ( sum_or_pcm & right_en ),
+    .op_result  ( acc_input_r    ),
+    .sum_en     ( acc_en_r       ),
     .zero       ( zero           ),
-    .snd        ( pre_right      )
+    .snd        ( right          )
 );
-
-// Output can be amplied by 8/6=1.33 to use full range
-// an easy alternative is to add 1/4th and get 1.25 amplification
-always @(posedge clk) if(clk_en) begin
-    left  <= pre_left  + { {2{left [11]}}, left [11:2] };
-    right <= pre_right + { {2{right[11]}}, right[11:2] };
-end
 
 endmodule

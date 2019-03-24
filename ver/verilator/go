@@ -71,7 +71,7 @@ while [ $# -gt 0 ]; do
         shift
         continue
     fi  
-    if [ $1 = "-3ch" ]; then
+    if [ $1 = "-2203" ]; then
         echo "YM2203 mode (you should also use -slow too if the audio output is important)"
         CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG"
         shift

@@ -51,6 +51,8 @@ module jt12_op(
     output  signed [13:0]   full_result
 );
 
+parameter num_ch = 6;
+
 /*  enters  exits
     S1      S2
     S3      S4
@@ -63,8 +65,6 @@ reg [11:0]  atten_internal_IX;
 
 assign op_result   = op_result_internal[13:5];
 assign full_result = op_result_internal;
-
-parameter num_ch = 6;
 
 reg         signbit_IX, signbit_X, signbit_XI;
 reg [11:0]  totalatten_X;
