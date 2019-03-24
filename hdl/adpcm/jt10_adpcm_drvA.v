@@ -23,7 +23,6 @@ module jt10_adpcm_drvA(
     input           rst_n,
     input           clk,    // CPU clock
     input           cen,    // clk & cen must be 111 kHz
-    input           zero,
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
     output  [3:0]   bank,
@@ -47,25 +46,9 @@ module jt10_adpcm_drvA(
     output signed [15:0]  pcm55_r
 );
 
-wire [19:0] cnt0, cnt1, cnt2, cnt3, cnt4, cnt5;
-wire [5:0] sel; // use upper or lower nibble of input byte
-reg  [5:0] aon, aoff;
 reg  [3:0] data;
 wire signed [15:0] pcmdec;
-reg nibble_sel;
-
-assign roe_n = 1'b1;
-
-always @(*)
-    case( cur_ch )
-        3'b0_00:   nibble_sel = sel[5];
-        3'b0_01:   nibble_sel = sel[0];
-        3'b0_10:   nibble_sel = sel[1];
-        3'b1_00:   nibble_sel = sel[2];
-        3'b1_01:   nibble_sel = sel[3];
-        3'b1_10:   nibble_sel = sel[4];
-        default:   nibble_sel = 1'b0;
-    endcase
+wire nibble_sel;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -74,30 +57,13 @@ always @(posedge clk or negedge rst_n)
         data <= nibble_sel ? datain[7:4] : datain[3:0];
     end
 
-always @(posedge clk or negedge rst_n) 
-    if( !rst_n ) begin
-        addr <= 20'd0;
-    end else begin  // no clock enable for address setting
-        case( cur_ch )
-            3'b0_00: begin addr <= cnt0; roe_n <= ~aon[0]; end
-            3'b0_01: begin addr <= cnt1; roe_n <= ~aon[1]; end
-            3'b0_10: begin addr <= cnt2; roe_n <= ~aon[2]; end
-            3'b1_00: begin addr <= cnt3; roe_n <= ~aon[3]; end
-            3'b1_01: begin addr <= cnt4; roe_n <= ~aon[4]; end
-            3'b1_10: begin addr <= cnt5; roe_n <= ~aon[5]; end
-            default: roe_n <= 1'b1;
-        endcase
-        aon  <= {6{!aon_cmd[7]}} & aon_cmd[5:0];
-        aoff <= {6{ aon_cmd[7]}} & aon_cmd[5:0];
-    end
-
 reg [5:0] up_start_dec, up_end_dec;
 
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
         up_start_dec <= 6'd0;
         up_end_dec   <= 6'd0;
-    end else begin  // no clock enable for address setting
+    end else if(cen) begin  // no clock enable for address setting
         case( up_start )
             3'd0: up_start_dec <= 6'b000_001;
             3'd1: up_start_dec <= 6'b000_010;
@@ -118,105 +84,36 @@ always @(posedge clk or negedge rst_n)
         endcase
     end
 
-reg up_lracl_dec;
+reg [5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
+reg [2:0] chlin;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
-        up_lracl_dec <= 1'b0;
+        chlin <= 'd0;
+        up_start_sr <= 'd0;
+        up_end_sr   <= 'd0;
+        aon_sr      <= 'd0;
+        aoff_sr     <= 'd0;
     end else if(cen) begin
-        case( up_lracl )
-            3'd0:   up_lracl_dec <= cur_ch == 3'b0_00;
-            3'd1:   up_lracl_dec <= cur_ch == 3'b0_01;
-            3'd2:   up_lracl_dec <= cur_ch == 3'b0_10;
-            3'd3:   up_lracl_dec <= cur_ch == 3'b1_00;
-            3'd4:   up_lracl_dec <= cur_ch == 3'b1_01;
-            3'd5:   up_lracl_dec <= cur_ch == 3'b1_10;
-            default:up_lracl_dec <= 1'b0;
-        endcase
+        chlin <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
+        up_start_sr <= { up_start == chlin, up_start_sr[5:1] };
+        up_end_sr <= { up_end == chlin, up_end_sr[5:1] };
+        aon_sr    <= chlin==0 && aon_cmd[7]  ? aon_cmd[5:0] : { aon_sr[0], aon_sr[5:1] };
+        aoff_sr   <= chlin==0 && !aon_cmd[7] ? aon_cmd[5:0] : { aoff_sr[0], aoff_sr[5:1] };
     end
 
-jt10_adpcm_cnt u_cnt0(
+jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
     .cen         ( cen             ),
     .addr_in     ( addr_in         ),
-    .cur_ch      ( cur_ch          ),
-    .up_start    ( up_start_dec[0] ),
-    .up_end      ( up_end_dec[0]   ),
-    .aon         ( aon[0]          ),
-    .aoff        ( aoff[0]         ),
-    .cnt         ( cnt0            ),
-    .sel         ( sel[0]          )
-);
-
-jt10_adpcm_cnt u_cnt1(
-    .rst_n       ( rst_n           ),
-    .clk         ( clk             ),
-    .cen         ( cen             ),
-    .addr_in     ( addr_in         ),
-    .cur_ch      ( cur_ch          ),
-    .up_start    ( up_start_dec[1] ),
-    .up_end      ( up_end_dec[1]   ),
-    .aon         ( aon[1]          ),
-    .aoff        ( aoff[1]         ),
-    .cnt         ( cnt1            ),
-    .sel         ( sel[1]          )
-);
-
-jt10_adpcm_cnt u_cnt2(
-    .rst_n       ( rst_n           ),
-    .clk         ( clk             ),
-    .cen         ( cen             ),
-    .addr_in     ( addr_in         ),
-    .cur_ch      ( cur_ch          ),
-    .up_start    ( up_start_dec[2] ),
-    .up_end      ( up_end_dec[2]   ),
-    .aon         ( aon[2]          ),
-    .aoff        ( aoff[2]         ),
-    .cnt         ( cnt2            ),
-    .sel         ( sel[2]          )
-);
-
-jt10_adpcm_cnt u_cnt3(
-    .rst_n       ( rst_n           ),
-    .clk         ( clk             ),
-    .cen         ( cen             ),
-    .addr_in     ( addr_in         ),
-    .cur_ch      ( cur_ch          ),
-    .up_start    ( up_start_dec[3] ),
-    .up_end      ( up_end_dec[3]   ),
-    .aon         ( aon[3]          ),
-    .aoff        ( aoff[3]         ),
-    .cnt         ( cnt3            ),
-    .sel         ( sel[3]          )
-);
-
-jt10_adpcm_cnt u_cnt4(
-    .rst_n       ( rst_n           ),
-    .clk         ( clk             ),
-    .cen         ( cen             ),
-    .addr_in     ( addr_in         ),
-    .cur_ch      ( cur_ch          ),
-    .up_start    ( up_start_dec[4] ),
-    .up_end      ( up_end_dec[4]   ),
-    .aon         ( aon[4]          ),
-    .aoff        ( aoff[4]         ),
-    .cnt         ( cnt4            ),
-    .sel         ( sel[4]          )
-);
-
-jt10_adpcm_cnt u_cnt5(
-    .rst_n       ( rst_n           ),
-    .clk         ( clk             ),
-    .cen         ( cen             ),
-    .addr_in     ( addr_in         ),
-    .cur_ch      ( cur_ch          ),
-    .up_start    ( up_start_dec[5] ),
-    .up_end      ( up_end_dec[5]   ),
-    .aon         ( aon[5]          ),
-    .aoff        ( aoff[5]         ),
-    .cnt         ( cnt5            ),
-    .sel         ( sel[5]          )
+    .up_start    ( up_start[0]     ),
+    .up_end      ( up_end[0]       ),
+    .aon         ( aon_sr[0]       ),
+    .aoff        ( aoff_sr[0]      ),
+    .addr_out    ( addr            ),
+    .sel         ( nibble_sel      ),
+    .roe_n       ( roe_n           )
 );
 
 jt10_adpcm u_decoder(
@@ -235,7 +132,7 @@ jt10_adpcm_gain u_gain(
     .cen    ( cen           ),
     .lracl  ( lracl_in      ),
     .atl    ( atl           ),        // ADPCM Total Level
-    .up     ( up_lracl_dec  ),
+    .up     ( 1'b0  ),
     .pcm_in ( pcmdec        ),
     .pcm_l  ( pcm18_l       ),
     .pcm_r  ( pcm18_r       )

@@ -26,14 +26,16 @@ module jt12_div(
     input           cen,
     input   [1:0]   div_setting,
     output  reg     clk_en,
-    output  reg     clk_en_ssg
+    output  reg     clk_en_ssg,
+    output  reg     clk_en_adpcm
 );
 
 parameter use_ssg=0, num_ch=6;
 
 reg [3:0] opn_pres, opn_cnt=4'd0;
 reg [2:0] ssg_pres, ssg_cnt=3'd0;
-reg cen_int, cen_ssg_int;
+reg [1:0] adpcm_cnt = 2'd0;
+reg cen_int, cen_ssg_int, cen_adpcm_int;
 
 always @(*)
     if( num_ch==6 ) begin
@@ -47,25 +49,34 @@ always @(*)
         2'b11: { opn_pres, ssg_pres } = { 4'd3-4'd1, 3'd1 }; // 3 - Default for YM2203
     endcase // div_setting
 
+`ifdef SIMULATION
+initial clk_en_adpcm = 1'b0;
+`endif
+
+reg adpcm_en = 1'b0;
 
 always @(negedge clk) begin
-    cen_int     <= opn_cnt == 4'd0;
-    cen_ssg_int <= ssg_cnt == 3'd0;
+    cen_int       <= opn_cnt == 4'd0;
+    cen_ssg_int   <= ssg_cnt == 3'd0;
+    cen_adpcm_int <= adpcm_cnt == 2'd0;
     `ifdef FASTDIV
     // always enabled for fast sims (use with GYM output, timer will not work well)
     clk_en <= 1'b1;
     clk_en_ssg <= 1'b1;
+    clk_en_adpcm <= 1'b1;
     `else
     clk_en      <= cen & cen_int;   
     clk_en_ssg  <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
+    clk_en_adpcm<= cen & cen_int & cen_adpcm_int; 
     `endif
 end
+
 
 // OPN
 always @(posedge clk)
     if( cen ) begin
         if( opn_cnt == opn_pres ) begin
-            opn_cnt <= 4'd0;            
+            opn_cnt <= 4'd0;  
         end
         else opn_cnt <= opn_cnt + 4'd1;
     end
@@ -78,5 +89,10 @@ always @(posedge clk)
         end
         else ssg_cnt <= ssg_cnt + 3'd1;
     end
+
+// ADPCM-A
+always @(posedge clk)
+    if( cen ) 
+        if( opn_cnt==4'd0 ) adpcm_cnt <= adpcm_cnt + 2'd1;
 
 endmodule // jt12_div
