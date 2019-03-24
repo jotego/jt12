@@ -16,8 +16,8 @@ void JTTParser::open(const char* filename, int limit) {
 }
 
 void JTTParser::remove_blanks( char*& str ) {
-    if( str==NULL ) { 
-        cout << "Syntax error at line " << line_cnt << '\n'; 
+    if( str==NULL ) {
+        cout << "Syntax error at line " << line_cnt << '\n';
         throw 0;
     }
     while( *str!=0 && (*str==' ' || *str=='\t') ) str++;
@@ -63,6 +63,22 @@ void JTTParser::parse_chdata(char *txt_arg, int cmd_base) {
     cmd = cmd_base | ch;
 }
 
+void JTTParser::parse_adpcma_data(char *txt_arg, int cmd_base) {
+    int ch, int_val, read=0;
+    read=sscanf( txt_arg, " %X , %X ", &ch, &int_val );
+    if( read == 1 ) {
+        int_val = ch;
+        ch = default_ch;
+    }
+    else if( read != 2 ) {
+        cout << "Missing arguments at line " << line_cnt << '\n';
+        throw 0;
+    }
+    addr = 1; // ADPCM-A always uses A1=1
+    val = int_val;
+    cmd = cmd_base | ch;
+}
+
 JTTParser::JTTParser(int c) : RipParser(c) {
     op_commands["dt_mul"] = 0x30;
     op_commands["tl"] = 0x40;
@@ -75,6 +91,14 @@ JTTParser::JTTParser(int c) : RipParser(c) {
     ch_commands["blk_fnum"] = 0xa4;
     ch_commands["fb_con"] = 0xb0;
     ch_commands["lr_ams_pms"] = 0xb4;
+
+    adpcma_commands["aon"] = 0;
+    adpcma_commands["atl"] = 1;
+    adpcma_commands["alr"] = 8;
+    adpcma_commands["astart_lsb"] = 0x10;
+    adpcma_commands["astart_msb"] = 0x18;
+    adpcma_commands["aend_lsb"] = 0x20;
+    adpcma_commands["aend_msb"] = 0x28;
 
     global_commands["kon"] = 0x28;
     global_commands["timer"] = 0x27;
@@ -117,7 +141,7 @@ int JTTParser::parse() {
             if( strcmp(txt_cmd, "finish")==0 ) {
                 done=true;
                 return cmd_finish;
-            }           
+            }
             char *txt_arg = strchr( txt_cmd, ' ');
             char cmd_base;
             if( txt_arg==NULL ) {
@@ -137,21 +161,28 @@ int JTTParser::parse() {
                 // cout << "Wait for " << wait << '\n';
                 return cmd_wait;
             }
-
+            // OP commands
             auto op_cmd = op_commands.find(txt_cmd);
             if( op_cmd != op_commands.end() ) {
                 cmd_base = op_cmd->second;
                 parse_opdata(txt_arg, cmd_base);
                 return cmd_write;
             }
-
+            // CH commands
             auto ch_cmd = ch_commands.find(txt_cmd);
             if( ch_cmd != ch_commands.end() ) {
                 cmd_base = ch_cmd->second;
                 parse_chdata(txt_arg, cmd_base);
                 return cmd_write;
             }
-
+            // ADPCM-A commands
+            auto adpcma_cmd = adpcma_commands.find(txt_cmd);
+            if( adpcma_cmd != adpcma_commands.end() ) {
+                cmd_base = adpcma_cmd->second;
+                parse_adpcma_data(txt_arg, cmd_base);
+                return cmd_write;
+            }
+            // Global commands
             auto global_cmd = global_commands.find(txt_cmd);
             if( global_cmd != global_commands.end() ) {
                 cmd = global_cmd->second;
@@ -169,7 +200,7 @@ int JTTParser::parse() {
             cout << '\t' << line << '\n';
             done=true;
             return cmd_error;
-        } 
+        }
         catch( int ) { done=true; return cmd_error; }
     }
     done=true;
@@ -273,7 +304,7 @@ int VGMParser::parse() {
         translate_wait();
         adjust_wait();
         pending_wait = 0;
-        return cmd_wait; // request wait        
+        return cmd_wait; // request wait
     }
     while( !file.eof() && file.good() ) {
         unsigned char vgm_cmd;
@@ -292,7 +323,7 @@ int VGMParser::parse() {
                 val = extra[1];
                 // int _cmd = cmd;
                 // _cmd &= 0xff;
-                // if( _cmd < 0x20 ) { 
+                // if( _cmd < 0x20 ) {
                 //  cout << "INFO: write to register (0x" << hex << _cmd << ") below 0x20\n"; }
                 translate_cmd();
                 return cmd_write;
@@ -328,13 +359,13 @@ int VGMParser::parse() {
             case 0x63:
                 wait = 882; // wait one frame (PAL)
                 translate_wait();
-                adjust_wait();              
+                adjust_wait();
                 return cmd_wait;
             case 0x66:
                 done=true;
                 return -1; // finish
                 // continue;
-            case 0x67: // data block: 
+            case 0x67: // data block:
             {
                 file.seekg( 1, ios_base::cur ); // skip 0x66 byte
                 unsigned char type;
@@ -352,11 +383,11 @@ int VGMParser::parse() {
                         stream_data = new char[length];
                         file.read( stream_data, length );
                         break;
-                    } 
+                    }
                     case 0x82:  { // 0x82 = ADPCM-A
                         uint32_t rom_size, rom_start;
                         file.read( (char*)&rom_size, 4 ); // ROM length
-                        file.read( (char*)&rom_start, 4 ); // This chunk's length
+                        file.read( (char*)&rom_start, 4 );
                         // cout << hex << rom_size << " - " << rom_start << '\n';
                         if( length==0 ) break;
                         if( ADPCM_data == NULL ) {
@@ -376,8 +407,8 @@ int VGMParser::parse() {
                     }
                     default: {
                         int skip = length;
-                        cout << "INFO: skipping unsupported block type " 
-                            << hex << (type&0xff) << 
+                        cout << "INFO: skipping unsupported block type "
+                            << hex << (type&0xff) <<
                             " of length " << dec << skip << '\n';
                         if( skip!= 0 ) file.seekg( skip, ios_base::cur );
                         break;
@@ -386,11 +417,11 @@ int VGMParser::parse() {
             }
 
             // wait short commands (bad design option for VGM file designer)
-            case 0x70: case 0x71: case 0x72: case 0x73: 
-            case 0x74: case 0x75: case 0x76: case 0x77: 
-            case 0x78: case 0x79: case 0x7A: case 0x7B: 
-            case 0x7c: case 0x7d: case 0x7e: case 0x7f: 
-                wait=(vgm_cmd&0xf)+1; 
+            case 0x70: case 0x71: case 0x72: case 0x73:
+            case 0x74: case 0x75: case 0x76: case 0x77:
+            case 0x78: case 0x79: case 0x7A: case 0x7B:
+            case 0x7c: case 0x7d: case 0x7e: case 0x7f:
+                wait=(vgm_cmd&0xf)+1;
                 translate_wait();
                 adjust_wait();
                 return 1;
@@ -415,10 +446,10 @@ int VGMParser::parse() {
                 } */
                 return cmd_psg;
             // DAC writes
-            case 0x80: case 0x81: case 0x82: case 0x83: 
-            case 0x84: case 0x85: case 0x86: case 0x87: 
-            case 0x88: case 0x89: case 0x8A: case 0x8B: 
-            case 0x8c: case 0x8d: case 0x8e: case 0x8f: 
+            case 0x80: case 0x81: case 0x82: case 0x83:
+            case 0x84: case 0x85: case 0x86: case 0x87:
+            case 0x88: case 0x89: case 0x8A: case 0x8B:
+            case 0x8c: case 0x8d: case 0x8e: case 0x8f:
                 pending_wait=(vgm_cmd&0xf); // will reply with a wait on next call
                 cmd=0x2a;
                 val=stream_data[data_offset++]; // buffer overrun risk here.
@@ -453,17 +484,17 @@ int VGMParser::parse() {
                 {
                     char tt;
                     int32_t aux;
-                    file.read( &tt, 1 ); 
+                    file.read( &tt, 1 );
                     file.read( (char*) & aux, 4 );
                     continue;   // not implemented
                 }
-            case 0x93: // start stream 
+            case 0x93: // start stream
                 {
                     char tt;
                     int32_t aux;
-                    file.read( &tt, 1 ); 
+                    file.read( &tt, 1 );
                     file.read( (char*) & aux, 4 );
-                    file.read( &tt, 1 ); 
+                    file.read( &tt, 1 );
                     file.read( (char*) & aux, 4 );
                     continue;   // not implemented
                 }
@@ -476,7 +507,7 @@ int VGMParser::parse() {
                 file.read( (char*)&data_offset, 4);
                 continue;
             default:
-                cout << "ERROR: Unsupported VGM command 0x" << hex << (((int)vgm_cmd)&0xff) 
+                cout << "ERROR: Unsupported VGM command 0x" << hex << (((int)vgm_cmd)&0xff)
                     << " at offset 0x" << (int)file.tellg() << '\n';
                 return -2;
         }
@@ -485,7 +516,7 @@ int VGMParser::parse() {
 }
 
 void Gym::open(const char* filename, int limit) {
-    file.open(filename,ios_base::binary);   
+    file.open(filename,ios_base::binary);
     if ( !file.good() ) cout << "Failed to open file: " << filename << '\n';
     cout << "Open " << filename << '\n';
     cmd = val = addr = 0;
@@ -508,10 +539,10 @@ int Gym::parse() {
             return -1;
         }
         switch(c) {
-            case 0: 
+            case 0:
                 wait = 735; // 16.7ms
-                adjust_wait();              
-                return 1; 
+                adjust_wait();
+                return 1;
             case 3: {
                 file.read(&c,1);
                 unsigned p = (unsigned char)c;
@@ -568,7 +599,7 @@ int RipParser::period() {
     return 0;
 }
 
-int VGMParser::period() { 
+int VGMParser::period() {
     // cout << "Freq = " << ym_freq << '\n';
-    return ym_freq==0 ? 0 : 1000'000/(ym_freq/1000); 
+    return ym_freq==0 ? 0 : 1000'000/(ym_freq/1000);
 }

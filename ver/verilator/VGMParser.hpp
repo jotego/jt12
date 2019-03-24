@@ -92,15 +92,20 @@ class JTTParser : public RipParser {
 	void remove_blanks( char*& str );
 	void parse_chdata(char *txt_arg, int cmd_base);
 	void parse_opdata(char *txt_arg, int cmd_base);
+	void parse_adpcma_data(char *txt_arg, int cmd_base);
 
 	std::map<std::string, char> op_commands;
 	std::map<std::string, char> ch_commands;
+	std::map<std::string, char> adpcma_commands;
 	std::map<std::string, char> global_commands;
 public:
 	JTTParser(int c);
 	void open(const char *filename, int limit=0);
 	int parse();
 	uint64_t length() { return 0; }
+	uint8_t ADPCM(int offset) {
+		return offset&0xff;
+	}	
 };
 
 

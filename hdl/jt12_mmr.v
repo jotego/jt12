@@ -56,11 +56,11 @@ module jt12_mmr(
     // ADPCM-A
     output  reg  [ 7:0] aon_a,      // ON
     output  reg  [ 5:0] atl_a,      // TL
-    output       [11:0] addr_a,     // address latch
-    output       [ 7:0] lracl,      // L/R ADPCM Channel Level
-    output       [ 2:0] up_start,   // write enable start address latch
-    output       [ 2:0] up_end,     // write enable end address latch
-    output       [ 2:0] up_lracl,
+    output  reg  [11:0] addr_a,     // address latch
+    output  reg  [ 7:0] lracl,      // L/R ADPCM Channel Level
+    output  reg  [ 2:0] up_start,   // write enable start address latch
+    output  reg  [ 2:0] up_end,     // write enable end address latch
+    output  reg  [ 2:0] up_lracl,
     // Operator
     output          xuse_prevprev1,
     output          xuse_internal,
@@ -213,6 +213,9 @@ always @(posedge clk) begin : memory_mapped_registers
         // ADPCM
         aon_a       <=  'd0;
         atl_a       <=  'd0;
+        up_start    <= 3'd7;
+        up_end      <= 3'd7;
+        up_lracl    <= 3'd7;
         // Original test features
         eg_stop     <= 1'b0;
         pg_stop     <= 1'b0;

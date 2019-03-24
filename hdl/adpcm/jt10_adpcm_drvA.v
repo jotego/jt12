@@ -95,7 +95,7 @@ always @(posedge clk or negedge rst_n)
         up_end_sr   <= 'd0;
         aon_sr      <= 'd0;
         aoff_sr     <= 'd0;
-    end else if(cen3) begin
+    end else if(cen) begin
         chlin <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
         up_start_sr <= { up_start == chlin, up_start_sr[5:1] };
         up_end_sr <= { up_end == chlin, up_end_sr[5:1] };
@@ -103,13 +103,23 @@ always @(posedge clk or negedge rst_n)
         aoff_sr   <= chlin==0 && !aon_cmd[7] ? aon_cmd[5:0] : { aoff_sr[0], aoff_sr[5:1] };
     end
 
+reg [2:0] div3;
+always @(posedge clk or negedge rst_n)
+    if( !rst_n ) begin
+        div3 <= 3'b1;
+    end else if(cen) begin
+        if(chlin==3'd5) div3 <= { div3[1:0], div3[2] };
+    end
+
+
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
-    .cen         ( cen3            ),   //
+    .cen         ( cen             ),
+    .div3        ( div3[0]         ),
     .addr_in     ( addr_in         ),
-    .up_start    ( up_start[0]     ),
-    .up_end      ( up_end[0]       ),
+    .up_start    ( up_start_sr[0]  ),
+    .up_end      ( up_end_sr[0]    ),
     .aon         ( aon_sr[0]       ),
     .aoff        ( aoff_sr[0]      ),
     .addr_out    ( addr            ),
@@ -121,6 +131,7 @@ jt10_adpcm u_decoder(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
     .cen    ( cen       ),
+   // .div3   ( div3[0]   ),
     .data   ( data      ),
     .pcm    ( pcmdec    )
 );

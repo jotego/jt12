@@ -23,6 +23,7 @@ module jt10_adpcm_cnt(
     input           rst_n,
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
+    input           div3,
     input   [11:0]  addr_in,
     input           up_start,
     input           up_end,
@@ -45,6 +46,9 @@ reg clr2;
 assign addr_out = addr6[20:1];
 assign sel      = addr6[0];
 assign roe_n    = roe_n6;
+
+wire sumup5 = on5 && !done5 && div3;
+reg  sumup6;
 
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
@@ -79,11 +83,12 @@ always @(posedge clk or negedge rst_n)
         start5 <= start4;
         end5   <= end4;
         // V
-        addr6  <= on5 && !done5 ? addr5+21'd1 : addr5;
+        addr6  <= sumup5 ? addr5+21'd1 : addr5;
         on6    <= on5;
         start6 <= start5;
         end6   <= end5;
-        roe_n6 <= !(on5 && !done5);
+        roe_n6 <= !sumup5;
+        sumup6 <= sumup5;
 
         addr1  <= addr6;
         on1    <= on6;
