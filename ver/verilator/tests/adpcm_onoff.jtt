@@ -1,0 +1,31 @@
+ym2610
+astart_lsb 0,0C
+astart_msb 0,0
+aend_lsb 0,0D
+aend_msb 0,0
+atl 12
+
+aon 1
+wait 50
+aon 81
+
+wait 50
+aon 1
+wait 50
+aon 81
+wait 50
+
+astart_lsb 1,0C
+astart_msb 1,1
+aend_lsb 1,0D
+aend_msb 1,1
+
+aon 2
+wait 50
+aon 82
+
+wait 50
+aon 2
+wait 50
+aon 82
+wait 50

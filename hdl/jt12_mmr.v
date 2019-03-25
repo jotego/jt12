@@ -58,8 +58,9 @@ module jt12_mmr(
     output  reg  [ 5:0] atl_a,      // TL
     output  reg  [11:0] addr_a,     // address latch
     output  reg  [ 7:0] lracl,      // L/R ADPCM Channel Level
-    output  reg  [ 2:0] up_start,   // write enable start address latch
-    output  reg  [ 2:0] up_end,     // write enable end address latch
+    output  reg         up_start,   // write enable start address latch
+    output  reg         up_end,     // write enable end address latch
+    output  reg  [ 2:0] up_addr,    // write enable end address latch
     output  reg  [ 2:0] up_lracl,
     // Operator
     output          xuse_prevprev1,
@@ -213,8 +214,9 @@ always @(posedge clk) begin : memory_mapped_registers
         // ADPCM
         aon_a       <=  'd0;
         atl_a       <=  'd0;
-        up_start    <= 3'd7;
-        up_end      <= 3'd7;
+        up_start    <=  'd0;
+        up_end      <=  'd0;
+        up_addr     <= 3'd7;
         up_lracl    <= 3'd7;
         // Original test features
         eg_stop     <= 1'b0;
@@ -299,17 +301,13 @@ always @(posedge clk) begin : memory_mapped_registers
                                 if( !selected_register[3] ) addr_a[ 7:0] <= din;
                                 if( selected_register[3]  ) addr_a[11:8] <= din[3:0];
                                 case( selected_register[5:4] )
-                                    2'b01: begin
-                                        up_start <= selected_register[2:0];
-                                        up_end   <= 3'd7; // do not update the end address
-                                    end
-                                    2'b10: begin
-                                        up_start <= 3'd7; // do not update the end address
-                                        up_end   <= selected_register[2:0];
+                                    2'b01, 2'b10: begin
+                                        {up_end, up_start } <= selected_register[5:4];
+                                        up_addr <= selected_register[2:0];
                                     end
                                     default: begin
-                                        up_start <= 3'd7;
-                                        up_end   <= 3'd7;
+                                        up_start <= 1'b0;
+                                        up_end   <= 1'b0;
                                     end
                                 endcase
                             end

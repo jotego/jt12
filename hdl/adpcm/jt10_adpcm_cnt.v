@@ -83,14 +83,14 @@ always @(posedge clk or negedge rst_n)
         start5 <= start4;
         end5   <= end4;
         // V
-        addr6  <= sumup5 ? addr5+21'd1 : addr5;
+        addr6  <= addr5;
         on6    <= on5;
         start6 <= start5;
         end6   <= end5;
         roe_n6 <= !sumup5;
         sumup6 <= sumup5;
 
-        addr1  <= addr6;
+        addr1  <= sumup6 ? addr6+21'd1 :addr6;
         on1    <= on6;
         start1 <= start6;
         end1   <= end6;

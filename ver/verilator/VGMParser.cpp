@@ -101,7 +101,7 @@ JTTParser::JTTParser(int c) : RipParser(c) {
     ch_commands["fb_con"] = 0xb0;
     ch_commands["lr_ams_pms"] = 0xb4;
 
-    adpcma_commands["aon"] = 0;
+    adpcma_commands["aon"]  = 0;
     adpcma_commands["atl"] = 1;
     adpcma_commands["alr"] = 8;
     adpcma_commands["astart_lsb"] = 0x10;

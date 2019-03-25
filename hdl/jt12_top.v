@@ -132,7 +132,8 @@ wire            psg_wr_n;
 // ADPCM-A
 wire signed [15:0]  pcm55_l, pcm55_r;
 wire [11:0] addr_a;
-wire [2:0] up_start, up_end, up_lracl;
+wire [2:0] up_addr, up_lracl;
+wire       up_start, up_end;
 wire [7:0] aon_a, lracl;
 wire [5:0] atl_a;     // ADPCM Total Level
 
@@ -166,6 +167,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .lracl_in   (  lracl        ),
         .up_start   (  up_start     ),
         .up_end     (  up_end       ),
+        .up_addr    (  up_addr      ),
         .up_lracl   (  up_lracl     ),
 
         .aon_cmd    ( aon_a         ),    // ADPCM ON equivalent to key on for FM
@@ -224,6 +226,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .lracl      ( lracl         ),   // L/R ADPCM Channel Level
     .up_start   ( up_start      ),   // write enable start address latch
     .up_end     ( up_end        ),   // write enable end address latch
+    .up_addr    ( up_addr       ),   // write enable end address latch
     .up_lracl   ( up_lracl      ),
     // Operator
     .xuse_prevprev1 ( xuse_prevprev1  ),

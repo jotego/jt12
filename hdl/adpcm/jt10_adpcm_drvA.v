@@ -36,8 +36,9 @@ module jt10_adpcm_drvA(
     input   [11:0]  addr_in,
 
     input   [2:0]   up_lracl,
-    input   [2:0]   up_start,
-    input   [2:0]   up_end,
+    input           up_start,
+    input           up_end,
+    input   [2:0]   up_addr,
 
     input   [7:0]   aon_cmd,    // ADPCM ON equivalent to key on for FM
 
@@ -62,6 +63,18 @@ reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
 reg [ 2:0] chlin;
 reg [11:0] addr_in2;
 
+reg [5:0] up_addr_dec;
+always @(*)
+    case(up_addr)
+        3'd0: up_addr_dec = 6'b000_001;
+        3'd1: up_addr_dec = 6'b000_010;
+        3'd2: up_addr_dec = 6'b000_100;
+        3'd3: up_addr_dec = 6'b001_000;
+        3'd4: up_addr_dec = 6'b010_000;
+        3'd5: up_addr_dec = 6'b100_000;
+        default: up_addr_dec = 6'd0;
+    endcase // up_addr
+
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         chlin <= 'd0;
@@ -72,10 +85,10 @@ always @(posedge clk or negedge rst_n)
     end else if(cen) begin
         addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
         chlin <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
-        up_start_sr <= up_start==3'd7 ? 6'd0 : { up_start == chlin, up_start_sr[5:1] };
-        up_end_sr   <=   up_end==3'd7 ? 6'd0 : { up_end == chlin, up_end_sr[5:1] };
-        aon_sr    <= chlin==5 && !aon_cmd[7] ? aon_cmd[5:0] : { aon_sr[0], aon_sr[5:1] };
-        aoff_sr   <= chlin==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { aoff_sr[0], aoff_sr[5:1] };
+        up_start_sr <= chlin==5 &&    up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] };
+        up_end_sr   <= chlin==5 &&      up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1] };
+        aon_sr      <= chlin==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1] };
+        aoff_sr     <= chlin==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aoff_sr[5:1] };
     end
 
 reg [2:0] div3;
