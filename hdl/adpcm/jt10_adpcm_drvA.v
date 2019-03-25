@@ -58,8 +58,9 @@ always @(posedge clk or negedge rst_n)
         data <= nibble_sel ? datain[7:4] : datain[3:0];
     end
 
-reg [5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
-reg [2:0] chlin;
+reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
+reg [ 2:0] chlin;
+reg [11:0] addr_in2;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -69,6 +70,7 @@ always @(posedge clk or negedge rst_n)
         aon_sr      <= 'd0;
         aoff_sr     <= 'd0;
     end else if(cen) begin
+        addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
         chlin <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
         up_start_sr <= up_start==3'd7 ? 6'd0 : { up_start == chlin, up_start_sr[5:1] };
         up_end_sr   <=   up_end==3'd7 ? 6'd0 : { up_end == chlin, up_end_sr[5:1] };
@@ -90,7 +92,7 @@ jt10_adpcm_cnt u_cnt(
     .clk         ( clk             ),
     .cen         ( cen             ),
     .div3        ( div3[0]         ),
-    .addr_in     ( addr_in         ),
+    .addr_in     ( addr_in2        ),
     .up_start    ( up_start_sr[0]  ),
     .up_end      ( up_end_sr[0]    ),
     .aon         ( aon_sr[0]       ),
