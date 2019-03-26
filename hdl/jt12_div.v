@@ -35,8 +35,8 @@ parameter use_ssg=0, num_ch=6;
 
 reg [3:0] opn_pres, opn_cnt=4'd0;
 reg [2:0] ssg_pres, ssg_cnt=3'd0;
-reg [1:0] adpcm_cnt  = 2'd0;
-reg [1:0] adpcm_cnt3 = 2'd0;
+reg [3:0] adpcm_cnt  = 4'd0;
+reg [2:0] adpcm_cnt3 = 3'd0;
 reg cen_int, cen_ssg_int, cen_adpcm_int, cen_adpcm3_int;
 
 always @(*)
@@ -60,8 +60,8 @@ reg adpcm_en = 1'b0;
 always @(negedge clk) begin
     cen_int        <= opn_cnt    == 4'd0;
     cen_ssg_int    <= ssg_cnt    == 3'd0;
-    cen_adpcm_int  <= adpcm_cnt  == 2'd0;
-    cen_adpcm3_int <= adpcm_cnt3 == 2'd0;
+    cen_adpcm_int  <= adpcm_cnt  == 4'd0;
+    cen_adpcm3_int <= adpcm_cnt3 == 3'd0;
     `ifdef FASTDIV
     // always enabled for fast sims (use with GYM output, timer will not work well)
     clk_en <= 1'b1;
@@ -97,11 +97,9 @@ always @(posedge clk)
 // ADPCM-A
 always @(posedge clk)
     if( cen ) begin
-        if( opn_cnt==4'd0 ) begin
-            adpcm_cnt <= adpcm_cnt + 2'd1;
-            if( adpcm_cnt==2'd0 )
-                adpcm_cnt3 <= adpcm_cnt3==2'b10 ? 2'd0 : adpcm_cnt3+2'd1;
-        end
+        adpcm_cnt <= adpcm_cnt==4'd11 ? 4'd0 : adpcm_cnt + 4'd1;
+        if( adpcm_cnt==4'd0 )
+            adpcm_cnt3 <= adpcm_cnt3==3'd5 ? 3'd0 : adpcm_cnt3+3'd1;
     end
 
 endmodule // jt12_div

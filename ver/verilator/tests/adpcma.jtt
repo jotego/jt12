@@ -1,38 +1,39 @@
 ym2610
-astart_lsb 0,0C
+astart_lsb 0,00
 astart_msb 0,0
-aend_lsb 0,0D
+aend_lsb 0,0F
 aend_msb 0,0
 atl 12
 aon 1
 wait 1500
 aon 81
 
-astart_lsb 1,1C
+astart_lsb 1,10
 astart_msb 1,1
-aend_lsb 1,0D
+aend_lsb 1,1F
 aend_msb 1,1
 
-astart_lsb 2,2C
+astart_lsb 2,20
 astart_msb 2,2
-aend_lsb 2,2D
+aend_lsb 2,2F
 aend_msb 2,2
 
-astart_lsb 3,3C
+astart_lsb 3,30
 astart_msb 3,3
-aend_lsb 3,3D
+aend_lsb 3,3F
 aend_msb 3,3
 
-astart_lsb 4,4C
+astart_lsb 4,40
 astart_msb 4,4
-aend_lsb 4,4D
+aend_lsb 4,4F
 aend_msb 4,4
 
-astart_lsb 5,5C
+astart_lsb 5,50
 astart_msb 5,5
-aend_lsb 5,5D
+aend_lsb 5,5F
 aend_msb 5,5
 
+aon ff
 aon 3f
 wait 2000
 aon 3f
