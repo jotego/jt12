@@ -104,7 +104,7 @@ jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
     .cen         ( cen             ),
-    .div3        ( div3[0]         ),
+    .div3        ( cen3 ), //div3[0]         ),
     .addr_in     ( addr_in2        ),
     .up_start    ( up_start_sr[0]  ),
     .up_end      ( up_end_sr[0]    ),
@@ -115,12 +115,15 @@ jt10_adpcm_cnt u_cnt(
     .roe_n       ( roe_n           )
 );
 
+reg chon;
+always @(posedge clk) if(cen) chon <= ~roe_n;
+
 jt10_adpcm u_decoder(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen       ),
-   // .div3   ( div3[0]   ),
+    .cen    ( cen3      ),
     .data   ( data      ),
+    .chon   ( chon      ),
     .pcm    ( pcmdec    )
 );
 

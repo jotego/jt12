@@ -26,6 +26,7 @@ module jt10_adpcm(
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input   [3:0]   data,
+    input           chon,       // high if this channel is on
     output signed [15:0] pcm
 );
 
@@ -62,6 +63,8 @@ end
 // 8 MHz -> /12 divider -> 666 kHz
 // 666 kHz -> 18.5 kHz = 55.5/3 kHz
 
+reg chon2, chon3, chon4;
+
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
         x1 <= 'd0; step1 <= 'd0; 
@@ -74,34 +77,43 @@ always @( posedge clk or negedge rst_n )
         sign2 <= 'b0;
         sign3 <= 'b0; x3sign <= 'b0;
         sign4 <= 'b0;
+        chon2 <= 'b0;   chon3 <= 'b0;   chon4 <= 'b0;
     end else if(cen) begin
         // I
         d2        <= {data[2:0],1'b1};
         sign2     <= data[3];
         x2        <= x1;
         step2     <= step1;
+        chon2     <= chon;
         // II multiply and obtain the offset
         d3        <= d2l[18:3]; // 16 bits
         sign3     <= sign2;
         x3        <= x2;
         step3     <= step2l[22:6];
+        chon3     <= chon2;
         // III
         x4        <= sign3 ? (x3_sgnext-{1'b0,d3}) : (x3_sgnext+{1'b0,d3});
         sign4     <= sign3;
         x3sign    <= x3[xw-1];
         step4     <= step3;
+        chon4     <= chon3;
         // IV: limit outputs
-        if( (x4[xw] != x3sign) && ( x4[xw] == sign4 ) )
-            x5 <= !x3sign ? 16'h8000 : 16'h7FFF;
-        else
-            x5 <= x4[xw-1:0];
+        if( chon4 ) begin
+            if( (x4[xw] != x3sign) && ( x4[xw] == sign4 ) )
+                x5 <= !x3sign ? 16'h8000 : 16'h7FFF;
+            else
+                x5 <= x4[xw-1:0];
 
-        if( step4 < 17'd127 )
-            step5  <= 15'd127;
-        else if( step4 > 17'd24576 )
-            step5  <= 15'd24576;
-        else
-            step5 <= step4[14:0];
+            if( step4 < 17'd127 )
+                step5  <= 15'd127;
+            else if( step4 > 17'd24576 )
+                step5  <= 15'd24576;
+            else
+                step5 <= step4[14:0];
+        end else begin
+            x5      <= 'd0;
+            step5   <= 'd0;
+        end
         // V: pad one cycle
         x6     <= x5;
         step6  <= step5;
