@@ -139,8 +139,12 @@ if [ $SKIPMAKE = FALSE ]; then
 fi
 
 if [[ $DUMPSIGNALS == "-trace" ]]; then
-    echo VCD to FST conversion running in parallel
-    obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" |  vcd2fst -v - -f test.fst
+    if which vcd2fst; then
+        echo VCD to FST conversion running in parallel
+        obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" |  vcd2fst -v - -f test.fst
+    else
+        obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" > test.vcd
+    fi
 else
     obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
 fi

@@ -90,7 +90,7 @@ always @(posedge clk or negedge rst_n)
     end else if(cen) begin
         chfast <= next_fast;
         if( chfast==3'd5 ) chlin  <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
-        div3 <= next_fast==chlin;
+        div3 <= next_fast==3'd0;
         // input new addresses
         if( chfast==5 ) addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
         up_start_sr <= chfast==5 &&    up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] };
