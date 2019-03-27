@@ -76,23 +76,36 @@ always @(*)
     endcase // up_addr
 
 reg div3;
-wire [2:0] next_fast = chfast==3'd5 ? 3'd0 : chfast + 3'd1;
+
+reg  [4:0]  cnt;
+wire [4:0] next = cnt==5'd17 ? 5'd0 : cnt + 5'd1;
+reg cen_addr_mask =1'b0;
+
+always @(negedge clk)
+    cen_addr_mask <= cnt<5'd7;
+
+wire cen_addr = cen_addr_mask & cen;
+
+always @(posedge clk or negedge rst_n)
+    if( !rst_n ) begin
+        cnt    <= 'd0;
+    end else if(cen) begin
+        cnt <= next;
+    end
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         chlin  <= 'd0;
-        chfast <= 'd0;
         up_start_sr <= 'd0;
         up_end_sr   <= 'd0;
         aon_sr      <= 'd0;
         aoff_sr     <= 'd0;
         div3        <= 'd0;
-    end else if(cen) begin
-        chfast <= next_fast;
-        if( chfast==3'd5 ) chlin  <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
-        div3 <= next_fast==3'd0;
+    end else if(cen_addr) begin
+        div3 <= next==5'd0;
         // input new addresses
-        if( chfast==5 ) addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
+        chfast <= chfast==3'd5 ? 3'd0 : chfast+3'd1;
+        if( chfast==3'd5 ) addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
         up_start_sr <= chfast==5 &&    up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] };
         up_end_sr   <= chfast==5 &&      up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1] };
         aon_sr      <= chfast==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1] };
@@ -102,7 +115,7 @@ always @(posedge clk or negedge rst_n)
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
-    .cen         ( cen             ),
+    .cen         ( cen_addr        ),
     .div3        ( div3            ),
     .addr_in     ( addr_in2        ),
     .up_start    ( up_start_sr[0]  ),
