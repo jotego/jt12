@@ -75,6 +75,9 @@ always @(*)
         default: up_addr_dec = 6'd0;
     endcase // up_addr
 
+reg div3;
+wire [2:0] next_fast = chfast==3'd5 ? 3'd0 : chfast + 3'd1;
+
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         chlin  <= 'd0;
@@ -83,30 +86,24 @@ always @(posedge clk or negedge rst_n)
         up_end_sr   <= 'd0;
         aon_sr      <= 'd0;
         aoff_sr     <= 'd0;
+        div3        <= 'd0;
     end else if(cen) begin
-        addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
-        chfast <= chfast==3'd5 ? 3'd0 : chfast + 3'd1;
+        chfast <= next_fast;
         if( chfast==3'd5 ) chlin  <= chlin==3'd5 ? 3'd0 : chlin + 3'd1;
-        up_start_sr <= chlin==5 &&    up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] };
-        up_end_sr   <= chlin==5 &&      up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1] };
-        aon_sr      <= chlin==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1] };
-        aoff_sr     <= chlin==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aoff_sr[5:1] };
+        div3 <= next_fast==chlin;
+        // input new addresses
+        if( chfast==5 ) addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
+        up_start_sr <= chfast==5 &&    up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] };
+        up_end_sr   <= chfast==5 &&      up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1] };
+        aon_sr      <= chfast==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1] };
+        aoff_sr     <= chfast==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aoff_sr[5:1] };
     end
-
-reg [2:0] div3;
-always @(posedge clk or negedge rst_n)
-    if( !rst_n ) begin
-        div3 <= 3'b1;
-    end else if(cen) begin
-        if(chlin==3'd5) div3 <= { div3[1:0], div3[2] };
-    end
-
 
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
     .cen         ( cen             ),
-    .div3        ( cen3 ), //div3[0]         ),
+    .div3        ( div3            ),
     .addr_in     ( addr_in2        ),
     .up_start    ( up_start_sr[0]  ),
     .up_end      ( up_end_sr[0]    ),
