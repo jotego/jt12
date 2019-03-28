@@ -56,7 +56,7 @@ always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         data <= 4'd0;
     end else if(cen) begin
-        data <= nibble_sel ? datain[7:4] : datain[3:0];
+        data <= !nibble_sel ? datain[7:4] : datain[3:0];
     end
 
 reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;

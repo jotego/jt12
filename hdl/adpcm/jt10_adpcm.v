@@ -62,15 +62,16 @@ end
 
 reg chon2, chon3, chon4, chon5;
 reg signEqu4, signEqu5;
+reg [3:0] data2;
 
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
-        x1 <= 'd0; step1 <= 'd0; 
-        x2 <= 'd0; step2 <= 'd0;
-        x3 <= 'd0; step3 <= 'd0;
-        x4 <= 'd0; step4 <= 'd0;
-        x5 <= 'd0; step5 <= 'd0;
-        x6 <= 'd0; step6 <= 'd0;
+        x1 <= 'd0; step1 <= 'd127; 
+        x2 <= 'd0; step2 <= 'd127;
+        x3 <= 'd0; step3 <= 'd127;
+        x4 <= 'd0; step4 <= 'd127;
+        x5 <= 'd0; step5 <= 'd127;
+        x6 <= 'd0; step6 <= 'd127;
         d2 <= 'd0; d3 <= 'd0; d4 <= 'd0;
         sign2 <= 'b0;
         sign3 <= 'b0;
@@ -80,6 +81,7 @@ always @( posedge clk or negedge rst_n )
         // I
         d2        <= {data[2:0],1'b1};
         sign2     <= data[3];
+        data2     <= data;
         x2        <= x1;
         step2     <= step1;
         chon2     <= chon;
@@ -102,7 +104,7 @@ always @( posedge clk or negedge rst_n )
         signEqu5  <= signEqu4;
         step5     <= step4;
         chon5     <= chon4;
-        // V: limit outputs
+        // V: limit or reset outputs
         if( chon5 ) begin
             if( signEqu5 && (sign5!=x5[15]) )
                 x6 <= sign5 ? 16'h8000 : 16'h7FFF;
@@ -117,7 +119,7 @@ always @( posedge clk or negedge rst_n )
                 step6 <= step5[14:0];
         end else begin
             x6      <= 'd0;
-            step6   <= 'd0;
+            step6   <= 'd127;
         end
         // VI: close the loop
         x1    <= x6;
