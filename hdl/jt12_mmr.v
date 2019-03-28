@@ -57,7 +57,7 @@ module jt12_mmr(
     // ADPCM-A
     output  reg  [ 7:0] aon_a,      // ON
     output  reg  [ 5:0] atl_a,      // TL
-    output  reg  [11:0] addr_a,     // address latch
+    output  reg  [15:0] addr_a,     // address latch
     output  reg  [ 7:0] lracl,      // L/R ADPCM Channel Level
     output  reg         up_start,   // write enable start address latch
     output  reg         up_end,     // write enable end address latch
@@ -299,7 +299,7 @@ always @(posedge clk) begin : memory_mapped_registers
                             end
                             6'b01_????, 6'b10_????: begin
                                 if( !selected_register[3] ) addr_a[ 7:0] <= din;
-                                if( selected_register[3]  ) addr_a[11:8] <= din[3:0];
+                                if( selected_register[3]  ) addr_a[15:8] <= din;
                                 case( selected_register[5:4] )
                                     2'b01, 2'b10: begin
                                         {up_end, up_start } <= selected_register[5:4];

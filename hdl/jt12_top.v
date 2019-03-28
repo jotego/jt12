@@ -132,7 +132,7 @@ wire    [7:0]   psg_data, psg_dout;
 wire            psg_wr_n;
 // ADPCM-A
 wire signed [15:0]  pcm55_l, pcm55_r;
-wire [11:0] addr_a;
+wire [15:0] addr_a;
 wire [2:0] up_addr, up_lracl;
 wire       up_start, up_end;
 wire [7:0] aon_a, lracl;

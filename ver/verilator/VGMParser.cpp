@@ -424,7 +424,7 @@ int VGMParser::parse() {
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
-                            cerr << "INFO: read " << dec << length << " bytes into ADPCM ROM" << '\n';
+                            cerr << "INFO: read " << dec << length << " bytes into ADPCM ROM at 0x" << hex << rom_start << '\n';
                         }
                         break;
                     }

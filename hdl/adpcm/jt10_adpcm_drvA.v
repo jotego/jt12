@@ -32,7 +32,7 @@ module jt10_adpcm_drvA(
     // Control Registers
     input   [5:0]   atl,        // ADPCM Total Level
     input   [7:0]   lracl_in,
-    input   [11:0]  addr_in,
+    input   [15:0]  addr_in,
 
     input   [2:0]   up_lracl,
     input           up_start,
@@ -60,7 +60,7 @@ always @(posedge clk or negedge rst_n)
 
 reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
 reg [ 2:0] chlin, chfast;
-reg [11:0] addr_in2;
+reg [15:0] addr_in2;
 
 reg [5:0] up_addr_dec;
 always @(*)
@@ -150,6 +150,7 @@ jt10_adpcm_cnt u_cnt(
     .aon         ( aon_sr[0]       ),
     .aoff        ( aoff_sr[0]      ),
     .addr_out    ( addr            ),
+    .bank        ( bank            ),
     .sel         ( nibble_sel      ),
     .roe_n       ( roe_n           )
 );

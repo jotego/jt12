@@ -24,17 +24,19 @@ module jt10_adpcm_cnt(
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input           div3,
-    input   [11:0]  addr_in,
+    input   [15:0]  addr_in,
     input           up_start,
     input           up_end,
     input           aon,
     input           aoff,
     output  [19:0]  addr_out,
+    output  [ 3:0]  bank,
     output          sel,
     output          roe_n
 );
 
 reg [20:0] addr1, addr2, addr3, addr4, addr5, addr6;
+reg [3:0] bank1, bank2, bank3, bank4, bank5, bank6;
 reg [11:0] start1, start2, start3, start4, start5, start6,
            end1,   end2,   end3,   end4,   end5,   end6;
 reg on1, on2, on3, on4, on5, on6;
@@ -45,6 +47,7 @@ reg clr2;
 
 assign addr_out = addr1[20:1];
 assign sel      = addr1[0];
+assign bank     = bank1;
 assign roe_n    = roe_n1;
 
 wire sumup5 = on5 && !done5 && div3;
@@ -64,29 +67,34 @@ always @(posedge clk or negedge rst_n)
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | on1);
         clr2   <= aon && !on1;
-        start2 <= up_start ? addr_in : start1;
-        end2   <= up_end   ? addr_in : end1;
+        start2 <= up_start ? addr_in[11:0] : start1;
+        end2   <= up_end   ? addr_in[11:0] : end1;
+        bank2  <= (up_end | up_start) ? addr_in[15:12] : bank1;
 
         addr3  <= clr2 ? {start2,9'd0} : addr2;
         on3    <= on2;
         start3 <= start2;
         end3   <= end2;
+        bank3  <= bank2;
 
         addr4  <= addr3;
         on4    <= on3;
         start4 <= start3;
         end4   <= end3;
+        bank4  <= bank3;
 
         addr5  <= addr4;
         on5    <= on4;
         done5  <= addr4[20:9] == end4;
         start5 <= start4;
         end5   <= end4;
+        bank5  <= bank4;
         // V
         addr6  <= addr5;
         on6    <= on5;
         start6 <= start5;
         end6   <= end5;
+        bank6  <= bank5;
         roe_n6 <= !(on5 && !done5);
         sumup6 <= sumup5;
 
@@ -95,6 +103,7 @@ always @(posedge clk or negedge rst_n)
         start1 <= start6;
         end1   <= end6;
         roe_n1 <= roe_n6;
+        bank1  <= bank6;
     end
 
 endmodule // jt10_adpcm_cnt

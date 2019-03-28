@@ -64,7 +64,8 @@ public:
 		if( ADPCM_data==NULL ) {
 			return 0;
 		}
-		// if(offset!=0)std::cerr << "INFO: read ADPCM at " << offset << '\n';
+		// int d = ADPCM_data[offset]&0xff;
+		// if(offset!=0)std::cerr << "INFO: read ADPCM " << d << " at " << offset << '\n';
 		return ADPCM_data[offset];
 	}
 	VGMParser(int c) : RipParser(c) {
