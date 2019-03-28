@@ -35,8 +35,8 @@ reg [7:0] lracl1, lracl2, lracl3, lracl4, lracl5, lracl6;
 
 reg  [9:0] lin_2b, lin3, lin4;
 reg  [6:0] db2, db3;
-reg [25:0] pcm5;
-reg [15:0] pcm6;
+reg signed [31:0] pcm5;
+reg signed [15:0] pcm6;
 /*
 jt10_adpcm_dbrom u_rom(
     .clk    ( clk       ),
@@ -58,6 +58,9 @@ always @(*)
         3'd6: lin_2b = 10'd305;
         3'd7: lin_2b = 10'd280;
     endcase
+
+wire signed [15:0] lin4s = {6'b0,lin4};
+wire signed [15:0] pcm5b = pcm5[24:9];
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -83,10 +86,10 @@ always @(posedge clk or negedge rst_n)
         sh4     <= sh3;
         // IV: new data is accepted here
         lracl5  <= lracl4;
-        pcm5    <= pcm_in * lin4; // multiplier
+        pcm5    <= pcm_in * lin4s; // multiplier
         sh5     <= sh4;
         // V
-        pcm6    <= pcm5[24:9] >> sh5;
+        pcm6    <= pcm5b >>> sh5;
         lracl6  <= lracl5;
         // VI close the loop
         lracl1 <= lracl6;
