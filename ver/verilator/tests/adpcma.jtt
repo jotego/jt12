@@ -7,6 +7,7 @@ atl 12
 aon 1
 wait 1500
 aon 81
+alr 0,1f
 
 astart_lsb 1,10
 astart_msb 1,1
@@ -33,8 +34,10 @@ astart_msb 5,5
 aend_lsb 5,5F
 aend_msb 5,5
 
-aon ff
-aon 3f
+# aon ff
+# aon 3f
+aon 81
+aon 1
 wait 2000
 aon 3f
 

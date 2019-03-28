@@ -75,6 +75,18 @@ always @(*)
         default: up_addr_dec = 6'd0;
     endcase // up_addr
 
+reg [5:0] up_lr_dec;
+always @(*)
+    case(up_lracl)
+        3'd0: up_lr_dec = 6'b000_001;
+        3'd1: up_lr_dec = 6'b000_010;
+        3'd2: up_lr_dec = 6'b000_100;
+        3'd3: up_lr_dec = 6'b001_000;
+        3'd4: up_lr_dec = 6'b010_000;
+        3'd5: up_lr_dec = 6'b100_000;
+        default: up_lr_dec = 6'd0;
+    endcase // up_addr
+
 reg div3;
 
 reg  [4:0]  cnt;
@@ -93,9 +105,21 @@ wire cen6 = cen6_mask & cen;
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         cnt    <= 'd0;
+        up_lracl_pipe <= 1'b0;
     end else if(cen) begin
         cnt <= next;
+        case( cnt )
+            5'd7: begin
+                up_lracl_pipe <= chfast == up_lracl;
+                lracl_in2     <= lracl_in;
+            end
+            5'd11: up_lracl_pipe <= 1'b0;
+            default:;
+        endcase // cnt
     end
+
+reg up_lracl_pipe;
+reg [7:0] lracl_in2;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -149,9 +173,9 @@ jt10_adpcm_gain u_gain(
     .rst_n  ( rst_n         ),
     .clk    ( clk           ),
     .cen    ( cen6          ),
-    .lracl  ( lracl_in      ),
+    .lracl  ( lracl_in2     ),
     .atl    ( atl           ),        // ADPCM Total Level
-    .up     ( 1'b0  ),
+    .up     ( up_lracl_pipe ),
     .pcm_in ( pcmdec        ),
     .pcm_l  ( pcm18_l       ),
     .pcm_r  ( pcm18_r       )

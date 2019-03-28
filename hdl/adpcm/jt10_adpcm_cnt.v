@@ -39,13 +39,13 @@ reg [11:0] start1, start2, start3, start4, start5, start6,
            end1,   end2,   end3,   end4,   end5,   end6;
 reg on1, on2, on3, on4, on5, on6;
 reg done5, done6;
-reg roe_n6;
+reg roe_n6, roe_n1;
 
 reg clr2;
 
-assign addr_out = addr6[20:1];
-assign sel      = addr6[0];
-assign roe_n    = roe_n6;
+assign addr_out = addr1[20:1];
+assign sel      = addr1[0];
+assign roe_n    = roe_n1;
 
 wire sumup5 = on5 && !done5 && div3;
 reg  sumup6;
@@ -87,13 +87,14 @@ always @(posedge clk or negedge rst_n)
         on6    <= on5;
         start6 <= start5;
         end6   <= end5;
-        roe_n6 <= !sumup5;
+        roe_n6 <= !(on5 && !done5);
         sumup6 <= sumup5;
 
         addr1  <= sumup6 ? addr6+21'd1 :addr6;
         on1    <= on6;
         start1 <= start6;
         end1   <= end6;
+        roe_n1 <= roe_n6;
     end
 
 endmodule // jt10_adpcm_cnt

@@ -2,6 +2,7 @@
 #include <string>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 #include "VGMParser.hpp"
 
 using namespace std;
@@ -113,6 +114,19 @@ JTTParser::JTTParser(int c) : RipParser(c) {
     global_commands["timer"] = 0x27;
     global_commands["lfo"] = 0x22;
     default_ch = 0;
+    // prepare sine table
+    adpcm_sine = new unsigned char[1024];
+    short *sine = new short[2048];
+    for(int k=0;k<2048;k++) {
+        sine[k]=32767.0*sin( 6.283185*k*4.0/2048.0 );
+    }
+    YM2610_ADPCMB_Encode( sine, adpcm_sine, 2048 );
+    delete []sine;
+}
+
+JTTParser::~JTTParser() {
+    delete []adpcm_sine;
+    adpcm_sine = 0;
 }
 
 int JTTParser::parse() {
@@ -616,4 +630,89 @@ int VGMParser::period() {
 int JTTParser::period() {
     if( chip_cfg == ym2610 ) return 125;
     else return 0;
+}
+
+uint8_t JTTParser::ADPCM(int offset) {
+    return adpcm_sine[ offset&0x3FF  ];
+}
+
+static long stepsizeTable[ 16 ] = {
+    57, 57, 57, 57, 77,102,128,153,
+    57, 57, 57, 57, 77,102,128,153
+};
+
+
+int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len ) {
+    int lpc , flag , shift , step;
+    long i , xn , stepSize;
+    long adpcm;
+    xn = 0;
+    stepSize = 127;
+    flag = 0;
+    shift = 4;
+    step = 0;
+    for( lpc = 0 ; lpc < len ; lpc++ ) {
+        adpcm = ( *src >> shift ) & 0xf;
+        i = ( ( adpcm & 7 ) * 2 + 1 ) * stepSize / 8;
+        if( adpcm & 8 )
+            xn -= i;
+        else
+            xn += i;
+        if( xn > 32767 )
+            xn = 32767;
+        else if( xn < -32768 )
+            xn = -32768;
+        stepSize = stepSize * stepsizeTable[ adpcm ] / 64;
+        if( stepSize < 127 )
+            stepSize = 127;
+        else if ( stepSize > 24576 )
+            stepSize = 24576;
+        *dest = ( short )xn;
+        dest++;
+        src += step;
+        step = step ^ 1;
+        shift = shift ^ 4;
+    }
+    return 0;
+}
+
+int YM2610_ADPCMB_Encode( short *src , unsigned char *dest , int len ) {
+    int lpc , flag;
+    long i , dn , xn , stepSize;
+    unsigned char adpcm;
+    unsigned char adpcmPack;
+    xn = 0;
+    stepSize = 127;
+    flag = 0;
+    for( lpc = 0 ; lpc < len ; lpc++ ) {
+        dn = *src - xn;
+        src++;
+        i = ( abs( dn ) << 16 ) / ( stepSize << 14 );
+        if( i > 7 ) i = 7;
+        adpcm = ( unsigned char )i;
+        i = ( adpcm * 2 + 1 ) * stepSize / 8;
+        if( dn < 0 ) {
+            adpcm |= 0x8;
+            xn -= i;
+        }
+        else {
+            xn += i;
+        }
+        stepSize = ( stepsizeTable[ adpcm ] * stepSize ) / 64;
+        if( stepSize < 127 )
+            stepSize = 127;
+        else if( stepSize > 24576 )
+            stepSize = 24576;
+        if( flag == 0 ) {
+            adpcmPack = ( adpcm << 4 ) ;
+            flag = 1;
+        }
+        else {
+            adpcmPack |= adpcm;
+            *dest = adpcmPack;
+            dest++;
+            flag = 0;
+        }
+    }
+    return 0;
 }

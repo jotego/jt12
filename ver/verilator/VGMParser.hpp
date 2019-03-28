@@ -100,17 +100,18 @@ class JTTParser : public RipParser {
 	std::map<std::string, char> ch_commands;
 	std::map<std::string, char> adpcma_commands;
 	std::map<std::string, char> global_commands;
+    unsigned char *adpcm_sine;
 public:
-	JTTParser(int c);
+    JTTParser(int c);
+	~JTTParser();
 	void open(const char *filename, int limit=0);
 	int parse();
 	uint64_t length() { return 0; }
-	uint8_t ADPCM(int offset) {
-		return offset&0xff;
-	}
+	uint8_t ADPCM(int offset);
 	int period();
 };
 
-
+int YM2610_ADPCMB_Encode( short *src , unsigned char *dest , int len );
+int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len );
 
 #endif

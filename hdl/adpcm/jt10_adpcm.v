@@ -31,19 +31,16 @@ module jt10_adpcm(
 );
 
 localparam stepw = 15;
-localparam xw    = 16;
 
-reg signed [xw-1:0] x1, x2, x3, x5, x6;
-reg signed [xw:0] x4;
-reg [stepw-1:0] step1, step2, step5, step6;
-reg [stepw+1:0] step3, step4;
-assign pcm = x6;
+reg signed [15:0] x1, x2, x3, x4, x5, x6;
+reg [stepw-1:0] step1, step2, step6;
+reg [stepw+1:0] step3, step4, step5;
+assign pcm = x2;
 
 reg  [18:0] d2l;
-reg  [15:0] d3;
-wire [xw:0] x3_sgnext = { x3[xw-1], x3 };
+reg  [15:0] d3,d4;
 reg  [3:0]  d2;
-reg         sign2, sign3, sign4, x3sign;
+reg         sign2, sign3, sign4, sign5;
 reg  [7:0]  step_val;
 reg  [22:0] step2l;
 
@@ -63,7 +60,8 @@ end
 // 8 MHz -> /12 divider -> 666 kHz
 // 666 kHz -> 18.5 kHz = 55.5/3 kHz
 
-reg chon2, chon3, chon4;
+reg chon2, chon3, chon4, chon5;
+reg signEqu4, signEqu5;
 
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
@@ -73,11 +71,11 @@ always @( posedge clk or negedge rst_n )
         x4 <= 'd0; step4 <= 'd0;
         x5 <= 'd0; step5 <= 'd0;
         x6 <= 'd0; step6 <= 'd0;
-        d2 <= 'd0; d3 <= 'd0;
+        d2 <= 'd0; d3 <= 'd0; d4 <= 'd0;
         sign2 <= 'b0;
-        sign3 <= 'b0; x3sign <= 'b0;
-        sign4 <= 'b0;
-        chon2 <= 'b0;   chon3 <= 'b0;   chon4 <= 'b0;
+        sign3 <= 'b0;
+        sign4 <= 'b0; sign5 <= 'b0;
+        chon2 <= 'b0;   chon3 <= 'b0;   chon4 <= 'b0; chon5 <= 1'b0;
     end else if(cen) begin
         // I
         d2        <= {data[2:0],1'b1};
@@ -91,32 +89,36 @@ always @( posedge clk or negedge rst_n )
         x3        <= x2;
         step3     <= step2l[22:6];
         chon3     <= chon2;
-        // III
-        x4        <= sign3 ? (x3_sgnext-{1'b0,d3}) : (x3_sgnext+{1'b0,d3});
+        // III 2's complement of d3 if necessary
+        d4        <= sign3 ? ~d3+16'b1 : d3;
         sign4     <= sign3;
-        x3sign    <= x3[xw-1];
+        signEqu4  <= sign3 == x3[15];
+        x4        <= x3;
         step4     <= step3;
         chon4     <= chon3;
-        // IV: limit outputs
-        if( chon4 ) begin
-            if( (x4[xw] != x3sign) && ( x4[xw] == sign4 ) )
-                x5 <= !x3sign ? 16'h8000 : 16'h7FFF;
+        // IV   Advance the waveform
+        x5        <= x4+d4;
+        sign5     <= sign4;
+        signEqu5  <= signEqu4;
+        step5     <= step4;
+        chon5     <= chon4;
+        // V: limit outputs
+        if( chon5 ) begin
+            if( signEqu5 && (sign5!=x5[15]) )
+                x6 <= sign5 ? 16'h8000 : 16'h7FFF;
             else
-                x5 <= x4[xw-1:0];
+                x6 <= x5;
 
-            if( step4 < 17'd127 )
-                step5  <= 15'd127;
-            else if( step4 > 17'd24576 )
-                step5  <= 15'd24576;
+            if( step5 < 127 )
+                step6  <= 15'd127;
+            else if( step5 > 24576 )
+                step6  <= 15'd24576;
             else
-                step5 <= step4[14:0];
+                step6 <= step5[14:0];
         end else begin
-            x5      <= 'd0;
-            step5   <= 'd0;
+            x6      <= 'd0;
+            step6   <= 'd0;
         end
-        // V: pad one cycle
-        x6     <= x5;
-        step6  <= step5;
         // VI: close the loop
         x1    <= x6;
         step1 <= step6;
