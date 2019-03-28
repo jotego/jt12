@@ -80,11 +80,15 @@ reg div3;
 reg  [4:0]  cnt;
 wire [4:0] next = cnt==5'd17 ? 5'd0 : cnt + 5'd1;
 reg cen_addr_mask =1'b0;
+reg cen6_mask = 1'b0;
 
-always @(negedge clk)
+always @(negedge clk) begin
     cen_addr_mask <= cnt<5'd7;
+    cen6_mask     <= cnt=='d8;
+end
 
 wire cen_addr = cen_addr_mask & cen;
+wire cen6 = cen6_mask & cen;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -102,7 +106,7 @@ always @(posedge clk or negedge rst_n)
         aoff_sr     <= 'd0;
         div3        <= 'd0;
     end else if(cen_addr) begin
-        div3 <= next==5'd0;
+        div3 <= cnt==5'd5;
         // input new addresses
         chfast <= chfast==3'd5 ? 3'd0 : chfast+3'd1;
         if( chfast==3'd5 ) addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
@@ -133,7 +137,7 @@ always @(posedge clk) if(cen) chon <= ~roe_n;
 jt10_adpcm u_decoder(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen3      ),
+    .cen    ( cen6      ),
     .data   ( data      ),
     .chon   ( chon      ),
     .pcm    ( pcmdec    )
@@ -144,7 +148,7 @@ wire signed [15:0] pcm18_l, pcm18_r;
 jt10_adpcm_gain u_gain(
     .rst_n  ( rst_n         ),
     .clk    ( clk           ),
-    .cen    ( cen           ),
+    .cen    ( cen6          ),
     .lracl  ( lracl_in      ),
     .atl    ( atl           ),        // ADPCM Total Level
     .up     ( 1'b0  ),
@@ -156,7 +160,7 @@ jt10_adpcm_gain u_gain(
 jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen       ),
+    .cen    ( cen6      ),
     .cur_ch ( cur_ch    ),
     .pcm_in ( pcm18_l   ),    // 18.5 kHz
     .pcm_out( pcm55_l   )     // 55.5 kHz
@@ -165,7 +169,7 @@ jt10_adpcm_acc u_acc_left(
 jt10_adpcm_acc u_acc_right(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen       ),
+    .cen    ( cen6      ),
     .cur_ch ( cur_ch    ),
     .pcm_in ( pcm18_r   ),    // 18.5 kHz
     .pcm_out( pcm55_r   )     // 55.5 kHz

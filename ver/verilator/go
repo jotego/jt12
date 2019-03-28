@@ -78,8 +78,9 @@ while [ $# -gt 0 ]; do
         continue
     fi
     if [ $1 = "-2610" ]; then
-        echo "YM2610 mode"
+        echo "YM2610 mode. The simulation will use real clock dividers for ADCPM accuracy."
         CHIPTYPE="-DYM2610"
+        EXTRA="$EXTRA -slow"
         shift
         continue
     fi    
