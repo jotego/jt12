@@ -32,7 +32,6 @@ module jt10_adpcm_drvA(
     // Control Registers
     input   [5:0]   atl,        // ADPCM Total Level
     input   [7:0]   lracl_in,
-    input   [2:0]   cur_ch, // Channel count follows YM2612 way
     input   [11:0]  addr_in,
 
     input   [2:0]   up_lracl,
@@ -185,7 +184,7 @@ jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
     .cen    ( cen6      ),
-    .cur_ch ( cur_ch    ),
+    .cur_ch ( chfast    ),
     .pcm_in ( pcm18_l   ),    // 18.5 kHz
     .pcm_out( pcm55_l   )     // 55.5 kHz
 );
@@ -194,7 +193,7 @@ jt10_adpcm_acc u_acc_right(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
     .cen    ( cen6      ),
-    .cur_ch ( cur_ch    ),
+    .cur_ch ( chfast    ),
     .pcm_in ( pcm18_r   ),    // 18.5 kHz
     .pcm_out( pcm55_r   )     // 55.5 kHz
 );

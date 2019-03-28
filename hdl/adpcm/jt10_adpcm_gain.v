@@ -33,49 +33,65 @@ module jt10_adpcm_gain(
 
 reg [7:0] lracl1, lracl2, lracl3, lracl4, lracl5, lracl6;
 
-wire [8:0] lin_gain3;
-wire [9:0] lin_gain4;
+reg  [9:0] lin_2b, lin3, lin4;
 reg  [6:0] db2, db3;
-reg [25:0] pcm_mul5;
-reg [15:0] pcm_mul6;
-
+reg [25:0] pcm5;
+reg [15:0] pcm6;
+/*
 jt10_adpcm_dbrom u_rom(
     .clk    ( clk       ),
     .db     ( db2[5:0]  ),
-    .lin    ( lin_gain3 )
+    .lin    ( lin  )
 );
+*/
+
+reg [3:0] sh3, sh4, sh5;
+
+always @(*)
+    case( db2[2:0] )
+        3'd0: lin_2b = 10'd512;
+        3'd1: lin_2b = 10'd470;
+        3'd2: lin_2b = 10'd431;
+        3'd3: lin_2b = 10'd395;
+        3'd4: lin_2b = 10'd362;
+        3'd5: lin_2b = 10'd332;
+        3'd6: lin_2b = 10'd305;
+        3'd7: lin_2b = 10'd280;
+    endcase
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
-        lracl1 <= 8'd0; lracl2 <= 8'd0;
-        lracl3 <= 8'd0; lracl4 <= 8'd0;
-        lracl5 <= 8'd0; lracl6 <= 8'd0;
-        db2 <= 'd0;
-        db3 <= 'd0;
-        pcm_mul5 <= 'd0;
-        pcm_l    <= 'd0;
-        pcm_r    <= 'd0;
+        lracl1  <= 8'd0; lracl2 <= 8'd0;
+        lracl3  <= 8'd0; lracl4 <= 8'd0;
+        lracl5  <= 8'd0; lracl6 <= 8'd0;
+        db2     <= 'd0;
+        db3     <= 'd0;
+        pcm5    <= 'd0;
+        pcm_l   <= 'd0;
+        pcm_r   <= 'd0;
     end else if(cen) begin
         // I
         lracl2  <= lracl1;
         db2     <= { 1'b0, ~lracl1[5:0] } + {1'b0, ~atl};
         // II
         lracl3  <= lracl2;
-        db3     <= db2;
+        lin3    <= lin_2b;
+        sh3     <= db2[6:3];
         // III
-        lracl4 <= lracl3;
-        lin_gain4 <=  db3==7'd0 ? 10'h200 : 
-            ( db3[6] ? 10'h0 : { 1'b0, lin_gain3 } );
+        lracl4  <= up ? lracl : lracl3;
+        lin4    <= sh3[3] ? 10'h0 : lin3;
+        sh4     <= sh3;
         // IV: new data is accepted here
-        lracl5   <= up ? lracl : lracl4;
-        pcm_mul5 <= pcm_in * lin_gain4; // multiplier
+        lracl5  <= lracl4;
+        pcm5    <= pcm_in * lin4; // multiplier
+        sh5     <= sh4;
         // V
-        pcm_mul6 <= pcm_mul5[25:10];
-        lracl6   <= lracl5;
+        pcm6    <= pcm5[24:9] >> sh5;
+        lracl6  <= lracl5;
         // VI close the loop
         lracl1 <= lracl6;
-        pcm_l  <= lracl6[7] ? pcm_mul6 : 16'd0;
-        pcm_r  <= lracl6[6] ? pcm_mul6 : 16'd0;
+        pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
+        pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
     end
 
 endmodule // jt10_adpcm_gain

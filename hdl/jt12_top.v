@@ -115,6 +115,7 @@ wire            pg_stop, eg_stop;
 
 wire            ch6op;
 wire    [ 2:0]  cur_ch;
+wire    [ 1:0]  cur_op;
 
 // Operator
 wire            xuse_internal, yuse_internal;
@@ -162,7 +163,6 @@ if( use_adpcm==1 ) begin: gen_adpcm
 
         // Control Registers
         .atl        (  atl_a        ),        // ADPCM Total Level
-        .cur_ch     (  cur_ch       ),
         .addr_in    (  addr_a       ),
         .lracl_in   (  lracl        ),
         .up_start   (  up_start     ),
@@ -200,6 +200,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .busy       ( busy      ),
     .ch6op      ( ch6op     ),
     .cur_ch     ( cur_ch    ),
+    .cur_op     ( cur_op    ),
     // LFO
     .lfo_freq   ( lfo_freq  ),
     .lfo_en     ( lfo_en    ),
@@ -454,6 +455,7 @@ generate
             .s3_enters  ( s4_enters     ),
             .s4_enters  ( s3_enters     ),
             .cur_ch     ( cur_ch        ),
+            .cur_op     ( cur_op        ),
             .alg        ( alg_I         ),
             .adpcma_l   ( pcm55_l       ),
             .adpcma_r   ( pcm55_r       ),

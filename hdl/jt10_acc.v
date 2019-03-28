@@ -46,6 +46,7 @@ module jt10_acc(
     input               s3_enters,
     input               s4_enters,
     input       [2:0]   cur_ch,
+    input       [1:0]   cur_op,
     input   [2:0]       alg,
     input signed [15:0] adpcma_l,
     input signed [15:0] adpcma_r,
@@ -72,20 +73,17 @@ reg  signed [15:0] acc_input_l, acc_input_r;
 reg acc_en_l, acc_en_r;
 
 always @(*)
-    case(cur_ch)
-        3'b0_10: begin
-            acc_input_l = adpcma_l;
-            acc_input_r = adpcma_r;
-            acc_en_l    = 1'b1;
-            acc_en_r    = 1'b1;
-        end
-        default: begin
-            acc_input_l = opext;
-            acc_input_r = opext;
-            acc_en_l    = sum_en & left_en;
-            acc_en_r    = sum_en & right_en;
-        end
-    endcase
+    if( {cur_op,cur_ch}=={2'd0,3'd2} ) begin
+        acc_input_l = adpcma_l;
+        acc_input_r = adpcma_r;
+        acc_en_l    = 1'b1;
+        acc_en_r    = 1'b1;
+    end else begin
+        acc_input_l = opext;
+        acc_input_r = opext;
+        acc_en_l    = sum_en & left_en;
+        acc_en_r    = sum_en & right_en;
+    end
 
 // Continuous output
 

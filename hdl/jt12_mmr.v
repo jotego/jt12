@@ -34,6 +34,7 @@ module jt12_mmr(
     output  reg     busy,
     output          ch6op,
     output  [2:0]   cur_ch,
+    output  [1:0]   cur_op,
     // LFO
     output  reg [2:0]   lfo_freq,
     output  reg         lfo_en,
@@ -97,7 +98,6 @@ module jt12_mmr(
 
     output          keyon_I,
 
-//  output  [ 1:0]  cur_op,
     // Operator
     output          zero,
     output          s1_enters,
@@ -390,6 +390,7 @@ jt12_reg #(.num_ch(num_ch)) u_reg(
 
     .ch6op      ( ch6op     ),
     .cur_ch     ( cur_ch    ),
+    .cur_op     ( cur_op    ),
     // CH3 Effect-mode operation
     .effect     ( effect    ),      // allows independent freq. for CH 3
     .fnum_ch3op2( fnum_ch3op2 ),

@@ -3,11 +3,11 @@ astart_lsb 0,00
 astart_msb 0,0
 aend_lsb 0,0F
 aend_msb 0,0
-atl 12
+atl 3f
 aon 1
 wait 1500
 aon 81
-alr 0,1f
+alr 0,f5
 
 astart_lsb 1,10
 astart_msb 1,1

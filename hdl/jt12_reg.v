@@ -48,6 +48,7 @@ module jt12_reg(
 
     output reg       ch6op,  // 1 when the operator belongs to CH6
     output reg [2:0] cur_ch,
+    output reg [1:0] cur_op,
     
     // CH3 Effect-mode operation
     input           effect,
@@ -106,7 +107,7 @@ module jt12_reg(
 parameter num_ch=6; // Use only 3 (YM2203/YM2610) or 6 (YM2612/YM2608)
 
 
-reg  [1:0] next_op, cur_op;
+reg  [1:0] next_op;
 reg  [2:0] next_ch;
 reg last;
 
