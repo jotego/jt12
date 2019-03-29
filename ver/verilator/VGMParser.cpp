@@ -659,7 +659,7 @@ uint8_t JTTParser::ADPCM(int offset) {
     return adpcm_sine[ offset&0x3FF  ];
 }
 
-static long stepsizeTable[ 16 ] = {
+static float stepsizeTable[ 16 ] = {
     57, 57, 57, 57, 77,102,128,153,
     57, 57, 57, 57, 77,102,128,153
 };
@@ -667,30 +667,29 @@ static long stepsizeTable[ 16 ] = {
 
 int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len ) {
     int lpc , flag , shift , step;
-    long i , xn , stepSize;
     long adpcm;
-    xn = 0;
-    stepSize = 127;
+    float xn = 0, i;
+    float stepSize = 127;
     flag = 0;
     shift = 4;
     step = 0;
     for( lpc = 0 ; lpc < len ; lpc++ ) {
         adpcm = ( *src >> shift ) & 0xf;
-        i = ( ( adpcm & 7 ) * 2 + 1 ) * stepSize / 8;
+        i = (( ( adpcm & 7 ) * 2.0 + 1 ) * stepSize) / 8.0;
         if( adpcm & 8 )
             xn -= i;
         else
             xn += i;
-        if( xn > 32767 )
-            xn = 32767;
-        else if( xn < -32768 )
-            xn = -32768;
-        stepSize = stepSize * stepsizeTable[ adpcm ] / 64;
+        // if( xn > 32767 )
+        //     xn = 32767;
+        // else if( xn < -32768 )
+        //     xn = -32768;
+        stepSize = (stepSize * stepsizeTable[ adpcm ]) / 64.0;
         if( stepSize < 127 )
             stepSize = 127;
         else if ( stepSize > 24576 )
             stepSize = 24576;
-        *dest = ( short )xn;
+        *dest = ( short )(xn/64.0);
         dest++;
         src += step;
         step = step ^ 1;
