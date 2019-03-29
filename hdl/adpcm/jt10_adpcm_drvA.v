@@ -55,7 +55,7 @@ always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         data <= 4'd0;
     end else if(cen) begin
-        data <= nibble_sel ? datain[7:4] : datain[3:0];
+        data <= !nibble_sel ? datain[7:4] : datain[3:0];
     end
 
 reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
@@ -183,6 +183,16 @@ jt10_adpcm_gain u_gain(
     .pcm_r  ( pcm18_r       )
 );
 
+// wire signed [15:0] pcm18_fl, pcm18_fr;
+// 
+// jt12_comb #(.w(16), .m(2)) u_comb_left(
+//     .rst    ( ~rst_n    ),
+//     .clk    ( clk       ),
+//     .cen    ( cen6      ),
+//     .snd_in ( pcm18_l   ),
+//     .snd_out( pcm18_fl  )
+// );
+
 jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
@@ -200,5 +210,7 @@ jt10_adpcm_acc u_acc_right(
     .pcm_in ( pcm18_r   ),    // 18.5 kHz
     .pcm_out( pcm55_r   )     // 55.5 kHz
 );
+
+
 
 endmodule // jt10_adpcm_drvA

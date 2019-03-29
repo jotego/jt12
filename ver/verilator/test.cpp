@@ -2,12 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <string>
 #include <list>
 #include "Vtop.h"
 #include "verilated_vcd_c.h"
 #include "VGMParser.hpp"
 #include "feature.hpp"
+#include "WaveWritter.hpp"
 
   // #include "verilated.h"
 
@@ -99,15 +99,6 @@ public:
     void Eval();
     bool Done() { return done; }
     void report_usage();
-};
-
-class WaveWritter {
-    ofstream fsnd, fhex;
-    bool dump_hex;
-public:
-    WaveWritter(const char *filename, int sample_rate, bool hex );
-    void write( int16_t *lr );
-    ~WaveWritter();
 };
 
 class PSGCmdWritter {
@@ -426,65 +417,6 @@ finish:
     delete top;
  }
 
-
-void WaveWritter::write( int16_t* lr ) {
-    int16_t g[2];
-    g[0] = lr[0]+lr[2]; // Left  + PSG
-    g[1] = lr[1]+lr[2]; // right + PSG
-    fsnd.write( (char*)&g, sizeof(int16_t)*2 );
-    if( dump_hex ) {
-        fhex << hex << g[0] << '\n';
-        fhex << hex << g[1] << '\n';
-    }
-}
-
-WaveWritter::WaveWritter( const char *filename, int sample_rate, bool hex ) {
-    fsnd.open(filename, ios_base::binary);
-    dump_hex = hex;
-    if( dump_hex ) {
-        char *hexname;
-        hexname = new char[strlen(filename)+1];
-        strcpy(hexname,filename);
-        strcpy( hexname+strlen(filename)-4, ".hex" );
-        cerr << "Hex file " << hexname << '\n';
-        fhex.open(hexname);
-        delete[] hexname;
-    }
-    // write header
-    char zero=0;
-    for( int k=0; k<45; k++ ) fsnd.write( &zero, 1 );
-    fsnd.seekp(0);
-    fsnd.write( "RIFF", 4 );
-    fsnd.seekp(8);
-    fsnd.write( "WAVEfmt ", 8 );
-    int32_t number32 = 16;
-    fsnd.write( (char*)&number32, 4 );
-    int16_t number16 = 1;
-    fsnd.write( (char*) &number16, 2);
-    number16=2;
-    fsnd.write( (char*) &number16, 2);
-    number32 = sample_rate; 
-    fsnd.write( (char*)&number32, 4 );
-    number32 = sample_rate*2*2; 
-    fsnd.write( (char*)&number32, 4 );
-    number16=2*2;   // Block align
-    fsnd.write( (char*) &number16, 2);
-    number16=16;
-    fsnd.write( (char*) &number16, 2);
-    fsnd.write( "data", 4 );
-    fsnd.seekp(44); 
-}
-
-WaveWritter::~WaveWritter() {
-    int32_t number32;
-    streampos file_length = fsnd.tellp();
-    number32 = (int32_t)file_length-8;
-    fsnd.seekp(4);
-    fsnd.write( (char*)&number32, 4);
-    fsnd.seekp(40);
-    number32 = (int32_t)file_length-44;
-    fsnd.write( (char*)&number32, 4);   
-}
 
 
 void CmdWritter::report_usage() {

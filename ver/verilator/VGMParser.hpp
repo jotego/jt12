@@ -33,6 +33,13 @@ public:
 
 RipParser* ParserFactory( const char *filename, int clk_period );
 
+// class ADPCMdec {
+//     int jedi_table[ 49*16 ];
+// public:
+//     ADPCMdec();
+//     void decode( char *buf, int *dest, int length );
+// };
+
 class VGMParser : public RipParser {
 	std::ifstream file;	
 	std::ofstream ftrans; // translation to JTT format
@@ -47,10 +54,12 @@ class VGMParser : public RipParser {
 	}
 	void translate_cmd();
 	void translate_wait();
+    void decode_save( char *buf, int length, int rom_start );
 	char *stream_data;
 	uint32_t data_offset, ym_freq;	
-	char *ADPCM_data;
-	// int max_PSG_warning;
+    char *ADPCM_data;
+    // int max_PSG_warning;
+    // ADPCMdec dec;
 public:
 	void open(const char *filename, int limit=0);
 	int parse();

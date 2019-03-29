@@ -28,7 +28,7 @@ module jt10_adpcm_acc(
     input           cen,        // 111 kHz
     input   [2:0]   cur_ch,
     input      signed [15:0] pcm_in,    // 18.5 kHz
-    output reg signed [15:0] pcm_out    // 55.5 kHz
+    output     signed [15:0] pcm_out    // 55.5 kHz
 );
 
 wire signed [17:0] pcmin_long = { {2{pcm_in[15]}}, pcm_in };
@@ -62,6 +62,8 @@ always @(posedge clk or negedge rst_n)
         end
     end
 
+assign pcm_out = last[15:0];
+/*
 wire overflow = |pcm_full[17:15] & ~&pcm_full[17:15];
 
 always @(posedge clk or negedge rst_n)
@@ -78,5 +80,5 @@ always @(posedge clk or negedge rst_n)
         else
             pcm_out <= pcm_full[15:0];
     end
-
+*/
 endmodule // jt10_adpcm_acc

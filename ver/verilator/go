@@ -124,11 +124,11 @@ date
 if [ $SKIPMAKE = FALSE ]; then
     echo "verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
         -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
-        $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp"
+        $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp WaveWritter.cpp"
 
     if ! verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
         -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
-        $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp; then
+        $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp WaveWritter.cpp; then
         exit $?
     fi
 

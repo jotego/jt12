@@ -3,7 +3,10 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <sstream>
+#include <fstream>
 #include "VGMParser.hpp"
+#include "WaveWritter.hpp"
 
 using namespace std;
 
@@ -320,6 +323,25 @@ void VGMParser::translate_wait() {
     //ftrans << wait << " -> " << ws << " Total: " << cur_time << "s \n";
 }
 
+void VGMParser::decode_save( char *buf, int length, int rom_start ) {
+    stringstream s;
+    s << hex << rom_start;
+    string fname( s.str() );
+    length <<= 1;
+    short *dest = new short[length];
+    YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length );
+    WaveWritter wav( (fname+".wav").c_str(), 18500, false );
+    // save array file
+    ofstream of( (fname+".dec").c_str());
+    for( int k=0; k<length; k++ ) {
+        of << "adpcm[" << k << "]=" << dest[k] << '\n';
+        int16_t v[2];
+        v[0] = v[1] = dest[k];
+        wav.write(v);
+    }
+    delete[] dest;
+}
+
 int VGMParser::parse() {
     if(done) return -1;
     if( pending_wait !=0 ) {
@@ -424,6 +446,7 @@ int VGMParser::parse() {
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
+                            decode_save( buf, length, rom_start );
                             cerr << "INFO: read " << dec << length << " bytes into ADPCM ROM at 0x" << hex << rom_start << '\n';
                         }
                         break;
