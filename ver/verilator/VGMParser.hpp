@@ -25,6 +25,7 @@ public:
 		std::cerr << "ERROR: No ADPCM buffer available\n";
 		throw 1;
 	}
+    virtual void saveADPCMA(const char* filename) {};
 	RipParser(int c) { clk_period = c; }
 	enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1, cmd_psg=2 };
 	chip_type chip() { return chip_cfg; }
@@ -65,6 +66,7 @@ public:
 	int parse();
 	uint64_t length();
 	int period();
+    void saveADPCMA(const char* filename);
 	uint8_t ADPCM(int offset) {
 		if( offset > 12*1024*1024 ) {
 			std::cerr << "ERROR: ADPCM offset too long\n";
@@ -111,6 +113,7 @@ class JTTParser : public RipParser {
 	std::map<std::string, char> adpcma_commands;
 	std::map<std::string, char> global_commands;
     unsigned char *adpcm_sine;
+    char *ADPCM_data;
 public:
     JTTParser(int c);
 	~JTTParser();

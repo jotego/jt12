@@ -62,8 +62,8 @@ always @(posedge clk or negedge rst_n)
         end
     end
 
-assign pcm_out = last[15:0];
-/*
+//assign pcm_out = last[15:0];
+
 wire overflow = |pcm_full[17:15] & ~&pcm_full[17:15];
 
 always @(posedge clk or negedge rst_n)
@@ -80,5 +80,5 @@ always @(posedge clk or negedge rst_n)
         else
             pcm_out <= pcm_full[15:0];
     end
-*/
+
 endmodule // jt10_adpcm_acc

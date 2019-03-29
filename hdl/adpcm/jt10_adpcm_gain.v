@@ -23,6 +23,7 @@ module jt10_adpcm_gain(
     input           rst_n,
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
+    input           div3,
     input   [7:0]   lracl,
     input   [5:0]   atl,        // ADPCM Total Level
     input           up,
@@ -93,8 +94,8 @@ always @(posedge clk or negedge rst_n)
         lracl6  <= lracl5;
         // VI close the loop
         lracl1 <= lracl6;
-        pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
-        pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
+        if(div3) pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
+        if(div3) pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
     end
 
 endmodule // jt10_adpcm_gain

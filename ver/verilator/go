@@ -11,6 +11,11 @@ WAV_FILE=
 CHIPTYPE="-DYM2612 -DMEGADRIVE_PSG"
 SKIPMAKE=FALSE
 
+function set_slow {
+    FAST=
+    EXTRA="$EXTRA -slow"    
+}
+
 while [ $# -gt 0 ]; do
     if [ "$1" = "-w" ]; then
         echo "Signal dump enabled"
@@ -20,8 +25,7 @@ while [ $# -gt 0 ]; do
     fi
     if [ "$1" = "-slow" ]; then
         echo "Clock divider enabled"
-        FAST=
-        EXTRA="$EXTRA -slow"
+        set_slow
         shift
         continue
     fi  
@@ -80,7 +84,7 @@ while [ $# -gt 0 ]; do
     if [ $1 = "-2610" ]; then
         echo "YM2610 mode. The simulation will use real clock dividers for ADCPM accuracy."
         CHIPTYPE="-DYM2610"
-        EXTRA="$EXTRA -slow"
+        set_slow
         shift
         continue
     fi    

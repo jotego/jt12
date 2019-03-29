@@ -58,7 +58,7 @@ always @(posedge clk or negedge rst_n)
         data <= !nibble_sel ? datain[7:4] : datain[3:0];
     end
 
-reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr;
+reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr, up_lracl_sr;
 reg [ 2:0] chlin, chfast;
 reg [15:0] addr_in2;
 
@@ -77,12 +77,12 @@ always @(*)
 reg [5:0] up_lr_dec;
 always @(*)
     case(up_lracl)
-        3'd0: up_lr_dec = 6'b000_001;
-        3'd1: up_lr_dec = 6'b000_010;
-        3'd2: up_lr_dec = 6'b000_100;
-        3'd3: up_lr_dec = 6'b001_000;
-        3'd4: up_lr_dec = 6'b010_000;
-        3'd5: up_lr_dec = 6'b100_000;
+        3'd3: up_lr_dec = 6'b000_001;
+        3'd4: up_lr_dec = 6'b000_010;
+        3'd5: up_lr_dec = 6'b000_100;
+        3'd0: up_lr_dec = 6'b001_000;
+        3'd1: up_lr_dec = 6'b010_000;
+        3'd2: up_lr_dec = 6'b100_000;
         default: up_lr_dec = 6'd0;
     endcase // up_addr
 
@@ -101,24 +101,15 @@ end
 wire cen_addr = cen_addr_mask & cen;
 wire cen6 = cen6_mask & cen;
 
+reg [7:0] lracl_in2;
+
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         cnt    <= 'd0;
-        up_lracl_pipe <= 1'b0;
     end else if(cen) begin
         cnt <= next;
-        case( cnt )
-            5'd7: begin
-                up_lracl_pipe <= chfast == up_lracl;
-                lracl_in2     <= lracl_in;
-            end
-            5'd11: up_lracl_pipe <= 1'b0;
-            default:;
-        endcase // cnt
     end
 
-reg up_lracl_pipe;
-reg [7:0] lracl_in2;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -132,11 +123,15 @@ always @(posedge clk or negedge rst_n)
         div3 <= cnt==5'd5;
         // input new addresses
         chfast <= chfast==3'd5 ? 3'd0 : chfast+3'd1;
-        if( chfast==3'd5 ) addr_in2 <= addr_in; // delay one clock cycle to synchronize with up_*_sr registers
+        if( chfast==3'd5 ) begin // delay one clock cycle to synchronize with up_*_sr registers
+            addr_in2  <= addr_in; 
+            lracl_in2 <= lracl_in;
+        end
         up_start_sr <= chfast==5 &&    up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] };
-        up_end_sr   <= chfast==5 &&      up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1] };
-        aon_sr      <= chfast==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1] };
-        aoff_sr     <= chfast==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aoff_sr[5:1] };
+        up_end_sr   <= chfast==5 &&      up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1]   };
+        aon_sr      <= chfast==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1]      };
+        aoff_sr     <= chfast==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aoff_sr[5:1]     };
+        up_lracl_sr <= chfast==5                ?    up_lr_dec : { 1'b0, up_lracl_sr[5:1] };
     end
 
 jt10_adpcm_cnt u_cnt(
@@ -170,17 +165,18 @@ jt10_adpcm u_decoder(
 wire signed [15:0] pcm18_l, pcm18_r;
 
 jt10_adpcm_gain u_gain(
-    .rst_n  ( rst_n         ),
-    .clk    ( clk           ),
-    .cen    ( cen6          ),
-    // .lracl  ( lracl_in2     ),
-    // .atl    ( atl           ),        // ADPCM Total Level
-    .lracl  ( 8'hff     ),
-    .atl    ( 6'h3f           ),        // ADPCM Total Level
-    .up     ( up_lracl_pipe ),
-    .pcm_in ( pcmdec        ),
-    .pcm_l  ( pcm18_l       ),
-    .pcm_r  ( pcm18_r       )
+    .rst_n  ( rst_n          ),
+    .clk    ( clk            ),
+    .cen    ( cen_addr       ),
+    .div3   ( div3           ),
+    .lracl  ( lracl_in2      ),
+    //.lracl  ( 8'hff      ),
+    .atl    ( atl            ),        // ADPCM Total Level
+    .up     ( up_lracl_sr[0] ),
+    //.up(1'b1),
+    .pcm_in ( pcmdec         ),
+    .pcm_l  ( pcm18_l        ),
+    .pcm_r  ( pcm18_r        )
 );
 
 // wire signed [15:0] pcm18_fl, pcm18_fr;
@@ -193,13 +189,18 @@ jt10_adpcm_gain u_gain(
 //     .snd_out( pcm18_fl  )
 // );
 
+wire signed [15:0] pre_pcm55_l, pre_pcm55_r;
+
+assign pcm55_l = pre_pcm55_l<<3;
+assign pcm55_r = pre_pcm55_r<<3;
+
 jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
     .cen    ( cen6      ),
     .cur_ch ( chfast    ),
     .pcm_in ( pcm18_l   ),    // 18.5 kHz
-    .pcm_out( pcm55_l   )     // 55.5 kHz
+    .pcm_out( pre_pcm55_l   )     // 55.5 kHz
 );
 
 jt10_adpcm_acc u_acc_right(
@@ -208,7 +209,7 @@ jt10_adpcm_acc u_acc_right(
     .cen    ( cen6      ),
     .cur_ch ( chfast    ),
     .pcm_in ( pcm18_r   ),    // 18.5 kHz
-    .pcm_out( pcm55_r   )     // 55.5 kHz
+    .pcm_out( pre_pcm55_r   )     // 55.5 kHz
 );
 
 

@@ -185,6 +185,8 @@ end else begin : gen_adpcm_no
 end
 endgenerate
 
+/* verilator tracing_off */
+
 jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm))
     u_mmr(
     .rst        ( rst       ),
@@ -276,6 +278,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .psg_wr_n   ( psg_wr_n  )
 );
 
+/* verilator tracing_off */
 jt12_timers u_timers(
     .clk        ( clk           ),
     .clk_en     ( clk_en | fast_timers  ),
@@ -354,7 +357,7 @@ endgenerate
 
 
 `ifndef TIMERONLY
-
+/* verilator tracing_off */
 jt12_pg #(.num_ch(num_ch)) u_pg(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -441,9 +444,12 @@ jt12_op #(.num_ch(num_ch)) u_op(
     .full_result    ( op_result_hd  )
 );
 
+/* verilator tracing_on */
+
 generate
     if( use_adpcm==1 ) begin: gen_adpcm_acc // YM2610 accumulator
-        assign snd_sample   = zero;
+        assign snd_sample   = zero;        
+        /* verilator lint_off PINMISSING */
         jt10_acc u_acc(
             .clk        ( clk           ),
             .clk_en     ( clk_en        ),
@@ -463,6 +469,9 @@ generate
             .left       ( fm_snd_left   ),
             .right      ( fm_snd_right  )
         );
+        /* verilator lint_on PINMISSING */
+        // assign fm_snd_left = pcm55_l;
+        // assign fm_snd_right= pcm55_r;
     end
     if( use_pcm==1 ) begin: gen_pcm_acc // YM2612 accumulator
         assign fm_snd_right[3:0] = 4'd0;

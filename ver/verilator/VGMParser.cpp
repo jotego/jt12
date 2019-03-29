@@ -121,15 +121,20 @@ JTTParser::JTTParser(int c) : RipParser(c) {
     adpcm_sine = new unsigned char[1024];
     short *sine = new short[2048];
     for(int k=0;k<2048;k++) {
-        sine[k]=32767.0*sin( 6.283185*k*4.0/2048.0 );
+        sine[k]=4095.0*sin( 6.283185*k*4.0/2048.0 );
     }
     YM2610_ADPCMB_Encode( sine, adpcm_sine, 2048 );
     delete []sine;
+    ADPCM_data = 0;
 }
 
 JTTParser::~JTTParser() {
     delete []adpcm_sine;
     adpcm_sine = 0;
+    if( ADPCM_data ) {
+        delete []ADPCM_data;
+        ADPCM_data = 0;
+    }
 }
 
 int JTTParser::parse() {
@@ -187,6 +192,18 @@ int JTTParser::parse() {
                 // cerr << "Wait for " << wait << '\n';
                 return cmd_wait;
             }
+
+            if( strcmp(txt_cmd, "load_adpcma")==0 ) {
+                ifstream fin( txt_arg, ios_base::binary );
+                if( !fin ) {
+                    cerr << "ERROR: Cannot open file " << txt_arg << '\n';
+                    throw 1;
+                }
+                if( !ADPCM_data ) ADPCM_data = new char[12*1024*1024];
+                fin.read( ADPCM_data, 12*1024*1024 );
+                cerr << "INFO: file '" << txt_arg << "' loaded into ADPCM-A memory\n";
+                continue; // process next command
+            }
             // OP commands
             auto op_cmd = op_commands.find(txt_cmd);
             if( op_cmd != op_commands.end() ) {
@@ -231,6 +248,13 @@ int JTTParser::parse() {
     }
     done=true;
     return cmd_finish;
+}
+
+void VGMParser::saveADPCMA(const char* filename) {
+    if( !ADPCM_data ) return;
+    ofstream of(filename, ios_base::binary );
+    of.write( ADPCM_data, 12*1024*1024 );
+    cerr << "\nINFO: ADPCM-A 12MB ROM written to " << filename << '\n';
 }
 
 uint64_t VGMParser::length() {
@@ -335,8 +359,8 @@ void VGMParser::decode_save( char *buf, int length, int rom_start ) {
     ofstream of( (fname+".dec").c_str());
     for( int k=0; k<length; k++ ) {
         of << "adpcm[" << k << "]=" << dest[k] << '\n';
-        int16_t v[2];
-        v[0] = v[1] = dest[k];
+        int16_t v[3];
+        v[0] = v[1] = dest[k]; v[2]=0;
         wav.write(v);
     }
     delete[] dest;
@@ -447,7 +471,10 @@ int VGMParser::parse() {
                         if( length > 0) {
                             file.read( buf, length );
                             decode_save( buf, length, rom_start );
-                            cerr << "INFO: read " << dec << length << " bytes into ADPCM ROM at 0x" << hex << rom_start << '\n';
+                            cerr << "INFO: read " << dec << length << " bytes into ADPCM ROM at 0x"
+                                 << hex << rom_start <<
+                                 " (ADDR 0x" << hex << (rom_start>>8) <<
+                                 " - 0x" << hex << ( (rom_start+length)>>8) << ") \n";
                         }
                         break;
                     }
@@ -656,10 +683,13 @@ int JTTParser::period() {
 }
 
 uint8_t JTTParser::ADPCM(int offset) {
-    return adpcm_sine[ offset&0x3FF  ];
+    if( ADPCM_data )
+        return ADPCM_data[offset ];
+    else  // fill with a sine wave
+        return adpcm_sine[ offset&0x3FF  ];
 }
 
-static float stepsizeTable[ 16 ] = {
+static int stepsizeTable[ 16 ] = {
     57, 57, 57, 57, 77,102,128,153,
     57, 57, 57, 57, 77,102,128,153
 };
@@ -668,8 +698,8 @@ static float stepsizeTable[ 16 ] = {
 int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len ) {
     int lpc , flag , shift , step;
     long adpcm;
-    float xn = 0, i;
-    float stepSize = 127;
+    float xn = 0, i, zprev=0, yn, zn;
+    int stepSize = 127;
     flag = 0;
     shift = 4;
     step = 0;
@@ -680,16 +710,21 @@ int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len ) {
             xn -= i;
         else
             xn += i;
-        // if( xn > 32767 )
-        //     xn = 32767;
-        // else if( xn < -32768 )
-        //     xn = -32768;
+        if( xn > 32767 )
+            xn = 32767;
+        else if( xn < -32768 )
+            xn = -32768;
         stepSize = (stepSize * stepsizeTable[ adpcm ]) / 64.0;
         if( stepSize < 127 )
             stepSize = 127;
         else if ( stepSize > 24576 )
             stepSize = 24576;
-        *dest = ( short )(xn/64.0);
+        // DC removal
+        //zn = xn + 0.95*zprev;
+        //yn = zn - zprev;
+        //zprev=zn;
+
+        *dest = ( short )xn;
         dest++;
         src += step;
         step = step ^ 1;

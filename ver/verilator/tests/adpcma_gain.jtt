@@ -1,0 +1,51 @@
+ym2610
+astart_lsb 0,00
+astart_msb 0,0
+aend_lsb 0,0F
+aend_msb 0,0
+atl 3f
+
+aend_msb   0,F
+aend_msb   1,F
+aend_msb   2,F
+aend_msb   3,F
+aend_msb   4,F
+aend_msb   5,F
+aend_lsb   0,FF
+aend_lsb   1,FF
+aend_lsb   2,FF
+aend_lsb   3,FF
+aend_lsb   4,FF
+aend_lsb   5,FF
+
+aon 3f
+
+alr 0,ff
+alr 1,c0
+alr 2,c0
+alr 3,c0
+alr 4,c0
+alr 5,c0
+
+wait 800
+
+alr 0,c0
+alr 1,f0
+wait 800
+
+alr 1,c0
+alr 2,ff
+wait 800
+
+alr 2,c0
+alr 3,f0
+wait 800
+
+alr 3,c0
+alr 4,ff
+wait 800
+
+alr 4,c0
+alr 5,f0
+wait 800
+

@@ -402,6 +402,7 @@ int main(int argc, char** argv, char** env) {
         if(trace) tfp->dump(sim_time.get_time());
     }
 finish:
+    gym->saveADPCMA("adpcma.rom");
     writter.report_usage();
     if( skip_zeros ) {
         cerr << "WARNING: Output wavefile is empty. No sound output was produced.\n";
