@@ -337,10 +337,10 @@ always @(posedge clk) begin : memory_mapped_registers
                         case(selected_register[3:0])
                             4'd0: {acmd_on_b, acmd_rep_b,acmd_rst_b} <= {din[7],din[4],din[0]};
                             4'd1: alr_b  <= din[7:6];
-                            4'd2: astart_b [15:8] <= din;
-                            4'd3: astart_b [ 7:0] <= din;
-                            4'd4: aend_b   [15:8] <= din;
-                            4'd5: aend_b   [ 7:0] <= din;
+                            4'd2: astart_b [ 7:0] <= din;
+                            4'd3: astart_b [15:8] <= din;
+                            4'd4: aend_b   [ 7:0] <= din;
+                            4'd5: aend_b   [15:8] <= din;
                             4'h9: adeltan_b[15:8] <= din;
                             4'ha: adeltan_b[ 7:0] <= din;
                             4'hb: aeg_b           <= din;

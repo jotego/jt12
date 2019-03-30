@@ -221,6 +221,7 @@ end else begin : gen_adpcm_no
 end
 endgenerate
 
+/* verilator tracing_off */
 jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm))
     u_mmr(
     .rst        ( rst       ),
