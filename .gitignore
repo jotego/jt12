@@ -13,4 +13,6 @@ sim
 *.hex
 db/*
 obj_dir
+*.dec
+*.rom
 
