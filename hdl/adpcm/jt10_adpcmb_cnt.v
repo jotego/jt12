@@ -31,11 +31,11 @@ module jt10_adpcmb_cnt(
     input               clr,
     input               on,
     // Address
-    input       [15:0]  start,
-    input       [15:0]  end,
-    input               repeat,
+    input       [15:0]  astart,
+    input       [15:0]  aend,
+    input               arepeat,
     output  reg [23:0]  addr,
-    output  reg         nibble_sel;
+    output  reg         nibble_sel,
 
     output  reg         adv
 );
@@ -70,15 +70,15 @@ always @(posedge clk or negedge rst_n)
     end else if(cen) begin
         last_on <= on;
         if( (on && !last_on) || clr )
-            addr <= start;
+            addr <= {astart,8'd0};
             nibble_sel <= 'b0;
-        else begin
+        end else begin
         if( on && adv ) begin
-            if( addr < end ) begin
+            if( addr[23:8] < aend ) begin
                 { addr, nibble_sel } <= { addr, nibble_sel } + 25'd1;
             end
-            else if(repeat) begin
-                addr <= start;
+            else if(arepeat) begin
+                addr <= {astart,8'd0};
                 nibble_sel <= 'b0;
             end
         end

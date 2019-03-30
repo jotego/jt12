@@ -28,6 +28,7 @@ module jt12_mmr(
     output          clk_en_ssg,
     output          clk_en_adpcm,
     output          clk_en_adpcm3,
+    output          clk_en_55,
     input   [7:0]   din,
     input           write,
     input   [1:0]   addr,
@@ -133,7 +134,8 @@ jt12_div #(.use_ssg(use_ssg),.num_ch(num_ch)) u_div (
     .clk_en         ( clk_en        ),
     .clk_en_ssg     ( clk_en_ssg    ),
     .clk_en_adpcm3  ( clk_en_adpcm3 ),
-    .clk_en_adpcm   ( clk_en_adpcm  )
+    .clk_en_adpcm   ( clk_en_adpcm  ),
+    .clk_en_55      ( clk_en_55     )
 );
 
 reg [7:0]   selected_register;
@@ -192,6 +194,7 @@ generate
 endgenerate
 
 reg part;
+reg [6:0] flag_ctl;
 
 // this runs at clk speed, no clock gating here
 always @(posedge clk) begin : memory_mapped_registers

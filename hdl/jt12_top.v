@@ -193,7 +193,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
         .cen        ( cen           ),
-        .cen55      ( clk_en55      ),
+        .cen55      ( clk_en_55     ),
 
         // Control
         .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On

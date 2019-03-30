@@ -29,7 +29,7 @@ module jt12_div(
     output  reg     clk_en_ssg,
     output  reg     clk_en_adpcm,   // 330 kHz
     output  reg     clk_en_adpcm3,  // 111
-    output  reg     clk_en_55,      //  55
+    output  reg     clk_en_55       //  55
 );
 
 parameter use_ssg=0, num_ch=6;
@@ -56,7 +56,7 @@ always @(*)
 initial clk_en_adpcm = 1'b0;
 `endif
 
-reg adpcm_en = 1'b0;
+reg cen_55_int;
 
 always @(negedge clk) begin
     cen_int        <= opn_cnt    == 4'd0;

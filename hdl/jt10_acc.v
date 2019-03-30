@@ -78,24 +78,25 @@ reg acc_en_l, acc_en_r;
 // uses channels 2 and 6 for ADPCM data, throwing away FM data for those channels
 always @(*)
     case( {cur_op,cur_ch} )
-    {2'd0,3'd2}: begin // ADPCM-A:
-        acc_input_l = adpcmA_l;
-        acc_input_r = adpcmA_r;
-        acc_en_l    = 1'b1;
-        acc_en_r    = 1'b1;
-    end
-    {2'd0,3'd6}: begin // ADPCM-B:
-        acc_input_l = adpcmB_l;
-        acc_input_r = adpcmB_r;
-        acc_en_l    = 1'b1;
-        acc_en_r    = 1'b1;
-    end
-    default: begin
-        acc_input_l = opext;
-        acc_input_r = opext;
-        acc_en_l    = sum_en & left_en;
-        acc_en_r    = sum_en & right_en;
-    end
+        {2'd0,3'd2}: begin // ADPCM-A:
+            acc_input_l = adpcmA_l;
+            acc_input_r = adpcmA_r;
+            acc_en_l    = 1'b1;
+            acc_en_r    = 1'b1;
+        end
+        {2'd0,3'd6}: begin // ADPCM-B:
+            acc_input_l = adpcmB_l;
+            acc_input_r = adpcmB_r;
+            acc_en_l    = 1'b1;
+            acc_en_r    = 1'b1;
+        end
+        default: begin
+            acc_input_l = opext;
+            acc_input_r = opext;
+            acc_en_l    = sum_en & left_en;
+            acc_en_r    = sum_en & right_en;
+        end
+    endcase
 
 // Continuous output
 

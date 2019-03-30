@@ -52,9 +52,9 @@ jt10_adpcmb_cnt u_cnt(
     .delta_n     ( adeltan_b       ),
     .clr         ( acmd_rst_b      ),
     .on          ( acmd_on_b       ),
-    .start       ( astart_b        ),
-    .end         ( aend_b          ),
-    .repeat      ( acmd_rep_b      ),
+    .astart      ( astart_b        ),
+    .aend        ( aend_b          ),
+    .arepeat     ( acmd_rep_b      ),
     .addr        ( addr            ),
     .nibble_sel  ( nibble_sel      ),
     .adv         ( adv             )

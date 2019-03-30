@@ -49,7 +49,7 @@ always @(posedge clk or negedge rst_n)
     end
 
 reg pass_negedge;
-assign cen_out <= cen & pass_negedge;
+assign cen_out = cen & pass_negedge;
 
 always @(negedge clk) begin
     pass_negedge <= pass;
