@@ -48,8 +48,10 @@ module jt10_acc(
     input       [2:0]   cur_ch,
     input       [1:0]   cur_op,
     input   [2:0]       alg,
-    input signed [15:0] adpcma_l,
-    input signed [15:0] adpcma_r,
+    input signed [15:0] adpcmA_l,
+    input signed [15:0] adpcmA_r,
+    input signed [15:0] adpcmB_l,
+    input signed [15:0] adpcmB_r,
     // combined output
     output reg signed   [15:0]  left,
     output reg signed   [15:0]  right
@@ -72,13 +74,23 @@ wire signed [15:0] opext = { {2{op_result[13]}}, op_result };
 reg  signed [15:0] acc_input_l, acc_input_r;
 reg acc_en_l, acc_en_r;
 
+// YM2610 mode:
+// uses channels 2 and 6 for ADPCM data, throwing away FM data for those channels
 always @(*)
-    if( {cur_op,cur_ch}=={2'd0,3'd2} ) begin
-        acc_input_l = adpcma_l;
-        acc_input_r = adpcma_r;
+    case( {cur_op,cur_ch} )
+    {2'd0,3'd2}: begin // ADPCM-A:
+        acc_input_l = adpcmA_l;
+        acc_input_r = adpcmA_r;
         acc_en_l    = 1'b1;
         acc_en_r    = 1'b1;
-    end else begin
+    end
+    {2'd0,3'd6}: begin // ADPCM-B:
+        acc_input_l = adpcmB_l;
+        acc_input_r = adpcmB_r;
+        acc_en_l    = 1'b1;
+        acc_en_r    = 1'b1;
+    end
+    default: begin
         acc_input_l = opext;
         acc_input_r = opext;
         acc_en_l    = sum_en & left_en;

@@ -28,7 +28,8 @@ module jt12_div(
     output  reg     clk_en,
     output  reg     clk_en_ssg,
     output  reg     clk_en_adpcm,   // 330 kHz
-    output  reg     clk_en_adpcm3   // 111
+    output  reg     clk_en_adpcm3,  // 111
+    output  reg     clk_en_55,      //  55
 );
 
 parameter use_ssg=0, num_ch=6;
@@ -36,7 +37,7 @@ parameter use_ssg=0, num_ch=6;
 reg [3:0] opn_pres, opn_cnt=4'd0;
 reg [2:0] ssg_pres, ssg_cnt=3'd0;
 reg [4:0] adpcm_cnt  = 5'd0;
-reg [2:0] adpcm_cnt3 = 3'd0;
+reg [2:0] adpcm_cnt3 = 3'd0, adpcm_cnt55=3'd0;
 reg cen_int, cen_ssg_int, cen_adpcm_int, cen_adpcm3_int;
 
 always @(*)
@@ -62,16 +63,19 @@ always @(negedge clk) begin
     cen_ssg_int    <= ssg_cnt    == 3'd0;
     cen_adpcm_int  <= adpcm_cnt  == 5'd0;
     cen_adpcm3_int <= adpcm_cnt3 == 3'd0;
+    cen_55_int     <= adpcm_cnt55== 3'd0;
     `ifdef FASTDIV
     // always enabled for fast sims (use with GYM output, timer will not work well)
     clk_en <= 1'b1;
     clk_en_ssg <= 1'b1;
     clk_en_adpcm <= 1'b1;
+    clk_en_55    <= 1'b1;
     `else
     clk_en        <= cen & cen_int;   
     clk_en_ssg    <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
     clk_en_adpcm  <= cen & cen_adpcm_int; 
     clk_en_adpcm3 <= cen & cen_adpcm_int & cen_adpcm3_int; 
+    clk_en_55     <= cen & cen_55_int;
     `endif
 end
 
@@ -98,8 +102,11 @@ always @(posedge clk)
 always @(posedge clk)
     if( cen ) begin
         adpcm_cnt <= adpcm_cnt==5'd3 ? 5'd0 : adpcm_cnt + 5'd1;
-        if( adpcm_cnt==5'd0 )
+        if( adpcm_cnt==5'd0 ) begin
             adpcm_cnt3 <= adpcm_cnt3==3'd5 ? 3'd0 : adpcm_cnt3+3'd1;
+            if( adpcm_cnt3==3'd0)
+                adpcm_cnt55 <= adpcm_cnt55==3'd5 ? 3'd0: adpcm_cnt55+3'd1;
+        end
     end
 
 endmodule // jt12_div

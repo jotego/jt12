@@ -63,6 +63,15 @@ module jt12_mmr(
     output  reg         up_end,     // write enable end address latch
     output  reg  [ 2:0] up_addr,    // write enable end address latch
     output  reg  [ 2:0] up_lracl,
+    // ADPCM-B
+    output  reg         acmd_on_b,  // Control - Process start, Key On
+    output  reg         acmd_rep_b, // Control - Repeat
+    output  reg         acmd_rst_b, // Control - Reset
+    output  reg  [ 1:0] alr_b,      // Left / Right
+    output  reg  [15:0] astart_b,   // Start address
+    output  reg  [15:0] aend_b,     // End   address
+    output  reg  [15:0] adeltan_b,  // Delta-N
+    output  reg  [ 7:0] aeg_b,      // Envelope Generator Control
     // Operator
     output          xuse_prevprev1,
     output          xuse_internal,
@@ -211,13 +220,19 @@ always @(posedge clk) begin : memory_mapped_registers
         pcm         <= 9'h0;
         pcm_en      <= 1'b0;
         pcm_wr      <= 1'b0;
-        // ADPCM
+        // ADPCM-A
         aon_a       <=  'd0;
         atl_a       <=  'd0;
         up_start    <=  'd0;
         up_end      <=  'd0;
         up_addr     <= 3'd7;
         up_lracl    <= 3'd7;
+        // ADPCM-B
+        acmd_on_b   <=  'd0;
+        acmd_rep_b  <=  'd0;
+        acmd_rst_b  <=  'd0;
+        alr_b       <=  'd0;
+        flag_ctl    <=  'd0;
         // Original test features
         eg_stop     <= 1'b0;
         pg_stop     <= 1'b0;
@@ -286,8 +301,8 @@ always @(posedge clk) begin : memory_mapped_registers
                     endcase
                     pcm_wr <= selected_register==REG_PCM;
                 end
-                // YM2610 ADPCM-A support, A1=1, regs 0-2D
                 if( use_adpcm==1 ) begin
+                    // YM2610 ADPCM-A support, A1=1, regs 0-2D
                     if(part && selected_register[7:6]==2'b0) begin
                         casez( selected_register[5:0] )
                             6'h0: aon_a <= din;
@@ -311,6 +326,22 @@ always @(posedge clk) begin : memory_mapped_registers
                                     end
                                 endcase
                             end
+                            default:;
+                        endcase
+                    end
+                    if( !part && selected_register[7:4]==4'h1 ) begin
+                        // YM2610 ADPCM-B support, A1=0, regs 1x
+                        case(selected_register[3:0])
+                            4'd0: {acmd_on_b, acmd_rep_b,acmd_rst_b} <= {din[7],din[4],din[0]};
+                            4'd1: alr_b  <= din[7:6];
+                            4'd2: astart_b [15:8] <= din;
+                            4'd3: astart_b [ 7:0] <= din;
+                            4'd4: aend_b   [15:8] <= din;
+                            4'd5: aend_b   [ 7:0] <= din;
+                            4'h9: adeltan_b[15:8] <= din;
+                            4'ha: adeltan_b[ 7:0] <= din;
+                            4'hb: aeg_b           <= din;
+                            4'hc: flag_ctl        <= {din[7],din[5:0]};
                             default:;
                         endcase
                     end
@@ -362,7 +393,7 @@ always @(posedge clk)
             busy_cnt <= busy_cnt+5'd1;
         end
     end
-
+/* verilator tracing_off */
 jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1

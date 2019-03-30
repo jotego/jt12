@@ -37,10 +37,11 @@ module jt12_top (
     output          irq_n,
     // ADPCM pins
     output  [19:0]  adpcma_addr,  // real hardware has 10 pins multiplexed through RMPX pin
-    output  [3:0]   adpcma_bank,
+    output  [ 3:0]  adpcma_bank,
     output          adpcma_roe_n, // ADPCM-A ROM output enable
-    input   [7:0]   adpcma_data,  // Data from RAM
+    input   [ 7:0]  adpcma_data,  // Data from RAM
     output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
+    input   [ 7:0]  adpcmb_data,
     output          adpcmb_roe_n, // ADPCM-B ROM output enable
     // Separated output
     output          [ 7:0] psg_A,
@@ -131,14 +132,25 @@ wire    [3:0]   psg_addr;
 wire    [7:0]   psg_data, psg_dout;
 wire            psg_wr_n;
 // ADPCM-A
-wire signed [15:0]  pcm55_l, pcm55_r;
+wire signed [15:0]  adpcmA_l, adpcmA_r;
 wire [15:0] addr_a;
-wire [2:0] up_addr, up_lracl;
-wire       up_start, up_end;
-wire [7:0] aon_a, lracl;
-wire [5:0] atl_a;     // ADPCM Total Level
+wire [ 2:0] up_addr, up_lracl;
+wire        up_start, up_end;
+wire [ 7:0] aon_a, lracl;
+wire [ 5:0] atl_a;     // ADPCM Total Level
+// APDCM-B
+wire signed [15:0]  adpcmB_l, adpcmB_r;
+wire        acmd_on_b;  // Control - Process start, Key On
+wire        acmd_rep_b; // Control - Repeat
+wire        acmd_rst_b; // Control - Reset
+wire [ 1:0] alr_b;      // Left / Right
+wire [15:0] astart_b;   // Start address
+wire [15:0] aend_b;     // End   address
+wire [15:0] adeltan_b;  // Delta-N
+wire [ 7:0] aeg_b;      // Envelope Generator Control
 
-wire clk_en_adpcm, clk_en_adpcm3;
+
+wire clk_en_adpcm, clk_en_adpcm3, clk_en_55;
 
 generate
 if( use_adpcm==1 ) begin: gen_adpcm
@@ -173,19 +185,40 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .aon_cmd    ( aon_a         ),    // ADPCM ON equivalent to key on for FM
 
 
-        .pcm55_l    (  pcm55_l      ),
-        .pcm55_r    (  pcm55_r      )
+        .pcm55_l    (  adpcmA_l     ),
+        .pcm55_r    (  adpcmA_r     )
+    );
+
+    jt10_adpcm_drvB u_adpcm_b(
+        .rst_n      ( rst_n         ),
+        .clk        ( clk           ),
+        .cen        ( cen           ),
+        .cen55      ( clk_en55      ),
+
+        // Control
+        .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
+        .acmd_rep_b ( acmd_rep_b    ),  // Control - Repeat
+        .acmd_rst_b ( acmd_rst_b    ),  // Control - Reset
+        .alr_b      ( alr_b         ),  // Left / Right
+        .astart_b   ( astart_b      ),  // Start address
+        .aend_b     ( aend_b        ),  // End   address
+        .adeltan_b  ( adeltan_b     ),  // Delta-N
+        .aeg_b      ( aeg_b         ),  // Envelope Generator Control
+        // memory
+        .addr       ( adpcmb_addr   ),
+        .data       ( adpcmb_data   ),
+
+        .pcm55_l    ( adpcmB_l      ),
+        .pcm55_r    ( adpcmB_r      )
     );
 end else begin : gen_adpcm_no
-    assign pcm55_l      = 'd0;
-    assign pcm55_r      = 'd0;
+    assign adpcmA_l      = 'd0;
+    assign adpcmA_r      = 'd0;
     assign adpcma_addr  = 'd0;
     assign adpcma_bank  = 'd0;
     assign adpcma_roe_n = 'b1;
 end
 endgenerate
-
-/* verilator tracing_off */
 
 jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm))
     u_mmr(
@@ -196,6 +229,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .clk_en_ssg ( clk_en_ssg),  // internal clock enable
     .clk_en_adpcm ( clk_en_adpcm  ),
     .clk_en_adpcm3( clk_en_adpcm3 ),
+    .clk_en_55  ( clk_en_55 ),
     .din        ( din       ),
     .write      ( write     ),
     .addr       ( addr      ),
@@ -231,6 +265,15 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .up_end     ( up_end        ),   // write enable end address latch
     .up_addr    ( up_addr       ),   // write enable end address latch
     .up_lracl   ( up_lracl      ),
+    // ADPCM-B
+    .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
+    .acmd_rep_b ( acmd_rep_b    ),  // Control - Repeat
+    .acmd_rst_b ( acmd_rst_b    ),  // Control - Reset
+    .alr_b      ( alr_b         ),  // Left / Right
+    .astart_b   ( astart_b      ),  // Start address
+    .aend_b     ( aend_b        ),  // End   address
+    .adeltan_b  ( adeltan_b     ),  // Delta-N
+    .aeg_b      ( aeg_b         ),  // Envelope Generator Control    
     // Operator
     .xuse_prevprev1 ( xuse_prevprev1  ),
     .xuse_internal  ( xuse_internal   ),
@@ -463,8 +506,10 @@ generate
             .cur_ch     ( cur_ch        ),
             .cur_op     ( cur_op        ),
             .alg        ( alg_I         ),
-            .adpcma_l   ( pcm55_l       ),
-            .adpcma_r   ( pcm55_r       ),
+            .adpcmA_l   ( adpcmA_l      ),
+            .adpcmA_r   ( adpcmA_r      ),
+            .adpcmB_l   ( adpcmB_l      ),
+            .adpcmB_r   ( adpcmB_r      ),
             // combined output
             .left       ( fm_snd_left   ),
             .right      ( fm_snd_right  )
