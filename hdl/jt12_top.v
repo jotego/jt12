@@ -207,6 +207,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         // memory
         .addr       ( adpcmb_addr   ),
         .data       ( adpcmb_data   ),
+        .roe_n      ( adpcmb_roe_n  ),
 
         .pcm55_l    ( adpcmB_l      ),
         .pcm55_r    ( adpcmB_r      )

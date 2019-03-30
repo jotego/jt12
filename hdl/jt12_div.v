@@ -75,7 +75,7 @@ always @(negedge clk) begin
     clk_en_ssg    <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
     clk_en_adpcm  <= cen & cen_adpcm_int; 
     clk_en_adpcm3 <= cen & cen_adpcm_int & cen_adpcm3_int; 
-    clk_en_55     <= cen & cen_55_int;
+    clk_en_55     <= cen & cen_adpcm_int & cen_adpcm3_int & cen_55_int;
     `endif
 end
 

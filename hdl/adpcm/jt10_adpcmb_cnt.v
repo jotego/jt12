@@ -69,11 +69,10 @@ always @(posedge clk or negedge rst_n)
         nibble_sel <= 'b0;
     end else if(cen) begin
         last_on <= on;
-        if( (on && !last_on) || clr )
+        if( (on && !last_on) || clr ) begin
             addr <= {astart,8'd0};
             nibble_sel <= 'b0;
-        end else begin
-        if( on && adv ) begin
+        end else if( on && adv ) begin
             if( addr[23:8] < aend ) begin
                 { addr, nibble_sel } <= { addr, nibble_sel } + 25'd1;
             end
@@ -82,7 +81,7 @@ always @(posedge clk or negedge rst_n)
                 nibble_sel <= 'b0;
             end
         end
-    end
+    end // cen
 
 
 endmodule // jt10_adpcmb_cnt

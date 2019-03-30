@@ -319,6 +319,14 @@ VGMParser::~VGMParser() {
     file.close();
     ftrans.close();
     if( stream_data != NULL ) { delete stream_data; stream_data=NULL; }
+    if( ADPCM_data ) {
+        delete[] ADPCM_data;
+        ADPCM_data=0;
+    }
+    if( ADPCMB_data ) {
+        delete[] ADPCMB_data;
+        ADPCMB_data=0;
+    }
 }
 
 void VGMParser::translate_cmd() {
@@ -463,7 +471,7 @@ int VGMParser::parse() {
                             ADPCM_data = new char[12*1024*1024]; // Max 12 Mbyte
                         }
                         if( rom_start+length-8 > 12*1024*1024 ) {
-                            cerr << "ERROR: ADPCM length is limited to 12 Mbyte\n";
+                            cerr << "ERROR: ADPCM-A length is limited to 12 Mbyte\n";
                             throw 1;
                         }
                         char *buf = &ADPCM_data[rom_start];
@@ -471,7 +479,32 @@ int VGMParser::parse() {
                         if( length > 0) {
                             file.read( buf, length );
                             decode_save( buf, length, rom_start );
-                            cerr << "INFO: read " << dec << length << " bytes into ADPCM ROM at 0x"
+                            cerr << "INFO: read " << dec << length << " bytes into ADPCM-A ROM at 0x"
+                                 << hex << rom_start <<
+                                 " (ADDR 0x" << hex << (rom_start>>8) <<
+                                 " - 0x" << hex << ( (rom_start+length)>>8) << ") \n";
+                        }
+                        break;
+                    }
+                    case 0x83:  { // 0x83 = ADPCM-B (delta T)
+                        uint32_t rom_size, rom_start;
+                        file.read( (char*)&rom_size, 4 ); // ROM length
+                        file.read( (char*)&rom_start, 4 );
+                        // cerr << hex << rom_size << " - " << rom_start << '\n';
+                        if( length==0 ) break;
+                        if( ADPCMB_data == NULL ) {
+                            ADPCMB_data = new char[16*1024*1024]; // Max 16 Mbyte
+                        }
+                        if( rom_start+length-8 > 16*1024*1024 ) {
+                            cerr << "ERROR: ADPCM-B length is limited to 16 Mbyte\n";
+                            throw 1;
+                        }
+                        char *buf = &ADPCMB_data[rom_start];
+                        length -= 8;
+                        if( length > 0) {
+                            file.read( buf, length );
+                            decode_save( buf, length, rom_start );
+                            cerr << "INFO: read " << dec << length << " bytes into ADPCM-B ROM at 0x"
                                  << hex << rom_start <<
                                  " (ADDR 0x" << hex << (rom_start>>8) <<
                                  " - 0x" << hex << ( (rom_start+length)>>8) << ") \n";

@@ -37,6 +37,7 @@ module jt10_adpcm_drvB(
     // memory
     output   [23:0] addr,
     input    [ 7:0] data,
+    output          roe_n,
 
     output signed [15:0]  pcm55_l,
     output signed [15:0]  pcm55_r
@@ -44,6 +45,13 @@ module jt10_adpcm_drvB(
 
 wire nibble_sel;
 wire adv;           // advance to next reading
+reg [1:0] adv2;
+
+always @(posedge clk) begin
+    roe_n <= ~adv;
+    adv2 <= {adv2[0], adv }; // give some time to get the data from memory
+end
+
 
 jt10_adpcmb_cnt u_cnt(
     .rst_n       ( rst_n           ),
@@ -66,7 +74,7 @@ jt10_cen_burst #(.cntmax(3'd6),.cntw(3))u_burst(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
     .cen         ( cen             ),
-    .start       ( adv             ),
+    .start       ( adv2[1]         ),
     .cen_out     ( cen_dec         )
 );
 

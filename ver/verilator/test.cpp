@@ -28,7 +28,7 @@ public:
         CLKSTEP = SEMIPERIOD;
     }
     int period() { return PERIOD; }
-    SimTime() { 
+    SimTime() {
         main_time=0; fast_forward=0; time_limit=0; toggle=false;
         verbose_ticks = 48000*24/2;
         set_period(132*6);
@@ -50,7 +50,7 @@ public:
         else {
             main_time = main_next;
             if( --verbose_ticks == 0 ) {
-                // cerr << "Current time " << dec << (int)(main_time/1000000) << " ms\n";               
+                // cerr << "Current time " << dec << (int)(main_time/1000000) << " ms\n";
                 cerr << '.';
                 verbose_ticks = 48000*24/2;
             }
@@ -78,7 +78,7 @@ class CmdWritter {
     int state;
     int watch_addr, watch_ch;
     list<FeatureUse>features;
-    struct Block_def{ int cmd_mask, cmd, blk_addr; 
+    struct Block_def{ int cmd_mask, cmd, blk_addr;
         int (*filter)(int);
     };
     list<Block_def>blocks;
@@ -100,6 +100,22 @@ public:
     bool Done() { return done; }
     void report_usage();
 };
+
+void ReadAPCM( Vtop *top, RipParser *gym ) {
+    if( top->adpcma_roe_n == 0 ) {
+        int addr = top->adpcma_addr;
+        int bank = top->adpcma_bank;
+        addr |= bank<<20;
+        int adpcma_data = gym->ADPCM(addr);
+        top->adpcma_data = adpcma_data;
+        // cerr << "ADPCM (" << hex << addr << ") = " << hex << adpcma_data << '\n';
+    }
+    if( top->adpcmb_roe_n == 0 ) {
+        int addr = top->adpcmb_addr;
+        int adpcmb_data = gym->ADPCMB(addr);
+        top->adpcmb_data = adpcmb_data;
+    }
+}
 
 class PSGCmdWritter {
     int val;
@@ -134,18 +150,18 @@ int main(int argc, char** argv, char** env) {
         if( string(argv[k])=="-trace" ) { trace=true; continue; }
         if( string(argv[k])=="-slow" )  { slow=true;  continue; }
         if( string(argv[k])=="-hex" )  { dump_hex=true;  continue; }
-        if( string(argv[k])=="-gym" ) { 
+        if( string(argv[k])=="-gym" ) {
             gym_filename = argv[++k];
             gym = ParserFactory( gym_filename, sim_time.period() );
             if( gym==NULL ) return 1;
             continue;
         }
-        if( string(argv[k])=="-o" ) { 
+        if( string(argv[k])=="-o" ) {
             if( ++k == argc ) { cerr << "ERROR: expecting filename after -o\n"; return 1; }
             strncpy( wav_filename, argv[k], 512 );
             continue;
         }
-        if( string(argv[k])=="-time" ) { 
+        if( string(argv[k])=="-time" ) {
             int aux;
             sscanf(argv[++k],"%d",&aux);
             vluint64_t time_limit = aux;
@@ -153,29 +169,29 @@ int main(int argc, char** argv, char** env) {
             forever=false;
             cerr << "Simulate until " << time_limit/1000000 << "ms\n";
             sim_time.set_time_limit( time_limit );
-            continue; 
+            continue;
         }
         if( string(argv[k])=="-noam" ) {
-            writter.block( 0xF0, 0x60, [](int v){return v&0x7f;} ); 
+            writter.block( 0xF0, 0x60, [](int v){return v&0x7f;} );
             continue;
         }
         if( string(argv[k])=="-noks") {
-            writter.block( 0xF0, 0x50, [](int v){return v&0x1f;} ); 
+            writter.block( 0xF0, 0x50, [](int v){return v&0x1f;} );
             continue;
         }
         if( string(argv[k])=="-nomul") {
             cerr << "All writes to MULT locked to 1\n";
-            writter.block( 0xF0, 0x30, [](int v){ return (v&0x70)|1;} ); 
+            writter.block( 0xF0, 0x30, [](int v){ return (v&0x70)|1;} );
             continue;
-        }       
+        }
         if( string(argv[k])=="-nodt") {
             cerr << "All writes to DT locked to 1\n";
-            writter.block( 0xF0, 0x30, [](int v){ return (v&0x0F)|1;} ); 
+            writter.block( 0xF0, 0x30, [](int v){ return (v&0x0F)|1;} );
             continue;
         }
         if( string(argv[k])=="-nossg") {
             cerr << "All writes to FM's SSG-EG locked to 0\n";
-            writter.block( 0xF0, 0x90, [](int v){ return 0;} ); 
+            writter.block( 0xF0, 0x90, [](int v){ return 0;} );
             continue;
         }
         if( string(argv[k])=="-nopsg") {
@@ -227,7 +243,7 @@ int main(int argc, char** argv, char** env) {
                 }
             }
             continue;
-        }       
+        }
         cerr << "ERROR: Unknown argument " << argv[k] << "\n";
         return 1;
     }
@@ -266,7 +282,7 @@ int main(int argc, char** argv, char** env) {
     if( trace ) {
         Verilated::traceEverOn(true);
         top->trace(tfp,99);
-        tfp->open("/dev/stdout"); 
+        tfp->open("/dev/stdout");
     }
 
     // Reset
@@ -288,7 +304,7 @@ int main(int argc, char** argv, char** env) {
     int last_a=0;
     enum { WRITE_REG, WRITE_VAL, WAIT_FINISH } state;
     state = WRITE_REG;
-    
+
     vluint64_t timeout=0;
     bool wait_nonzero=true;
     const int check_step = 200;
@@ -315,14 +331,7 @@ int main(int argc, char** argv, char** env) {
     int next_verbosity = 200;
     vluint64_t next_sample=0;
     while( forever || !sim_time.finish() ) {
-        if( top->adpcma_roe_n == 0 ) {
-            int addr = top->adpcma_addr;
-            int bank = top->adpcma_bank;
-            addr |= bank<<20;
-            int adpcma_data = gym->ADPCM(addr);
-            top->adpcma_data = adpcma_data;
-            // cerr << "ADPCM (" << hex << addr << ") = " << hex << adpcma_data << '\n';
-        }
+        ReadAPCM( top, gym );
         top->eval();
         if( sim_time.next_quarter() ) {
             int clk = top->clk;
@@ -344,7 +353,7 @@ int main(int argc, char** argv, char** env) {
             writter.Eval();
             psg_writter.Eval();
 
-            if( timeout!=0 && sim_time.get_time()>timeout ) {               
+            if( timeout!=0 && sim_time.get_time()>timeout ) {
                 cerr << "Timeout waiting for BUSY to clear\n";
                 cerr << "writter.done == " << writter.Done() << '\n';
                 goto finish;
@@ -363,7 +372,7 @@ int main(int argc, char** argv, char** env) {
             int action;
             action = gym->parse();
             switch( action ) {
-                default: 
+                default:
                     if( !sim_time.finish() ) {
                         cerr << "go on\n";
                         continue;
@@ -374,7 +383,7 @@ int main(int argc, char** argv, char** env) {
                     psg_writter.Write(gym->cmd);
                     timeout = 0;
                     break;
-                case RipParser::cmd_write: 
+                case RipParser::cmd_write:
                     // if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
                     // /*(gym->addr==0 && gym->cmd>=(char)0x30) || */
                     // ((gym->cmd&(char)0xf0)==(char)0x90)) {
@@ -385,18 +394,18 @@ int main(int argc, char** argv, char** env) {
                     writter.Write( gym->addr, gym->cmd, gym->val );
                     timeout = sim_time.get_time() + sim_time.period()*6*100;
                     break; // parse register
-                case RipParser::cmd_wait: 
+                case RipParser::cmd_wait:
                     // cerr << "Waiting\n";
                     wait=gym->wait;
                     // cerr << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
                     // if(trace) wait/=3;
                     wait+=sim_time.get_time();
                     timeout=0;
-                    break;// wait 16.7ms    
+                    break;// wait 16.7ms
                 case RipParser::cmd_finish: // reached end of file
                     goto finish;
                 case RipParser::cmd_error: // unsupported command
-                    goto finish;                
+                    goto finish;
             }
         }
         if(trace) tfp->dump(sim_time.get_time());
@@ -413,7 +422,7 @@ finish:
     } else {
         cerr << "$finish at " << dec << sim_time.get_time_ms() << "ms = " << sim_time.get_time() << " ns\n";
     }
-    if(trace) tfp->close(); 
+    if(trace) tfp->close();
     delete gym;
     delete top;
  }
@@ -458,17 +467,17 @@ void CmdWritter::Write( int _addr, int _cmd, int _val ) {
     if( addr == watch_addr && cmd>=(char)0x30 && (cmd&0x3)==watch_ch )
         cerr << addr << '-' << watch_ch << " CMD = " << hex << (cmd&0xff) << " VAL = " << (val&0xff) << '\n';
     for( auto& k : features )
-        k.check( cmd, val );    
+        k.check( cmd, val );
     // cerr << addr << '\t' << hex << "0x" << ((unsigned)cmd&0xff);
     // cerr  << '\t' << ((unsigned)val&0xff) << '\n' << dec;
 }
 
-void CmdWritter::Eval() {   
+void CmdWritter::Eval() {
     // cerr << "Writter eval " << state << "\n";
-    int clk = top->clk; 
+    int clk = top->clk;
     if( (clk==0) && (last_clk != clk) ) {
         switch( state ) {
-            case 0: 
+            case 0:
                 top->addr = addr ? 2 : 0;
                 top->din = cmd;
                 top->wr_n = 0;
@@ -489,7 +498,7 @@ void CmdWritter::Eval() {
                 state=4;
                 top->addr = 0; // read busy signal
                 break;
-            case 4:             
+            case 4:
                 if( (((int)top->dout) &0x80 ) == 0 ) {
                     done = true;
                     state=5;
@@ -513,11 +522,11 @@ void PSGCmdWritter::Write( int _val ) {
     state = 0;
 }
 
-void PSGCmdWritter::Eval() {   
-    int clk = top->clk; 
+void PSGCmdWritter::Eval() {
+    int clk = top->clk;
     if( (clk==0) && (last_clk != clk) ) {
         switch( state ) {
-            case 0: 
+            case 0:
                 top->din = val;
                 top->psg_wr_n = 0;
                 state=1;
@@ -529,7 +538,7 @@ void PSGCmdWritter::Eval() {
                     state = 2;
                 }
                 break;
-            case 2:             
+            case 2:
                 done = true;
                 break;
             default: break;
