@@ -251,9 +251,9 @@ int JTTParser::parse() {
 }
 
 void VGMParser::saveADPCMA(const char* filename) {
-    if( !ADPCM_data ) return;
+    if( adpcm_a.is_empty() ) return;
     ofstream of(filename, ios_base::binary );
-    of.write( ADPCM_data, 12*1024*1024 );
+    of.write( adpcm_a.getptr(), adpcm_a.getsize() );
     cerr << "\nINFO: ADPCM-A 12MB ROM written to " << filename << '\n';
 }
 
@@ -319,14 +319,6 @@ VGMParser::~VGMParser() {
     file.close();
     ftrans.close();
     if( stream_data != NULL ) { delete stream_data; stream_data=NULL; }
-    if( ADPCM_data ) {
-        delete[] ADPCM_data;
-        ADPCM_data=0;
-    }
-    if( ADPCMB_data ) {
-        delete[] ADPCMB_data;
-        ADPCMB_data=0;
-    }
 }
 
 void VGMParser::translate_cmd() {
@@ -372,6 +364,32 @@ void VGMParser::decode_save( char *buf, int length, int rom_start ) {
         wav.write(v);
     }
     delete[] dest;
+}
+
+char *ADPCMbuffer::getptr(int _bufsize ) {
+    if(_bufsize==0) return data;
+    if( data == 0 ) {
+        bufsize = _bufsize;
+        data = new char [bufsize];
+        mask = bufsize-1; // bufsize should be a multiple of 2!
+        cerr << "INFO: ADPCM buffer created of size 0x" << hex << bufsize
+            << " mask = 0x" << hex << mask << '\n';
+    }
+    if( bufsize != _bufsize ) {
+        cerr << "ERROR: Requested ADPCM buffer of different size from the previous one.\n";
+        throw 1;
+    }
+    return data;
+}
+
+char ADPCMbuffer::get(int offset ) {
+    offset &= mask;
+    if( data==NULL ) {
+        return 0;
+    }
+    // int d = ADPCM_data[offset]&0xff;
+    // if(offset!=0)std::cerr << "INFO: read ADPCM " << d << " at " << offset << '\n';
+    return data[offset];
 }
 
 int VGMParser::parse() {
@@ -467,14 +485,8 @@ int VGMParser::parse() {
                         file.read( (char*)&rom_start, 4 );
                         // cerr << hex << rom_size << " - " << rom_start << '\n';
                         if( length==0 ) break;
-                        if( ADPCM_data == NULL ) {
-                            ADPCM_data = new char[12*1024*1024]; // Max 12 Mbyte
-                        }
-                        if( rom_start+length-8 > 12*1024*1024 ) {
-                            cerr << "ERROR: ADPCM-A length is limited to 12 Mbyte\n";
-                            throw 1;
-                        }
-                        char *buf = &ADPCM_data[rom_start];
+                        char *buf = &adpcm_a.getptr(rom_size)[rom_start];
+                        buf = &buf[rom_start];
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
@@ -492,14 +504,7 @@ int VGMParser::parse() {
                         file.read( (char*)&rom_start, 4 );
                         // cerr << hex << rom_size << " - " << rom_start << '\n';
                         if( length==0 ) break;
-                        if( ADPCMB_data == NULL ) {
-                            ADPCMB_data = new char[16*1024*1024]; // Max 16 Mbyte
-                        }
-                        if( rom_start+length-8 > 16*1024*1024 ) {
-                            cerr << "ERROR: ADPCM-B length is limited to 16 Mbyte\n";
-                            throw 1;
-                        }
-                        char *buf = &ADPCMB_data[rom_start];
+                        char *buf = &adpcm_b.getptr(rom_size)[rom_start];
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );

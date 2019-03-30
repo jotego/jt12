@@ -17,7 +17,7 @@ protected:
 public:
     char cmd, val, addr;
     uint64_t wait;
-    virtual void open(const char *filename, int limit=0)=0; 
+    virtual void open(const char *filename, int limit=0)=0;
     virtual int parse()=0;
     virtual uint64_t length()=0;
     virtual ~RipParser() {};
@@ -45,25 +45,37 @@ RipParser* ParserFactory( const char *filename, int clk_period );
 //     void decode( char *buf, int *dest, int length );
 // };
 
+class ADPCMbuffer {
+	char *data;
+	int bufsize, mask;
+public:
+	ADPCMbuffer() : data(0), bufsize(0) {}
+	char *getptr(int _bufsize=0);
+	char get(int offset);
+	bool is_empty() { return bufsize==0; }
+	int getsize() { return bufsize; }
+	~ADPCMbuffer() { delete[] data; data=0; }
+};
+
 class VGMParser : public RipParser {
-    std::ifstream file; 
+    std::ifstream file;
     std::ofstream ftrans; // translation to JTT format
     float cur_time; // used by ftrans
     int totalwait, pending_wait, stream_id;
     bool done, stream_notmplemented_info;
-    void adjust_wait() { 
+    void adjust_wait() {
         double w=wait;
         w /= 44100.0;
         w *= 1e9;
-        wait = (uint64_t)w; 
+        wait = (uint64_t)w;
     }
     void translate_cmd();
     void translate_wait();
     void decode_save( char *buf, int length, int rom_start );
     char *stream_data;
-    uint32_t data_offset, ym_freq;  
-    char *ADPCM_data;
-    char *ADPCMB_data;
+    uint32_t data_offset, ym_freq;
+
+    ADPCMbuffer adpcm_a, adpcm_b;
     // int max_PSG_warning;
     // ADPCMdec dec;
 public:
@@ -73,38 +85,19 @@ public:
     int period();
     void saveADPCMA(const char* filename);
     uint8_t ADPCM(int offset) {
-        if( offset > 12*1024*1024 ) {
-            std::cerr << "ERROR: ADPCM-A offset too long\n";
-            throw 1;
-        }
-        if( ADPCM_data==NULL ) {
-            return 0;
-        }
-        // int d = ADPCM_data[offset]&0xff;
-        // if(offset!=0)std::cerr << "INFO: read ADPCM " << d << " at " << offset << '\n';
-        return ADPCM_data[offset];
+        return adpcm_a.get(offset);
     }
     uint8_t ADPCMB(int offset) {
-        if( offset > 16*1024*1024 ) {
-            std::cerr << "ERROR: ADPCM-B offset too long: " << std::hex << offset << "\n";
-            throw 1;
-        }
-        if( ADPCMB_data==NULL ) {
-            std::cerr << "ERROR: ADPCM-B data buffer is empty.\n";
-            return 0;
-        }
-        // int d = ADPCM_data[offset]&0xff;
-        // if(offset!=0)std::cerr << "INFO: read ADPCM " << d << " at " << offset << '\n';
-        return ADPCMB_data[offset];
+        return adpcm_b.get(offset);
     }
     VGMParser(int c) : RipParser(c) {
-        stream_data=NULL; stream_id=0; ADPCM_data=0;
+        stream_data=NULL; stream_id=0;
     }
     ~VGMParser();
 };
 
 class Gym : public RipParser {
-    std::ifstream file; 
+    std::ifstream file;
     int max_PSG_warning;
     int count, count_limit;
     void adjust_wait() { wait*=100000; wait/=441; }
@@ -116,7 +109,7 @@ public:
 };
 
 class JTTParser : public RipParser {
-    std::ifstream file; 
+    std::ifstream file;
     int line_cnt;
     bool done;
     int default_ch;
