@@ -30,6 +30,7 @@ public:
         throw 1;
     }
     virtual void saveADPCMA(const char* filename) {};
+    virtual void saveADPCMB(const char* filename) {};
     RipParser(int c) { clk_period = c; }
     enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1, cmd_psg=2 };
     chip_type chip() { return chip_cfg; }
@@ -54,6 +55,8 @@ public:
 	char get(int offset);
 	bool is_empty() { return bufsize==0; }
 	int getsize() { return bufsize; }
+	void save(const char* filename);
+	void load(const char* filename);
 	~ADPCMbuffer() { delete[] data; data=0; }
 };
 
@@ -83,7 +86,8 @@ public:
     int parse();
     uint64_t length();
     int period();
-    void saveADPCMA(const char* filename);
+    void saveADPCMA(const char* filename) { adpcm_a.save(filename); }
+    void saveADPCMB(const char* filename) { adpcm_b.save(filename); }
     uint8_t ADPCM(int offset) {
         return adpcm_a.get(offset);
     }
@@ -118,13 +122,15 @@ class JTTParser : public RipParser {
     void parse_chdata(char *txt_arg, int cmd_base);
     void parse_opdata(char *txt_arg, int cmd_base);
     void parse_adpcma_data(char *txt_arg, int cmd_base);
+    void parse_adpcmb_data(char *txt_arg, int cmd_base);
 
     std::map<std::string, char> op_commands;
     std::map<std::string, char> ch_commands;
     std::map<std::string, char> adpcma_commands;
+    std::map<std::string, char> adpcmb_commands;
     std::map<std::string, char> global_commands;
     unsigned char *adpcm_sine;
-    char *ADPCM_data;
+    ADPCMbuffer adpcm_a, adpcm_b;
 public:
     JTTParser(int c);
     ~JTTParser();
@@ -132,6 +138,7 @@ public:
     int parse();
     uint64_t length() { return 0; }
     uint8_t ADPCM(int offset);
+    uint8_t ADPCMB(int offset);
     int period();
 };
 

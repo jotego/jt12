@@ -1,0 +1,13 @@
+ym2610
+# load_adpcmb adpcmb.rom
+blr c0
+bstart_msb 71
+bstart_lsb 03
+bend_msb   71
+bend_lsb   7b
+
+bdelta_msb 55
+bdelta_lsb 55
+
+bctl 80
+wait 10000

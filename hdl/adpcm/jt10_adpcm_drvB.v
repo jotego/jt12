@@ -39,8 +39,8 @@ module jt10_adpcm_drvB(
     input    [ 7:0] data,
     output          roe_n,
 
-    output signed [15:0]  pcm55_l,
-    output signed [15:0]  pcm55_r
+    output reg signed [15:0]  pcm55_l,
+    output reg signed [15:0]  pcm55_r
 );
 
 wire nibble_sel;
@@ -94,7 +94,9 @@ jt10_adpcm u_decoder(
 );
 
 // temporary assignment until linear interpolation is added
-assign pcm55_l = alr_b[1] ? pcmdec : 16'd0;
-assign pcm55_r = alr_b[0] ? pcmdec : 16'd0;
+always @(posedge clk) if(cen55) begin
+    pcm55_l <= alr_b[1] ? pcmdec : 16'd0;
+    pcm55_r <= alr_b[0] ? pcmdec : 16'd0;
+end
 
 endmodule // jt10_adpcm_drvB

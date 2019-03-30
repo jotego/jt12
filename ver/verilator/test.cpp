@@ -412,6 +412,7 @@ int main(int argc, char** argv, char** env) {
     }
 finish:
     gym->saveADPCMA("adpcma.rom");
+    gym->saveADPCMB("adpcmb.rom");
     writter.report_usage();
     if( skip_zeros ) {
         cerr << "WARNING: Output wavefile is empty. No sound output was produced.\n";

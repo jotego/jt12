@@ -92,6 +92,18 @@ void JTTParser::parse_adpcma_data(char *txt_arg, int cmd_base) {
     cmd = cmd_base>2 ? (cmd_base | ch) : cmd_base; // commands 0-2 are global
 }
 
+void JTTParser::parse_adpcmb_data(char *txt_arg, int cmd_base) {
+    int int_val, read=0;
+    read=sscanf( txt_arg, " %X ", &int_val );
+    if( read != 1 ) {
+        cerr << "Missing arguments at line " << line_cnt << '\n';
+        throw 0;
+    }
+    addr = 0; // ADPCM-B always uses A1=0
+    val = int_val;
+    cmd = cmd_base;
+}
+
 JTTParser::JTTParser(int c) : RipParser(c) {
     op_commands["dt_mul"] = 0x30;
     op_commands["tl"] = 0x40;
@@ -113,6 +125,16 @@ JTTParser::JTTParser(int c) : RipParser(c) {
     adpcma_commands["aend_lsb"] = 0x20;
     adpcma_commands["aend_msb"] = 0x28;
 
+    adpcmb_commands["bctl"] = 0x10;
+    adpcmb_commands["blr"]  = 0x11;
+    adpcmb_commands["bstart_lsb"] = 0x12;
+    adpcmb_commands["bstart_msb"] = 0x13;
+    adpcmb_commands["bend_lsb"]   = 0x14;
+    adpcmb_commands["bend_msb"]   = 0x15;
+    adpcmb_commands["bdelta_lsb"] = 0x19;
+    adpcmb_commands["bdelta_msb"] = 0x1a;
+    adpcmb_commands["btl"]        = 0x1b;
+
     global_commands["kon"] = 0x28;
     global_commands["timer"] = 0x27;
     global_commands["lfo"] = 0x22;
@@ -125,16 +147,28 @@ JTTParser::JTTParser(int c) : RipParser(c) {
     }
     YM2610_ADPCMB_Encode( sine, adpcm_sine, 2048 );
     delete []sine;
-    ADPCM_data = 0;
 }
 
 JTTParser::~JTTParser() {
     delete []adpcm_sine;
     adpcm_sine = 0;
-    if( ADPCM_data ) {
-        delete []ADPCM_data;
-        ADPCM_data = 0;
+}
+
+void ADPCMbuffer::load(const char* filename) {
+    ifstream fin( filename, ios_base::binary );
+    if( !fin ) {
+        cerr << "ERROR: Cannot open file " << filename << '\n';
+        throw 1;
     }
+    delete[] data;
+    fin.seekg(0,ios_base::end);
+    bufsize = fin.tellg();
+    data = new char[bufsize];
+    fin.seekg( 0, ios_base::beg );
+    fin.read( data, bufsize );
+    int readcnt = fin.gcount();
+    cerr << "INFO: file '" << filename << "' loaded into ADPCM memory (0x"
+         << hex << readcnt << " bytes) \n";
 }
 
 int JTTParser::parse() {
@@ -192,16 +226,13 @@ int JTTParser::parse() {
                 // cerr << "Wait for " << wait << '\n';
                 return cmd_wait;
             }
-
+            // Load ADPCM ROM files
             if( strcmp(txt_cmd, "load_adpcma")==0 ) {
-                ifstream fin( txt_arg, ios_base::binary );
-                if( !fin ) {
-                    cerr << "ERROR: Cannot open file " << txt_arg << '\n';
-                    throw 1;
-                }
-                if( !ADPCM_data ) ADPCM_data = new char[12*1024*1024];
-                fin.read( ADPCM_data, 12*1024*1024 );
-                cerr << "INFO: file '" << txt_arg << "' loaded into ADPCM-A memory\n";
+                adpcm_a.load( txt_arg );
+                continue; // process next command
+            }
+            if( strcmp(txt_cmd, "load_adpcmb")==0 ) {
+                adpcm_b.load( txt_arg );
                 continue; // process next command
             }
             // OP commands
@@ -223,6 +254,13 @@ int JTTParser::parse() {
             if( adpcma_cmd != adpcma_commands.end() ) {
                 cmd_base = adpcma_cmd->second;
                 parse_adpcma_data(txt_arg, cmd_base);
+                return cmd_write;
+            }
+            // ADPCM-B commands
+            auto adpcmb_cmd = adpcmb_commands.find(txt_cmd);
+            if( adpcmb_cmd != adpcmb_commands.end() ) {
+                cmd_base = adpcmb_cmd->second;
+                parse_adpcmb_data(txt_arg, cmd_base);
                 return cmd_write;
             }
             // Global commands
@@ -250,11 +288,11 @@ int JTTParser::parse() {
     return cmd_finish;
 }
 
-void VGMParser::saveADPCMA(const char* filename) {
-    if( adpcm_a.is_empty() ) return;
+void ADPCMbuffer::save(const char* filename) {
+    if( bufsize==0 ) return;
     ofstream of(filename, ios_base::binary );
-    of.write( adpcm_a.getptr(), adpcm_a.getsize() );
-    cerr << "\nINFO: ADPCM-A 12MB ROM written to " << filename << '\n';
+    of.write( data, bufsize );
+    cerr << "INFO: ADPCM data written to " << filename << '\n';
 }
 
 uint64_t VGMParser::length() {
@@ -721,11 +759,23 @@ int JTTParser::period() {
 }
 
 uint8_t JTTParser::ADPCM(int offset) {
-    if( ADPCM_data )
-        return ADPCM_data[offset ];
+    if( !adpcm_a.is_empty() )
+        return adpcm_a.get(offset);
     else  // fill with a sine wave
         return adpcm_sine[ offset&0x3FF  ];
 }
+
+uint8_t JTTParser::ADPCMB(int offset) {
+    if( !adpcm_b.is_empty() ) {
+        int val = adpcm_b.get(offset);
+        cerr << "INFO: ADPCMB @0x" << hex << offset 
+             << " = 0x" << hex << val << '\n';
+        return val;
+    }
+    else  // fill with a sine wave
+        return adpcm_sine[ offset&0x3FF  ];
+}
+
 
 static int stepsizeTable[ 16 ] = {
     57, 57, 57, 57, 77,102,128,153,
