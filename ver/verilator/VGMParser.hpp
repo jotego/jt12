@@ -39,13 +39,6 @@ public:
 
 RipParser* ParserFactory( const char *filename, int clk_period );
 
-// class ADPCMdec {
-//     int jedi_table[ 49*16 ];
-// public:
-//     ADPCMdec();
-//     void decode( char *buf, int *dest, int length );
-// };
-
 class ADPCMbuffer {
 	char *data;
 	int bufsize, mask;

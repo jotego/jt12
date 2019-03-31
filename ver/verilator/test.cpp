@@ -108,7 +108,10 @@ void ReadAPCM( Vtop *top, RipParser *gym ) {
         addr |= bank<<20;
         int adpcma_data = gym->ADPCM(addr);
         top->adpcma_data = adpcma_data;
-        // cerr << "ADPCM (" << hex << addr << ") = " << hex << adpcma_data << '\n';
+        // static int last=0;
+        // if(last!=addr)
+        //     cerr << "ADPCM (" << hex << addr << ") = " << hex << adpcma_data << '\n';
+        // last = addr;
     }
     if( top->adpcmb_roe_n == 0 ) {
         int addr = top->adpcmb_addr;

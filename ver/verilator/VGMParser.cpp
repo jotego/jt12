@@ -364,7 +364,35 @@ void VGMParser::translate_cmd() {
     char line[128];
     int _cmd = cmd; _cmd&=0xff;
     int _val = val; _val&=0xff;
-    sprintf(line,"$%d%2X,%02X", addr,_cmd,_val );
+    bool done=false;
+    if( addr==1 && _cmd < 0x30 ) { // ADPCM-A
+        done=true;
+        switch( _cmd ) {
+            case 0x0: {
+                stringstream ss;
+                ss << "aon " << hex << _val << " # channels "; 
+                int aux = _val;
+                for( int k=0; k<6; k++) {
+                    if( aux&1 ) ss << k; else ss << ' ';
+                    aux>>=1;
+                }
+                strcpy(line, ss.str().c_str() );
+                break; }
+            case 0x1: sprintf(line,"atl %02X", _val ); break;
+            case 0x8: case 0x9: case 0xa: case 0xb: case 0xc: case 0xd:
+                sprintf(line,"alr %X,%02X", _cmd& 0x7, _val ); break;
+            case 0x10: case 0x11: case 0x12: case 0x13: case 0x14: case 0x15:
+                sprintf(line,"astart_lsb %X,%02X", _cmd& 0x7, _val ); break;
+            case 0x18: case 0x19: case 0x1a: case 0x1b: case 0x1c: case 0x1d:
+                sprintf(line,"astart_msb %X,%02X", _cmd& 0x7, _val ); break;
+            case 0x20: case 0x21: case 0x22: case 0x23: case 0x24: case 0x25:
+                sprintf(line,"aend_lsb %X,%02X", _cmd& 0x7, _val ); break;
+            case 0x28: case 0x29: case 0x2a: case 0x2b: case 0x2c: case 0x2d:
+                sprintf(line,"aend_msb %X,%02X", _cmd&0x7, _val ); break;
+            default: done=false;
+        }
+    }
+    if(!done) sprintf(line,"$%d%02X,%02X", addr,_cmd,_val );
     ftrans << line;
     if( cmd == 0x28 ) {
         if( val&0xf0 )
@@ -525,7 +553,6 @@ int VGMParser::parse() {
                         // cerr << hex << rom_size << " - " << rom_start << '\n';
                         if( length==0 ) break;
                         char *buf = &adpcm_a.getptr(rom_size)[rom_start];
-                        buf = &buf[rom_start];
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
@@ -762,8 +789,9 @@ int JTTParser::period() {
 uint8_t JTTParser::ADPCM(int offset) {
     if( !adpcm_a.is_empty() )
         return adpcm_a.get(offset);
-    else  // fill with a sine wave
+    else { // fill with a sine wave
         return adpcm_sine[ offset&0x3FF  ];
+    }
 }
 
 uint8_t JTTParser::ADPCMB(int offset) {
@@ -773,8 +801,9 @@ uint8_t JTTParser::ADPCMB(int offset) {
        //       << " = 0x" << hex << val << '\n';
         return val;
     }
-    else  // fill with a sine wave
+    else { // fill with a sine wave
         return adpcm_sine[ offset&0x3FF  ];
+    }
 }
 
 

@@ -66,7 +66,7 @@ always @(posedge clk or negedge rst_n)
     end else if( cen ) begin
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | on1);
-        clr2   <= aon; // Each time a A-ON is sent the address counter restarts
+        clr2   <= aon && !on1; // Each time a A-ON is sent the address counter restarts
         start2 <= up_start ? addr_in[11:0] : start1;
         end2   <= up_end   ? addr_in[11:0] : end1;
         bank2  <= (up_end | up_start) ? addr_in[15:12] : bank1;

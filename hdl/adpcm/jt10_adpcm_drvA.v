@@ -164,6 +164,13 @@ jt10_adpcm u_decoder(
 
 wire signed [15:0] pcm18_l, pcm18_r;
 
+// always @(posedge clk) begin
+//     if( cen3 && chon ) begin
+//         pcm55_l <= pcmdec>>>1;
+//         pcm55_r <= pcmdec>>>1;
+//     end
+// end
+
 jt10_adpcm_gain u_gain(
     .rst_n  ( rst_n          ),
     .clk    ( clk            ),
@@ -191,8 +198,8 @@ jt10_adpcm_gain u_gain(
 
 wire signed [15:0] pre_pcm55_l, pre_pcm55_r;
 
-assign pcm55_l = pre_pcm55_l<<3;
-assign pcm55_r = pre_pcm55_r<<3;
+assign pcm55_l = pre_pcm55_l<<<3;
+assign pcm55_r = pre_pcm55_r<<<3;
 
 jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),
