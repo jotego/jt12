@@ -70,7 +70,7 @@ jt10_adpcmb_cnt u_cnt(
 
 wire cen_dec;
 
-jt10_cen_burst #(.cntmax(3'd6),.cntw(3))u_burst(
+jt10_cen_burst #(.cntmax(3'd5),.cntw(3))u_burst(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
     .cen         ( cen             ),

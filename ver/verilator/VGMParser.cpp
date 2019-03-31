@@ -163,6 +163,7 @@ void ADPCMbuffer::load(const char* filename) {
     delete[] data;
     fin.seekg(0,ios_base::end);
     bufsize = fin.tellg();
+    mask=bufsize-1;
     data = new char[bufsize];
     fin.seekg( 0, ios_base::beg );
     fin.read( data, bufsize );
@@ -768,8 +769,8 @@ uint8_t JTTParser::ADPCM(int offset) {
 uint8_t JTTParser::ADPCMB(int offset) {
     if( !adpcm_b.is_empty() ) {
         int val = adpcm_b.get(offset);
-        cerr << "INFO: ADPCMB @0x" << hex << offset 
-             << " = 0x" << hex << val << '\n';
+       //  cerr << "INFO: ADPCMB @0x" << hex << offset 
+       //       << " = 0x" << hex << val << '\n';
         return val;
     }
     else  // fill with a sine wave

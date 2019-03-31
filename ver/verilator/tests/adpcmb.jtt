@@ -1,5 +1,5 @@
 ym2610
-# load_adpcmb adpcmb.rom
+load_adpcmb b_710300.rom
 blr c0
 bstart_msb 71
 bstart_lsb 03
@@ -10,4 +10,4 @@ bdelta_msb 55
 bdelta_lsb 55
 
 bctl 80
-wait 10000
+wait 110000
