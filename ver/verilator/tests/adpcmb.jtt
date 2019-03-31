@@ -1,6 +1,7 @@
 ym2610
 load_adpcmb b_710300.rom
 blr c0
+btl ff
 bstart_msb 71
 bstart_lsb 03
 bend_msb   71
@@ -9,5 +10,15 @@ bend_lsb   7b
 bdelta_msb 55
 bdelta_lsb 55
 
+bctl 80
+wait 110000
+
+bctl 1
+btl f0
+bctl 80
+wait 110000
+
+bctl 1
+btl e2
 bctl 80
 wait 110000

@@ -236,6 +236,7 @@ always @(posedge clk) begin : memory_mapped_registers
         acmd_rst_b  <=  'd0;
         alr_b       <=  'd0;
         flag_ctl    <=  'd0;
+        aeg_b       <= 8'hff;
         // Original test features
         eg_stop     <= 1'b0;
         pg_stop     <= 1'b0;

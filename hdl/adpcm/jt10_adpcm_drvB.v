@@ -82,7 +82,7 @@ reg [3:0] din;
 
 always @(posedge clk) din <= !nibble_sel ? data[7:4] : data[3:0];
 
-wire signed [15:0] pcmdec;
+wire signed [15:0] pcmdec, pcmgain;
 
 jt10_adpcm u_decoder(
     .rst_n  ( rst_n          ),
@@ -93,10 +93,19 @@ jt10_adpcm u_decoder(
     .pcm    ( pcmdec         )
 );
 
+jt10_adpcmb_gain u_gain(
+    .rst_n  ( rst_n          ),
+    .clk    ( clk            ),
+    .cen55  ( cen55          ),
+    .tl     ( aeg_b          ),
+    .pcm_in ( pcmdec         ),
+    .pcm_out( pcmgain        )
+);
+
 // temporary assignment until linear interpolation is added
 always @(posedge clk) if(cen55) begin
-    pcm55_l <= alr_b[1] ? pcmdec : 16'd0;
-    pcm55_r <= alr_b[0] ? pcmdec : 16'd0;
+    pcm55_l <= alr_b[1] ? pcmgain : 16'd0;
+    pcm55_r <= alr_b[0] ? pcmgain : 16'd0;
 end
 
 endmodule // jt10_adpcm_drvB
