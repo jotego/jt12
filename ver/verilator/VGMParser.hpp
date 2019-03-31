@@ -67,7 +67,7 @@ class VGMParser : public RipParser {
     }
     void translate_cmd();
     void translate_wait();
-    void decode_save( char *buf, int length, int rom_start );
+    void decode_save( char *buf, int length, int rom_start, bool );
     char *stream_data;
     uint32_t data_offset, ym_freq;
 
@@ -137,5 +137,6 @@ public:
 
 int YM2610_ADPCMB_Encode( short *src , unsigned char *dest , int len );
 int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len );
+void YM2610_ADPCMA_Decode( unsigned char *src , short *dest , int len );
 
 #endif

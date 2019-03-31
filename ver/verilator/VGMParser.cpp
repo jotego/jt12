@@ -414,13 +414,16 @@ void VGMParser::translate_wait() {
     //ftrans << wait << " -> " << ws << " Total: " << cur_time << "s \n";
 }
 
-void VGMParser::decode_save( char *buf, int length, int rom_start ) {
+void VGMParser::decode_save( char *buf, int length, int rom_start, bool Adecoder ) {
     stringstream s;
     s << hex << rom_start;
     string fname( s.str() );
     length <<= 1;
     short *dest = new short[length];
-    YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length );
+    if( Adecoder )
+        YM2610_ADPCMA_Decode( (unsigned char*) buf, dest, length );
+    else
+        YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length );
     WaveWritter wav( (fname+".wav").c_str(), 18500, false );
     // save array file
     ofstream of( (fname+".dec").c_str());
@@ -556,7 +559,7 @@ int VGMParser::parse() {
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
-                            decode_save( buf, length, rom_start );
+                            decode_save( buf, length, rom_start, true );
                             cerr << "INFO: read " << dec << length << " bytes into ADPCM-A ROM at 0x"
                                  << hex << rom_start <<
                                  " (ADDR 0x" << hex << (rom_start>>8) <<
@@ -574,7 +577,7 @@ int VGMParser::parse() {
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
-                            decode_save( buf, length, rom_start );
+                            decode_save( buf, length, rom_start, false );
                             cerr << "INFO: read " << dec << length << " bytes into ADPCM-B ROM at 0x"
                                  << hex << rom_start <<
                                  " (ADDR 0x" << hex << (rom_start>>8) <<
@@ -890,4 +893,56 @@ int YM2610_ADPCMB_Encode( short *src , unsigned char *dest , int len ) {
         }
     }
     return 0;
+}
+
+// ADPCM-A the MAME way
+static int jedi_table[ 49*16 ];
+static constexpr int step_inc[8] = { -1*16, -1*16, -1*16, -1*16, 2*16, 5*16, 7*16, 9*16 };
+/* usual ADPCM table (16 * 1.1^N) */
+
+void Init_ADPCMATable()
+{
+    int step, nib;
+    constexpr int steps[49] =
+    {
+         16,  17,   19,   21,   23,   25,   28,
+         31,  34,   37,   41,   45,   50,   55,
+         60,  66,   73,   80,   88,   97,  107,
+        118, 130,  143,  157,  173,  190,  209,
+        230, 253,  279,  307,  337,  371,  408,
+        449, 494,  544,  598,  658,  724,  796,
+        876, 963, 1060, 1166, 1282, 1411, 1552
+    };
+
+    for (step = 0; step < 49; step++)
+    {
+        /* loop over all nibbles and compute the difference */
+        for (nib = 0; nib < 16; nib++)
+        {
+            int value = (2*(nib & 0x07) + 1) * steps[step] / 8;
+            jedi_table[step*16 + nib] = (nib&0x08) ? -value : value;
+        }
+    }
+}
+
+void YM2610_ADPCMA_Decode( unsigned char *src, short *dest, int len ) {
+    static bool init=false;
+    if( !init ) { Init_ADPCMATable(); init=true; }
+    int nibble=1;
+    int step=0, x=0;
+    while( len-- ) {
+        int data = nibble ? (*src>>4) : *src;
+        data&=0xf;
+        x += jedi_table[ step + data ];
+        if( x & ~0x7ff )    // 12-bit sign extension
+            x |= ~0xffff;
+        else
+            x &= 0xffff;
+        step += step_inc[ data&7 ];
+        if( step>48*16 ) step=48*16;
+        if( step<0 ) step=0;
+        *dest++ = (short)x;
+        if( !nibble ) src++;
+        nibble = 1-nibble;
+    }
 }
