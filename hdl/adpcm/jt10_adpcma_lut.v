@@ -24,6 +24,7 @@
 
 module jt10_adpcma_lut(
     input              clk,        // CPU clock
+    input              rst_n,
     input              cen,
     input      [8:0]   addr,       //  = {step,delta};
     output reg [11:0]  inc
@@ -132,7 +133,10 @@ lut[9'o60_0] = 12'd0302; lut[9'o60_1] = 12'd1106; lut[9'o60_2] = 12'd1712; lut[9
 lut[9'o60_4] = 12'd3322; lut[9'o60_5] = 12'd3777; lut[9'o60_6] = 12'd3777; lut[9'o60_7] = 12'd3777; 
 end
 
-always @(posedge clk) if(cen)
-    inc <= lut[addr];
+always @(posedge clk or negedge rst_n) 
+    if(!rst_n)
+        inc <= 'd0;
+    else if(cen)
+        inc <= lut[addr];
 
 endmodule // jt10_adpcma_lut

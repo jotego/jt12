@@ -57,6 +57,7 @@ reg [8:0] lut_addr2;
 
 jt10_adpcma_lut u_lut(
     .clk    ( clk        ),
+    .rst_n  ( rst_n      ),
     .cen    ( cen        ),
     .addr   ( lut_addr2  ),
     .inc    ( inc3       )
@@ -77,7 +78,9 @@ always @( posedge clk or negedge rst_n )
         x5 <= 'd0; step5 <= 0;
         x6 <= 'd0; step6 <= 0;
         sign2 <= 'b0;
-        chon2 <= 'b0;   chon3 <= 'b0;
+        chon2 <= 'b0;   chon3 <= 'b0; chon4 <= 'b0;
+        lut_addr2 <= 'd0;
+        inc4 <= 'd0;
     end else if(cen) begin
         // I
         sign2     <= data[3];

@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module test;
 
 wire signed [15:0] pcm;
@@ -22,6 +24,10 @@ initial begin
     // 2.rom is obtained by running the verilator simulation
     // on track 02 of Metal Slug
     file=$fopen("2.rom","rb");
+    if( file==0 ) begin
+        $display("Cannot open file 2.rom");
+        $finish;
+    end
     maxcnt = $fread( mem, file );
     $display("INFO 0x%X bytes read", maxcnt);
     cnt    = 32'h2b1b00;
@@ -42,10 +48,11 @@ wire [7:0] memcnt = mem[cnt];
 
 always @(posedge clk) begin
     if(chcnt==0) begin
-        data <= nibble ? memcnt[7:6] : memcnt[3:0];
+        data <= nibble ? mem[cnt][7:4] : mem[cnt][3:0];
         nibble <= ~nibble;
         if( !nibble ) cnt <= cnt+1;
         if( cnt == maxcnt ) $finish;    
+        // $display("%X -> %X", cnt, mem[cnt] );
     end
     chon <= chcnt==0;
 end
@@ -75,10 +82,16 @@ reg signed [15:0] pcm0;
 always @(posedge clk) begin
     if(chcnt==2) pcm0 <= pcm;
 end
-
+`ifdef NCVERILOG
 initial begin
     $shm_open("test.shm");
     $shm_probe(test,"AS");
 end
+`else 
+initial begin
+    $dumpfile("test.fst");
+    $dumpvars;
+end
+`endif
 
 endmodule

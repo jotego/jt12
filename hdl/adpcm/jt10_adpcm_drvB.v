@@ -92,7 +92,7 @@ jt10_adpcmb u_decoder(
     .chon   ( acmd_on_b      ),
     .pcm    ( pcmdec         )
 );
-/*
+
 jt10_adpcmb_gain u_gain(
     .rst_n  ( rst_n          ),
     .clk    ( clk            ),
@@ -101,9 +101,7 @@ jt10_adpcmb_gain u_gain(
     .pcm_in ( pcmdec         ),
     .pcm_out( pcmgain        )
 );
-*/
-assign pcmgain = pcmdec;
-// temporary assignment until linear interpolation is added
+
 always @(posedge clk) if(cen55) begin
     pcm55_l <= alr_b[1] ? pcmgain : 16'd0;
     pcm55_r <= alr_b[0] ? pcmgain : 16'd0;
