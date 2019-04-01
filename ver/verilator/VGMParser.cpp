@@ -421,10 +421,13 @@ void VGMParser::decode_save( char *buf, int length, int rom_start, bool Adecoder
     string fname( s.str() );
     length <<= 1;
     short *dest = new short[length];
-    if( Adecoder )
-        YM2610_ADPCMA_Decode( (unsigned char*) buf, dest, length );
-    else
+    if( Adecoder ) {
+        //YM2610_ADPCMA_Decode( (unsigned char*) buf, dest, length );
+        YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length, true );
+    }
+    else {
         YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length );
+    }
     WaveWritter wav( (fname+".wav").c_str(), 18500, false );
     // save array file
     ofstream of( (fname+".dec").c_str());
@@ -845,7 +848,7 @@ int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len, bool Atype
             xn = 32767;
         else if( xn < -32768 )
             xn = -32768;
-        stepSize = (stepSize * stepsizeTable[ adpcm ]) / 64.0;
+        stepSize = (stepSize * stepLUT[ adpcm ]) / 64.0;
         if( stepSize < stepmin )
             stepSize = stepmin;
         else if ( stepSize > stepmax )
