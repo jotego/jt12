@@ -40,13 +40,17 @@ reg nibble=1;
 reg [3:0] data=4'd0;
 
 integer chcnt=0;
-always @(posedge clk)
+always @(posedge clk) if(cen)
     chcnt <= chcnt==5 ? 0 : chcnt+1;
 
 reg chon=1'b0;
 wire [7:0] memcnt = mem[cnt];
 
-always @(posedge clk) begin
+reg cen=1;
+// if cen is toggled adpcma_single instance will fail.
+//always @(negedge clk) cen <= ~cen;
+
+always @(posedge clk) if(cen) begin
     if(chcnt==0) begin
         data <= nibble ? mem[cnt][7:4] : mem[cnt][3:0];
         nibble <= ~nibble;
@@ -60,7 +64,7 @@ end
 jt10_adpcm uut(
     .rst_n      ( rst_n ),
     .clk        ( clk   ),
-    .cen        ( 1'b1  ),
+    .cen        ( cen  ),
     .data       ( data  ),
     .chon       ( chon  ),
     .pcm        ( pcm   )
