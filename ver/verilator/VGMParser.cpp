@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <cstring>
 #include <cstdio>
@@ -809,18 +810,27 @@ uint8_t JTTParser::ADPCMB(int offset) {
     }
 }
 
-
+// For ADPCM-B
 static int stepsizeTable[ 16 ] = {
     57, 57, 57, 57, 77,102,128,153,
     57, 57, 57, 57, 77,102,128,153
 };
 
+// For ADPCM-A
+static int stepsizeTable_A[ 16 ] = {
+    58, 58, 58, 58, 77, 94, 113, 137,
+    58, 58, 58, 58, 77, 94, 113, 137
+};
 
-int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len ) {
+int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len, bool Atype ) {
     int lpc , flag , shift , step;
     long adpcm;
     float xn = 0, i, zprev=0, yn, zn;
-    int stepSize = 127;
+    const int stepmin = Atype ?   16 : 127;
+    const int stepmax = Atype ? 1552 : 24576;
+    const int* stepLUT = Atype ? stepsizeTable_A : stepsizeTable;
+    int stepSize = stepmin;
+
     flag = 0;
     shift = 4;
     step = 0;
@@ -836,10 +846,10 @@ int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len ) {
         else if( xn < -32768 )
             xn = -32768;
         stepSize = (stepSize * stepsizeTable[ adpcm ]) / 64.0;
-        if( stepSize < 127 )
-            stepSize = 127;
-        else if ( stepSize > 24576 )
-            stepSize = 24576;
+        if( stepSize < stepmin )
+            stepSize = stepmin;
+        else if ( stepSize > stepmax )
+            stepSize = stepmax;
         // DC removal
         //zn = xn + 0.95*zprev;
         //yn = zn - zprev;
@@ -913,15 +923,19 @@ void Init_ADPCMATable()
         449, 494,  544,  598,  658,  724,  796,
         876, 963, 1060, 1166, 1282, 1411, 1552
     };
-
+    ofstream fout("adpcm_table.txt");
+    fout << setfill(' ');
     for (step = 0; step < 49; step++)
     {
         /* loop over all nibbles and compute the difference */
         for (nib = 0; nib < 16; nib++)
         {
             int value = (2*(nib & 0x07) + 1) * steps[step] / 8;
-            jedi_table[step*16 + nib] = (nib&0x08) ? -value : value;
+            int idx = step*16 + nib;
+            jedi_table[idx] = (nib&0x08) ? -value : value;
+            fout << setw(5) <<jedi_table[idx] << ",";
         }
+        fout << '\n';
     }
 }
 

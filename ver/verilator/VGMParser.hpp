@@ -136,7 +136,7 @@ public:
 };
 
 int YM2610_ADPCMB_Encode( short *src , unsigned char *dest , int len );
-int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len );
+int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len, bool Atype=false );
 void YM2610_ADPCMA_Decode( unsigned char *src , short *dest , int len );
 
 #endif
