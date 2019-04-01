@@ -61,8 +61,12 @@ jt10_adpcm uut(
 
 wire signed [15:0] pcm_single;
 
+reg cen6=0;
+
+always @(negedge clk ) cen6= chcnt==0;
+
 adpcma_single single(
-    .clk        ( clk          ),
+    .clk        ( clk && cen6         ),
     .data       ( data         ),
     .pcm        ( pcm_single   )
 );

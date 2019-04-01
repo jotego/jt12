@@ -909,8 +909,8 @@ int YM2610_ADPCMB_Encode( short *src , unsigned char *dest , int len ) {
 }
 
 // ADPCM-A the MAME way
-static int jedi_table[ 49*16 ];
-static constexpr int step_inc[8] = { -1*16, -1*16, -1*16, -1*16, 2*16, 5*16, 7*16, 9*16 };
+static int jedi_table[ 49*8 ];
+static constexpr int step_inc[8] = { -1, -1, -1, -1, 2, 5, 7, 9 };
 /* usual ADPCM table (16 * 1.1^N) */
 
 void Init_ADPCMATable()
@@ -932,26 +932,15 @@ void Init_ADPCMATable()
     for (step = 0; step < 49; step++)
     {
         /* loop over all nibbles and compute the difference */
-        for (nib = 0; nib < 16; nib++)
-        {
-            int value = (2*(nib & 0x07) + 1) * steps[step] / 8;
-            if( value > max_inc ) value=max_inc;
-            int idx = step*16 + nib;
-            jedi_table[idx] = (nib&0x08) ? -value : value;
-        }
-    }
-    // Verilog table
-    for (step = 0; step < 49; step++)
-    {
-        /* loop over all nibbles and compute the difference */
         for (nib = 0; nib < 8; nib++)
         {
             int value = (2*(nib & 0x07) + 1) * steps[step] / 8;
             if( value > max_inc ) value=max_inc;
+            int idx = (step<<3) + nib;
+            jedi_table[idx] = (nib&0x08) ? -value : value;
             fout << "lut[9'o" << setw(2) << oct << step << "_"  << nib << "] = 12'd"
                  << setw(4) << value << "; ";
             if(nib==3) fout <<'\n';
-
         }
         fout << '\n';
     }
@@ -965,13 +954,14 @@ void YM2610_ADPCMA_Decode( unsigned char *src, short *dest, int len ) {
     while( len-- ) {
         int data = nibble ? (*src>>4) : *src;
         data&=0xf;
-        x += jedi_table[ step + data ];
-        if( x & ~0x7ff )    // 12-bit sign extension
-            x |= ~0xffff;
-        else
-            x &= 0xffff;
+        int addr = (step<<3) | (data&7);
+        x = (data&8) ? x-jedi_table[ addr ] : x+jedi_table[ addr ];
+        // if( x & ~0x7ff )    // 12-bit sign extension
+        //     x |= ~0xffff;
+        // else
+        //     x &= 0xffff;
         step += step_inc[ data&7 ];
-        if( step>48*16 ) step=48*16;
+        if( step>48 ) step=48;
         if( step<0 ) step=0;
         *dest++ = (short)x;
         if( !nibble ) src++;

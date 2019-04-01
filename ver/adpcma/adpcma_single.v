@@ -6,11 +6,11 @@ module adpcma_single(
 
 reg [11:0] lut[0:391];
 
-integer x=0, next_x;
+integer x=0;
 reg [5:0] step=0, step_next, step_1p;
+wire [8:0] addr = {step,data[2:0]};
 
 always @(*) begin
-    next_x = data[3] ? x + lut[{step,data[2:0]}] : x - lut[{step,data[2:0]}];
     casez( data[2:0] )
         3'b0??: step_next = step=='d0 ? 6'd0 : (step-1);
         3'b100: step_next = step+2;
@@ -23,9 +23,19 @@ end
 
 assign pcm = x[15:0];
 
+integer file, cnt=0;
+initial begin
+    file=$fopen("single.dec","w");
+    $fwrite(file,"dimension single(1)\n");
+end
+
+wire [11:0] inc = lut[addr];
+
 always @(posedge clk) begin
     step <= step_1p;
-    x <= next_x;
+    x <= data[3] ? (x + inc) : (x - inc);
+    cnt <= cnt+1;
+    $fwrite( file, "single[%1d] = %1d\n", cnt, x );
 end
 
 initial begin
