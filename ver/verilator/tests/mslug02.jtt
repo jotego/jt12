@@ -20,8 +20,8 @@ astart_lsb 0,1b
 aend_msb   0,2b
 aend_lsb   0,2e
 
-# aon 1
-# wait 10000
+aon 1
+wait 55000
 
 astart_msb 1,2b
 astart_lsb 1,3d
@@ -34,8 +34,8 @@ astart_msb 2,2b
 astart_lsb 2,e7
 aend_msb   2,2c
 aend_lsb   2,28
-aon 4
-wait 40000
+# aon 4
+# wait 40000
 
 finish
 

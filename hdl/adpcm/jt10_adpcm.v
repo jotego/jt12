@@ -19,7 +19,7 @@
     Date: 21-03-2019
 */
 
-// Sampling rates: 2kHz ~ 55.5 kHz. in 0.85Hz steps
+// ADPCM-A algorithm
 
 module jt10_adpcm(
     input           rst_n,
@@ -30,101 +30,80 @@ module jt10_adpcm(
     output signed [15:0] pcm
 );
 
-localparam stepw = 15;
+reg signed [14:0] x1, x2, x3, x4, x5, x6;
+reg signed [14:0] inc4;
+reg [5:0] step1, step2, step6, step3, step4, step5;
+reg [5:0] step_next, step_1p;
+reg       sign2, sign3;
 
-reg signed [15:0] x1, x2, x3, x4, x5, x6;
-reg [stepw-1:0] step1, step2, step6;
-reg [stepw+1:0] step3, step4, step5;
-assign pcm = x2;
+assign pcm = { {1{x2[14]}}, x2 };
 
-reg  [18:0] d2l;
-reg  [15:0] d3,d4;
-reg  [3:0]  d2;
-reg         sign2, sign3, sign4, sign5;
-reg  [7:0]  step_val;
-reg  [22:0] step2l;
-
+// This could be decomposed in more steps as the pipeline
+// has room for it
 always @(*) begin
-    casez( d2[3:1] )
-        3'b0_??: step_val = 8'd57;
-        3'b1_00: step_val = 8'd77;
-        3'b1_01: step_val = 8'd102;
-        3'b1_10: step_val = 8'd128;
-        3'b1_11: step_val = 8'd153;
-    endcase // data[2:0]
-    d2l    = d2 * step2; // 4 + 15 = 19 bits -> div by 8 -> 16 bits
-    step2l = step_val * step2; // 15 bits + 8 bits = 23 bits -> div 64 -> 17 bits
+    casez( data[2:0] )
+        3'b0??: step_next = step1=='d0 ? 6'd0 : (step1-1);
+        3'b100: step_next = step1+2;
+        3'b101: step_next = step1+5;
+        3'b110: step_next = step1+7;
+        3'b111: step_next = step1+9;
+    endcase
+    step_1p = step_next > 6'd48 ? 6'd48 : step_next;
 end
+
+wire [11:0] inc3;
+reg [8:0] lut_addr2;
+
+
+jt10_adpcma_lut u_lut(
+    .clk    ( clk        ),
+    .cen    ( cen        ),
+    .addr   ( lut_addr2  ),
+    .inc    ( inc3       )
+);
 
 // Original pipeline: 6 stages, 6 channels take 36 clock cycles
 // 8 MHz -> /12 divider -> 666 kHz
 // 666 kHz -> 18.5 kHz = 55.5/3 kHz
 
-reg chon2, chon3, chon4, chon5;
-reg signEqu4, signEqu5;
-reg [3:0] data2;
+reg chon2, chon3, chon4;
 
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
-        x1 <= 'd0; step1 <= 'd127; 
-        x2 <= 'd0; step2 <= 'd127;
-        x3 <= 'd0; step3 <= 'd127;
-        x4 <= 'd0; step4 <= 'd127;
-        x5 <= 'd0; step5 <= 'd127;
-        x6 <= 'd0; step6 <= 'd127;
-        d2 <= 'd0; d3 <= 'd0; d4 <= 'd0;
+        x1 <= 'd0; step1 <= 0; 
+        x2 <= 'd0; step2 <= 0;
+        x3 <= 'd0; step3 <= 0;
+        x4 <= 'd0; step4 <= 0;
+        x5 <= 'd0; step5 <= 0;
+        x6 <= 'd0; step6 <= 0;
         sign2 <= 'b0;
-        sign3 <= 'b0;
-        sign4 <= 'b0; sign5 <= 'b0;
-        chon2 <= 'b0;   chon3 <= 'b0;   chon4 <= 'b0; chon5 <= 1'b0;
+        chon2 <= 'b0;   chon3 <= 'b0;
     end else if(cen) begin
         // I
-        d2        <= {data[2:0],1'b1};
         sign2     <= data[3];
-        data2     <= data;
         x2        <= x1;
-        step2     <= step1;
+        step2     <= chon ? step1 : step_1p;
         chon2     <= chon;
-        // II multiply and obtain the offset
-        d3        <= d2l[18:3]; // 16 bits
+        lut_addr2 <= { step6, data[2:0] };
+        // II 2's complement of inc2 if necessary
         sign3     <= sign2;
         x3        <= x2;
-        step3     <= step2l[22:6];
+        step3     <= step2;
         chon3     <= chon2;
-        // III 2's complement of d3 if necessary
-        d4        <= sign3 ? ~d3+16'b1 : d3;
-        sign4     <= sign3;
-        signEqu4  <= sign3 == x3[15];
+        // III
+        inc4      <= sign3 ? ~{ 3'b0,inc3 } + 15'd1 : {3'b0, inc3};
         x4        <= x3;
         step4     <= step3;
         chon4     <= chon3;
-        // IV   Advance the waveform
-        x5        <= x4+d4;
-        sign5     <= sign4;
-        signEqu5  <= signEqu4;
+        // IV
+        x5        <= chon4 ? x4 + inc4 : x4;
         step5     <= step4;
-        chon5     <= chon4;
-        // V: limit or reset outputs
-        if( chon5 ) begin
-            if( signEqu5 && (sign5!=x5[15]) )
-                x6 <= sign5 ? 16'h8000 : 16'h7FFF;
-            else
-                x6 <= x5;
-
-            if( step5 < 127 )
-                step6  <= 15'd127;
-            else if( step5 > 24576 )
-                step6  <= 15'd24576;
-            else
-                step6 <= step5[14:0];
-        end else begin
-            x6      <= 'd0;
-            step6   <= 'd127;
-        end
+        // V
+        x6        <= x5;
+        step6     <= step5;
         // VI: close the loop
-        x1    <= x6;
-        step1 <= step6;
+        x1        <= x6;
+        step1     <= step6;
     end
-
 
 endmodule // jt10_adpcm    

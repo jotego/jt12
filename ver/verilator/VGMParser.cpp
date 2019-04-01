@@ -422,8 +422,8 @@ void VGMParser::decode_save( char *buf, int length, int rom_start, bool Adecoder
     length <<= 1;
     short *dest = new short[length];
     if( Adecoder ) {
-        //YM2610_ADPCMA_Decode( (unsigned char*) buf, dest, length );
-        YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length, true );
+        YM2610_ADPCMA_Decode( (unsigned char*) buf, dest, length );
+        //YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length, true );
     }
     else {
         YM2610_ADPCMB_Decode( (unsigned char*) buf, dest, length );
@@ -821,12 +821,12 @@ static int stepsizeTable[ 16 ] = {
 
 // For ADPCM-A
 static int stepsizeTable_A[ 16 ] = {
-    58, 58, 58, 58, 77, 94, 113, 137,
-    58, 58, 58, 58, 77, 94, 113, 137
+    58, 58, 58, 58, 77, 103, 124, 150,
+    58, 58, 58, 58, 77, 103, 124, 150
 };
 
 int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len, bool Atype ) {
-    int lpc , flag , shift , step;
+    int flag , shift , step;
     long adpcm;
     float xn = 0, i, zprev=0, yn, zn;
     const int stepmin = Atype ?   16 : 127;
@@ -837,18 +837,18 @@ int YM2610_ADPCMB_Decode( unsigned char *src , short *dest , int len, bool Atype
     flag = 0;
     shift = 4;
     step = 0;
-    for( lpc = 0 ; lpc < len ; lpc++ ) {
+    while( len-- ) {
         adpcm = ( *src >> shift ) & 0xf;
         i = (( ( adpcm & 7 ) * 2.0 + 1 ) * stepSize) / 8.0;
         if( adpcm & 8 )
             xn -= i;
         else
             xn += i;
-        if( xn > 32767 )
-            xn = 32767;
-        else if( xn < -32768 )
-            xn = -32768;
-        stepSize = (stepSize * stepLUT[ adpcm ]) / 64.0;
+        // if( xn > 32767 )
+        //     xn = 32767;
+        // else if( xn < -32768 )
+        //     xn = -32768;
+        stepSize = (stepSize * stepLUT[ adpcm ]) / 64;
         if( stepSize < stepmin )
             stepSize = stepmin;
         else if ( stepSize > stepmax )
@@ -917,7 +917,7 @@ void Init_ADPCMATable()
 {
     int step, nib;
     constexpr int steps[49] =
-    {
+    { // 7 rows x 7 columns
          16,  17,   19,   21,   23,   25,   28,
          31,  34,   37,   41,   45,   50,   55,
          60,  66,   73,   80,   88,   97,  107,
@@ -927,16 +927,31 @@ void Init_ADPCMATable()
         876, 963, 1060, 1166, 1282, 1411, 1552
     };
     ofstream fout("adpcm_table.txt");
-    fout << setfill(' ');
+    fout << setfill('0');
+    const int max_inc = (1<<11)-1;
     for (step = 0; step < 49; step++)
     {
         /* loop over all nibbles and compute the difference */
         for (nib = 0; nib < 16; nib++)
         {
             int value = (2*(nib & 0x07) + 1) * steps[step] / 8;
+            if( value > max_inc ) value=max_inc;
             int idx = step*16 + nib;
             jedi_table[idx] = (nib&0x08) ? -value : value;
-            fout << setw(5) <<jedi_table[idx] << ",";
+        }
+    }
+    // Verilog table
+    for (step = 0; step < 49; step++)
+    {
+        /* loop over all nibbles and compute the difference */
+        for (nib = 0; nib < 8; nib++)
+        {
+            int value = (2*(nib & 0x07) + 1) * steps[step] / 8;
+            if( value > max_inc ) value=max_inc;
+            fout << "lut[9'o" << setw(2) << oct << step << "_"  << nib << "] = 12'd"
+                 << setw(4) << value << "; ";
+            if(nib==3) fout <<'\n';
+
         }
         fout << '\n';
     }
