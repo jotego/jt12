@@ -125,6 +125,18 @@ fi
 
 date
 
+# Link files located in ../../cc
+# Maybe I could just reference to files there, but it is not
+# so obvious how to do it with Verilator Makefile so I just
+# add them here
+if [ ! -e WaveWritter.cpp ]; then
+    ln -s ../../cc/WaveWritter.cpp
+fi
+
+if [ ! -e WaveWritter.hpp ]; then
+    ln -s ../../cc/WaveWritter.hpp
+fi
+
 if [ $SKIPMAKE = FALSE ]; then
     echo "verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
         -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \

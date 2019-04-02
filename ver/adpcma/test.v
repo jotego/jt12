@@ -40,13 +40,13 @@ reg nibble=1;
 reg [3:0] data=4'd0;
 
 integer chcnt=0;
+reg cen=1;
 always @(posedge clk) if(cen)
     chcnt <= chcnt==5 ? 0 : chcnt+1;
 
 reg chon=1'b0;
 wire [7:0] memcnt = mem[cnt];
 
-reg cen=1;
 // if cen is toggled adpcma_single instance will fail.
 //always @(negedge clk) cen <= ~cen;
 
@@ -82,9 +82,17 @@ adpcma_single single(
     .pcm        ( pcm_single   )
 );
 
-reg signed [15:0] pcm0;
+integer filepipe;
+initial begin
+    filepipe=$fopen("pipeline.val","w");
+end
+
+reg signed [15:0] pcm0=0;
 always @(posedge clk) begin
-    if(chcnt==2) pcm0 <= pcm;
+    if(chcnt==2) begin
+        pcm0 <= pcm;
+        $fdisplay(filepipe, "%d\n",pcm);
+    end
 end
 `ifdef NCVERILOG
 initial begin

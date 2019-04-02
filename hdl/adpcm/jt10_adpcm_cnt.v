@@ -20,19 +20,20 @@
 */
 
 module jt10_adpcm_cnt(
-    input           rst_n,
-    input           clk,        // CPU clock
-    input           cen,        // optional clock enable, if not needed leave as 1'b1
-    input           div3,
-    input   [15:0]  addr_in,
-    input           up_start,
-    input           up_end,
-    input           aon,
-    input           aoff,
-    output  [19:0]  addr_out,
-    output  [ 3:0]  bank,
-    output          sel,
-    output          roe_n
+    input             rst_n,
+    input             clk,        // CPU clock
+    input             cen,        // optional clock enable, if not needed leave as 1'b1
+    input             div3,
+    input      [15:0] addr_in,
+    input             up_start,
+    input             up_end,
+    input             aon,
+    input             aoff,
+    output     [19:0] addr_out,
+    output     [ 3:0] bank,
+    output            sel,
+    output            roe_n,
+    output reg [ 5:0] flags
 );
 
 reg [20:0] addr1, addr2, addr3, addr4, addr5, addr6;
@@ -40,7 +41,9 @@ reg [3:0] bank1, bank2, bank3, bank4, bank5, bank6;
 reg [11:0] start1, start2, start3, start4, start5, start6,
            end1,   end2,   end3,   end4,   end5,   end6;
 reg on1, on2, on3, on4, on5, on6;
-reg done5, done6;
+reg done5, done6, done1;
+reg [5:0] done_sr, zero;
+
 reg roe_n6, roe_n1;
 
 reg clr2;
@@ -55,9 +58,19 @@ reg  sumup6;
 
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
+        zero    <= 6'd1;
+        done_sr <= ~6'd0;
+    end else if(cen) begin
+        zero    <= { zero[0], zero[5:1] };
+        done_sr <= { done1, done_sr[5:1]};
+        if( zero[0] ) flags <= done_sr;
+    end
+
+always @(posedge clk or negedge rst_n) 
+    if( !rst_n ) begin
         addr1  <= 'd0;    addr2 <= 'd0;    addr3 <= 'd0;
         addr4  <= 'd0;    addr5 <= 'd0;    addr6 <= 'd0;
-        done5  <= 'd0;
+        done1  <= 'd1;    done5 <= 'd1;    done6 <= 'd1;
         start1 <= 'd0;   start2 <= 'd0;   start3 <= 'd0;
         start4 <= 'd0;   start5 <= 'd0;   start6 <= 'd0;
         end1   <= 'd0;     end2 <= 'd0;     end3 <= 'd0;
@@ -92,6 +105,7 @@ always @(posedge clk or negedge rst_n)
         // V
         addr6  <= addr5;
         on6    <= on5;
+        done6  <= done5;
         start6 <= start5;
         end6   <= end5;
         bank6  <= bank5;
@@ -100,6 +114,7 @@ always @(posedge clk or negedge rst_n)
 
         addr1  <= sumup6 ? addr6+21'd1 :addr6;
         on1    <= on6;
+        done1  <= done6;
         start1 <= start6;
         end1   <= end6;
         roe_n1 <= roe_n6;

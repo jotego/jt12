@@ -29,9 +29,10 @@ end
 
 assign pcm = x[15:0];
 
-integer file, cnt=0;
+integer file, file2, cnt=0;
 initial begin
     file=$fopen("single.dec","w");
+    file2=$fopen("single.val","w");
     $fwrite(file,"dimension single(1)\n");
 end
 
@@ -41,6 +42,7 @@ always @(posedge clk) begin
     x <= next_x;
     cnt <= cnt+1;
     $fwrite( file, "single[%4x] = %1d // data = %x\n", cnt+32'h2b1b00, x, data );
+    $fwrite( file2, "%d\n", x );
 end
 
 initial begin

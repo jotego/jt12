@@ -140,14 +140,16 @@ wire [ 7:0] aon_a, lracl;
 wire [ 5:0] atl_a;     // ADPCM Total Level
 // APDCM-B
 wire signed [15:0]  adpcmB_l, adpcmB_r;
-wire        acmd_on_b;  // Control - Process start, Key On
-wire        acmd_rep_b; // Control - Repeat
-wire        acmd_rst_b; // Control - Reset
-wire [ 1:0] alr_b;      // Left / Right
-wire [15:0] astart_b;   // Start address
-wire [15:0] aend_b;     // End   address
-wire [15:0] adeltan_b;  // Delta-N
-wire [ 7:0] aeg_b;      // Envelope Generator Control
+wire        acmd_on_b;     // Control - Process start, Key On
+wire        acmd_rep_b;    // Control - Repeat
+wire        acmd_rst_b;    // Control - Reset
+wire [ 1:0] alr_b;         // Left / Right
+wire [15:0] astart_b;      // Start address
+wire [15:0] aend_b;        // End   address
+wire [15:0] adeltan_b;     // Delta-N
+wire [ 7:0] aeg_b;         // Envelope Generator Control
+wire [ 5:0] adpcma_flags;  // ADPMC-A read over flags
+wire        adpcmb_flag;
 
 
 wire clk_en_adpcm, clk_en_adpcm3, clk_en_55;
@@ -174,19 +176,19 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .datain     ( adpcma_data   ),
 
         // Control Registers
-        .atl        (  atl_a        ),        // ADPCM Total Level
-        .addr_in    (  addr_a       ),
-        .lracl_in   (  lracl        ),
-        .up_start   (  up_start     ),
-        .up_end     (  up_end       ),
-        .up_addr    (  up_addr      ),
-        .up_lracl   (  up_lracl     ),
+        .atl        ( atl_a         ),        // ADPCM Total Level
+        .addr_in    ( addr_a        ),
+        .lracl_in   ( lracl         ),
+        .up_start   ( up_start      ),
+        .up_end     ( up_end        ),
+        .up_addr    ( up_addr       ),
+        .up_lracl   ( up_lracl      ),
 
         .aon_cmd    ( aon_a         ),    // ADPCM ON equivalent to key on for FM
 
-
-        .pcm55_l    (  adpcmA_l     ),
-        .pcm55_r    (  adpcmA_r     )
+        .flags      ( adpcma_flags  ),
+        .pcm55_l    ( adpcmA_l      ),
+        .pcm55_r    ( adpcmA_r      )
     );
 
     jt10_adpcm_drvB u_adpcm_b(
@@ -220,6 +222,20 @@ end else begin : gen_adpcm_no
     assign adpcma_roe_n = 'b1;
 end
 endgenerate
+
+jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
+//    .rst_n          ( rst_n         ),
+    .clk            ( clk           ),        // CPU clock
+    .flag_A         ( flag_A        ),
+    .flag_B         ( flag_B        ),
+    .busy           ( busy          ),
+    .adpcma_flags   ( adpcma_flags  ),
+    .adpcmb_flag    ( adpcmb_flag   ),
+    .psg_dout       ( psg_dout      ),
+    .addr           ( addr          ),
+    .dout           ( dout          )
+);
+
 
 /* verilator tracing_off */
 jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm))
@@ -259,14 +275,14 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .pcm_en     ( pcm_en        ),
     .pcm_wr     ( pcm_wr        ),
     // ADPCM-A
-    .aon_a      ( aon_a         ),   // ON
-    .atl_a      ( atl_a         ),   // TL
-    .addr_a     ( addr_a        ),   // address latch
-    .lracl      ( lracl         ),   // L/R ADPCM Channel Level
-    .up_start   ( up_start      ),   // write enable start address latch
-    .up_end     ( up_end        ),   // write enable end address latch
-    .up_addr    ( up_addr       ),   // write enable end address latch
-    .up_lracl   ( up_lracl      ),
+    .aon_a        ( aon_a         ),   // ON
+    .atl_a        ( atl_a         ),   // TL
+    .addr_a       ( addr_a        ),   // address latch
+    .lracl        ( lracl         ),   // L/R ADPCM Channel Level
+    .up_start     ( up_start      ),   // write enable start address latch
+    .up_end       ( up_end        ),   // write enable end address latch
+    .up_addr      ( up_addr       ),   // write enable end address latch
+    .up_lracl     ( up_lracl      ),
     // ADPCM-B
     .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
     .acmd_rep_b ( acmd_rep_b    ),  // Control - Repeat
@@ -390,13 +406,11 @@ generate
         );
         assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0};
         assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0};
-        assign dout = addr[0] ? psg_dout : fm_dout;
     end else begin : gen_nossg
         assign psg_snd  = 10'd0;
         assign snd_left = fm_snd_left;
         assign snd_right= fm_snd_right;
         assign psg_dout = 8'd0;
-        assign dout = fm_dout;
     end
 endgenerate
 

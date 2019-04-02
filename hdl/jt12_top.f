@@ -31,6 +31,7 @@ jt12_sumch.v
 jt12_timers.v
 jt12_pcm.v
 jt12_rst.v
+jt12_dout.v
 mixer/jt12_genmix.v
 mixer/jt12_decim.v
 mixer/jt12_interpol.v

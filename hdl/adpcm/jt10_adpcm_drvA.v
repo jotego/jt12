@@ -43,6 +43,7 @@ module jt10_adpcm_drvA(
 
     input   [7:0]   datain,
 
+    output  [5:0]   flags,
     output signed [15:0]  pcm55_l,
     output signed [15:0]  pcm55_r
 );
@@ -147,7 +148,8 @@ jt10_adpcm_cnt u_cnt(
     .addr_out    ( addr            ),
     .bank        ( bank            ),
     .sel         ( nibble_sel      ),
-    .roe_n       ( roe_n           )
+    .roe_n       ( roe_n           ),
+    .flags       ( flags           )
 );
 
 reg chon;
