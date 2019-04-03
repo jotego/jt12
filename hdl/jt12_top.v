@@ -421,8 +421,9 @@ generate
     end
 endgenerate
 
-
-`ifndef TIMERONLY
+wire    [ 8:0]  op_result;
+wire    [13:0]  op_result_hd;
+`ifndef NOFM
 /* verilator tracing_off */
 jt12_pg #(.num_ch(num_ch)) u_pg(
     .rst        ( rst           ),
@@ -483,9 +484,6 @@ jt12_sh #(.width(10),.stages(4)) u_egpad(
     .drop   ( eg_IX     )
 );
 
-wire    [ 8:0]  op_result;
-wire    [13:0]  op_result_hd;
-
 jt12_op #(.num_ch(num_ch)) u_op(
     .rst            ( rst           ),
     .clk            ( clk           ),
@@ -509,6 +507,10 @@ jt12_op #(.num_ch(num_ch)) u_op(
     .op_result      ( op_result     ),
     .full_result    ( op_result_hd  )
 );
+`else 
+assign op_result    = 'd0;
+assign op_result_hd = 'd0;
+`endif
 
 /* verilator tracing_on */
 
@@ -605,5 +607,4 @@ generate
         );
     end
 endgenerate
-`endif
 endmodule

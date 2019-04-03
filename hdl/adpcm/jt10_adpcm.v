@@ -30,15 +30,19 @@ module jt10_adpcm(
     output signed [15:0] pcm
 );
 
-parameter sigw = 15;
+localparam sigw = 13; // 1 bit more than the actual signal width so
+    // there is room for overflow
+wire signed [sigw-1:0] max_pos = { 2'b00, {sigw-2{1'b1}} };
+wire signed [sigw-1:0] max_neg = { 2'b11, {sigw-2{1'b0}} };
+localparam shift = 16-sigw+1;
 
 reg signed [sigw-1:0] x1, x2, x3, x4, x5, x6;
 reg signed [sigw-1:0] inc4;
 reg [5:0] step1, step2, step6, step3, step4, step5;
 reg [5:0] step_next, step_1p;
-reg       sign2, sign3;
+reg       sign2, sign3, sign4, sign5, xsign5;
 
-assign pcm = { {16-sigw{x2[sigw-1]}}, x2 };
+assign pcm = { {16-sigw{x2[sigw-1]}}, x2 } <<< shift;
 
 // This could be decomposed in more steps as the pipeline
 // has room for it
@@ -88,7 +92,7 @@ always @( posedge clk or negedge rst_n )
         // I
         sign2     <= data[3];
         x2        <= x1;
-        step2     <= chon ? step_1p : step1;
+        step2     <= chon ? step_1p : 0;
         chon2     <= chon;
         lut_addr2 <= { step1, data[2:0] };
         // II 2's complement of inc2 if necessary
@@ -97,15 +101,26 @@ always @( posedge clk or negedge rst_n )
         step3     <= step2;
         chon3     <= chon2;
         // III
+        sign4     <= sign3;
         inc4      <= sign3 ? ~inc3_long + 1 : inc3_long;
         x4        <= x3;
         step4     <= step3;
         chon4     <= chon3;
         // IV
-        x5        <= chon4 ? x4 + inc4 : x4;
+        sign5     <= sign4;
+        xsign5    <= x4[sigw-1];
+        x5        <= chon4 ? x4 + inc4 : 0;
         step5     <= step4;
         // V
-        x6        <= x5;
+        // if( xsign5!=x5[sigw-1] && sign5!=x5[sigw-1] ) begin // enable limiter
+        //     if( sign5 ) // it was negative
+        //         x6 <= {1'b1, {sigw-1{1'b0}}};
+        //     else // it was positive
+        //         x6 <= {1'b0, {sigw-1{1'b1}}};
+        // end else
+        x6 <= x5;
+        if( x5 > max_pos) x6 <= max_pos;
+        if( x5 < max_neg) x6 <= max_neg;
         step6     <= step5;
         // VI: close the loop
         x1        <= x6;

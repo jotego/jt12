@@ -97,6 +97,12 @@ while [ $# -gt 0 ]; do
         shift
         continue
     fi
+    if [ "$1" = "-d" ]; then
+        shift
+        VERI_EXTRA="-D$1 $VERI_EXTRA"
+        shift
+        continue
+    fi
     if [ "$1" = "-runonly" ]; then
         echo Skipping Verilator and make steps
         SKIPMAKE=TRUE

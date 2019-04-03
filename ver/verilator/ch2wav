@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# ADPCM-A output of each channel is converted to .wav files
+
+for i in ch?.dec; do ../../cc/dec2wav 18500 $i; done

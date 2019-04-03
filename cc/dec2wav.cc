@@ -40,7 +40,7 @@ int main(int argc, char *argv[] ) {
         int val;
         fin >> val;
         int16_t lr[3];
-        lr[0] = lr[1] = val;
+        lr[0] = lr[1] = val*2;
         lr[2] = 0;
         wav.write( lr );
     }

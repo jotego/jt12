@@ -52,7 +52,6 @@ module jt10_adpcm_drvA(
 );
 
 reg  [3:0] data;
-wire signed [15:0] pcmdec;
 wire nibble_sel;
 
 always @(posedge clk or negedge rst_n)
@@ -159,7 +158,8 @@ jt10_adpcm_cnt u_cnt(
 reg chon;
 always @(posedge clk) if(cen) chon <= ~roe_n;
 
-wire chactive = chon & cen6;
+// wire chactive = chon & cen6;
+wire signed [15:0] pcmdec;
 
 jt10_adpcm u_decoder(
     .rst_n  ( rst_n     ),
@@ -170,18 +170,45 @@ jt10_adpcm u_decoder(
     .pcm    ( pcmdec    )
 );
 
-// integer fch0;
-// initial begin
-//     fch0 = $fopen("ch0.dec","w");
-// end
-// 
-// reg signed [15:0] pcm_ch0;
-// always @(negedge cen6) begin
-//     if(chfast==3'd0) begin
-//         pcm_ch0 <= pcmdec;
-//         $fwrite( fch0, "%d\n", pcmdec );
-//     end
-// end
+`ifdef SIMULATION
+integer fch0, fch1, fch2, fch3, fch4, fch5;
+initial begin
+    fch0 = $fopen("ch0.dec","w");
+    fch1 = $fopen("ch1.dec","w");
+    fch2 = $fopen("ch2.dec","w");
+    fch3 = $fopen("ch3.dec","w");
+    fch4 = $fopen("ch4.dec","w");
+    fch5 = $fopen("ch5.dec","w");
+end
+
+reg signed [15:0] pcm_ch0, pcm_ch1, pcm_ch2, pcm_ch3, pcm_ch4, pcm_ch5;
+always @(negedge cen6) begin
+    if(chfast==3'd0) begin
+        pcm_ch0 <= pcmdec;
+        $fwrite( fch0, "%d\n", pcmdec );
+    end
+    if(chfast==3'd1) begin
+        pcm_ch1 <= pcmdec;
+        $fwrite( fch1, "%d\n", pcmdec );
+    end
+    if(chfast==3'd2) begin
+        pcm_ch2 <= pcmdec;
+        $fwrite( fch2, "%d\n", pcmdec );
+    end
+    if(chfast==3'd3) begin
+        pcm_ch3 <= pcmdec;
+        $fwrite( fch3, "%d\n", pcmdec );
+    end
+    if(chfast==3'd4) begin
+        pcm_ch4 <= pcmdec;
+        $fwrite( fch4, "%d\n", pcmdec );
+    end
+    if(chfast==3'd5) begin
+        pcm_ch5 <= pcmdec;
+        $fwrite( fch5, "%d\n", pcmdec );
+    end    
+end
+`endif
 
 wire signed [15:0] pcm18_l, pcm18_r;
 
@@ -191,8 +218,6 @@ always @(posedge clk) begin
         pcm55_r <= pre_pcm55_r;
     end
 end
-
-wire signed [15:0] pcm12 = pcmdec; // { pcmdec[11:0], 4'd0 };
 
 jt10_adpcm_gain u_gain(
     .rst_n  ( rst_n          ),
@@ -204,20 +229,10 @@ jt10_adpcm_gain u_gain(
     .atl    ( atl            ),        // ADPCM Total Level
     .up     ( up_lracl_sr[0] ),
     //.up(1'b1),
-    .pcm_in ( pcm12          ),
+    .pcm_in ( pcmdec         ),
     .pcm_l  ( pcm18_l        ),
     .pcm_r  ( pcm18_r        )
 );
-
-// wire signed [15:0] pcm18_fl, pcm18_fr;
-// 
-// jt12_comb #(.w(16), .m(2)) u_comb_left(
-//     .rst    ( ~rst_n    ),
-//     .clk    ( clk       ),
-//     .cen    ( cen6      ),
-//     .snd_in ( pcm18_l   ),
-//     .snd_out( pcm18_fl  )
-// );
 
 wire signed [15:0] pre_pcm55_l, pre_pcm55_r;
 

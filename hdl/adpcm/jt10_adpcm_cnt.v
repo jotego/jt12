@@ -80,6 +80,10 @@ always @(posedge clk or negedge rst_n)
         flags <= ~clr_flags & (set_flags | flags);
     end
 
+`ifdef SIMULATION
+wire [11:0] addr1_cmp = addr1[20:9];
+`endif
+
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
         addr1  <= 'd0;    addr2 <= 'd0;    addr3 <= 'd0;
