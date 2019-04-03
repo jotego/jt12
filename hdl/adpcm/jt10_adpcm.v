@@ -30,13 +30,15 @@ module jt10_adpcm(
     output signed [15:0] pcm
 );
 
-reg signed [14:0] x1, x2, x3, x4, x5, x6;
-reg signed [14:0] inc4;
+parameter sigw = 15;
+
+reg signed [sigw-1:0] x1, x2, x3, x4, x5, x6;
+reg signed [sigw-1:0] inc4;
 reg [5:0] step1, step2, step6, step3, step4, step5;
 reg [5:0] step_next, step_1p;
 reg       sign2, sign3;
 
-assign pcm = { {1{x2[14]}}, x2 };
+assign pcm = { {16-sigw{x2[sigw-1]}}, x2 };
 
 // This could be decomposed in more steps as the pipeline
 // has room for it
@@ -68,6 +70,7 @@ jt10_adpcma_lut u_lut(
 // 666 kHz -> 18.5 kHz = 55.5/3 kHz
 
 reg chon2, chon3, chon4;
+wire [sigw-1:0] inc3_long = { {sigw-12{1'b0}},inc3 };
 
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
@@ -94,7 +97,7 @@ always @( posedge clk or negedge rst_n )
         step3     <= step2;
         chon3     <= chon2;
         // III
-        inc4      <= sign3 ? ~{ 3'b0,inc3 } + 15'd1 : {3'b0, inc3};
+        inc4      <= sign3 ? ~inc3_long + 1 : inc3_long;
         x4        <= x3;
         step4     <= step3;
         chon4     <= chon3;
