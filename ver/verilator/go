@@ -117,6 +117,9 @@ echo EXTRA="$EXTRA"
 if [[ $(expr match "$GYM_FILE" ".*\.vgz") != 0 ]]; then
     echo Uncompressing vgz file...
     UNZIP_GYM=$(basename "$GYM_FILE" .vgz).vgm
+    if [ -e /tmp ]; then
+        UNZIP_GYM="/tmp/$UNZIP_GYM"
+    fi
     WAV_FILE=$(basename "$UNZIP_GYM" .vgm).wav
     gunzip -S vgz "$GYM_FILE" --to-stdout > "$UNZIP_GYM"
 else

@@ -1,0 +1,46 @@
+ym2610
+
+aend_lsb 0,1
+aend_lsb 1,1
+aend_lsb 2,1
+aend_lsb 3,1
+aend_lsb 4,1
+aend_lsb 5,1
+
+bend_lsb 1
+
+aon 1
+wait 2000
+aon 2
+wait 2000
+flag_ctl 3
+wait 10
+aon 1
+# aon 5
+wait 2000
+
+# ADPCM B flag and control:
+finish
+
+bdelta_lsb 55
+bdelta_msb 55
+
+bctl 80
+wait 2000
+flag_ctl ff
+wait 100
+
+bctl 0
+bctl 80
+wait 2000
+
+bctl 0
+bctl 80
+wait 100
+bctl 1  # reset
+wait 200
+
+flag_ctl 80
+bctl 0
+bctl 90 # repeat
+wait 4000

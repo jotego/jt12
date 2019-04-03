@@ -34,6 +34,8 @@ module jt10_adpcm_drvB(
     input    [15:0] aend_b,     // End   address
     input    [15:0] adeltan_b,  // Delta-N
     input    [ 7:0] aeg_b,      // Envelope Generator Control
+    output          flag,
+    input           clr_flag,
     // memory
     output   [23:0] addr,
     input    [ 7:0] data,
@@ -65,6 +67,9 @@ jt10_adpcmb_cnt u_cnt(
     .arepeat     ( acmd_rep_b      ),
     .addr        ( addr            ),
     .nibble_sel  ( nibble_sel      ),
+    // Flag control
+    .clr_flag    ( clr_flag        ),
+    .flag        ( flag            ),
     .adv         ( adv             )
 );
 

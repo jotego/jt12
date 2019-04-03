@@ -135,6 +135,7 @@ JTTParser::JTTParser(int c) : RipParser(c) {
     adpcmb_commands["bdelta_lsb"] = 0x19;
     adpcmb_commands["bdelta_msb"] = 0x1a;
     adpcmb_commands["btl"]        = 0x1b;
+    adpcmb_commands["flag_ctl"]   = 0x1c;
 
     global_commands["kon"] = 0x28;
     global_commands["timer"] = 0x27;

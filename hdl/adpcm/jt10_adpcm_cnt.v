@@ -33,7 +33,8 @@ module jt10_adpcm_cnt(
     output     [ 3:0] bank,
     output            sel,
     output            roe_n,
-    output reg [ 5:0] flags
+    output reg [ 5:0] flags,
+    input      [ 5:0] clr_flags
 );
 
 reg [20:0] addr1, addr2, addr3, addr4, addr5, addr6;
@@ -56,14 +57,27 @@ assign roe_n    = roe_n1;
 wire sumup5 = on5 && !done5 && div3;
 reg  sumup6;
 
+reg [5:0] last_done, set_flags;
+
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
-        zero    <= 6'd1;
-        done_sr <= ~6'd0;
+        zero      <= 6'd1;
+        done_sr   <= ~6'd0;
+        last_done <= ~6'd0;
     end else if(cen) begin
         zero    <= { zero[0], zero[5:1] };
         done_sr <= { done1, done_sr[5:1]};
-        if( zero[0] ) flags <= done_sr;
+        if( zero[0] ) begin
+            last_done <= done_sr;
+            set_flags <= ~last_done & done_sr;
+        end
+    end
+
+always @(posedge clk or negedge rst_n) 
+    if( !rst_n ) begin
+        flags <= 6'd0;
+    end else begin
+        flags <= ~clr_flags & (set_flags | flags);
     end
 
 always @(posedge clk or negedge rst_n) 

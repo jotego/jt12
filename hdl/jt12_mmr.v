@@ -73,6 +73,7 @@ module jt12_mmr(
     output  reg  [15:0] aend_b,     // End   address
     output  reg  [15:0] adeltan_b,  // Delta-N
     output  reg  [ 7:0] aeg_b,      // Envelope Generator Control
+    output  reg  [ 6:0] flag_ctl,
     // Operator
     output          xuse_prevprev1,
     output          xuse_internal,
@@ -194,7 +195,6 @@ generate
 endgenerate
 
 reg part;
-reg [6:0] flag_ctl;
 
 // this runs at clk speed, no clock gating here
 always @(posedge clk) begin : memory_mapped_registers
@@ -345,7 +345,7 @@ always @(posedge clk) begin : memory_mapped_registers
                             4'h9: adeltan_b[15:8] <= din;
                             4'ha: adeltan_b[ 7:0] <= din;
                             4'hb: aeg_b           <= din;
-                            4'hc: flag_ctl        <= {din[7],din[5:0]};
+                            4'hc: flag_ctl        <= {din[7],din[5:0]}; // this lasts a single clock cycle
                             default:;
                         endcase
                     end
@@ -375,7 +375,8 @@ always @(posedge clk) begin : memory_mapped_registers
             // lfo_rst <= 1'b0;
             { clr_flag_B, clr_flag_A } <= 2'd0;
             psg_wr_n <= 1'b1;
-            pcm_wr <= 1'b0;
+            pcm_wr   <= 1'b0;
+            flag_ctl <= 'd0;
         end
     end
 end

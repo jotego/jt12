@@ -150,6 +150,7 @@ wire [15:0] adeltan_b;     // Delta-N
 wire [ 7:0] aeg_b;         // Envelope Generator Control
 wire [ 5:0] adpcma_flags;  // ADPMC-A read over flags
 wire        adpcmb_flag;
+wire [ 6:0] flag_ctl;
 
 
 wire clk_en_adpcm, clk_en_adpcm3, clk_en_55;
@@ -185,8 +186,10 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .up_lracl   ( up_lracl      ),
 
         .aon_cmd    ( aon_a         ),    // ADPCM ON equivalent to key on for FM
-
+        // Flags
         .flags      ( adpcma_flags  ),
+        .clr_flags  ( flag_ctl[5:0] ),
+
         .pcm55_l    ( adpcmA_l      ),
         .pcm55_r    ( adpcmA_r      )
     );
@@ -206,6 +209,9 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .aend_b     ( aend_b        ),  // End   address
         .adeltan_b  ( adeltan_b     ),  // Delta-N
         .aeg_b      ( aeg_b         ),  // Envelope Generator Control
+        // Flag
+        .flag       ( adpcmb_flag   ),
+        .clr_flag   ( flag_ctl[6]   ),
         // memory
         .addr       ( adpcmb_addr   ),
         .data       ( adpcmb_data   ),
@@ -292,6 +298,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .aend_b     ( aend_b        ),  // End   address
     .adeltan_b  ( adeltan_b     ),  // Delta-N
     .aeg_b      ( aeg_b         ),  // Envelope Generator Control    
+    .flag_ctl   ( flag_ctl      ),
     // Operator
     .xuse_prevprev1 ( xuse_prevprev1  ),
     .xuse_internal  ( xuse_internal   ),
