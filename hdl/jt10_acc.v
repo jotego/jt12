@@ -16,7 +16,7 @@
 
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
-    Date: 27-1-2017 
+    Date: 21-03-2019
     
     Each channel can use the full range of the DAC as they do not
     get summed in the real chip.
@@ -79,14 +79,14 @@ reg acc_en_l, acc_en_r;
 always @(*)
     case( {cur_op,cur_ch} )
         {2'd0,3'd2}: begin // ADPCM-A:
-            acc_input_l = adpcmA_l;
-            acc_input_r = adpcmA_r;
+            acc_input_l = adpcmA_l<<3;
+            acc_input_r = adpcmA_r<<3;
             acc_en_l    = 1'b1;
             acc_en_r    = 1'b1;
         end
         {2'd0,3'd6}: begin // ADPCM-B:
-            acc_input_l = adpcmB_l;
-            acc_input_r = adpcmB_r;
+            acc_input_l = adpcmB_l<<2; // To do: add limiter
+            acc_input_r = adpcmB_r<<2;
             acc_en_l    = 1'b1;
             acc_en_r    = 1'b1;
         end
