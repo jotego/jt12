@@ -47,8 +47,8 @@ module jt10_adpcm_drvA(
     output  [5:0]   flags,
     input   [5:0]   clr_flags,
 
-    output signed [15:0]  pcm55_l,
-    output signed [15:0]  pcm55_r
+    output reg signed [15:0]  pcm55_l,
+    output reg signed [15:0]  pcm55_r
 );
 
 reg  [3:0] data;
@@ -170,14 +170,29 @@ jt10_adpcm u_decoder(
     .pcm    ( pcmdec    )
 );
 
-wire signed [15:0] pcm18_l, pcm18_r;
-
-// always @(posedge clk) begin
-//     if( cen3 && chon ) begin
-//         pcm55_l <= pcmdec>>>1;
-//         pcm55_r <= pcmdec>>>1;
+// integer fch0;
+// initial begin
+//     fch0 = $fopen("ch0.dec","w");
+// end
+// 
+// reg signed [15:0] pcm_ch0;
+// always @(negedge cen6) begin
+//     if(chfast==3'd0) begin
+//         pcm_ch0 <= pcmdec;
+//         $fwrite( fch0, "%d\n", pcmdec );
 //     end
 // end
+
+wire signed [15:0] pcm18_l, pcm18_r;
+
+always @(posedge clk) begin
+    if( cen3 && chon ) begin
+        pcm55_l <= pre_pcm55_l;
+        pcm55_r <= pre_pcm55_r;
+    end
+end
+
+wire signed [15:0] pcm12 = pcmdec; // { pcmdec[11:0], 4'd0 };
 
 jt10_adpcm_gain u_gain(
     .rst_n  ( rst_n          ),
@@ -189,7 +204,7 @@ jt10_adpcm_gain u_gain(
     .atl    ( atl            ),        // ADPCM Total Level
     .up     ( up_lracl_sr[0] ),
     //.up(1'b1),
-    .pcm_in ( pcmdec         ),
+    .pcm_in ( pcm12          ),
     .pcm_l  ( pcm18_l        ),
     .pcm_r  ( pcm18_r        )
 );
@@ -206,8 +221,8 @@ jt10_adpcm_gain u_gain(
 
 wire signed [15:0] pre_pcm55_l, pre_pcm55_r;
 
-assign pcm55_l = pre_pcm55_l;
-assign pcm55_r = pre_pcm55_r;
+// assign pcm55_l = pre_pcm55_l;
+// assign pcm55_r = pre_pcm55_r;
 
 jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),

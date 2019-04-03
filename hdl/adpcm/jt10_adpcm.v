@@ -85,9 +85,9 @@ always @( posedge clk or negedge rst_n )
         // I
         sign2     <= data[3];
         x2        <= x1;
-        step2     <= chon ? step1 : step_1p;
+        step2     <= chon ? step_1p : step1;
         chon2     <= chon;
-        lut_addr2 <= { step6, data[2:0] };
+        lut_addr2 <= { step1, data[2:0] };
         // II 2's complement of inc2 if necessary
         sign3     <= sign2;
         x3        <= x2;
