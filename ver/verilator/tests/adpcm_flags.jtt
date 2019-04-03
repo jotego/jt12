@@ -15,12 +15,28 @@ aon 2
 wait 2000
 flag_ctl 3
 wait 10
+
+aon ff
 aon 1
-# aon 5
+wait 10
+aon 2
+wait 10
+aon 4
+wait 10
+aon 8
+wait 10
+aon 10
+wait 10
+aon 20
 wait 2000
+flag_ctl 1
+flag_ctl 2
+flag_ctl 4
+flag_ctl 8
+flag_ctl 10
+flag_ctl 20
 
 # ADPCM B flag and control:
-finish
 
 bdelta_lsb 55
 bdelta_msb 55
