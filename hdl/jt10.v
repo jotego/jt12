@@ -47,7 +47,8 @@ module jt10(
     output  signed  [15:0] fm_snd,
     // combined output
     output          [ 9:0] psg_snd,    
-    output  signed  [15:0] snd,
+    output  signed  [15:0] snd_right,
+    output  signed  [15:0] snd_left,
     output          snd_sample
 );
 
@@ -80,8 +81,8 @@ u_jt12(
     .fm_snd_left    ( fm_snd       ),
     .fm_snd_right   (),
 
-    .snd_right      ( snd          ),
-    .snd_left       (),
+    .snd_right      ( snd_right    ),
+    .snd_left       ( snd_left     ),
     .snd_sample     ( snd_sample   )
 );
 
