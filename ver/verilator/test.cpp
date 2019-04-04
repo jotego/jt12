@@ -135,6 +135,72 @@ public:
 
 struct YMcmd { int addr; int cmd; int val; };
 
+class WaveOutputs {
+    class WaveWritter* mixed;
+    class WaveWritter* fm;
+    class WaveWritter* psg;
+    class WaveWritter* adpcmA;
+    class WaveWritter* adpcmB;    
+public:
+    WaveOutputs( const string& filename, int sample_rate, bool dump_hex, bool dump_adpcm, bool dump_psg );
+    ~WaveOutputs();
+    void write( class Vtop *top );
+};
+
+WaveOutputs::WaveOutputs( const string& filename, int sample_rate, bool dump_hex, bool dump_adpcm, bool dump_psg ) {
+    string base_name;
+    auto pos = filename.find_last_of('.');
+    if( pos == string::npos ) pos=filename.length();
+    base_name = filename.substr( 0, pos  );
+    mixed  = new WaveWritter( base_name+".wav", sample_rate, dump_hex );
+    fm     = dump_adpcm || dump_psg ? new WaveWritter( base_name+"_fm.wav", sample_rate, dump_hex ) : 0;
+    adpcmA = dump_adpcm ? new WaveWritter( base_name+"_adpcmA.wav", sample_rate, dump_hex ) : 0;
+    adpcmB = dump_adpcm ? new WaveWritter( base_name+"_adpcmB.wav", sample_rate, dump_hex ) : 0;
+    psg    = dump_psg   ? new WaveWritter( base_name+"_psg.wav",    sample_rate, dump_hex ) : 0;
+}
+
+WaveOutputs::~WaveOutputs() {
+    // cerr << "~WaveOutputs\n";
+    delete mixed;  mixed=0;
+    delete adpcmA; adpcmA=0;
+    delete adpcmB; adpcmB=0;
+    delete psg;    psg=0;
+    delete fm;     fm=0;
+}
+
+void WaveOutputs::write( class Vtop *top ) {
+    int16_t snd[3]; // 0=left, 1=right, 2=mono (added to 0 and 1)
+    snd[0] = top->snd_left;
+    snd[1] = top->snd_right;
+    snd[2] = top->psg_snd*2;    // Megadrive PSG
+    mixed->write(snd);
+    if(fm) {
+        snd[0] = top->fm_snd_left;
+        snd[1] = top->fm_snd_right;
+        snd[2] = 0;
+        fm->write(snd);        
+    }
+    if(adpcmA) {
+        snd[0] = top->adpcmA_l;
+        snd[1] = top->adpcmA_r;
+        snd[2] = 0;
+        // cerr << snd[0] << ' ';
+        adpcmA->write(snd);        
+    }
+    if(adpcmB) {
+        snd[0] = top->adpcmB_l;
+        snd[1] = top->adpcmB_r;
+        snd[2] = 0;
+        adpcmB->write(snd);        
+    }
+    if(psg) {   // YM2203/2610 PSG
+        snd[0] = 0;
+        snd[1] = 0;
+        snd[2] = top->psg_A + top->psg_B + top->psg_C;
+        psg->write(snd);        
+    }
+}
+
 int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
     Vtop* top = new Vtop;
@@ -143,11 +209,11 @@ int main(int argc, char** argv, char** env) {
     bool trace = false, slow=false;
     RipParser *gym;
     bool forever=true, dump_hex=false;
-    char wav_filename[512]="";
     char *gym_filename;
     SimTime sim_time;
     int SAMPLERATE=0;
     vluint64_t SAMPLING_PERIOD=0;
+    string wav_filename;
 
     for( int k=1; k<argc; k++ ) {
         if( string(argv[k])=="-trace" ) { trace=true; continue; }
@@ -161,7 +227,7 @@ int main(int argc, char** argv, char** env) {
         }
         if( string(argv[k])=="-o" ) {
             if( ++k == argc ) { cerr << "ERROR: expecting filename after -o\n"; return 1; }
-            strncpy( wav_filename, argv[k], 512 );
+            wav_filename = string(argv[k]);
             continue;
         }
         if( string(argv[k])=="-time" ) {
@@ -250,18 +316,12 @@ int main(int argc, char** argv, char** env) {
         cerr << "ERROR: Unknown argument " << argv[k] << "\n";
         return 1;
     }
-    if( strlen(wav_filename)==0 ) {
-        strncpy( wav_filename, gym_filename, 512 );
-        int dot = strlen( wav_filename) - 3;
-        wav_filename[dot]=0;
-        strcat( wav_filename, "wav");
-    }
-
     // determines the chip type
+    bool dump_adpcm=false, dump_psg=false;
     switch( gym->chip() ) {
-        case RipParser::ym2203: cerr << "YM2203 tune.\n"; break;
+        case RipParser::ym2203: cerr << "YM2203 tune.\n"; dump_psg=true; break;
         case RipParser::ym2612: cerr << "YM2612 tune.\n"; break;
-        case RipParser::ym2610: cerr << "YM2610 tune.\n"; break;
+        case RipParser::ym2610: cerr << "YM2610 tune.\n"; dump_adpcm=true; dump_psg=true; break;
         default: cerr << "ERROR: Unknown chip (" << gym->chip() << ") in VGM file\n"; return 1;
     }
 
@@ -317,8 +377,7 @@ int main(int argc, char** argv, char** env) {
     // cerr << "Main loop\n";
     vluint64_t wait=0;
     int last_sample=0;
-    WaveWritter wav(wav_filename, SAMPLERATE, dump_hex);
-
+    WaveOutputs waves( wav_filename, SAMPLERATE, dump_hex, dump_adpcm, dump_psg );
     // forced values
     list<YMcmd> forced_values;
     // forced_values.push_back( {0, 0xb4, 0x40} );
@@ -348,7 +407,7 @@ int main(int argc, char** argv, char** env) {
                 // skip initial set of zero's
                 if( !skip_zeros || snd[0]!=0 || snd[1]!=0 || snd[2]!=0) {
                     skip_zeros=false;
-                    wav.write( snd );
+                    waves.write( top );
                 }
                 next_sample = sim_time.get_time() + SAMPLING_PERIOD;
             }

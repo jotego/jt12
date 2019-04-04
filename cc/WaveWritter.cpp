@@ -15,7 +15,8 @@ void WaveWritter::write( int16_t* lr ) {
     }
 }
 
-WaveWritter::WaveWritter( const char *filename, int sample_rate, bool hex ) {
+void WaveWritter::Constructor( const char *filename, int sample_rate, bool hex ) {
+    name = filename;
     fsnd.open(filename, ios_base::binary);
     dump_hex = hex;
     if( dump_hex ) {

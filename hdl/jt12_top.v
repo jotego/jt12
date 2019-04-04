@@ -49,6 +49,10 @@ module jt12_top (
     output          [ 7:0] psg_C,
     output  signed  [15:0] fm_snd_left,
     output  signed  [15:0] fm_snd_right,
+    output  signed  [15:0] adpcmA_l,
+    output  signed  [15:0] adpcmA_r,
+    output  signed  [15:0] adpcmB_l,
+    output  signed  [15:0] adpcmB_r,
     // combined output
     output          [ 9:0] psg_snd,
     output  signed  [15:0] snd_right, // FM+PSG
@@ -132,14 +136,12 @@ wire    [3:0]   psg_addr;
 wire    [7:0]   psg_data, psg_dout;
 wire            psg_wr_n;
 // ADPCM-A
-wire signed [15:0]  adpcmA_l, adpcmA_r;
 wire [15:0] addr_a;
 wire [ 2:0] up_addr, up_lracl;
 wire        up_start, up_end;
 wire [ 7:0] aon_a, lracl;
 wire [ 5:0] atl_a;     // ADPCM Total Level
 // APDCM-B
-wire signed [15:0]  adpcmB_l, adpcmB_r;
 wire        acmd_on_b;     // Control - Process start, Key On
 wire        acmd_rep_b;    // Control - Repeat
 wire        acmd_rst_b;    // Control - Reset

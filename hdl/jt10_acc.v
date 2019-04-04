@@ -81,14 +81,24 @@ always @(*)
         {2'd0,3'd2}: begin // ADPCM-A:
             acc_input_l = adpcmA_l<<3;
             acc_input_r = adpcmA_r<<3;
+            `ifndef NOMIX
             acc_en_l    = 1'b1;
             acc_en_r    = 1'b1;
+            `else 
+            acc_en_l    = 1'b0;
+            acc_en_r    = 1'b0;
+            `endif
         end
         {2'd0,3'd6}: begin // ADPCM-B:
             acc_input_l = adpcmB_l<<2; // To do: add limiter
             acc_input_r = adpcmB_r<<2;
+            `ifndef NOMIX
             acc_en_l    = 1'b1;
             acc_en_r    = 1'b1;
+            `else 
+            acc_en_l    = 1'b0;
+            acc_en_r    = 1'b0;
+            `endif
         end
         default: begin
             acc_input_l = opext;

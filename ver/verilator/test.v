@@ -52,6 +52,16 @@ module top(
     output  signed  [15:0]  snd_right,
     output  signed  [15:0]  snd_left,
     output          snd_sample,
+    // separated outputs
+    output   [ 7:0] psg_A,
+    output   [ 7:0] psg_B,
+    output   [ 7:0] psg_C,
+    output   [15:0] fm_snd_left,
+    output   [15:0] fm_snd_right,
+    output   [15:0] adpcmA_l,
+    output   [15:0] adpcmA_r,
+    output   [15:0] adpcmB_l,       
+    output   [15:0] adpcmB_r,       
     // Megadrive PSG
     input           psg_wr_n,
     output   [10:0] psg_snd,
@@ -95,11 +105,15 @@ u_jt12(
     .snd_left       ( snd_left  ),
     .snd_sample     ( snd_sample),
     // Separated output
-    .psg_A          (),
-    .psg_B          (),
-    .psg_C          (),
-    .fm_snd_left    (),
-    .fm_snd_right   (),
+    .psg_A          ( psg_A         ),
+    .psg_B          ( psg_B         ),
+    .psg_C          ( psg_C         ),
+    .fm_snd_left    ( fm_snd_left   ),
+    .fm_snd_right   ( fm_snd_right  ),
+    .adpcmA_l       ( adpcmA_l      ),
+    .adpcmA_r       ( adpcmA_r      ),
+    .adpcmB_l       ( adpcmB_l      ),
+    .adpcmB_r       ( adpcmB_r      ),    
     // combined output
     .psg_snd        ()  
 );
