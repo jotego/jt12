@@ -208,7 +208,7 @@ int main(int argc, char** argv, char** env) {
     PSGCmdWritter psg_writter(top);
     bool trace = false, slow=false;
     RipParser *gym;
-    bool forever=true, dump_hex=false;
+    bool forever=true, dump_hex=false, decode_pcm=true;
     char *gym_filename;
     SimTime sim_time;
     int SAMPLERATE=0;
@@ -240,6 +240,10 @@ int main(int argc, char** argv, char** env) {
             sim_time.set_time_limit( time_limit );
             continue;
         }
+        if( string(argv[k])=="-nodecode" ) {
+            decode_pcm=false;
+            continue;
+        }        
         if( string(argv[k])=="-noam" ) {
             writter.block( 0xF0, 0x60, [](int v){return v&0x7f;} );
             continue;
@@ -347,7 +351,7 @@ int main(int argc, char** argv, char** env) {
         top->trace(tfp,99);
         tfp->open("/dev/stdout");
     }
-
+    gym->set_decodeADPCM( decode_pcm );
     // Reset
     top->rst = 1;
     top->clk = 0;

@@ -347,7 +347,12 @@ void VGMParser::open(const char* filename, int limit) {
     }
     done=false;
     // open translation file
-    ftrans.open("last.jtt");
+    string aux = filename;
+    auto pos = aux.find_last_of('/');
+    if( pos == string::npos ) pos=0; else pos++;
+    aux = aux.substr( pos ); // trim path
+    aux = aux+".jtt";
+    ftrans.open(aux);
     cur_time=0;
     if( stream_data != NULL ) { delete stream_data; stream_data=NULL; }
     data_offset=0;
@@ -564,7 +569,7 @@ int VGMParser::parse() {
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
-                            decode_save( buf, length, rom_start, true );
+                            if(decode) decode_save( buf, length, rom_start, true );
                             cerr << "INFO: read " << dec << length << " bytes into ADPCM-A ROM at 0x"
                                  << hex << rom_start <<
                                  " (ADDR 0x" << hex << (rom_start>>8) <<
@@ -582,7 +587,7 @@ int VGMParser::parse() {
                         length -= 8;
                         if( length > 0) {
                             file.read( buf, length );
-                            decode_save( buf, length, rom_start, false );
+                            if(decode) decode_save( buf, length, rom_start, false );
                             cerr << "INFO: read " << dec << length << " bytes into ADPCM-B ROM at 0x"
                                  << hex << rom_start <<
                                  " (ADDR 0x" << hex << (rom_start>>8) <<

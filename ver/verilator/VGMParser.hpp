@@ -14,6 +14,7 @@ public:
 protected:
     int clk_period; // synthesizer clock period
     chip_type chip_cfg;
+    bool decode;    // enable decode and .wav/.dec of ADPCM rom files
 public:
     char cmd, val, addr;
     uint64_t wait;
@@ -31,7 +32,8 @@ public:
     }
     virtual void saveADPCMA(const char* filename) {};
     virtual void saveADPCMB(const char* filename) {};
-    RipParser(int c) { clk_period = c; }
+    RipParser(int c) { clk_period = c; decode=true; }
+    void set_decodeADPCM( bool b ) { decode=b; }
     enum { cmd_error=-2, cmd_finish=-1, cmd_write=0, cmd_wait=1, cmd_psg=2 };
     chip_type chip() { return chip_cfg; }
     virtual int period();

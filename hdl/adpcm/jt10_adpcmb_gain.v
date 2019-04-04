@@ -30,57 +30,10 @@ module jt10_adpcmb_gain(
     output reg signed [15:0] pcm_out
 );
 
-reg [9:0] lin_gain;
+wire signed [15:0] factor = {8'd0, tl};
+wire signed [31:0] pcm_mul = pcm_in * factor; // linear gain
 
-always @(posedge clk or negedge rst_n) begin
-    if( !rst_n)
-        lin_gain <= 'd0;
-    else begin
-        case( ~tl[2:0] )
-            3'd0: lin_gain <= 10'd512;
-            3'd1: lin_gain <= 10'd470;
-            3'd2: lin_gain <= 10'd431;
-            3'd3: lin_gain <= 10'd395;
-            3'd4: lin_gain <= 10'd362;
-            3'd5: lin_gain <= 10'd332;
-            3'd6: lin_gain <= 10'd305;
-            3'd7: lin_gain <= 10'd280;
-        endcase
-    end
-end
-
-reg signed [15:0] pcm_sh;
-reg signed [31:0] pcm_mul;
-reg toggle;
-
-wire signed [15:0] lins = {6'b0,lin_gain};
-
-always @(posedge clk or negedge rst_n)
-    if( !rst_n ) begin
-        toggle <= 'b0;
-    end else if(cen55) begin
-        pcm_mul <= lins * pcm_in;
-        pcm_out <= pcm_sh;
-        toggle  <= ~toggle;
-    end
-
-reg toggle_last;
-reg [4:0] shift;
-
-always @(posedge clk or negedge rst_n)
-    if( !rst_n ) begin
-        shift  <= 'd0;
-        pcm_sh <= 'd0;
-    end else begin
-        toggle_last <= toggle;
-        if( toggle != toggle_last) begin
-            pcm_sh <= pcm_mul[24:9];
-            shift  <= ~tl[7:3];
-        end
-        if( shift != 5'd0 ) begin
-            pcm_sh <= pcm_sh>>>1;
-            shift  <= shift-5'd1;
-        end
-    end
+always @(posedge clk)
+    pcm_out <= pcm_mul[23:8];
 
 endmodule // jt10_adpcm_gain

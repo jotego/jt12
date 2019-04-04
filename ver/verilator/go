@@ -88,7 +88,7 @@ while [ $# -gt 0 ]; do
         shift
         continue
     fi    
-    if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "$1" = "-mute"  ]]; then
+    if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "$1" = "-mute" || "$1" = "-nodecode" ]]; then
         EXTRA="$EXTRA $1"
         if [[ "$1" = -mute ]]; then
             shift
