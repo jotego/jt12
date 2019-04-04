@@ -1,4 +1,9 @@
 ym2610
+
+# generate ROM file as:
+# go -2610 -f mslug02.vgz -time 20 -d NOFM
+# cp adpcmb.rom b_710300.rom
+
 load_adpcmb b_710300.rom
 blr c0
 btl ff

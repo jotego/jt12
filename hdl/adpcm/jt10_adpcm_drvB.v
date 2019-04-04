@@ -23,8 +23,8 @@ module jt10_adpcm_drvB(
     input           rst_n,
     input           clk,
     input           cen,      // 8MHz cen
-    input           cen55,    // clk & cen = 55 kHz
-
+    input           cen55,    // clk & cen55  =  55 kHz
+    input           cen333,   // clk &c en333 = 333 kHz
     // Control
     input           acmd_on_b,  // Control - Process start, Key On
     input           acmd_rep_b, // Control - Repeat
@@ -93,7 +93,9 @@ wire signed [15:0] pcmdec, pcmgain;
 jt10_adpcmb u_decoder(
     .rst_n  ( rst_n          ),
     .clk    ( clk            ),
-    .cen    ( cen_dec        ),
+    //.cen    ( cen_dec        ),
+    .cen    ( cen333         ),
+    .adv    ( adv            ),
     .data   ( din            ),
     .chon   ( acmd_on_b      ),
     .pcm    ( pcmdec         )

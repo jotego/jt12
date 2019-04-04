@@ -1,6 +1,6 @@
 /* This file is part of JT12.
 
- 
+
     JT12 program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -27,15 +27,16 @@ module jt10_adpcmb(
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input   [3:0]   data,
     input           chon,       // high if this channel is on
+    input           adv,
     output signed [15:0] pcm
 );
 
 localparam stepw = 15;
 
-reg signed [15:0] x1, x2, x3, x4, x5, x6;
-reg [stepw-1:0] step1, step2, step6;
-reg [stepw+1:0] step3, step4, step5;
-assign pcm = x2;
+reg signed [15:0] x1, x2, x3, x4, x5, x6, next_x5;
+reg [stepw-1:0] step1, step2, step6, step3, step4, step5;
+reg [stepw+1:0] next_step3, next_step4, next_step5;
+assign pcm = x6;
 
 reg  [18:0] d2l;
 reg  [15:0] d3,d4;
@@ -66,7 +67,7 @@ reg [3:0] data2;
 
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
-        x1 <= 'd0; step1 <= 'd127; 
+        x1 <= 'd0; step1 <= 'd127;
         x2 <= 'd0; step2 <= 'd127;
         x3 <= 'd0; step3 <= 'd127;
         x4 <= 'd0; step4 <= 'd127;
@@ -89,7 +90,8 @@ always @( posedge clk or negedge rst_n )
         d3        <= d2l[18:3]; // 16 bits
         sign3     <= sign2;
         x3        <= x2;
-        step3     <= step2l[22:6];
+        next_step3<= step2l[22:6];
+        step3     <= step2;
         chon3     <= chon2;
         // III 2's complement of d3 if necessary
         d4        <= sign3 ? ~d3+16'b1 : d3;
@@ -97,26 +99,34 @@ always @( posedge clk or negedge rst_n )
         signEqu4  <= sign3 == x3[15];
         x4        <= x3;
         step4     <= step3;
+        next_step4<= next_step3;
         chon4     <= chon3;
         // IV   Advance the waveform
-        x5        <= x4+d4;
+        x5        <= x4;
+        next_x5   <= x4+d4;
         sign5     <= sign4;
         signEqu5  <= signEqu4;
         step5     <= step4;
+        next_step5<= next_step4;
         chon5     <= chon4;
         // V: limit or reset outputs
-        if( chon5 ) begin
-            if( signEqu5 && (sign5!=x5[15]) )
-                x6 <= sign5 ? 16'h8000 : 16'h7FFF;
-            else
-                x6 <= x5;
+        if( chon5 ) begin // update values if needed
+            if( adv ) begin
+                    if( signEqu5 && (sign5!=next_x5[15]) )
+                        x6 <= sign5 ? 16'h8000 : 16'h7FFF;
+                    else
+                        x6 <= next_x5;
 
-            if( step5 < 127 )
-                step6  <= 15'd127;
-            else if( step5 > 24576 )
-                step6  <= 15'd24576;
-            else
-                step6 <= step5[14:0];
+                    if( next_step5 < 127 )
+                        step6  <= 15'd127;
+                    else if( next_step5 > 24576 )
+                        step6  <= 15'd24576;
+                    else
+                        step6 <= next_step5[14:0];
+                end else begin
+                    x6    <= x5;
+                    step6 <= step5;
+                end
         end else begin
             x6      <= 'd0;
             step6   <= 'd127;
@@ -127,4 +137,4 @@ always @( posedge clk or negedge rst_n )
     end
 
 
-endmodule // jt10_adpcm    
+endmodule // jt10_adpcm

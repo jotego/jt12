@@ -201,7 +201,8 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .clk        ( clk           ),
         .cen        ( cen           ),
         .cen55      ( clk_en_55     ),
-
+        .cen333     ( clk_en_adpcm3 ),
+        
         // Control
         .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
         .acmd_rep_b ( acmd_rep_b    ),  // Control - Repeat

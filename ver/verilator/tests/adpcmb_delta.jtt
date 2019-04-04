@@ -1,0 +1,26 @@
+ym2610
+
+blr c0
+btl ff
+bstart_msb 00
+bstart_lsb 00
+bend_msb   ff
+bend_lsb   ff
+
+bdelta_msb 55
+bdelta_lsb 55
+
+bctl 80
+wait 5000
+
+bctl 1
+bdelta_msb 15
+bdelta_lsb 55
+bctl 80
+wait 5000
+
+bctl 1
+bdelta_msb aa
+bdelta_lsb aa
+bctl 80
+wait 5000

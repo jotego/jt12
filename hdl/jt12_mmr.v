@@ -342,8 +342,8 @@ always @(posedge clk) begin : memory_mapped_registers
                             4'd3: astart_b [15:8] <= din;
                             4'd4: aend_b   [ 7:0] <= din;
                             4'd5: aend_b   [15:8] <= din;
-                            4'h9: adeltan_b[15:8] <= din;
-                            4'ha: adeltan_b[ 7:0] <= din;
+                            4'h9: adeltan_b[ 7:0] <= din;
+                            4'ha: adeltan_b[15:8] <= din;
                             4'hb: aeg_b           <= din;
                             4'hc: flag_ctl        <= {din[7],din[5:0]}; // this lasts a single clock cycle
                             default:;
