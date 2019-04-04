@@ -26,6 +26,7 @@ module jt10_cen_burst #(parameter cntmax=3'd6, cntw=3)(
     input           clk,
     input           cen,      // 8MHz cen
     input           start,
+    input           start_cen,
     output          cen_out
 );
 
@@ -39,7 +40,7 @@ always @(posedge clk or negedge rst_n)
         pass <= 1'b0;
     end else if(cen) begin
         last_start <= start;
-        if( start && !last_start ) begin
+        if( start && start_cen ) begin
             cnt  <= 'd0;
             pass <= 1'b1;
         end else begin

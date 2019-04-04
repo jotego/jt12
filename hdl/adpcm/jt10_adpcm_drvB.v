@@ -80,6 +80,7 @@ jt10_cen_burst #(.cntmax(3'd5),.cntw(3))u_burst(
     .clk         ( clk             ),
     .cen         ( cen             ),
     .start       ( adv2[1]         ),
+    .start_cen   ( cen55           ),
     .cen_out     ( cen_dec         )
 );
 
