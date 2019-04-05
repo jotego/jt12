@@ -39,7 +39,7 @@ public:
     vluint64_t get_time_limit() { return time_limit; }
     vluint64_t get_time() { return main_time; }
     int get_time_s() { return main_time/1000000000; }
-    int get_time_ms() { return main_time/1000000; }
+    int get_time_ms() { return main_time/1000'000; }
     bool next_quarter() {
         if( !toggle ) {
             main_next = main_time + SEMIPERIOD;
@@ -140,11 +140,13 @@ class WaveOutputs {
     class WaveWritter* fm;
     class WaveWritter* psg;
     class WaveWritter* adpcmA;
-    class WaveWritter* adpcmB;    
+    class WaveWritter* adpcmB;
+    bool nomix;
 public:
     WaveOutputs( const string& filename, int sample_rate, bool dump_hex, bool dump_adpcm, bool dump_psg );
     ~WaveOutputs();
     void write( class Vtop *top );
+    void set_nomix(bool _nomix) {nomix=_nomix;}
 };
 
 WaveOutputs::WaveOutputs( const string& filename, int sample_rate, bool dump_hex, bool dump_adpcm, bool dump_psg ) {
@@ -157,6 +159,7 @@ WaveOutputs::WaveOutputs( const string& filename, int sample_rate, bool dump_hex
     adpcmA = dump_adpcm ? new WaveWritter( base_name+"_adpcmA.wav", sample_rate, dump_hex ) : 0;
     adpcmB = dump_adpcm ? new WaveWritter( base_name+"_adpcmB.wav", sample_rate, dump_hex ) : 0;
     psg    = dump_psg   ? new WaveWritter( base_name+"_psg.wav",    sample_rate, dump_hex ) : 0;
+    nomix=false;
 }
 
 WaveOutputs::~WaveOutputs() {
@@ -168,36 +171,51 @@ WaveOutputs::~WaveOutputs() {
     delete fm;     fm=0;
 }
 
+
+
 void WaveOutputs::write( class Vtop *top ) {
     int16_t snd[3]; // 0=left, 1=right, 2=mono (added to 0 and 1)
-    snd[0] = top->snd_left;
-    snd[1] = top->snd_right;
     snd[2] = top->psg_snd*2;    // Megadrive PSG
+    if( nomix ) {
+        // JT12 is not mixing the channels: do it here
+        int left, right;
+        const int maxpos = 0x7fff;
+        const int minneg = ~0x7fff;
+
+        left  = (int)top->adpcmA_l + (int)top->adpcmB_l + (int)top->fm_snd_left ;
+        right = (int)top->adpcmA_r + (int)top->adpcmB_r + (int)top->fm_snd_right;
+        snd[0] = (int16_t)min( left,  maxpos );
+        snd[1] = (int16_t)max( right, minneg );
+
+    } else { // JT12 is doing the mixing
+        snd[0] = top->snd_left;
+        snd[1] = top->snd_right;
+    }
     mixed->write(snd);
     if(fm) {
         snd[0] = top->fm_snd_left;
         snd[1] = top->fm_snd_right;
         snd[2] = 0;
-        fm->write(snd);        
+        fm->write(snd);
     }
     if(adpcmA) {
         snd[0] = top->adpcmA_l;
         snd[1] = top->adpcmA_r;
         snd[2] = 0;
         // cerr << snd[0] << ' ';
-        adpcmA->write(snd);        
+        adpcmA->write(snd);
     }
     if(adpcmB) {
         snd[0] = top->adpcmB_l;
         snd[1] = top->adpcmB_r;
         snd[2] = 0;
-        adpcmB->write(snd);        
+        adpcmB->write(snd);
     }
     if(psg) {   // YM2203/2610 PSG
         snd[0] = 0;
         snd[1] = 0;
         snd[2] = top->psg_A + top->psg_B + top->psg_C;
-        psg->write(snd);        
+        psg->write(snd);
     }
 }
 
@@ -212,12 +230,23 @@ int main(int argc, char** argv, char** env) {
     char *gym_filename;
     SimTime sim_time;
     int SAMPLERATE=0;
-    vluint64_t SAMPLING_PERIOD=0;
+    vluint64_t SAMPLING_PERIOD=0, trace_start_time=0;
     string wav_filename;
+    bool nomix=false;
 
     for( int k=1; k<argc; k++ ) {
         if( string(argv[k])=="-trace" ) { trace=true; continue; }
+        if( string(argv[k])=="-trace_start" ) { 
+            int aux;
+            sscanf(argv[++k],"%d",&aux);
+            cerr << "Trace will start at time " << aux << "ms\n";
+            trace_start_time = aux;
+            trace_start_time *= 1000'000;
+            trace=true;
+            continue; 
+        }
         if( string(argv[k])=="-slow" )  { slow=true;  continue; }
+        if( string(argv[k])=="-nomix" )  { nomix=true;  continue; }
         if( string(argv[k])=="-hex" )  { dump_hex=true;  continue; }
         if( string(argv[k])=="-gym" ) {
             gym_filename = argv[++k];
@@ -234,16 +263,16 @@ int main(int argc, char** argv, char** env) {
             int aux;
             sscanf(argv[++k],"%d",&aux);
             vluint64_t time_limit = aux;
-            time_limit *= 1000000;
+            time_limit *= 1000'000;
             forever=false;
-            cerr << "Simulate until " << time_limit/1000000 << "ms\n";
+            cerr << "Simulate until " << time_limit/1000'000 << "ms\n";
             sim_time.set_time_limit( time_limit );
             continue;
         }
         if( string(argv[k])=="-nodecode" ) {
             decode_pcm=false;
             continue;
-        }        
+        }
         if( string(argv[k])=="-noam" ) {
             writter.block( 0xF0, 0x60, [](int v){return v&0x7f;} );
             continue;
@@ -382,6 +411,7 @@ int main(int argc, char** argv, char** env) {
     vluint64_t wait=0;
     int last_sample=0;
     WaveOutputs waves( wav_filename, SAMPLERATE, dump_hex, dump_adpcm, dump_psg );
+    waves.set_nomix(nomix);
     // forced values
     list<YMcmd> forced_values;
     // forced_values.push_back( {0, 0xb4, 0x40} );
@@ -474,7 +504,7 @@ int main(int argc, char** argv, char** env) {
                     goto finish;
             }
         }
-        if(trace) tfp->dump(sim_time.get_time());
+        if( trace && sim_time.get_time()>trace_start_time ) tfp->dump(sim_time.get_time());
     }
 finish:
     gym->saveADPCMA("adpcma.rom");

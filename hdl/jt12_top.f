@@ -44,6 +44,7 @@ adpcm/jt10_adpcm_drvA.v
 adpcm/jt10_adpcm_gain.v
 adpcm/jt10_adpcmb_gain.v
 adpcm/jt10_adpcm.v
+adpcm/jt10_adpcm_div.v
 adpcm/jt10_adpcma_lut.v
 adpcm/jt10_adpcmb.v
 adpcm/jt10_adpcmb_cnt.v

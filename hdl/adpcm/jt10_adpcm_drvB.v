@@ -101,6 +101,46 @@ jt10_adpcmb u_decoder(
     .pcm    ( pcmdec         )
 );
 
+reg signed [15:0] pcmlast, delta_x;
+reg signed [16:0] pre_dx;
+reg start_div=1'b0;
+reg [3:0] deltan, pre_dn;
+
+always @(posedge clk) if(cen55) begin
+    if ( adv2[1] )
+        pre_dn  <= 'd1;
+    else
+        pre_dn <= pre_dn + 1;
+end
+
+
+always @(posedge clk) if(cen55) begin
+    if(adv2[1]) begin
+        pre_dx <= { pcmdec[15], pcmdec } - { pcmlast[15], pcmlast };        
+        pcmlast <= pcmdec;
+        deltan  <= pre_dn;
+    end
+end
+
+always @(posedge clk) if(cen) begin
+    delta_x <= pre_dx[16] ? ~pre_dx[15:0]+1 : pre_dx[15:0];
+    start_div <= adv2[1];
+end
+
+wire [15:0] slope;
+
+jt10_adpcm_div #(.dw(16)) u_div(
+    .rst_n  ( rst_n       ),
+    .clk    ( clk         ),
+    .cen    ( cen         ),
+    .start  ( start_div   ),
+    .a      ( delta_x     ),
+    .b      ( {12'd0, deltan }   ),
+    .d      ( slope       ),
+    .r      (             )
+);
+
+
 jt10_adpcmb_gain u_gain(
     .rst_n  ( rst_n          ),
     .clk    ( clk            ),

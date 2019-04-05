@@ -463,7 +463,11 @@ char *ADPCMbuffer::getptr(int _bufsize ) {
 }
 
 char ADPCMbuffer::get(int offset ) {
-    offset &= mask;
+    //offset &= mask;
+    if( offset > bufsize ) {
+        cerr << "WARNING: ADPCM data requested outside the buffer size\n";
+        return 0;
+    }
     if( data==NULL ) {
         return 0;
     }

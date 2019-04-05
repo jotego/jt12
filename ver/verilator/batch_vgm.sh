@@ -1,3 +1,8 @@
 #!/bin/bash
 
-find ../vgm/ym2610 -name "*.vgz" | parallel go -2610 -d NOMIX -nodecode -f
+if [ ! -e "$1" ]; then
+    echo "Cannot open folder $1"
+    exit 1
+fi
+
+find $1 -name "*.vgz" | parallel go -2610 -nomix -time 8000 -nodecode -f

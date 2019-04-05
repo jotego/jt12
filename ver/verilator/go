@@ -23,6 +23,14 @@ while [ $# -gt 0 ]; do
         shift
         continue
     fi
+    if [ "$1" = "-w0" ]; then
+        shift
+        echo "Signal dump enabled from time $1"
+        DUMPSIGNALS="-trace"
+        EXTRA="$EXTRA -trace_start $1"
+        shift
+        continue
+    fi    
     if [ "$1" = "-slow" ]; then
         echo "Clock divider enabled"
         set_slow
@@ -103,6 +111,12 @@ while [ $# -gt 0 ]; do
         shift
         continue
     fi
+    if [ "$1" = "-nomix" ]; then
+        VERI_EXTRA="-DNOFM $VERI_EXTRA"
+        EXTRA="$EXTRA $1"
+        shift
+        continue
+    fi    
     if [ "$1" = "-runonly" ]; then
         echo Skipping Verilator and make steps
         SKIPMAKE=TRUE
