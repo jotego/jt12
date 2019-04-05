@@ -5,4 +5,4 @@ if [ ! -e "$1" ]; then
     exit 1
 fi
 
-find $1 -name "*.vgz" | parallel go -2610 -nomix -time 8000 -nodecode -f
+find $1 -name "*.vgz" | parallel go -2610 -time 8000 -nodecode -f
