@@ -113,13 +113,17 @@ always @(posedge clk) if(cen55) begin
         pre_dn <= pre_dn + 1;
 end
 
+reg signed [15:0] pcminter;
+wire [15:0] step;
 
 always @(posedge clk) if(cen55) begin
     if(adv2[1]) begin
         pre_dx <= { pcmdec[15], pcmdec } - { pcmlast[15], pcmlast };        
         pcmlast <= pcmdec;
         deltan  <= pre_dn;
+        pcminter <= pcmdec;
     end
+    else pcminter <= pcmdec + step;
 end
 
 always @(posedge clk) if(cen) begin
@@ -127,18 +131,18 @@ always @(posedge clk) if(cen) begin
     start_div <= adv2[1];
 end
 
-wire [15:0] slope;
 
 jt10_adpcm_div #(.dw(16)) u_div(
     .rst_n  ( rst_n       ),
     .clk    ( clk         ),
     .cen    ( cen         ),
-    .start  ( start_div   ),
+    .start  ( start_div & cen55  ),
     .a      ( delta_x     ),
     .b      ( {12'd0, deltan }   ),
-    .d      ( slope       ),
+    .d      ( step        ),
     .r      (             )
 );
+
 
 
 jt10_adpcmb_gain u_gain(
