@@ -95,7 +95,7 @@ jt10_adpcmb u_decoder(
     .clk    ( clk            ),
     //.cen    ( cen_dec        ),
     .cen    ( cen333         ),
-    .adv    ( adv            ),
+    .adv    ( adv & cen55    ),
     .data   ( din            ),
     .chon   ( acmd_on_b      ),
     .pcm    ( pcmdec         )
