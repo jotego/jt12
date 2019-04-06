@@ -16,72 +16,76 @@ function set_slow {
     EXTRA="$EXTRA -slow"    
 }
 
-while [ $# -gt 0 ]; do
-    case "$1" in
-    "-w")
-        echo "Signal dump enabled"
-        DUMPSIGNALS="-trace";;
-    "-w0")
-        shift
-        echo "Signal dump enabled from time $1"
-        DUMPSIGNALS="-trace"
-        EXTRA="$EXTRA -trace_start $1";;
-    "-slow")
-        echo "Clock divider enabled"
-        set_slow;;
-    "-hex")
-        echo "Hexadecimal dump enabled"
-        FAST=
-        EXTRA="$EXTRA -hex";;
-    "-w1")
-        echo "Signal dump enabled (only top level)"
-        DUMPSIGNALS="-trace"
-        VERI_EXTRA="$VERI_EXTRA --trace-depth 1";;
-    "-f")
-        shift
-        if [ ! -e "$1" ]; then
-            echo "Cannot open file " $1 " for GYM parsing"
-            exit 1
-        fi
-        GYM_ARG="-gym"
-        GYM_FILE="$1"
-        if [[ "$WAV_FILE" == "" ]]; then
-            WAV_FILE=$(basename "$GYM_FILE" .vgm).wav
-        fi;;
-    "-time" | "-t")
-        shift
-        EXTRA="$EXTRA -time $1";;
-    "-o")
-        shift
-        WAV_FILE="$1";;
-    "-2203")
-        echo "YM2203 mode (you should also use -slow too if the audio output is important)"
-        CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG";;
-    "-2610")
-        echo "YM2610 mode. The simulation will use real clock dividers for ADCPM accuracy."
-        CHIPTYPE="-DYM2610"
-        set_slow;;
-    "-noam" | "-noks" | "-nomul" | "-mute" | "-nodecode")
-        EXTRA="$EXTRA $1"
-        if [[ "$1" = -mute ]]; then
+function eval_args {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        "-w")
+            echo "Signal dump enabled"
+            DUMPSIGNALS="-trace";;
+        "-w0")
             shift
+            echo "Signal dump enabled from time $1"
+            DUMPSIGNALS="-trace"
+            EXTRA="$EXTRA -trace_start $1";;
+        "-slow")
+            echo "Clock divider enabled"
+            set_slow;;
+        "-hex")
+            echo "Hexadecimal dump enabled"
+            FAST=
+            EXTRA="$EXTRA -hex";;
+        "-w1")
+            echo "Signal dump enabled (only top level)"
+            DUMPSIGNALS="-trace"
+            VERI_EXTRA="$VERI_EXTRA --trace-depth 1";;
+        "-f")
+            shift
+            if [ ! -e "$1" ]; then
+                echo "Cannot open file " $1 " for GYM parsing"
+                exit 1
+            fi
+            GYM_ARG="-gym"
+            GYM_FILE="$1"
+            if [[ "$WAV_FILE" == "" ]]; then
+                WAV_FILE=$(basename "$GYM_FILE" .vgm).wav
+            fi;;
+        "-time" | "-t")
+            shift
+            EXTRA="$EXTRA -time $1";;
+        "-o")
+            shift
+            WAV_FILE="$1";;
+        "-2203")
+            echo "YM2203 mode (you should also use -slow too if the audio output is important)"
+            CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG";;
+        "-2610")
+            echo "YM2610 mode. The simulation will use real clock dividers for ADCPM accuracy."
+            CHIPTYPE="-DYM2610"
+            set_slow;;
+        "-noam" | "-noks" | "-nomul" | "-mute" | "-nodecode")
             EXTRA="$EXTRA $1"
-        fi;;
-    "-d")
+            if [[ "$1" = -mute ]]; then
+                shift
+                EXTRA="$EXTRA $1"
+            fi;;
+        "-d")
+            shift
+            VERI_EXTRA="-D$1 $VERI_EXTRA";;
+        "-nomix")
+            VERI_EXTRA="-DNOFM $VERI_EXTRA"
+            EXTRA="$EXTRA $1";;
+        "-runonly")
+            echo Skipping Verilator and make steps
+            SKIPMAKE=TRUE;;
+        *)
+            echo go: unrecognized option $1
+            exit 1
+        esac
         shift
-        VERI_EXTRA="-D$1 $VERI_EXTRA";;
-    "-nomix")
-        VERI_EXTRA="-DNOFM $VERI_EXTRA"
-        EXTRA="$EXTRA $1";;
-    "-runonly")
-        echo Skipping Verilator and make steps
-        SKIPMAKE=TRUE;;
-    *)
-        echo go: unrecognized option $1
-        exit 1
-    esac
-    shift
-done
+    done
+}
+
+eval_args $JT12_VERILATOR $*
 
 if [[ "$GYM_FILE" = "" ]]; then
     echo "Specify the VGM/GYM/JTT file to parse using the argument -f file_name"

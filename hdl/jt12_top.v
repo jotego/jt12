@@ -223,6 +223,29 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_l    ( adpcmB_l      ),
         .pcm55_r    ( adpcmB_r      )
     );
+    
+    assign snd_sample   = zero;        
+    jt10_acc u_acc(
+        .clk        ( clk           ),
+        .clk_en     ( clk_en        ),
+        .op_result  ( op_result_hd  ),
+        .rl         ( rl            ),
+        .zero       ( zero          ),
+        .s1_enters  ( s2_enters     ),
+        .s2_enters  ( s1_enters     ),
+        .s3_enters  ( s4_enters     ),
+        .s4_enters  ( s3_enters     ),
+        .cur_ch     ( cur_ch        ),
+        .cur_op     ( cur_op        ),
+        .alg        ( alg_I         ),
+        .adpcmA_l   ( adpcmA_l      ),
+        .adpcmA_r   ( adpcmA_r      ),
+        .adpcmB_l   ( adpcmB_l      ),
+        .adpcmB_r   ( adpcmB_r      ),
+        // combined output
+        .left       ( fm_snd_left   ),
+        .right      ( fm_snd_right  )
+    );
 end else begin : gen_adpcm_no
     assign adpcmA_l      = 'd0;
     assign adpcmA_r      = 'd0;
@@ -392,6 +415,7 @@ endgenerate
 
 // YM2203/YM2610 have a PSG
 
+`ifndef NOSSG
 generate
     if( use_ssg==1 ) begin : gen_ssg
         jt49 u_psg( // note that input ports are not multiplexed
@@ -423,6 +447,12 @@ generate
         assign psg_dout = 8'd0;
     end
 endgenerate
+`else
+    assign psg_snd  = 10'd0;
+    assign snd_left = fm_snd_left;
+    assign snd_right= fm_snd_right;
+    assign psg_dout = 8'd0;
+`endif
 
 wire    [ 8:0]  op_result;
 wire    [13:0]  op_result_hd;
@@ -518,34 +548,6 @@ assign op_result_hd = 'd0;
 /* verilator tracing_on */
 
 generate
-    if( use_adpcm==1 ) begin: gen_adpcm_acc // YM2610 accumulator
-        assign snd_sample   = zero;        
-        /* verilator lint_off PINMISSING */
-        jt10_acc u_acc(
-            .clk        ( clk           ),
-            .clk_en     ( clk_en        ),
-            .op_result  ( op_result_hd  ),
-            .rl         ( rl            ),
-            .zero       ( zero          ),
-            .s1_enters  ( s2_enters     ),
-            .s2_enters  ( s1_enters     ),
-            .s3_enters  ( s4_enters     ),
-            .s4_enters  ( s3_enters     ),
-            .cur_ch     ( cur_ch        ),
-            .cur_op     ( cur_op        ),
-            .alg        ( alg_I         ),
-            .adpcmA_l   ( adpcmA_l      ),
-            .adpcmA_r   ( adpcmA_r      ),
-            .adpcmB_l   ( adpcmB_l      ),
-            .adpcmB_r   ( adpcmB_r      ),
-            // combined output
-            .left       ( fm_snd_left   ),
-            .right      ( fm_snd_right  )
-        );
-        /* verilator lint_on PINMISSING */
-        // assign fm_snd_left = pcm55_l;
-        // assign fm_snd_right= pcm55_r;
-    end
     if( use_pcm==1 ) begin: gen_pcm_acc // YM2612 accumulator
         assign fm_snd_right[3:0] = 4'd0;
         assign fm_snd_left [3:0] = 4'd0;
