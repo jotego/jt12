@@ -6,7 +6,7 @@ EXTRA=
 GYM_FILE=
 GYM_ARG=
 FAST=-DFASTDIV
-VERI_EXTRA=
+VERI_EXTRA="-DSIMULATION"
 WAV_FILE=
 CHIPTYPE="-DYM2612 -DMEGADRIVE_PSG"
 SKIPMAKE=FALSE
@@ -37,9 +37,6 @@ while [ $# -gt 0 ]; do
         echo "Signal dump enabled (only top level)"
         DUMPSIGNALS="-trace"
         VERI_EXTRA="$VERI_EXTRA --trace-depth 1";;
-    "-sim")
-        echo "Simulation signals enabled"
-        VERI_EXTRA="$VERI_EXTRA -DSIMULATION";;
     "-f")
         shift
         if [ ! -e "$1" ]; then
