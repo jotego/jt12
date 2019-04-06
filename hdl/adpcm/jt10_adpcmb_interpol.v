@@ -67,7 +67,7 @@ always @(posedge clk) if(cen) begin
     if( adv2[5] ) begin
         start_div <= 1'b1;
         delta_x <= pre_dx[16] ? ~pre_dx[15:0]+1 : pre_dx[15:0];
-        step_sign <= pre_dx[16];
+        next_step_sign <= pre_dx[16];
     end        
 end
 
