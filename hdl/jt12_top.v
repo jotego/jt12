@@ -195,7 +195,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_l    ( adpcmA_l      ),
         .pcm55_r    ( adpcmA_r      )
     );
-
+    /* verilator tracing_off */
     jt10_adpcm_drvB u_adpcm_b(
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
@@ -223,7 +223,8 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_l    ( adpcmB_l      ),
         .pcm55_r    ( adpcmB_r      )
     );
-    
+
+    /* verilator tracing_off */
     assign snd_sample   = zero;        
     jt10_acc u_acc(
         .clk        ( clk           ),

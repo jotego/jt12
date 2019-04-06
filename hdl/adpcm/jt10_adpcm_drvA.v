@@ -181,31 +181,33 @@ initial begin
     fch5 = $fopen("ch5.dec","w");
 end
 
+wire signed [15:0] pcm_mono = pcm18_l+pcm18_r;
+
 reg signed [15:0] pcm_ch0, pcm_ch1, pcm_ch2, pcm_ch3, pcm_ch4, pcm_ch5;
 always @(negedge cen6) begin
     if(chfast==3'd0) begin
-        pcm_ch0 <= pcmdec;
-        $fwrite( fch0, "%d\n", pcmdec );
+        pcm_ch0 <= pcm_mono;
+        $fwrite( fch0, "%d\n", pcm_mono );
     end
     if(chfast==3'd1) begin
-        pcm_ch1 <= pcmdec;
-        $fwrite( fch1, "%d\n", pcmdec );
+        pcm_ch1 <= pcm_mono;
+        $fwrite( fch1, "%d\n", pcm_mono );
     end
     if(chfast==3'd2) begin
-        pcm_ch2 <= pcmdec;
-        $fwrite( fch2, "%d\n", pcmdec );
+        pcm_ch2 <= pcm_mono;
+        $fwrite( fch2, "%d\n", pcm_mono );
     end
     if(chfast==3'd3) begin
-        pcm_ch3 <= pcmdec;
-        $fwrite( fch3, "%d\n", pcmdec );
+        pcm_ch3 <= pcm_mono;
+        $fwrite( fch3, "%d\n", pcm_mono );
     end
     if(chfast==3'd4) begin
-        pcm_ch4 <= pcmdec;
-        $fwrite( fch4, "%d\n", pcmdec );
+        pcm_ch4 <= pcm_mono;
+        $fwrite( fch4, "%d\n", pcm_mono );
     end
     if(chfast==3'd5) begin
-        pcm_ch5 <= pcmdec;
-        $fwrite( fch5, "%d\n", pcmdec );
+        pcm_ch5 <= pcm_mono;
+        $fwrite( fch5, "%d\n", pcm_mono );
     end    
 end
 `endif

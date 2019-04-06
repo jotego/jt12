@@ -142,6 +142,7 @@ class WaveOutputs {
     class WaveWritter* adpcmA;
     class WaveWritter* adpcmB;
     bool nomix;
+    int mix( int pcmA, int pcmB, int fm );    
 public:
     WaveOutputs( const string& filename, int sample_rate, bool dump_hex, bool dump_adpcm, bool dump_psg );
     ~WaveOutputs();
@@ -171,6 +172,12 @@ WaveOutputs::~WaveOutputs() {
     delete fm;     fm=0;
 }
 
+int WaveOutputs::mix( int pcmA, int pcmB, int fm ) {
+    int s = pcmA<<3;
+    s += pcmB>>1;
+    s += fm;
+    return s>>3;
+}
 
 
 void WaveOutputs::write( class Vtop *top ) {
@@ -182,8 +189,8 @@ void WaveOutputs::write( class Vtop *top ) {
         const int maxpos = 0x7fff;
         const int minneg = ~0x7fff;
 
-        left  = (int)top->adpcmA_l + (int)top->adpcmB_l + (int)top->fm_snd_left ;
-        right = (int)top->adpcmA_r + (int)top->adpcmB_r + (int)top->fm_snd_right;
+        left  = mix( top->adpcmA_l, top->adpcmB_l, top->fm_snd_left  );
+        right = mix( top->adpcmA_r, top->adpcmB_r, top->fm_snd_right );
         snd[0] = (int16_t)min( left,  maxpos );
         snd[1] = (int16_t)max( right, minneg );
 

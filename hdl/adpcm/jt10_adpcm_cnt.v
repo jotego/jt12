@@ -47,7 +47,7 @@ reg [5:0] done_sr, zero;
 
 reg roe_n6, roe_n1;
 
-reg clr2;
+reg clr2, clr3, clr4, clr5, clr6;
 
 assign addr_out = addr1[20:1];
 assign sel      = addr1[0];
@@ -97,25 +97,28 @@ always @(posedge clk or negedge rst_n)
     end else if( cen ) begin
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | on1);
-        clr2   <= aon && !on1; // Each time a A-ON is sent the address counter restarts
+        clr2   <= aoff | (aon && !on1); // Each time a A-ON is sent the address counter restarts
         start2 <= up_start ? addr_in[11:0] : start1;
         end2   <= up_end   ? addr_in[11:0] : end1;
         bank2  <= (up_end | up_start) ? addr_in[15:12] : bank1;
 
-        addr3  <= clr2 ? {start2,9'd0} : addr2;
+        addr3  <= addr2; // clr2 ? {start2,9'd0} : addr2;
         on3    <= on2;
+        clr3   <= clr2;
         start3 <= start2;
         end3   <= end2;
         bank3  <= bank2;
 
         addr4  <= addr3;
         on4    <= on3;
+        clr4   <= clr3;
         start4 <= start3;
         end4   <= end3;
         bank4  <= bank3;
 
         addr5  <= addr4;
         on5    <= on4;
+        clr5   <= clr4;
         done5  <= addr4[20:9] == end4;
         start5 <= start4;
         end5   <= end4;
@@ -123,6 +126,7 @@ always @(posedge clk or negedge rst_n)
         // V
         addr6  <= addr5;
         on6    <= on5;
+        clr6   <= clr5 & div3;
         done6  <= done5;
         start6 <= start5;
         end6   <= end5;
@@ -130,7 +134,7 @@ always @(posedge clk or negedge rst_n)
         roe_n6 <= !(on5 && !done5);
         sumup6 <= sumup5;
 
-        addr1  <= sumup6 ? addr6+21'd1 :addr6;
+        addr1  <= clr6 ? {start6,9'd0} : (sumup6 ? addr6+21'd1 :addr6);
         on1    <= on6;
         done1  <= done6;
         start1 <= start6;
