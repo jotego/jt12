@@ -31,15 +31,18 @@ module jt10_adpcmb(
     output signed [15:0] pcm
 );
 
-localparam stepw = 15;
+localparam stepw = 15, xw=16;
 
-reg signed [15:0] x1, x2, x3, x4, x5, x6, next_x5;
+reg signed [xw-1:0] x1, x2, x3, x4, x5, x6, next_x5;
 reg [stepw-1:0] step1, step2, step6, step3, step4, step5;
 reg [stepw+1:0] next_step3, next_step4, next_step5;
-assign pcm = x6;
+assign pcm = x6[xw-1:xw-16];
+
+wire [xw-1:0] limpos = 32767;
+wire [xw-1:0] limneg = -32768;
 
 reg  [18:0] d2l;
-reg  [15:0] d3,d4;
+reg  [xw-1:0] d3,d4;
 reg  [3:0]  d2;
 reg         sign2, sign3, sign4, sign5;
 reg  [7:0]  step_val;
@@ -87,16 +90,16 @@ always @( posedge clk or negedge rst_n )
         step2     <= step1;
         chon2     <= chon;
         // II multiply and obtain the offset
-        d3        <= d2l[18:3]; // 16 bits
+        d3        <= { {xw-16{1'b0}}, d2l[18:3] }; // xw bits
         sign3     <= sign2;
         x3        <= x2;
         next_step3<= step2l[22:6];
         step3     <= step2;
         chon3     <= chon2;
         // III 2's complement of d3 if necessary
-        d4        <= sign3 ? ~d3+16'b1 : d3;
+        d4        <= sign3 ? ~d3+1 : d3;
         sign4     <= sign3;
-        signEqu4  <= sign3 == x3[15];
+        signEqu4  <= sign3 == x3[xw-1];
         x4        <= x3;
         step4     <= step3;
         next_step4<= next_step3;
@@ -112,8 +115,8 @@ always @( posedge clk or negedge rst_n )
         // V: limit or reset outputs
         if( chon5 ) begin // update values if needed
             if( adv ) begin
-                    if( signEqu5 && (sign5!=next_x5[15]) )
-                        x6 <= sign5 ? 16'h8000 : 16'h7FFF;
+                    if( signEqu5 && (sign5!=next_x5[xw-1]) )
+                        x6 <= sign5 ? limneg : limpos;
                     else
                         x6 <= next_x5;
 

@@ -56,5 +56,5 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/j
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcm_drvB.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcm_gain.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_cen_burst.v ]
-set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_cen_burst.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcm_div.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt10_acc.v ]

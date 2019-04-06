@@ -17,47 +17,30 @@ function set_slow {
 }
 
 while [ $# -gt 0 ]; do
-    if [ "$1" = "-w" ]; then
+    case "$1" in
+    "-w")
         echo "Signal dump enabled"
-        DUMPSIGNALS="-trace"
-        shift
-        continue
-    fi
-    if [ "$1" = "-w0" ]; then
+        DUMPSIGNALS="-trace";;
+    "-w0")
         shift
         echo "Signal dump enabled from time $1"
         DUMPSIGNALS="-trace"
-        EXTRA="$EXTRA -trace_start $1"
-        shift
-        continue
-    fi    
-    if [ "$1" = "-slow" ]; then
+        EXTRA="$EXTRA -trace_start $1";;
+    "-slow")
         echo "Clock divider enabled"
-        set_slow
-        shift
-        continue
-    fi  
-    if [ "$1" = "-hex" ]; then
+        set_slow;;
+    "-hex")
         echo "Hexadecimal dump enabled"
         FAST=
-        EXTRA="$EXTRA -hex"
-        shift
-        continue
-    fi  
-    if [ "$1" = "-w1" ]; then
+        EXTRA="$EXTRA -hex";;
+    "-w1")
         echo "Signal dump enabled (only top level)"
         DUMPSIGNALS="-trace"
-        VERI_EXTRA="$VERI_EXTRA --trace-depth 1"
-        shift
-        continue
-    fi
-    if [ "$1" = "-sim" ]; then
+        VERI_EXTRA="$VERI_EXTRA --trace-depth 1";;
+    "-sim")
         echo "Simulation signals enabled"
-        VERI_EXTRA="$VERI_EXTRA -DSIMULATION"
-        shift
-        continue
-    fi
-    if [ "$1" = "-f" ]; then
+        VERI_EXTRA="$VERI_EXTRA -DSIMULATION";;
+    "-f")
         shift
         if [ ! -e "$1" ]; then
             echo "Cannot open file " $1 " for GYM parsing"
@@ -67,64 +50,40 @@ while [ $# -gt 0 ]; do
         GYM_FILE="$1"
         if [[ "$WAV_FILE" == "" ]]; then
             WAV_FILE=$(basename "$GYM_FILE" .vgm).wav
-        fi
+        fi;;
+    "-time" | "-t")
         shift
-        continue
-    fi
-    if [ "$1" = "-time" ]; then
+        EXTRA="$EXTRA -time $1";;
+    "-o")
         shift
-        EXTRA="$EXTRA -time $1"
-        shift
-        continue
-    fi
-    if [ "$1" = "-o" ]; then
-        shift
-        WAV_FILE="$1"
-        shift
-        continue
-    fi  
-    if [ "$1" = "-2203" ]; then
+        WAV_FILE="$1";;
+    "-2203")
         echo "YM2203 mode (you should also use -slow too if the audio output is important)"
-        CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG"
-        shift
-        continue
-    fi
-    if [ "$1" = "-2610" ]; then
+        CHIPTYPE="-DYM2203 -DMEGADRIVE_PSG";;
+    "-2610")
         echo "YM2610 mode. The simulation will use real clock dividers for ADCPM accuracy."
         CHIPTYPE="-DYM2610"
-        set_slow
-        shift
-        continue
-    fi    
-    if [[ "$1" = "-noam" || "$1" = "-noks" || "$1" = "-nomul" || "$1" = "-mute" || "$1" = "-nodecode" ]]; then
+        set_slow;;
+    "-noam" | "-noks" | "-nomul" | "-mute" | "-nodecode")
         EXTRA="$EXTRA $1"
         if [[ "$1" = -mute ]]; then
             shift
             EXTRA="$EXTRA $1"
-        fi
+        fi;;
+    "-d")
         shift
-        continue
-    fi
-    if [ "$1" = "-d" ]; then
-        shift
-        VERI_EXTRA="-D$1 $VERI_EXTRA"
-        shift
-        continue
-    fi
-    if [ "$1" = "-nomix" ]; then
+        VERI_EXTRA="-D$1 $VERI_EXTRA";;
+    "-nomix")
         VERI_EXTRA="-DNOFM $VERI_EXTRA"
-        EXTRA="$EXTRA $1"
-        shift
-        continue
-    fi    
-    if [ "$1" = "-runonly" ]; then
+        EXTRA="$EXTRA $1";;
+    "-runonly")
         echo Skipping Verilator and make steps
-        SKIPMAKE=TRUE
-        shift
-        continue
-    fi  
-    echo go: unrecognized option $1
-    exit 1
+        SKIPMAKE=TRUE;;
+    *)
+        echo go: unrecognized option $1
+        exit 1
+    esac
+    shift
 done
 
 if [[ "$GYM_FILE" = "" ]]; then
