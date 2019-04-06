@@ -217,6 +217,7 @@ always @(posedge clk) begin : up_counter
     end
 end
 
+`ifndef NOFM
 jt12_kon #(.num_ch(num_ch)) u_kon(
     .rst        ( rst       ),
     .clk        ( clk       ),
@@ -367,5 +368,5 @@ end else begin // YM2203 has no stereo output
 end
     
 endgenerate
-
+`endif
 endmodule
