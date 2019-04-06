@@ -1,0 +1,14 @@
+ym2610
+
+# Fatal Fury 3, track 02
+load_adpcmb ff3_02.rom
+
+blr c0
+btl ff
+bstart_msb 74
+bstart_lsb 9d
+bend_msb   75
+bend_lsb   45
+
+bctl 80
+wait 20000

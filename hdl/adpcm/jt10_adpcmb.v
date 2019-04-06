@@ -33,10 +33,10 @@ module jt10_adpcmb(
 
 localparam stepw = 15, xw=16;
 
-reg signed [xw-1:0] x1, x2, x3, x4, x5, x6, next_x5;
-reg [stepw-1:0] step1, step2, step6, step3, step4, step5;
-reg [stepw+1:0] next_step3, next_step4, next_step5;
-assign pcm = x6[xw-1:xw-16];
+reg signed [xw-1:0] x1, next_x5;
+reg [stepw-1:0] step1;
+reg [stepw+1:0] next_step3;
+assign pcm = x1[xw-1:xw-16];
 
 wire [xw-1:0] limpos = 32767;
 wire [xw-1:0] limneg = -32768;
@@ -44,7 +44,6 @@ wire [xw-1:0] limneg = -32768;
 reg  [18:0] d2l;
 reg  [xw-1:0] d3,d4;
 reg  [3:0]  d2;
-reg         sign2, sign3, sign4, sign5;
 reg  [7:0]  step_val;
 reg  [22:0] step2l;
 
@@ -55,88 +54,58 @@ always @(*) begin
         3'b1_01: step_val = 8'd102;
         3'b1_10: step_val = 8'd128;
         3'b1_11: step_val = 8'd153;
-    endcase // data[2:0]
-    d2l    = d2 * step2; // 4 + 15 = 19 bits -> div by 8 -> 16 bits
-    step2l = step_val * step2; // 15 bits + 8 bits = 23 bits -> div 64 -> 17 bits
+    endcase
+    d2l    = d2 * step1; // 4 + 15 = 19 bits -> div by 8 -> 16 bits
+    step2l = step_val * step1; // 15 bits + 8 bits = 23 bits -> div 64 -> 17 bits
 end
 
 // Original pipeline: 6 stages, 6 channels take 36 clock cycles
 // 8 MHz -> /12 divider -> 666 kHz
 // 666 kHz -> 18.5 kHz = 55.5/3 kHz
 
-reg chon2, chon3, chon4, chon5;
-reg signEqu4, signEqu5;
 reg [3:0] data2;
+reg sign_data;
+
+reg [3:0] adv2;
 
 always @( posedge clk or negedge rst_n )
     if( ! rst_n ) begin
         x1 <= 'd0; step1 <= 'd127;
-        x2 <= 'd0; step2 <= 'd127;
-        x3 <= 'd0; step3 <= 'd127;
-        x4 <= 'd0; step4 <= 'd127;
-        x5 <= 'd0; step5 <= 'd127;
-        x6 <= 'd0; step6 <= 'd127;
         d2 <= 'd0; d3 <= 'd0; d4 <= 'd0;
-        sign2 <= 'b0;
-        sign3 <= 'b0;
-        sign4 <= 'b0; sign5 <= 'b0;
-        chon2 <= 'b0;   chon3 <= 'b0;   chon4 <= 'b0; chon5 <= 1'b0;
     end else if(cen) begin
+        adv2 <= {1'b0,adv2[3:1]};
         // I
-        d2        <= {data[2:0],1'b1};
-        sign2     <= data[3];
-        data2     <= data;
-        x2        <= x1;
-        step2     <= step1;
-        chon2     <= chon;
+        if( adv ) begin
+            d2        <= {data[2:0],1'b1};
+            sign_data <= data[3];
+            adv2[3] <= 1'b1;
+        end
         // II multiply and obtain the offset
         d3        <= { {xw-16{1'b0}}, d2l[18:3] }; // xw bits
-        sign3     <= sign2;
-        x3        <= x2;
         next_step3<= step2l[22:6];
-        step3     <= step2;
-        chon3     <= chon2;
         // III 2's complement of d3 if necessary
-        d4        <= sign3 ? ~d3+1 : d3;
-        sign4     <= sign3;
-        signEqu4  <= sign3 == x3[xw-1];
-        x4        <= x3;
-        step4     <= step3;
-        next_step4<= next_step3;
-        chon4     <= chon3;
+        d4        <= sign_data ? ~d3+1 : d3;
         // IV   Advance the waveform
-        x5        <= x4;
-        next_x5   <= x4+d4;
-        sign5     <= sign4;
-        signEqu5  <= signEqu4;
-        step5     <= step4;
-        next_step5<= next_step4;
-        chon5     <= chon4;
+        next_x5   <= x1+d4;
         // V: limit or reset outputs
-        if( chon5 ) begin // update values if needed
-            if( adv ) begin
-                    if( signEqu5 && (sign5!=next_x5[xw-1]) )
-                        x6 <= sign5 ? limneg : limpos;
+        if( chon ) begin // update values if needed
+            if( adv2[0] ) begin
+                    if( sign_data == x1[xw-1] && (x1[xw-1]!=next_x5[xw-1]) )
+                        x1 <= x1[xw-1] ? limneg : limpos;
                     else
-                        x6 <= next_x5;
+                        x1 <= next_x5;
 
-                    if( next_step5 < 127 )
-                        step6  <= 15'd127;
-                    else if( next_step5 > 24576 )
-                        step6  <= 15'd24576;
+                    if( next_step3 < 127 )
+                        step1  <= 15'd127;
+                    else if( next_step3 > 24576 )
+                        step1  <= 15'd24576;
                     else
-                        step6 <= next_step5[14:0];
-                end else begin
-                    x6    <= x5;
-                    step6 <= step5;
+                        step1 <= next_step3[14:0];
                 end
         end else begin
-            x6      <= 'd0;
-            step6   <= 'd127;
+            x1      <= 'd0;
+            step1   <= 'd127;
         end
-        // VI: close the loop
-        x1    <= x6;
-        step1 <= step6;
     end
 
 
