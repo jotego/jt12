@@ -90,8 +90,8 @@ always @(*)
             `endif
         end
         {2'd0,3'd6}: begin // ADPCM-B:
-            acc_input_l = adpcmB_l;
-            acc_input_r = adpcmB_r;
+            acc_input_l = adpcmB_l>>>1;
+            acc_input_r = adpcmB_r>>>1;
             `ifndef NOMIX
             acc_en_l    = 1'b1;
             acc_en_r    = 1'b1;
