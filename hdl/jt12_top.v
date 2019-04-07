@@ -141,6 +141,7 @@ wire [ 2:0] up_addr, up_lracl;
 wire        up_start, up_end;
 wire [ 7:0] aon_a, lracl;
 wire [ 5:0] atl_a;     // ADPCM Total Level
+wire        up_aon;
 // APDCM-B
 wire        acmd_on_b;     // Control - Process start, Key On
 wire        acmd_rep_b;    // Control - Repeat
@@ -188,6 +189,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .up_lracl   ( up_lracl      ),
 
         .aon_cmd    ( aon_a         ),    // ADPCM ON equivalent to key on for FM
+        .up_aon     ( up_aon        ),
         // Flags
         .flags      ( adpcma_flags  ),
         .clr_flags  ( flag_ctl[5:0] ),
@@ -308,14 +310,15 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .pcm_en     ( pcm_en        ),
     .pcm_wr     ( pcm_wr        ),
     // ADPCM-A
-    .aon_a        ( aon_a         ),   // ON
-    .atl_a        ( atl_a         ),   // TL
-    .addr_a       ( addr_a        ),   // address latch
-    .lracl        ( lracl         ),   // L/R ADPCM Channel Level
-    .up_start     ( up_start      ),   // write enable start address latch
-    .up_end       ( up_end        ),   // write enable end address latch
-    .up_addr      ( up_addr       ),   // write enable end address latch
-    .up_lracl     ( up_lracl      ),
+    .aon_a      ( aon_a         ),   // ON
+    .atl_a      ( atl_a         ),   // TL
+    .addr_a     ( addr_a        ),   // address latch
+    .lracl      ( lracl         ),   // L/R ADPCM Channel Level
+    .up_start   ( up_start      ),   // write enable start address latch
+    .up_end     ( up_end        ),   // write enable end address latch
+    .up_addr    ( up_addr       ),   // write enable end address latch
+    .up_lracl   ( up_lracl      ),
+    .up_aon     ( up_aon        ),
     // ADPCM-B
     .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
     .acmd_rep_b ( acmd_rep_b    ),  // Control - Repeat

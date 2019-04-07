@@ -64,6 +64,7 @@ module jt12_mmr(
     output  reg         up_end,     // write enable end address latch
     output  reg  [ 2:0] up_addr,    // write enable end address latch
     output  reg  [ 2:0] up_lracl,
+    output  reg         up_aon,     // There was a write AON register
     // ADPCM-B
     output  reg         acmd_on_b,  // Control - Process start, Key On
     output  reg         acmd_rep_b, // Control - Repeat
@@ -230,6 +231,7 @@ always @(posedge clk) begin : memory_mapped_registers
         up_end      <=  'd0;
         up_addr     <= 3'd7;
         up_lracl    <= 3'd7;
+        up_aon      <=  'd0;
         // ADPCM-B
         acmd_on_b   <=  'd0;
         acmd_rep_b  <=  'd0;
@@ -309,7 +311,10 @@ always @(posedge clk) begin : memory_mapped_registers
                     // YM2610 ADPCM-A support, A1=1, regs 0-2D
                     if(part && selected_register[7:6]==2'b0) begin
                         casez( selected_register[5:0] )
-                            6'h0: aon_a <= din;
+                            6'h0: begin
+                                aon_a  <= din;
+                                up_aon <= 1'b1;
+                            end
                             6'h1: atl_a <= din[5:0];
                             // LRACL
                             6'h8, 6'h9, 6'hA, 6'hB, 6'hC, 6'hD: begin
@@ -377,6 +382,7 @@ always @(posedge clk) begin : memory_mapped_registers
             psg_wr_n <= 1'b1;
             pcm_wr   <= 1'b0;
             flag_ctl <= 'd0;
+            up_aon   <= 1'b0;
         end
     end
 end

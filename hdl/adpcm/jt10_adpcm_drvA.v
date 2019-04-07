@@ -40,6 +40,7 @@ module jt10_adpcm_drvA(
     input   [2:0]   up_addr,
 
     input   [7:0]   aon_cmd,    // ADPCM ON equivalent to key on for FM
+    input           up_aon,
 
     input   [7:0]   datain,
 
@@ -87,6 +88,13 @@ always @(posedge clk or negedge rst_n)
         cnt <= next;
     end
 
+reg [7:0] aon_cmd_cpy;
+
+always @(posedge clk) if(cen) begin
+    if( cen_addr && chfast==5 ) aon_cmd_cpy <= 8'd0;
+    else if(up_aon ) aon_cmd_cpy <= aon_cmd;
+end
+
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         chlin  <= 'd0;
@@ -97,8 +105,8 @@ always @(posedge clk or negedge rst_n)
         div3 <= cnt==5'd5;
         // input new addresses
         chfast <= chfast==3'd5 ? 3'd0 : chfast+3'd1;
-        aon_sr      <= chfast==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1]      };
-        aoff_sr     <= chfast==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aoff_sr[5:1]     };
+        aon_sr      <= chfast==5 && !aon_cmd_cpy[7] ? aon_cmd_cpy[5:0] : { 1'b0, aon_sr[5:1]      };
+        aoff_sr     <= chfast==5 &&  aon_cmd_cpy[7] ? aon_cmd_cpy[5:0] : { 1'b0, aoff_sr[5:1]     };
     end
 
 wire [15:0] start_top, end_top;
@@ -168,6 +176,8 @@ always @(posedge cen6) begin
 end
 `endif
 
+wire clr_dec;
+
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
@@ -181,10 +191,13 @@ jt10_adpcm_cnt u_cnt(
     // Control
     .aon         ( aon_sr[0]       ),
     .aoff        ( aoff_sr[0]      ),
+    .clr         ( clr_dec         ),
+    // ROM driver
     .addr_out    ( addr            ),
     .bank        ( bank            ),
     .sel         ( nibble_sel      ),
     .roe_n       ( roe_n           ),
+    // Flags
     .flags       ( flags           ),
     .clr_flags   ( clr_flags       ),
     .start_top   ( start_top       ),
@@ -203,6 +216,7 @@ jt10_adpcm u_decoder(
     .cen    ( cen6      ),
     .data   ( data      ),
     .chon   ( chon      ),
+    .clr    ( clr_dec   ),
     .pcm    ( pcmdec    )
 );
 

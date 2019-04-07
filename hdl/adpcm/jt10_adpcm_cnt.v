@@ -32,12 +32,16 @@ module jt10_adpcm_cnt(
     // Counter control
     input             aon,
     input             aoff,
+    // ROM driver
     output     [19:0] addr_out,
     output     [ 3:0] bank,
     output            sel,
     output            roe_n,
+    output            clr,      // inform the decoder that a new section begins
+    // Flags
     output reg [ 5:0] flags,
     input      [ 5:0] clr_flags,
+    //
     output [15:0] start_top,
     output [15:0]   end_top
 );
@@ -52,12 +56,13 @@ reg [5:0] done_sr, zero;
 
 reg roe_n6, roe_n1;
 
-reg clr2, clr3, clr4, clr5, clr6;
+reg clr1, clr2, clr3, clr4, clr5, clr6;
 
 assign addr_out = addr1[20:1];
 assign sel      = addr1[0];
 assign bank     = bank1;
 assign roe_n    = roe_n1;
+assign clr      = clr1;
 
 wire sumup5 = on5 && !done5 && div3;
 reg  sumup6;
@@ -123,7 +128,7 @@ always @(posedge clk or negedge rst_n)
 
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | on1);
-        clr2   <= aoff | aon; //(aon && !on1); // Each time a A-ON is sent the address counter restarts
+        clr2   <= aoff || (aon && !on1); // Each time a A-ON is sent the address counter restarts
         start2 <=  (up_start && up1) ? addr_in[11:0] : start1;
         end2   <=  (up_end   && up1) ? addr_in[11:0] : end1;
         bank2  <= ((up_end | up_start) && up1) ? addr_in[15:12] : bank1;
@@ -167,6 +172,7 @@ always @(posedge clk or negedge rst_n)
         end1   <= end6;
         roe_n1 <= roe_n6;
         bank1  <= bank6;
+        clr1   <= clr6;
     end
 
 endmodule // jt10_adpcm_cnt
