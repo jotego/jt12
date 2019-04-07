@@ -51,6 +51,8 @@ module jt10_adpcm_drvA(
     output reg signed [15:0]  pcm55_r
 );
 
+/* verilator tracing_on */
+
 reg  [3:0] data;
 wire nibble_sel;
 
@@ -66,8 +68,9 @@ reg [ 2:0] chlin, chfast;
 reg [15:0] addr_in2;
 
 reg [5:0] up_addr_dec;
+reg [2:0] up_addr2;
 always @(*)
-    case(up_addr)
+    case(up_addr2)
         3'd0: up_addr_dec = 6'b000_001;
         3'd1: up_addr_dec = 6'b000_010;
         3'd2: up_addr_dec = 6'b000_100;
@@ -127,15 +130,70 @@ always @(posedge clk or negedge rst_n)
         // input new addresses
         chfast <= chfast==3'd5 ? 3'd0 : chfast+3'd1;
         if( chfast==3'd5 ) begin // delay one clock cycle to synchronize with up_*_sr registers
-            addr_in2  <= addr_in; 
+            addr_in2  <= addr_in;
             lracl_in2 <= lracl_in;
+            up_addr2  <= up_addr;
         end
-        up_start_sr <= chfast==5 &&    up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] };
-        up_end_sr   <= chfast==5 &&      up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1]   };
+        up_start_sr <= up_end   ? 6'd0 : ( chfast==5 && up_start ?  up_addr_dec : { 1'b0, up_start_sr[5:1] } );
+        up_end_sr   <= up_start ? 6'd0 : ( chfast==5 &&   up_end ?  up_addr_dec : { 1'b0, up_end_sr[5:1]   } );
         aon_sr      <= chfast==5 && !aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aon_sr[5:1]      };
         aoff_sr     <= chfast==5 &&  aon_cmd[7] ? aon_cmd[5:0] : { 1'b0, aoff_sr[5:1]     };
         up_lracl_sr <= chfast==5                ?    up_lr_dec : { 1'b0, up_lracl_sr[5:1] };
     end
+
+wire [15:0] start_top, end_top;
+`ifdef SIMULATION
+reg div3b;
+reg [2:0] chframe;
+always @(posedge clk) div3b<=div3;
+always @(negedge div3b) chframe <= chfast;
+
+reg [15:0] sim_start0, sim_start1, sim_start2, sim_start3, sim_start4, sim_start5;
+reg [15:0] sim_end0, sim_end1, sim_end2, sim_end3, sim_end4, sim_end5;
+
+always @(posedge cen6) if(up_start)
+    case(up_addr2)
+        3'd0: sim_start0 <= addr_in2;
+        3'd1: sim_start1 <= addr_in2;
+        3'd2: sim_start2 <= addr_in2;
+        3'd3: sim_start3 <= addr_in2;
+        3'd4: sim_start4 <= addr_in2;
+        3'd5: sim_start5 <= addr_in2;
+        default:;
+    endcase // up_addr
+
+always @(posedge cen6) if(up_end)
+    case(up_addr2)
+        3'd0: sim_end0 <= addr_in2;
+        3'd1: sim_end1 <= addr_in2;
+        3'd2: sim_end2 <= addr_in2;
+        3'd3: sim_end3 <= addr_in2;
+        3'd4: sim_end4 <= addr_in2;
+        3'd5: sim_end5 <= addr_in2;
+        default:;
+    endcase // up_addr
+reg start_error, end_error;
+always @(posedge cen6) begin
+    case(chframe)
+        3'd0: start_error <= start_top != sim_start0;
+        3'd1: start_error <= start_top != sim_start1;
+        3'd2: start_error <= start_top != sim_start2;
+        3'd3: start_error <= start_top != sim_start3;
+        3'd4: start_error <= start_top != sim_start4;
+        3'd5: start_error <= start_top != sim_start5;
+        default:;
+    endcase
+    case(chframe)
+        3'd0: end_error <= end_top != sim_end0;
+        3'd1: end_error <= end_top != sim_end1;
+        3'd2: end_error <= end_top != sim_end2;
+        3'd3: end_error <= end_top != sim_end3;
+        3'd4: end_error <= end_top != sim_end4;
+        3'd5: end_error <= end_top != sim_end5;
+        default:;
+    endcase
+end
+`endif
 
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
@@ -152,7 +210,9 @@ jt10_adpcm_cnt u_cnt(
     .sel         ( nibble_sel      ),
     .roe_n       ( roe_n           ),
     .flags       ( flags           ),
-    .clr_flags   ( clr_flags       )
+    .clr_flags   ( clr_flags       ),
+    .start_top   ( start_top       ),
+    .end_top     ( end_top         )
 );
 
 reg chon;
@@ -185,32 +245,35 @@ wire signed [15:0] pcm_mono = pcm18_l+pcm18_r;
 
 reg signed [15:0] pcm_ch0, pcm_ch1, pcm_ch2, pcm_ch3, pcm_ch4, pcm_ch5;
 always @(negedge cen6) begin
-    if(chfast==3'd0) begin
+    // chfast and pcm_mono are misaligned by "one channel"
+    if(chfast==3'd1) begin
         pcm_ch0 <= pcm_mono;
         $fwrite( fch0, "%d\n", pcm_mono );
     end
-    if(chfast==3'd1) begin
+    if(chfast==3'd2) begin
         pcm_ch1 <= pcm_mono;
         $fwrite( fch1, "%d\n", pcm_mono );
     end
-    if(chfast==3'd2) begin
+    if(chfast==3'd3) begin
         pcm_ch2 <= pcm_mono;
         $fwrite( fch2, "%d\n", pcm_mono );
     end
-    if(chfast==3'd3) begin
+    if(chfast==3'd4) begin
         pcm_ch3 <= pcm_mono;
         $fwrite( fch3, "%d\n", pcm_mono );
     end
-    if(chfast==3'd4) begin
+    if(chfast==3'd5) begin
         pcm_ch4 <= pcm_mono;
         $fwrite( fch4, "%d\n", pcm_mono );
     end
-    if(chfast==3'd5) begin
+    if(chfast==3'd0) begin
         pcm_ch5 <= pcm_mono;
         $fwrite( fch5, "%d\n", pcm_mono );
-    end    
+    end
 end
 `endif
+
+/* verilator tracing_off */
 
 wire signed [15:0] pcm18_l, pcm18_r;
 
