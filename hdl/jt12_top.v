@@ -171,8 +171,9 @@ if( use_adpcm==1 ) begin: gen_adpcm
     jt10_adpcm_drvA u_adpcm_a(
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
-        .cen        ( clk_en_adpcm  ),  // clk & cen must be 55   kHz
-        .cen3       ( clk_en_adpcm3 ),  // clk & cen must be 18.5 kHz
+        .cen        ( cen           ),
+        .cen6       ( clk_en_adpcm3 ),  // clk & cen must be 666  kHz
+        .cen3       ( 0 ),  // clk & cen must be 18.5 kHz
 
         .addr       ( adpcma_addr   ),  // real hardware has 10 pins multiplexed through RMPX pin
         .bank       ( adpcma_bank   ),

@@ -103,7 +103,7 @@ always @(posedge clk)
     if( cen ) begin
         adpcm_cnt <= adpcm_cnt==5'd3 ? 5'd0 : adpcm_cnt + 5'd1;
         if( adpcm_cnt==5'd0 ) begin
-            adpcm_cnt3 <= adpcm_cnt3==3'd5 ? 3'd0 : adpcm_cnt3+3'd1;
+            adpcm_cnt3 <= adpcm_cnt3==3'd2 ? 3'd0 : adpcm_cnt3+3'd1;
             if( adpcm_cnt3==3'd0)
                 adpcm_cnt55 <= adpcm_cnt55==3'd5 ? 3'd0: adpcm_cnt55+3'd1;
         end

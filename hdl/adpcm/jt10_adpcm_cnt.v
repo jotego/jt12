@@ -22,8 +22,10 @@
 module jt10_adpcm_cnt(
     input             rst_n,
     input             clk,        // CPU clock
-    input             cen,        // optional clock enable, if not needed leave as 1'b1
-    input             div3,
+    input             cen,        // 666 kHz
+    // pipeline channel
+    input      [ 5:0] cur_ch,
+    input      [ 5:0] en_ch,
     // Address writes from CPU
     input      [15:0] addr_in,
     input      [ 2:0] addr_ch,
@@ -64,7 +66,7 @@ assign bank     = bank1;
 assign roe_n    = roe_n1;
 assign clr      = clr1;
 
-wire sumup5 = on5 && !done5 && div3;
+wire sumup5 = on5 && !done5 && { cur_ch[1:0], cur_ch[5:2] } == en_ch;
 reg  sumup6;
 
 reg [5:0] last_done, set_flags;
@@ -98,6 +100,7 @@ assign start_top = {bank1, start1};
 assign   end_top =   {bank1, end1};
 
 reg [5:0] cur_ch, addr_ch_dec;
+reg [5:0] en_ch;
 
 always @(*)
     case(addr_ch)
@@ -122,10 +125,7 @@ always @(posedge clk or negedge rst_n)
         end1   <= 'd0;     end2 <= 'd0;     end3 <= 'd0;
         end4   <= 'd0;     end5 <= 'd0;     end6 <= 'd0;
         roe_n6 <= 'd1;
-        cur_ch <= 6'b1;
     end else if( cen ) begin
-        cur_ch <= { cur_ch[4:0], cur_ch[5] };
-
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | on1);
         clr2   <= aoff || (aon && !on1); // Each time a A-ON is sent the address counter restarts
@@ -157,7 +157,7 @@ always @(posedge clk or negedge rst_n)
         // V
         addr6  <= addr5;
         on6    <= on5;
-        clr6   <= clr5; // & div3;
+        clr6   <= clr5;
         done6  <= done5;
         start6 <= start5;
         end6   <= end5;

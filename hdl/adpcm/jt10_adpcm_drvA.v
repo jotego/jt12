@@ -22,7 +22,8 @@
 module jt10_adpcm_drvA(
     input           rst_n,
     input           clk,    // CPU clock
-    input           cen,    // clk & cen = 666 kHz
+    input           cen,    // same cen as MMR
+    input           cen6,   // clk & cen = 666 kHz
     input           cen3,   // clk & cen = 111 kHz
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
@@ -54,6 +55,8 @@ module jt10_adpcm_drvA(
 
 /* verilator tracing_on */
 
+reg  [5:0] cur_ch;
+reg  [5:0] en_ch;
 reg  [3:0] data;
 wire nibble_sel;
 
@@ -68,48 +71,37 @@ reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr, up_lracl_sr;
 reg [ 2:0] chlin, chfast;
 reg div3;
 
-reg  [4:0]  cnt;
-wire [4:0] next = cnt==5'd17 ? 5'd0 : cnt + 5'd1;
-reg cen_addr_mask =1'b0;
-reg cen6_mask = 1'b0;
-
-always @(negedge clk) begin
-    cen_addr_mask <= cnt<5'd7;
-    cen6_mask     <= cnt=='d8;
-end
-
-wire cen_addr = cen_addr_mask & cen;
-wire cen6 = cen6_mask & cen;
-
-always @(posedge clk or negedge rst_n)
-    if( !rst_n ) begin
-        cnt    <= 'd0;
-    end else if(cen) begin
-        cnt <= next;
-    end
-
 reg [7:0] aon_cmd_cpy;
 
 always @(posedge clk) if(cen) begin
-    if( cen_addr && chfast==5 ) aon_cmd_cpy <= 8'd0;
-    else if(up_aon ) aon_cmd_cpy <= aon_cmd;
+    if( cur_ch[5] ) begin
+        aon_cmd_cpy <= 8'd0;
+    end
+    else begin
+        if( up_aon ) aon_cmd_cpy <= aon_cmd; else if(cur_ch[5] && cen6) aon_cmd_cpy <= 8'd0;
+    end
 end
 
-always @(posedge clk or negedge rst_n)
+always @(posedge clk) if(cen6) begin
+    if( cur_ch[5] ) begin
+        aon_sr  <= ~{6{aon_cmd_cpy[7]}} & aon_cmd_cpy[5:0];
+        aoff_sr <=  {6{aon_cmd_cpy[7]}} & aon_cmd_cpy[5:0];
+    end else begin
+        aon_sr  <= { 1'b0,  aon_sr[5:1] };
+        aoff_sr <= { 1'b0, aoff_sr[5:1] };
+    end
+end
+
+always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
-        chlin  <= 'd0;
-        aon_sr      <= 'd0;
-        aoff_sr     <= 'd0;
-        div3        <= 'd0;
-    end else if(cen_addr) begin
-        div3 <= cnt==5'd5;
-        // input new addresses
-        chfast <= chfast==3'd5 ? 3'd0 : chfast+3'd1;
-        aon_sr      <= chfast==5 && !aon_cmd_cpy[7] ? aon_cmd_cpy[5:0] : { 1'b0, aon_sr[5:1]      };
-        aoff_sr     <= chfast==5 &&  aon_cmd_cpy[7] ? aon_cmd_cpy[5:0] : { 1'b0, aoff_sr[5:1]     };
+        cur_ch <= 6'b1;  en_ch  <= 6'b1;
+    end else if( cen6 ) begin
+        cur_ch <= { cur_ch[4:0], cur_ch[5] };
+        if( cur_ch[5] ) en_ch <= {en_ch[4:0], en_ch[5] };
     end
 
 wire [15:0] start_top, end_top;
+/*
 `ifdef SIMULATION
 reg div3b;
 reg [2:0] chframe;
@@ -175,14 +167,16 @@ always @(posedge cen6) begin
     endcase
 end
 `endif
-
+*/
 wire clr_dec;
 
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
-    .cen         ( cen_addr        ),
-    .div3        ( div3            ),
+    .cen         ( cen6            ),
+    // Pipeline
+    .cur_ch      ( cur_ch          ),
+    .en_ch       ( en_ch           ),
     // START/END update
     .addr_in     ( addr_in         ),
     .addr_ch     ( up_addr         ),
@@ -219,7 +213,7 @@ jt10_adpcm u_decoder(
     .clr    ( clr_dec   ),
     .pcm    ( pcmdec    )
 );
-
+/*
 `ifdef SIMULATION
 integer fch0, fch1, fch2, fch3, fch4, fch5;
 initial begin
@@ -308,6 +302,6 @@ jt10_adpcm_acc u_acc_right(
     .pcm_out( pre_pcm55_r   )     // 55.5 kHz
 );
 
-
+*/
 
 endmodule // jt10_adpcm_drvA
