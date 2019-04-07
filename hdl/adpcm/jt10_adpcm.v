@@ -27,6 +27,7 @@ module jt10_adpcm(
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input   [3:0]   data,
     input           chon,       // high if this channel is on
+    input           clr,
     output signed [15:0] pcm
 );
 
@@ -91,8 +92,8 @@ always @( posedge clk or negedge rst_n )
     end else if(cen) begin
         // I
         sign2     <= data[3];
-        x2        <= x1;
-        step2     <= chon ? step_1p : 0;
+        x2        <= clr ? 0 : x1;
+        step2     <= (chon && !clr) ? step_1p : 0;
         chon2     <= chon;
         lut_addr2 <= { step1, data[2:0] };
         // II 2's complement of inc2 if necessary
