@@ -24,9 +24,11 @@ module jt10_adpcm_gain(
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input           div3,
-    input   [7:0]   lracl,
     input   [5:0]   atl,        // ADPCM Total Level
-    input           up,
+    // Gain update
+    input   [7:0]   lracl,
+    input   [2:0]   up_ch,
+    // Data
     input signed [15:0] pcm_in,
     output reg signed [15:0] pcm_l,
     output reg signed [15:0] pcm_r
@@ -38,15 +40,21 @@ reg  [9:0] lin_2b, lin3, lin4;
 reg  [6:0] db2, db3;
 reg signed [31:0] pcm5;
 reg signed [15:0] pcm6;
-/*
-jt10_adpcm_dbrom u_rom(
-    .clk    ( clk       ),
-    .db     ( db2[5:0]  ),
-    .lin    ( lin  )
-);
-*/
+
 
 reg [3:0] sh3, sh4, sh5;
+
+reg [5:0] up_ch_dec;
+always @(*)
+    case(up_ch)
+        3'd0: up_ch_dec = 6'b000_001;
+        3'd1: up_ch_dec = 6'b000_010;
+        3'd2: up_ch_dec = 6'b000_100;
+        3'd3: up_ch_dec = 6'b001_000;
+        3'd4: up_ch_dec = 6'b010_000;
+        3'd5: up_ch_dec = 6'b100_000;
+        default: up_ch_dec = 6'd0;
+    endcase // up_addr
 
 always @(*)
     case( db2[2:0] )
@@ -62,6 +70,7 @@ always @(*)
 
 wire signed [15:0] lin4s = {6'b0,lin4};
 wire signed [15:0] pcm5b = pcm5[24:9];
+reg [5:0] cur_ch;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -73,16 +82,19 @@ always @(posedge clk or negedge rst_n)
         pcm5    <= 'd0;
         pcm_l   <= 'd0;
         pcm_r   <= 'd0;
+        cur_ch  <= 6'h20;
     end else if(cen) begin
+        cur_ch <= { cur_ch[4:0], cur_ch[5] };
+
         // I
-        lracl2  <= lracl1;
+        lracl2  <= up_ch_dec == cur_ch ? lracl : lracl1;
         db2     <= { 1'b0, ~lracl1[5:0] } + {1'b0, ~atl};
         // II
         lracl3  <= lracl2;
         lin3    <= lin_2b;
         sh3     <= db2[6:3];
         // III
-        lracl4  <= up ? lracl : lracl3;
+        lracl4  <= lracl3;
         lin4    <= sh3[3] ? 10'h0 : lin3;
         sh4     <= sh3;
         // IV: new data is accepted here

@@ -24,9 +24,12 @@ module jt10_adpcm_cnt(
     input             clk,        // CPU clock
     input             cen,        // optional clock enable, if not needed leave as 1'b1
     input             div3,
+    // Address writes from CPU
     input      [15:0] addr_in,
+    input      [ 2:0] addr_ch,
     input             up_start,
     input             up_end,
+    // Counter control
     input             aon,
     input             aoff,
     output     [19:0] addr_out,
@@ -89,6 +92,21 @@ wire [11:0] addr1_cmp = addr1[20:9];
 assign start_top = {bank1, start1};
 assign   end_top =   {bank1, end1};
 
+reg [5:0] cur_ch, addr_ch_dec;
+
+always @(*)
+    case(addr_ch)
+        3'd0: addr_ch_dec = 6'b000_001;
+        3'd1: addr_ch_dec = 6'b000_010;
+        3'd2: addr_ch_dec = 6'b000_100;
+        3'd3: addr_ch_dec = 6'b001_000;
+        3'd4: addr_ch_dec = 6'b010_000;
+        3'd5: addr_ch_dec = 6'b100_000;
+        default: addr_ch_dec = 6'd0;
+    endcase // up_addr
+
+wire up1 = cur_ch == addr_ch_dec;
+
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
         addr1  <= 'd0;    addr2 <= 'd0;    addr3 <= 'd0;
@@ -99,13 +117,16 @@ always @(posedge clk or negedge rst_n)
         end1   <= 'd0;     end2 <= 'd0;     end3 <= 'd0;
         end4   <= 'd0;     end5 <= 'd0;     end6 <= 'd0;
         roe_n6 <= 'd1;
+        cur_ch <= 6'b1;
     end else if( cen ) begin
+        cur_ch <= { cur_ch[4:0], cur_ch[5] };
+
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | on1);
         clr2   <= aoff | (aon && !on1); // Each time a A-ON is sent the address counter restarts
-        start2 <= up_start ? addr_in[11:0] : start1;
-        end2   <= up_end   ? addr_in[11:0] : end1;
-        bank2  <= (up_end | up_start) ? addr_in[15:12] : bank1;
+        start2 <=  (up_start && up1) ? addr_in[11:0] : start1;
+        end2   <=  (up_end   && up1) ? addr_in[11:0] : end1;
+        bank2  <= ((up_end | up_start) && up1) ? addr_in[15:12] : bank1;
 
         addr3  <= addr2; // clr2 ? {start2,9'd0} : addr2;
         on3    <= on2;
@@ -124,14 +145,14 @@ always @(posedge clk or negedge rst_n)
         addr5  <= addr4;
         on5    <= on4;
         clr5   <= clr4;
-        done5  <= addr4[20:9] == end4; // && addr4[8:0]==~9'b0;
+        done5  <= addr4[20:9] == end4 && !clr4; // && addr4[8:0]==~9'b0;
         start5 <= start4;
         end5   <= end4;
         bank5  <= bank4;
         // V
         addr6  <= addr5;
         on6    <= on5;
-        clr6   <= clr5 & div3;
+        clr6   <= clr5; // & div3;
         done6  <= done5;
         start6 <= start5;
         end6   <= end5;

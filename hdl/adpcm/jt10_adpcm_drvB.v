@@ -54,7 +54,7 @@ always @(posedge acmd_on_b) begin
     fsample = adeltan_b;
     fsample = fsample/65536;
     fsample = fsample * 55.5;
-    $display("INFO ADPCM-B ON: %X delta N = %6d (%2.1f kHz)", astart_b, adeltan_b, fsample );
+    $display("INFO: ADPCM-B ON: %X delta N = %6d (%2.1f kHz)", astart_b, adeltan_b, fsample );
 end
 `endif
 

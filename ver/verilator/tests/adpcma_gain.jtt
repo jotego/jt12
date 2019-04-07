@@ -18,34 +18,35 @@ aend_lsb   3,FF
 aend_lsb   4,FF
 aend_lsb   5,FF
 
-aon 3f
+alr 0,f0
+alr 1,f1
+alr 2,f2
+alr 3,f3
+alr 4,f4
+alr 5,f5
 
-alr 0,ff
-alr 1,c0
-alr 2,c0
-alr 3,c0
-alr 4,c0
-alr 5,c0
-
+aon 1
 wait 800
 
-alr 0,c0
-alr 1,f0
+aon 81
+aon 2
 wait 800
 
-alr 1,c0
-alr 2,ff
+aon 82
+aon 4
 wait 800
 
-alr 2,c0
-alr 3,f0
+aon 84
+aon 8
 wait 800
 
-alr 3,c0
-alr 4,ff
+aon 88
+aon 10
 wait 800
 
-alr 4,c0
-alr 5,f0
+aon 90
+aon 20
 wait 800
 
+aon a0
+wait 80
