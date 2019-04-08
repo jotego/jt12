@@ -50,12 +50,12 @@ reg [3:0] sh3, sh4, sh5;
 reg [5:0] up_ch_dec;
 always @(*)
     case(up_ch)
-        3'd2: up_ch_dec = 6'b000_001;
-        3'd3: up_ch_dec = 6'b000_010;
-        3'd4: up_ch_dec = 6'b000_100;
-        3'd5: up_ch_dec = 6'b001_000;
-        3'd0: up_ch_dec = 6'b010_000;
-        3'd1: up_ch_dec = 6'b100_000;
+        3'd3: up_ch_dec = 6'b000_001;
+        3'd4: up_ch_dec = 6'b000_010;
+        3'd5: up_ch_dec = 6'b000_100;
+        3'd0: up_ch_dec = 6'b001_000;
+        3'd1: up_ch_dec = 6'b010_000;
+        3'd2: up_ch_dec = 6'b100_000;
         default: up_ch_dec = 6'd0;
     endcase
 

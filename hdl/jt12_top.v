@@ -226,7 +226,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_r    ( adpcmB_r      )
     );
 
-    /* verilator tracing_off */
+    /* verilator tracing_on */
     assign snd_sample   = zero;        
     jt10_acc u_acc(
         .clk        ( clk           ),
@@ -258,6 +258,7 @@ end else begin : gen_adpcm_no
 end
 endgenerate
 
+/* verilator tracing_off */
 jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
 //    .rst_n          ( rst_n         ),
     .clk            ( clk           ),        // CPU clock

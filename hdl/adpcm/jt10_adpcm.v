@@ -32,10 +32,10 @@ module jt10_adpcm(
 );
 
 localparam sigw = 13; // 1 bit more than the actual signal width so
+localparam shift = 3; //16-sigw;
     // there is room for overflow
 wire signed [sigw-1:0] max_pos = { 2'b00, {sigw-2{1'b1}} };
 wire signed [sigw-1:0] max_neg = { 2'b11, {sigw-2{1'b0}} };
-localparam shift = 16-sigw+1;
 
 reg signed [sigw-1:0] x1, x2, x3, x4, x5, x6;
 reg signed [sigw-1:0] inc4;
@@ -43,7 +43,8 @@ reg [5:0] step1, step2, step6, step3, step4, step5;
 reg [5:0] step_next, step_1p;
 reg       sign2, sign3, sign4, sign5, xsign5;
 
-assign pcm = { {16-sigw{x2[sigw-1]}}, x2 } <<< shift;
+// All outputs from stage 1
+assign pcm = { {16-sigw{x1[sigw-1]}}, x1 } <<< shift;
 
 // This could be decomposed in more steps as the pipeline
 // has room for it
@@ -119,7 +120,7 @@ always @( posedge clk or negedge rst_n )
         //     else // it was positive
         //         x6 <= {1'b0, {sigw-1{1'b1}}};
         // end else
-        x6 <= x5;
+        x6        <= x5;
         if( x5 > max_pos) x6 <= max_pos;
         if( x5 < max_neg) x6 <= max_neg;
         step6     <= step5;

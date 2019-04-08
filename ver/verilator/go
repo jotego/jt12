@@ -147,7 +147,7 @@ if [[ $DUMPSIGNALS == "-trace" ]]; then
         obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" |  grep -v "^INFO: " | vcd2fst -v - -f test.fst
     else
         if which simvisdbutil; then
-            obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" > test.vcd
+            obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" | grep -v "^INFO: " > test.vcd
             echo VCD to SST2 conversion
             simvisdbutil test.vcd -output test -overwrite -shm && rm test.vcd
         else

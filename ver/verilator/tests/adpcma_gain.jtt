@@ -49,4 +49,19 @@ aon 20
 wait 800
 
 aon a0
-wait 80
+wait 800
+
+# all channels now
+atl 30
+aon 1
+wait 1000
+aon 2
+wait 1000
+aon 4
+wait 1000
+aon 8
+wait 1000
+aon 10
+wait 1000
+aon 20
+wait 1000

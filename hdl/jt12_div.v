@@ -105,7 +105,7 @@ always @(posedge clk)
         if( adpcm_cnt666==5'd0 ) begin
             adpcm_cnt111 <= adpcm_cnt111==3'd5 ? 3'd0 : adpcm_cnt111+3'd1;
             if( adpcm_cnt111==3'd0)
-                adpcm_cnt55 <= adpcm_cnt55==3'd5 ? 3'd0: adpcm_cnt55+3'd1;
+                adpcm_cnt55 <= adpcm_cnt55==3'd1 ? 3'd0: adpcm_cnt55+3'd1;
         end
     end
 

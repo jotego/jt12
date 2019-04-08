@@ -97,15 +97,17 @@ always @(posedge clk or negedge rst_n)
     end
 
 wire [15:0] start_top, end_top;
-/*
+
 `ifdef SIMULATION
+reg [15:0] sim_start0, sim_start1, sim_start2, sim_start3, sim_start4, sim_start5;
+reg [15:0] sim_end0, sim_end1, sim_end2, sim_end3, sim_end4, sim_end5;
+reg [ 7:0] sim_lracl0, sim_lracl1, sim_lracl2, sim_lracl3, sim_lracl4, sim_lracl5;
+/*
 reg div3b;
 reg [2:0] chframe;
 always @(posedge clk) div3b<=div3;
 always @(negedge div3b) chframe <= chfast;
 
-reg [15:0] sim_start0, sim_start1, sim_start2, sim_start3, sim_start4, sim_start5;
-reg [15:0] sim_end0, sim_end1, sim_end2, sim_end3, sim_end4, sim_end5;
 
 reg [7:0] aon_cpy, aon_cpy2;
 always @(posedge clk) begin
@@ -119,7 +121,7 @@ always @(posedge aon_cpy[2]) if(!aon_cpy2[7]) $display("INFO: ADPCM-A ON 2 - %X"
 always @(posedge aon_cpy[3]) if(!aon_cpy2[7]) $display("INFO: ADPCM-A ON 3 - %X",sim_start3);
 always @(posedge aon_cpy[4]) if(!aon_cpy2[7]) $display("INFO: ADPCM-A ON 4 - %X",sim_start4);
 always @(posedge aon_cpy[5]) if(!aon_cpy2[7]) $display("INFO: ADPCM-A ON 5 - %X",sim_start5);
-
+*/
 always @(posedge cen6) if(up_start)
     case(up_addr)
         3'd0: sim_start0 <= addr_in;
@@ -141,6 +143,19 @@ always @(posedge cen6) if(up_end)
         3'd5: sim_end5 <= addr_in;
         default:;
     endcase // up_addr
+
+always @(posedge cen6)
+    case(up_lracl)
+        3'd0: sim_lracl0 <= lracl_in;
+        3'd1: sim_lracl1 <= lracl_in;
+        3'd2: sim_lracl2 <= lracl_in;
+        3'd3: sim_lracl3 <= lracl_in;
+        3'd4: sim_lracl4 <= lracl_in;
+        3'd5: sim_lracl5 <= lracl_in;
+        default:;
+    endcase // up_addr
+
+    /*
 reg start_error, end_error;
 always @(posedge cen6) begin
     case(chframe)
@@ -162,8 +177,9 @@ always @(posedge cen6) begin
         default:;
     endcase
 end
-`endif
 */
+`endif
+
 wire clr_dec, decon;
 
 jt10_adpcm_cnt u_cnt(
@@ -208,48 +224,6 @@ jt10_adpcm u_decoder(
     .pcm    ( pcmdec    )
 );
 /*
-`ifdef SIMULATION
-integer fch0, fch1, fch2, fch3, fch4, fch5;
-initial begin
-    fch0 = $fopen("ch0.dec","w");
-    fch1 = $fopen("ch1.dec","w");
-    fch2 = $fopen("ch2.dec","w");
-    fch3 = $fopen("ch3.dec","w");
-    fch4 = $fopen("ch4.dec","w");
-    fch5 = $fopen("ch5.dec","w");
-end
-
-wire signed [15:0] pcm_mono = pcm18_l+pcm18_r;
-
-reg signed [15:0] pcm_ch0, pcm_ch1, pcm_ch2, pcm_ch3, pcm_ch4, pcm_ch5;
-always @(negedge cen6) begin
-    // chfast and pcm_mono are misaligned by "one channel"
-    if(chfast==3'd1) begin
-        pcm_ch0 <= pcm_mono;
-        $fwrite( fch0, "%d\n", pcm_mono );
-    end
-    if(chfast==3'd2) begin
-        pcm_ch1 <= pcm_mono;
-        $fwrite( fch1, "%d\n", pcm_mono );
-    end
-    if(chfast==3'd3) begin
-        pcm_ch2 <= pcm_mono;
-        $fwrite( fch2, "%d\n", pcm_mono );
-    end
-    if(chfast==3'd4) begin
-        pcm_ch3 <= pcm_mono;
-        $fwrite( fch3, "%d\n", pcm_mono );
-    end
-    if(chfast==3'd5) begin
-        pcm_ch4 <= pcm_mono;
-        $fwrite( fch4, "%d\n", pcm_mono );
-    end
-    if(chfast==3'd0) begin
-        pcm_ch5 <= pcm_mono;
-        $fwrite( fch5, "%d\n", pcm_mono );
-    end
-end
-`endif
 
 always @(posedge clk) begin
     if( cen3 && chon ) begin
@@ -303,5 +277,46 @@ jt10_adpcm_acc u_acc_right(
     .pcm_in ( pcm18_r   ),    // 18.5 kHz
     .pcm_out( pre_pcm55_r   )     // 55.5 kHz
 );
+
+
+`ifdef SIMULATION
+integer fch0, fch1, fch2, fch3, fch4, fch5;
+initial begin
+    fch0 = $fopen("ch0.dec","w");
+    fch1 = $fopen("ch1.dec","w");
+    fch2 = $fopen("ch2.dec","w");
+    fch3 = $fopen("ch3.dec","w");
+    fch4 = $fopen("ch4.dec","w");
+    fch5 = $fopen("ch5.dec","w");
+end
+
+reg signed [15:0] pcm_ch0, pcm_ch1, pcm_ch2, pcm_ch3, pcm_ch4, pcm_ch5;
+always @(posedge cen6) if(en_ch[0]) begin
+    if(cur_ch[0]) begin
+        pcm_ch0 <= pcmdec;
+        $fwrite( fch0, "%d\n", pcmdec );
+    end
+    if(cur_ch[1]) begin
+        pcm_ch1 <= pcmdec;
+        $fwrite( fch1, "%d\n", pcmdec );
+    end
+    if(cur_ch[2]) begin
+        pcm_ch2 <= pcmdec;
+        $fwrite( fch2, "%d\n", pcmdec );
+    end
+    if(cur_ch[3]) begin
+        pcm_ch3 <= pcmdec;
+        $fwrite( fch3, "%d\n", pcmdec );
+    end
+    if(cur_ch[4]) begin
+        pcm_ch4 <= pcmdec;
+        $fwrite( fch4, "%d\n", pcmdec );
+    end
+    if(cur_ch[5]) begin
+        pcm_ch5 <= pcmdec;
+        $fwrite( fch5, "%d\n", pcmdec );
+    end
+end
+`endif
 
 endmodule // jt10_adpcm_drvA
