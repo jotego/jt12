@@ -283,8 +283,11 @@ assign pcm55_r = pre_pcm55_r;
 jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen1      ),
-    .cur_ch ( en_ch     ),
+    .cen    ( cen6      ),
+    // Pipeline
+    .cur_ch ( cur_ch    ),
+    .en_ch  ( en_ch     ),
+
     .pcm_in ( pcm18_l   ),    // 18.5 kHz
     .pcm_out( pre_pcm55_l   )     // 55.5 kHz
 );
@@ -292,8 +295,11 @@ jt10_adpcm_acc u_acc_left(
 jt10_adpcm_acc u_acc_right(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen1      ),
-    .cur_ch ( en_ch     ),
+    .cen    ( cen6      ),
+    // Pipeline
+    .cur_ch ( cur_ch    ),
+    .en_ch  ( en_ch     ),
+
     .pcm_in ( pcm18_r   ),    // 18.5 kHz
     .pcm_out( pre_pcm55_r   )     // 55.5 kHz
 );

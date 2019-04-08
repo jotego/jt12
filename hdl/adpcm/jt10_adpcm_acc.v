@@ -26,9 +26,12 @@ module jt10_adpcm_acc(
     input           rst_n,
     input           clk,        // CPU clock
     input           cen,        // 111 kHz
+    // pipeline channel
     input   [5:0]   cur_ch,
-    input      signed [15:0] pcm_in,    // 18.5 kHz
-    output     signed [15:0] pcm_out    // 55.5 kHz
+    input   [5:0]   en_ch,
+
+    input  signed [15:0] pcm_in,    // 18.5 kHz
+    output signed [15:0] pcm_out    // 55.5 kHz
 );
 
 wire signed [17:0] pcmin_long = { {2{pcm_in[15]}}, pcm_in };
@@ -48,14 +51,17 @@ always @(*) begin
 
 end
 
+wire adv = en_ch[0] & cur_ch[0];
+
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         step <= 'd0;
         acc  <= 18'd0;
         last <= 18'd0;
     end else if(cen) begin
-        acc <= cur_ch[0] ? pcmin_long : ( pcmin_long + acc );
-        if( cur_ch[0] ) begin
+        if( cur_ch[0] )
+            acc <= en_ch[0] ? pcmin_long : ( pcmin_long + acc );
+        if( adv ) begin
             // step = diff * (1/4+1/16+1/64+1/128)
             step <= { {2{step_full[22]}}, step_full[22:7] }; // >>>7;
             last <= acc;
@@ -69,8 +75,8 @@ wire overflow = |pcm_full[17:15] & ~&pcm_full[17:15];
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         pcm_full <= 18'd0;
-    end else if(cen) begin
-        case( cur_ch )
+    end else if(cen && cur_ch[0]) begin
+        case( en_ch )
             6'b000_001: pcm_full <= last;
             6'b000_100,
             6'b010_000: pcm_full <= pcm_full + step;
