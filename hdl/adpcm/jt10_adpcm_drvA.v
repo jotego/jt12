@@ -24,7 +24,7 @@ module jt10_adpcm_drvA(
     input           clk,    // CPU clock
     input           cen,    // same cen as MMR
     input           cen6,   // clk & cen = 666 kHz
-    input           cen3,   // clk & cen = 111 kHz
+    input           cen1,   // clk & cen = 111 kHz
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
     output  [3:0]   bank,
@@ -59,6 +59,7 @@ reg  [5:0] cur_ch;
 reg  [5:0] en_ch;
 reg  [3:0] data;
 wire nibble_sel;
+wire signed [15:0] pcm18_l, pcm18_r;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -74,12 +75,7 @@ reg div3;
 reg [7:0] aon_cmd_cpy;
 
 always @(posedge clk) if(cen) begin
-    if( cur_ch[5] ) begin
-        aon_cmd_cpy <= 8'd0;
-    end
-    else begin
         if( up_aon ) aon_cmd_cpy <= aon_cmd; else if(cur_ch[5] && cen6) aon_cmd_cpy <= 8'd0;
-    end
 end
 
 always @(posedge clk) if(cen6) begin
@@ -257,20 +253,20 @@ always @(negedge cen6) begin
 end
 `endif
 
-wire signed [15:0] pcm18_l, pcm18_r;
-
 always @(posedge clk) begin
     if( cen3 && chon ) begin
         pcm55_l <= pre_pcm55_l;
         pcm55_r <= pre_pcm55_r;
     end
 end
-
+*/
 jt10_adpcm_gain u_gain(
     .rst_n  ( rst_n          ),
     .clk    ( clk            ),
-    .cen    ( cen_addr       ),
-    .div3   ( div3           ),
+    .cen    ( cen6           ),
+    // Pipeline
+    .cur_ch ( cur_ch         ),
+    .en_ch  ( en_ch          ),
     // Gain control
     .atl    ( atl            ),        // ADPCM Total Level
     .lracl  ( lracl_in       ),
@@ -283,13 +279,14 @@ jt10_adpcm_gain u_gain(
 
 wire signed [15:0] pre_pcm55_l, pre_pcm55_r;
 
-// assign pcm55_l = pre_pcm55_l;
-// assign pcm55_r = pre_pcm55_r;
+assign pcm55_l = pre_pcm55_l;
+assign pcm55_r = pre_pcm55_r;
 
 jt10_adpcm_acc u_acc_left(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen6      ),
+    .cen    ( cen1      ),
+    .cur_ch ( en_ch     ),
     .pcm_in ( pcm18_l   ),    // 18.5 kHz
     .pcm_out( pre_pcm55_l   )     // 55.5 kHz
 );
@@ -297,11 +294,10 @@ jt10_adpcm_acc u_acc_left(
 jt10_adpcm_acc u_acc_right(
     .rst_n  ( rst_n     ),
     .clk    ( clk       ),
-    .cen    ( cen6      ),
+    .cen    ( cen1      ),
+    .cur_ch ( en_ch     ),
     .pcm_in ( pcm18_r   ),    // 18.5 kHz
     .pcm_out( pre_pcm55_r   )     // 55.5 kHz
 );
-
-*/
 
 endmodule // jt10_adpcm_drvA

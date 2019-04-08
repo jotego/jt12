@@ -22,8 +22,11 @@
 module jt10_adpcm_gain(
     input           rst_n,
     input           clk,        // CPU clock
-    input           cen,        // optional clock enable, if not needed leave as 1'b1
-    input           div3,
+    input           cen,        // 666 kHz
+    // pipeline channel
+    input   [5:0]   cur_ch,
+    input   [5:0]   en_ch,
+
     input   [5:0]   atl,        // ADPCM Total Level
     // Gain update
     input   [7:0]   lracl,
@@ -47,14 +50,17 @@ reg [3:0] sh3, sh4, sh5;
 reg [5:0] up_ch_dec;
 always @(*)
     case(up_ch)
-        3'd0: up_ch_dec = 6'b000_001;
-        3'd1: up_ch_dec = 6'b000_010;
-        3'd2: up_ch_dec = 6'b000_100;
-        3'd3: up_ch_dec = 6'b001_000;
-        3'd4: up_ch_dec = 6'b010_000;
-        3'd5: up_ch_dec = 6'b100_000;
+        3'd2: up_ch_dec = 6'b000_001;
+        3'd3: up_ch_dec = 6'b000_010;
+        3'd4: up_ch_dec = 6'b000_100;
+        3'd5: up_ch_dec = 6'b001_000;
+        3'd0: up_ch_dec = 6'b010_000;
+        3'd1: up_ch_dec = 6'b100_000;
         default: up_ch_dec = 6'd0;
-    endcase // up_addr
+    endcase
+
+wire [5:0] en_ch2 = { en_ch[1:0], en_ch[5:2] }; // shift the bits to fit in the pipeline slot correctly
+
 
 always @(*)
     case( db2[2:0] )
@@ -70,7 +76,6 @@ always @(*)
 
 wire signed [15:0] lin4s = {6'b0,lin4};
 wire signed [15:0] pcm5b = pcm5[24:9];
-reg [5:0] cur_ch;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -82,9 +87,7 @@ always @(posedge clk or negedge rst_n)
         pcm5    <= 'd0;
         pcm_l   <= 'd0;
         pcm_r   <= 'd0;
-        cur_ch  <= 6'h20;
     end else if(cen) begin
-        cur_ch <= { cur_ch[4:0], cur_ch[5] };
 
         // I
         lracl2  <= up_ch_dec == cur_ch ? lracl : lracl1;
@@ -106,8 +109,8 @@ always @(posedge clk or negedge rst_n)
         lracl6  <= lracl5;
         // VI close the loop
         lracl1 <= lracl6;
-        if(div3) pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
-        if(div3) pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
+        if(en_ch2 == cur_ch) pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
+        if(en_ch2 == cur_ch) pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
     end
 
 endmodule // jt10_adpcm_gain

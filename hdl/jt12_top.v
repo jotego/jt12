@@ -156,7 +156,7 @@ wire        adpcmb_flag;
 wire [ 6:0] flag_ctl;
 
 
-wire clk_en_adpcm, clk_en_adpcm3, clk_en_55;
+wire clk_en_666, clk_en_111, clk_en_55;
 
 generate
 if( use_adpcm==1 ) begin: gen_adpcm
@@ -172,8 +172,8 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
         .cen        ( cen           ),
-        .cen6       ( clk_en_adpcm3 ),  // clk & cen must be 666  kHz
-        .cen3       ( 0 ),  // clk & cen must be 18.5 kHz
+        .cen6       ( clk_en_666    ),  // clk & cen must be 666  kHz
+        .cen1       ( clk_en_111    ),  // clk & cen must be 111 kHz
 
         .addr       ( adpcma_addr   ),  // real hardware has 10 pins multiplexed through RMPX pin
         .bank       ( adpcma_bank   ),
@@ -204,7 +204,6 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .clk        ( clk           ),
         .cen        ( cen           ),
         .cen55      ( clk_en_55     ),
-        .cen333     ( clk_en_adpcm3 ),
         
         // Control
         .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
@@ -281,8 +280,8 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .cen        ( cen       ),  // external clock enable
     .clk_en     ( clk_en    ),  // internal clock enable
     .clk_en_ssg ( clk_en_ssg),  // internal clock enable
-    .clk_en_adpcm ( clk_en_adpcm  ),
-    .clk_en_adpcm3( clk_en_adpcm3 ),
+    .clk_en_666 ( clk_en_666),
+    .clk_en_111 ( clk_en_111),
     .clk_en_55  ( clk_en_55 ),
     .din        ( din       ),
     .write      ( write     ),

@@ -24,7 +24,6 @@ module jt10_adpcm_drvB(
     input           clk,
     input           cen,      // 8MHz cen
     input           cen55,    // clk & cen55  =  55 kHz
-    input           cen333,   // clk &c en333 = 333 kHz
     // Control
     input           acmd_on_b,  // Control - Process start, Key On
     input           acmd_rep_b, // Control - Repeat

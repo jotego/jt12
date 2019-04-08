@@ -26,6 +26,7 @@ module jt10_adpcm_acc(
     input           rst_n,
     input           clk,        // CPU clock
     input           cen,        // 111 kHz
+    input   [5:0]   cur_ch,
     input      signed [15:0] pcm_in,    // 18.5 kHz
     output     signed [15:0] pcm_out    // 55.5 kHz
 );
@@ -47,16 +48,12 @@ always @(*) begin
 
 end
 
-reg [5:0] cur_ch;
-
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         step <= 'd0;
         acc  <= 18'd0;
         last <= 18'd0;
-        cur_ch <= 6'h2;
     end else if(cen) begin
-        cur_ch <= { cur_ch[4:0], cur_ch[5] };
         acc <= cur_ch[0] ? pcmin_long : ( pcmin_long + acc );
         if( cur_ch[0] ) begin
             // step = diff * (1/4+1/16+1/64+1/128)

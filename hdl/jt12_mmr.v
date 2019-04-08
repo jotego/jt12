@@ -26,8 +26,8 @@ module jt12_mmr(
     input           cen,
     output          clk_en,
     output          clk_en_ssg,
-    output          clk_en_adpcm,
-    output          clk_en_adpcm3,
+    output          clk_en_666,
+    output          clk_en_111,
     output          clk_en_55,
     input   [7:0]   din,
     input           write,
@@ -129,15 +129,15 @@ reg [1:0] div_setting;
 
 
 jt12_div #(.use_ssg(use_ssg),.num_ch(num_ch)) u_div (
-    .rst            ( rst           ),
-    .clk            ( clk           ),
-    .cen            ( cen           ),
-    .div_setting    ( div_setting   ),
-    .clk_en         ( clk_en        ),
-    .clk_en_ssg     ( clk_en_ssg    ),
-    .clk_en_adpcm3  ( clk_en_adpcm3 ),
-    .clk_en_adpcm   ( clk_en_adpcm  ),
-    .clk_en_55      ( clk_en_55     )
+    .rst            ( rst             ),
+    .clk            ( clk             ),
+    .cen            ( cen             ),
+    .div_setting    ( div_setting     ),
+    .clk_en         ( clk_en          ),
+    .clk_en_ssg     ( clk_en_ssg      ),
+    .clk_en_666     ( clk_en_666      ),
+    .clk_en_111     ( clk_en_111      ),
+    .clk_en_55      ( clk_en_55       )
 );
 
 reg [7:0]   selected_register;
