@@ -93,7 +93,7 @@ always @( posedge clk or negedge rst_n )
         // I
         sign2     <= data[3];
         x2        <= clr ? 0 : x1;
-        step2     <= (chon && !clr) ? step_1p : 0;
+        step2     <= clr ? 0 : (chon ? step_1p : step1);
         chon2     <= chon;
         lut_addr2 <= { step1, data[2:0] };
         // II 2's complement of inc2 if necessary
@@ -110,7 +110,7 @@ always @( posedge clk or negedge rst_n )
         // IV
         sign5     <= sign4;
         xsign5    <= x4[sigw-1];
-        x5        <= chon4 ? x4 + inc4 : 0;
+        x5        <= chon4 ? x4 + inc4 : x4;
         step5     <= step4;
         // V
         // if( xsign5!=x5[sigw-1] && sign5!=x5[sigw-1] ) begin // enable limiter

@@ -39,6 +39,7 @@ module jt10_adpcm_cnt(
     output     [ 3:0] bank,
     output            sel,
     output            roe_n,
+    output            decon,
     output            clr,      // inform the decoder that a new section begins
     // Flags
     output reg [ 5:0] flags,
@@ -56,17 +57,20 @@ reg on1, on2, on3, on4, on5, on6;
 reg done5, done6, done1;
 reg [5:0] done_sr, zero;
 
-reg roe_n6, roe_n1;
+reg roe_n1, decon1;
 
 reg clr1, clr2, clr3, clr4, clr5, clr6;
 
+// All outputs from stage 1
 assign addr_out = addr1[20:1];
 assign sel      = addr1[0];
 assign bank     = bank1;
 assign roe_n    = roe_n1;
 assign clr      = clr1;
+assign decon    = decon1;
 
-wire sumup5 = on5 && !done5 && { cur_ch[1:0], cur_ch[5:2] } == en_ch;
+wire active5 = { cur_ch[1:0], cur_ch[5:2] } == en_ch;
+wire sumup5  = on5 && !done5 && active5;
 reg  sumup6;
 
 reg [5:0] last_done, set_flags;
@@ -124,7 +128,6 @@ always @(posedge clk or negedge rst_n)
         start4 <= 'd0;   start5 <= 'd0;   start6 <= 'd0;
         end1   <= 'd0;     end2 <= 'd0;     end3 <= 'd0;
         end4   <= 'd0;     end5 <= 'd0;     end6 <= 'd0;
-        roe_n6 <= 'd1;
     end else if( cen ) begin
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | on1);
@@ -162,7 +165,6 @@ always @(posedge clk or negedge rst_n)
         start6 <= start5;
         end6   <= end5;
         bank6  <= bank5;
-        roe_n6 <= !(on5 && !done5);
         sumup6 <= sumup5;
 
         addr1  <= clr6 ? {start6,9'd0} : (sumup6 ? addr6+21'd1 :addr6);
@@ -170,7 +172,8 @@ always @(posedge clk or negedge rst_n)
         done1  <= done6;
         start1 <= start6;
         end1   <= end6;
-        roe_n1 <= roe_n6;
+        roe_n1 <= ~sumup6;
+        decon1 <= sumup6;
         bank1  <= bank6;
         clr1   <= clr6;
     end

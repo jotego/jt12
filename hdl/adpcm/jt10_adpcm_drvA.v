@@ -164,7 +164,7 @@ always @(posedge cen6) begin
 end
 `endif
 */
-wire clr_dec;
+wire clr_dec, decon;
 
 jt10_adpcm_cnt u_cnt(
     .rst_n       ( rst_n           ),
@@ -187,15 +187,13 @@ jt10_adpcm_cnt u_cnt(
     .bank        ( bank            ),
     .sel         ( nibble_sel      ),
     .roe_n       ( roe_n           ),
+    .decon       ( decon           ),
     // Flags
     .flags       ( flags           ),
     .clr_flags   ( clr_flags       ),
     .start_top   ( start_top       ),
     .end_top     ( end_top         )
 );
-
-reg chon;
-always @(posedge clk) if(cen) chon <= ~roe_n;
 
 // wire chactive = chon & cen6;
 wire signed [15:0] pcmdec;
@@ -205,7 +203,7 @@ jt10_adpcm u_decoder(
     .clk    ( clk       ),
     .cen    ( cen6      ),
     .data   ( data      ),
-    .chon   ( chon      ),
+    .chon   ( decon     ),
     .clr    ( clr_dec   ),
     .pcm    ( pcmdec    )
 );
