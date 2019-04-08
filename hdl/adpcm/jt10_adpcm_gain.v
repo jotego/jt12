@@ -32,7 +32,7 @@ module jt10_adpcm_gain(
     input   [7:0]   lracl,
     input   [2:0]   up_ch,
     // Data
-    input signed [15:0] pcm_in,
+    input      signed [15:0] pcm_in,
     output reg signed [15:0] pcm_l,
     output reg signed [15:0] pcm_r
 );
@@ -108,7 +108,7 @@ always @(posedge clk or negedge rst_n)
         pcm6    <= pcm5b >>> sh5;
         lracl6  <= lracl5;
         // VI close the loop
-        lracl1 <= lracl6;
+        lracl1  <= lracl6;
         if(en_ch2 == cur_ch) pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
         if(en_ch2 == cur_ch) pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
     end
