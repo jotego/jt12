@@ -18,12 +18,12 @@ aend_lsb   3,FF
 aend_lsb   4,FF
 aend_lsb   5,FF
 
-alr 0,f0
-alr 1,f1
-alr 2,f2
-alr 3,f3
-alr 4,f4
-alr 5,f5
+alr 0,d0
+alr 1,d1
+alr 2,d2
+alr 3,d3
+alr 4,d4
+alr 5,d5
 
 aon 1
 wait 800

@@ -29,12 +29,14 @@ module jt10_adpcm_acc(
     // pipeline channel
     input   [5:0]   cur_ch,
     input   [5:0]   en_ch,
+    input           match,
 
+    input           en_sum,
     input  signed [15:0] pcm_in,    // 18.5 kHz
     output signed [15:0] pcm_out    // 55.5 kHz
 );
 
-wire signed [17:0] pcm_in_long = { {2{pcm_in[15]}}, pcm_in };
+wire signed [17:0] pcm_in_long = en_sum ? { {2{pcm_in[15]}}, pcm_in } : 18'd0;
 reg  signed [17:0] acc, last, pcm_full;
 reg  signed [17:0] step;
 
@@ -59,7 +61,7 @@ always @(posedge clk or negedge rst_n)
         acc  <= 18'd0;
         last <= 18'd0;
     end else if(cen) begin
-        if( cur_ch[0] )
+        if( match )
             acc <= en_ch[0] ? pcm_in_long : ( pcm_in_long + acc );
         if( adv ) begin
             // step = diff * (1/4+1/16+1/64+1/128)

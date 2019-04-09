@@ -26,15 +26,16 @@ module jt10_adpcm_gain(
     // pipeline channel
     input   [5:0]   cur_ch,
     input   [5:0]   en_ch,
+    input           match,
 
     input   [5:0]   atl,        // ADPCM Total Level
     // Gain update
     input   [7:0]   lracl,
     input   [2:0]   up_ch,
     // Data
+    output  [1:0]   lr,
     input      signed [15:0] pcm_in,
-    output reg signed [15:0] pcm_l,
-    output reg signed [15:0] pcm_r
+    output     signed [15:0] pcm_att
 );
 
 reg [5:0] up_ch_dec;
@@ -49,8 +50,9 @@ always @(*)
         default: up_ch_dec = 6'd0;
     endcase
 
-wire [5:0] en_ch2 = { en_ch[1:0], en_ch[5:2] }; // shift the bits to fit in the pipeline slot correctly
+wire [5:0] en_ch2 = { en_ch[4:0], en_ch[5] }; // shift the bits to fit in the pipeline slot correctly
 
+reg  [6:0] db5;
 always @(*)
     case( db5[2:0] )
         3'd0: lin_5b = 10'd512;
@@ -64,10 +66,12 @@ always @(*)
     endcase
 
 reg [7:0] lracl1, lracl2, lracl3, lracl4, lracl5, lracl6;
-reg  [9:0] lin_5b, lin1, lin6;
+reg  [9:0] lin_5b, lin1, lin2, lin6;
 reg [3:0] sh1, sh6;
 
 // dB to linear conversion
+assign lr = lracl1[7:6];
+
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         lracl1  <= 8'd0; lracl2 <= 8'd0;
@@ -76,7 +80,6 @@ always @(posedge clk or negedge rst_n)
         db5     <= 'd0;
         sh1     <= 4'd0; sh6    <= 4'd0;
         lin1    <= 10'd0;
-        lin_5b  <= 10'd0;
         lin6    <= 10'd0;
     end else if(cen) begin
 
@@ -117,40 +120,57 @@ always @(*) begin
     shcnt_mod4 = shcnt4 != 0;
     shcnt_mod5 = shcnt5 != 0;
     pcm2_mul   = pcm2 * lin2s;
-    pcm2_lim   = !pcm[31] ? 
-        (pcm5[31:5] == 0 ? pcm5[24:9] : 
 end
 
 reg signed [15:0] pcm1, pcm2, pcm3, pcm4, pcm5, pcm6;
-wire signed [15:0] pcm5b = pcm5[24:9];
+reg match2;
+
+assign pcm_att = pcm1;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
-        pcm_l   <= 'd0;
-        pcm_r   <= 'd0;
+        pcm1   <= 'd0; pcm2   <= 'd0;
+        pcm3   <= 'd0; pcm4   <= 'd0;
+        pcm5   <= 'd0; pcm6   <= 'd0;
+        shcnt1 <= 'd0; shcnt2 <= 'd0;
+        shcnt3 <= 'd0; shcnt4 <= 'd0;
+        shcnt5 <= 'd0; shcnt6 <= 'd0;
     end else if(cen) begin
         // I
-        pcm2    <= new1 ? pcm_in : pcm6;
+        pcm2    <= match ? pcm_in : pcm1;
         lin2    <= lin1;
-        shcnt2  <= new1 ? sh1 : shcnt6;
-        new2    <= new1;
+        shcnt2  <= match ? sh1 : shcnt1;
+        match2  <= match;
         // II
-        pcm3    <= new2 ? pcm2_mul : pcm2;
+        pcm3    <= match2 ? pcm2_mul[24:9] : pcm2;
         shcnt3  <= shcnt2;
         // III, shift by 0 or 1
-        pcm4    <= pcm3>>>shcnt_mod3;
-        shcnt4  <= shcnt3 - shcnt_mod3
+        if( shcnt_mod3 ) begin
+            pcm4   <= pcm3>>>1;
+            shcnt4 <= shcnt3-1;
+        end else begin
+            pcm4   <= pcm3;
+            shcnt4 <= shcnt3;
+        end
         // IV, shift by 0 or 1
-        pcm5    <= pcm4;   // pcm4>>>shcnt_mod4;
-        shcnt5  <= shcnt4; // shcnt4 - shcnt_mod4
+        if( shcnt_mod4 ) begin
+            pcm5   <= pcm4>>>1;
+            shcnt5 <= shcnt4-1;
+        end else begin
+            pcm5   <= pcm4;
+            shcnt5 <= shcnt4;
+        end       
         // V, shift by 0 or 1
-        pcm6    <= pcm5;   // pcm5>>>shcnt_mod5;
-        shcnt6  <= shcnt5; // shcnt5 - shcnt_mod5
+        if( shcnt_mod5 ) begin
+            pcm6   <= pcm5>>>1;
+            shcnt6 <= shcnt5-1;
+        end else begin
+            pcm6   <= pcm5;
+            shcnt6 <= shcnt5;
+        end       
         // VI close the loop and output
         pcm1    <= pcm6;
         shcnt1  <= shcnt6;
-        if(en_ch2 == cur_ch) pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
-        if(en_ch2 == cur_ch) pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
     end
 
 endmodule // jt10_adpcm_gain

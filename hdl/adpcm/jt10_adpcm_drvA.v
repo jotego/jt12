@@ -59,7 +59,7 @@ reg  [5:0] cur_ch;
 reg  [5:0] en_ch;
 reg  [3:0] data;
 wire nibble_sel;
-wire signed [15:0] pcm18_l, pcm18_r;
+wire signed [15:0] pcm_att;
 
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
@@ -88,17 +88,171 @@ always @(posedge clk) if(cen6) begin
     end
 end
 
+reg match; // high when cur_ch==en_ch, but calculated one clock cycle ahead
+    // so it can be latched
+wire [5:0] cur_next = { cur_ch[4:0], cur_ch[5] };
+wire [5:0]  en_next = {en_ch[4:0], en_ch[5] };
+
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
         cur_ch <= 6'b1;  en_ch  <= 6'b1;
+        match  <= 0;
     end else if( cen6 ) begin
-        cur_ch <= { cur_ch[4:0], cur_ch[5] };
-        if( cur_ch[5] ) en_ch <= {en_ch[4:0], en_ch[5] };
+        cur_ch <= cur_next;
+        if( cur_ch[5] ) en_ch <= en_next;
+        match <= cur_next == (cur_ch[5] ? en_next : en_ch);
     end
 
 wire [15:0] start_top, end_top;
 
+wire clr_dec, decon;
+
+jt10_adpcm_cnt u_cnt(
+    .rst_n       ( rst_n           ),
+    .clk         ( clk             ),
+    .cen         ( cen6            ),
+    // Pipeline
+    .cur_ch      ( cur_ch          ),
+    .en_ch       ( en_ch           ),
+    // START/END update
+    .addr_in     ( addr_in         ),
+    .addr_ch     ( up_addr         ),
+    .up_start    ( up_start        ),
+    .up_end      ( up_end          ),
+    // Control
+    .aon         ( aon_sr[0]       ),
+    .aoff        ( aoff_sr[0]      ),
+    .clr         ( clr_dec         ),
+    // ROM driver
+    .addr_out    ( addr            ),
+    .bank        ( bank            ),
+    .sel         ( nibble_sel      ),
+    .roe_n       ( roe_n           ),
+    .decon       ( decon           ),
+    // Flags
+    .flags       ( flags           ),
+    .clr_flags   ( clr_flags       ),
+    .start_top   ( start_top       ),
+    .end_top     ( end_top         )
+);
+
+// wire chactive = chon & cen6;
+wire signed [15:0] pcmdec;
+
+jt10_adpcm u_decoder(
+    .rst_n  ( rst_n     ),
+    .clk    ( clk       ),
+    .cen    ( cen6      ),
+    .data   ( data      ),
+    .chon   ( decon     ),
+    .clr    ( clr_dec   ),
+    .pcm    ( pcmdec    )
+);
+/*
+
+always @(posedge clk) begin
+    if( cen3 && chon ) begin
+        pcm55_l <= pre_pcm55_l;
+        pcm55_r <= pre_pcm55_r;
+    end
+end
+*/
+
+wire [1:0] lr;
+
+jt10_adpcm_gain u_gain(
+    .rst_n  ( rst_n          ),
+    .clk    ( clk            ),
+    .cen    ( cen6           ),
+    // Pipeline
+    .cur_ch ( cur_ch         ),
+    .en_ch  ( en_ch          ),
+    .match  ( match          ),
+    // Gain control
+    .atl    ( atl            ),        // ADPCM Total Level
+    .lracl  ( lracl_in       ),
+    .up_ch  ( up_lracl       ),
+
+    .lr     ( lr             ),
+    .pcm_in ( pcmdec         ),
+    .pcm_att( pcm_att        )
+);
+
+wire signed [15:0] pre_pcm55_l, pre_pcm55_r;
+
+assign pcm55_l = pre_pcm55_l;
+assign pcm55_r = pre_pcm55_r;
+
+jt10_adpcm_acc u_acc_left(
+    .rst_n  ( rst_n     ),
+    .clk    ( clk       ),
+    .cen    ( cen6      ),
+    // Pipeline
+    .cur_ch ( cur_ch    ),
+    .en_ch  ( en_ch     ),
+    .match  ( match     ),
+    // left/right enable
+    .en_sum ( lr[1]     ),
+
+    .pcm_in ( pcm_att   ),    // 18.5 kHz
+    .pcm_out( pre_pcm55_l   )     // 55.5 kHz
+);
+
+jt10_adpcm_acc u_acc_right(
+    .rst_n  ( rst_n     ),
+    .clk    ( clk       ),
+    .cen    ( cen6      ),
+    // Pipeline
+    .cur_ch ( cur_ch    ),
+    .en_ch  ( en_ch     ),
+    .match  ( match     ),
+    // left/right enable
+    .en_sum ( lr[0]     ),
+
+    .pcm_in ( pcm_att   ),    // 18.5 kHz
+    .pcm_out( pre_pcm55_r   )     // 55.5 kHz
+);
+
+
 `ifdef SIMULATION
+integer fch0, fch1, fch2, fch3, fch4, fch5;
+initial begin
+    fch0 = $fopen("ch0.dec","w");
+    fch1 = $fopen("ch1.dec","w");
+    fch2 = $fopen("ch2.dec","w");
+    fch3 = $fopen("ch3.dec","w");
+    fch4 = $fopen("ch4.dec","w");
+    fch5 = $fopen("ch5.dec","w");
+end
+
+reg signed [15:0] pcm_ch0, pcm_ch1, pcm_ch2, pcm_ch3, pcm_ch4, pcm_ch5;
+always @(posedge cen6) if(en_ch[0]) begin
+    if(cur_ch[0]) begin
+        pcm_ch0 <= pcmdec;
+        $fwrite( fch0, "%d\n", pcmdec );
+    end
+    if(cur_ch[1]) begin
+        pcm_ch1 <= pcmdec;
+        $fwrite( fch1, "%d\n", pcmdec );
+    end
+    if(cur_ch[2]) begin
+        pcm_ch2 <= pcmdec;
+        $fwrite( fch2, "%d\n", pcmdec );
+    end
+    if(cur_ch[3]) begin
+        pcm_ch3 <= pcmdec;
+        $fwrite( fch3, "%d\n", pcmdec );
+    end
+    if(cur_ch[4]) begin
+        pcm_ch4 <= pcmdec;
+        $fwrite( fch4, "%d\n", pcmdec );
+    end
+    if(cur_ch[5]) begin
+        pcm_ch5 <= pcmdec;
+        $fwrite( fch5, "%d\n", pcmdec );
+    end
+end
+
 reg [15:0] sim_start0, sim_start1, sim_start2, sim_start3, sim_start4, sim_start5;
 reg [15:0] sim_end0, sim_end1, sim_end2, sim_end3, sim_end4, sim_end5;
 reg [ 7:0] sim_lracl0, sim_lracl1, sim_lracl2, sim_lracl3, sim_lracl4, sim_lracl5;
@@ -178,145 +332,6 @@ always @(posedge cen6) begin
     endcase
 end
 */
-`endif
-
-wire clr_dec, decon;
-
-jt10_adpcm_cnt u_cnt(
-    .rst_n       ( rst_n           ),
-    .clk         ( clk             ),
-    .cen         ( cen6            ),
-    // Pipeline
-    .cur_ch      ( cur_ch          ),
-    .en_ch       ( en_ch           ),
-    // START/END update
-    .addr_in     ( addr_in         ),
-    .addr_ch     ( up_addr         ),
-    .up_start    ( up_start        ),
-    .up_end      ( up_end          ),
-    // Control
-    .aon         ( aon_sr[0]       ),
-    .aoff        ( aoff_sr[0]      ),
-    .clr         ( clr_dec         ),
-    // ROM driver
-    .addr_out    ( addr            ),
-    .bank        ( bank            ),
-    .sel         ( nibble_sel      ),
-    .roe_n       ( roe_n           ),
-    .decon       ( decon           ),
-    // Flags
-    .flags       ( flags           ),
-    .clr_flags   ( clr_flags       ),
-    .start_top   ( start_top       ),
-    .end_top     ( end_top         )
-);
-
-// wire chactive = chon & cen6;
-wire signed [15:0] pcmdec;
-
-jt10_adpcm u_decoder(
-    .rst_n  ( rst_n     ),
-    .clk    ( clk       ),
-    .cen    ( cen6      ),
-    .data   ( data      ),
-    .chon   ( decon     ),
-    .clr    ( clr_dec   ),
-    .pcm    ( pcmdec    )
-);
-/*
-
-always @(posedge clk) begin
-    if( cen3 && chon ) begin
-        pcm55_l <= pre_pcm55_l;
-        pcm55_r <= pre_pcm55_r;
-    end
-end
-*/
-jt10_adpcm_gain u_gain(
-    .rst_n  ( rst_n          ),
-    .clk    ( clk            ),
-    .cen    ( cen6           ),
-    // Pipeline
-    .cur_ch ( cur_ch         ),
-    .en_ch  ( en_ch          ),
-    // Gain control
-    .atl    ( atl            ),        // ADPCM Total Level
-    .lracl  ( lracl_in       ),
-    .up_ch  ( up_lracl       ),
-
-    .pcm_in ( pcmdec         ),
-    .pcm_l  ( pcm18_l        ),
-    .pcm_r  ( pcm18_r        )
-);
-
-wire signed [15:0] pre_pcm55_l, pre_pcm55_r;
-
-assign pcm55_l = pre_pcm55_l;
-assign pcm55_r = pre_pcm55_r;
-
-jt10_adpcm_acc u_acc_left(
-    .rst_n  ( rst_n     ),
-    .clk    ( clk       ),
-    .cen    ( cen6      ),
-    // Pipeline
-    .cur_ch ( cur_ch    ),
-    .en_ch  ( en_ch     ),
-
-    .pcm_in ( pcm18_l   ),    // 18.5 kHz
-    .pcm_out( pre_pcm55_l   )     // 55.5 kHz
-);
-
-jt10_adpcm_acc u_acc_right(
-    .rst_n  ( rst_n     ),
-    .clk    ( clk       ),
-    .cen    ( cen6      ),
-    // Pipeline
-    .cur_ch ( cur_ch    ),
-    .en_ch  ( en_ch     ),
-
-    .pcm_in ( pcm18_r   ),    // 18.5 kHz
-    .pcm_out( pre_pcm55_r   )     // 55.5 kHz
-);
-
-
-`ifdef SIMULATION
-integer fch0, fch1, fch2, fch3, fch4, fch5;
-initial begin
-    fch0 = $fopen("ch0.dec","w");
-    fch1 = $fopen("ch1.dec","w");
-    fch2 = $fopen("ch2.dec","w");
-    fch3 = $fopen("ch3.dec","w");
-    fch4 = $fopen("ch4.dec","w");
-    fch5 = $fopen("ch5.dec","w");
-end
-
-reg signed [15:0] pcm_ch0, pcm_ch1, pcm_ch2, pcm_ch3, pcm_ch4, pcm_ch5;
-always @(posedge cen6) if(en_ch[0]) begin
-    if(cur_ch[0]) begin
-        pcm_ch0 <= pcmdec;
-        $fwrite( fch0, "%d\n", pcmdec );
-    end
-    if(cur_ch[1]) begin
-        pcm_ch1 <= pcmdec;
-        $fwrite( fch1, "%d\n", pcmdec );
-    end
-    if(cur_ch[2]) begin
-        pcm_ch2 <= pcmdec;
-        $fwrite( fch2, "%d\n", pcmdec );
-    end
-    if(cur_ch[3]) begin
-        pcm_ch3 <= pcmdec;
-        $fwrite( fch3, "%d\n", pcmdec );
-    end
-    if(cur_ch[4]) begin
-        pcm_ch4 <= pcmdec;
-        $fwrite( fch4, "%d\n", pcmdec );
-    end
-    if(cur_ch[5]) begin
-        pcm_ch5 <= pcmdec;
-        $fwrite( fch5, "%d\n", pcmdec );
-    end
-end
 `endif
 
 endmodule // jt10_adpcm_drvA

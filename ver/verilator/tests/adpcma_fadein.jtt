@@ -1,0 +1,387 @@
+ym2610
+# Generated with adpcma_fadein.py
+atl 3f
+aend_msb ff
+aon 1
+alr 0, c0
+wait 200
+alr 0, c1
+wait 200
+alr 0, c2
+wait 200
+alr 0, c3
+wait 200
+alr 0, c4
+wait 200
+alr 0, c5
+wait 200
+alr 0, c6
+wait 200
+alr 0, c7
+wait 200
+alr 0, c8
+wait 200
+alr 0, c9
+wait 200
+alr 0, ca
+wait 200
+alr 0, cb
+wait 200
+alr 0, cc
+wait 200
+alr 0, cd
+wait 200
+alr 0, ce
+wait 200
+alr 0, cf
+wait 200
+alr 0, d0
+wait 200
+alr 0, d1
+wait 200
+alr 0, d2
+wait 200
+alr 0, d3
+wait 200
+alr 0, d4
+wait 200
+alr 0, d5
+wait 200
+alr 0, d6
+wait 200
+alr 0, d7
+wait 200
+alr 0, d8
+wait 200
+alr 0, d9
+wait 200
+alr 0, da
+wait 200
+alr 0, db
+wait 200
+alr 0, dc
+wait 200
+alr 0, dd
+wait 200
+alr 0, de
+wait 200
+alr 0, df
+wait 200
+alr 0, e0
+wait 200
+alr 0, e1
+wait 200
+alr 0, e2
+wait 200
+alr 0, e3
+wait 200
+alr 0, e4
+wait 200
+alr 0, e5
+wait 200
+alr 0, e6
+wait 200
+alr 0, e7
+wait 200
+alr 0, e8
+wait 200
+alr 0, e9
+wait 200
+alr 0, ea
+wait 200
+alr 0, eb
+wait 200
+alr 0, ec
+wait 200
+alr 0, ed
+wait 200
+alr 0, ee
+wait 200
+alr 0, ef
+wait 200
+alr 0, f0
+wait 200
+alr 0, f1
+wait 200
+alr 0, f2
+wait 200
+alr 0, f3
+wait 200
+alr 0, f4
+wait 200
+alr 0, f5
+wait 200
+alr 0, f6
+wait 200
+alr 0, f7
+wait 200
+alr 0, f8
+wait 200
+alr 0, f9
+wait 200
+alr 0, fa
+wait 200
+alr 0, fb
+wait 200
+alr 0, fc
+wait 200
+alr 0, fd
+wait 200
+alr 0, fe
+wait 200
+alr 0, ff
+wait 200
+alr 0, bf
+wait 200
+alr 0, be
+wait 200
+alr 0, bd
+wait 200
+alr 0, bc
+wait 200
+alr 0, bb
+wait 200
+alr 0, ba
+wait 200
+alr 0, b9
+wait 200
+alr 0, b8
+wait 200
+alr 0, b7
+wait 200
+alr 0, b6
+wait 200
+alr 0, b5
+wait 200
+alr 0, b4
+wait 200
+alr 0, b3
+wait 200
+alr 0, b2
+wait 200
+alr 0, b1
+wait 200
+alr 0, b0
+wait 200
+alr 0, af
+wait 200
+alr 0, ae
+wait 200
+alr 0, ad
+wait 200
+alr 0, ac
+wait 200
+alr 0, ab
+wait 200
+alr 0, aa
+wait 200
+alr 0, a9
+wait 200
+alr 0, a8
+wait 200
+alr 0, a7
+wait 200
+alr 0, a6
+wait 200
+alr 0, a5
+wait 200
+alr 0, a4
+wait 200
+alr 0, a3
+wait 200
+alr 0, a2
+wait 200
+alr 0, a1
+wait 200
+alr 0, a0
+wait 200
+alr 0, 9f
+wait 200
+alr 0, 9e
+wait 200
+alr 0, 9d
+wait 200
+alr 0, 9c
+wait 200
+alr 0, 9b
+wait 200
+alr 0, 9a
+wait 200
+alr 0, 99
+wait 200
+alr 0, 98
+wait 200
+alr 0, 97
+wait 200
+alr 0, 96
+wait 200
+alr 0, 95
+wait 200
+alr 0, 94
+wait 200
+alr 0, 93
+wait 200
+alr 0, 92
+wait 200
+alr 0, 91
+wait 200
+alr 0, 90
+wait 200
+alr 0, 8f
+wait 200
+alr 0, 8e
+wait 200
+alr 0, 8d
+wait 200
+alr 0, 8c
+wait 200
+alr 0, 8b
+wait 200
+alr 0, 8a
+wait 200
+alr 0, 89
+wait 200
+alr 0, 88
+wait 200
+alr 0, 87
+wait 200
+alr 0, 86
+wait 200
+alr 0, 85
+wait 200
+alr 0, 84
+wait 200
+alr 0, 83
+wait 200
+alr 0, 82
+wait 200
+alr 0, 81
+wait 200
+alr 0, 40
+wait 200
+alr 0, 41
+wait 200
+alr 0, 42
+wait 200
+alr 0, 43
+wait 200
+alr 0, 44
+wait 200
+alr 0, 45
+wait 200
+alr 0, 46
+wait 200
+alr 0, 47
+wait 200
+alr 0, 48
+wait 200
+alr 0, 49
+wait 200
+alr 0, 4a
+wait 200
+alr 0, 4b
+wait 200
+alr 0, 4c
+wait 200
+alr 0, 4d
+wait 200
+alr 0, 4e
+wait 200
+alr 0, 4f
+wait 200
+alr 0, 50
+wait 200
+alr 0, 51
+wait 200
+alr 0, 52
+wait 200
+alr 0, 53
+wait 200
+alr 0, 54
+wait 200
+alr 0, 55
+wait 200
+alr 0, 56
+wait 200
+alr 0, 57
+wait 200
+alr 0, 58
+wait 200
+alr 0, 59
+wait 200
+alr 0, 5a
+wait 200
+alr 0, 5b
+wait 200
+alr 0, 5c
+wait 200
+alr 0, 5d
+wait 200
+alr 0, 5e
+wait 200
+alr 0, 5f
+wait 200
+alr 0, 60
+wait 200
+alr 0, 61
+wait 200
+alr 0, 62
+wait 200
+alr 0, 63
+wait 200
+alr 0, 64
+wait 200
+alr 0, 65
+wait 200
+alr 0, 66
+wait 200
+alr 0, 67
+wait 200
+alr 0, 68
+wait 200
+alr 0, 69
+wait 200
+alr 0, 6a
+wait 200
+alr 0, 6b
+wait 200
+alr 0, 6c
+wait 200
+alr 0, 6d
+wait 200
+alr 0, 6e
+wait 200
+alr 0, 6f
+wait 200
+alr 0, 70
+wait 200
+alr 0, 71
+wait 200
+alr 0, 72
+wait 200
+alr 0, 73
+wait 200
+alr 0, 74
+wait 200
+alr 0, 75
+wait 200
+alr 0, 76
+wait 200
+alr 0, 77
+wait 200
+alr 0, 78
+wait 200
+alr 0, 79
+wait 200
+alr 0, 7a
+wait 200
+alr 0, 7b
+wait 200
+alr 0, 7c
+wait 200
+alr 0, 7d
+wait 200
+alr 0, 7e
+wait 200
+alr 0, 7f
+wait 200
