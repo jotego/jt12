@@ -36,6 +36,7 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mixer/j
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mixer/jt12_interpol.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mixer/jt12_comb.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) mixer/jt12_fm_uprate.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_dout.v ]
 # SSG
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../jt49/hdl/jt49.v       ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../jt49/hdl/jt49_div.v   ]
