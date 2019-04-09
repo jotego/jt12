@@ -37,78 +37,118 @@ module jt10_adpcm_gain(
     output reg signed [15:0] pcm_r
 );
 
-reg [7:0] lracl1, lracl2, lracl3, lracl4, lracl5, lracl6;
-
-reg  [9:0] lin_2b, lin3, lin4;
-reg  [6:0] db2, db3;
-reg signed [31:0] pcm5;
-reg signed [15:0] pcm6;
-
-
-reg [3:0] sh3, sh4, sh5;
-
 reg [5:0] up_ch_dec;
 always @(*)
     case(up_ch)
-        3'd3: up_ch_dec = 6'b000_001;
-        3'd4: up_ch_dec = 6'b000_010;
-        3'd5: up_ch_dec = 6'b000_100;
-        3'd0: up_ch_dec = 6'b001_000;
-        3'd1: up_ch_dec = 6'b010_000;
-        3'd2: up_ch_dec = 6'b100_000;
+        3'd0: up_ch_dec = 6'b000_001;
+        3'd1: up_ch_dec = 6'b000_010;
+        3'd2: up_ch_dec = 6'b000_100;
+        3'd3: up_ch_dec = 6'b001_000;
+        3'd4: up_ch_dec = 6'b010_000;
+        3'd5: up_ch_dec = 6'b100_000;
         default: up_ch_dec = 6'd0;
     endcase
 
 wire [5:0] en_ch2 = { en_ch[1:0], en_ch[5:2] }; // shift the bits to fit in the pipeline slot correctly
 
-
 always @(*)
-    case( db2[2:0] )
-        3'd0: lin_2b = 10'd512;
-        3'd1: lin_2b = 10'd470;
-        3'd2: lin_2b = 10'd431;
-        3'd3: lin_2b = 10'd395;
-        3'd4: lin_2b = 10'd362;
-        3'd5: lin_2b = 10'd332;
-        3'd6: lin_2b = 10'd305;
-        3'd7: lin_2b = 10'd280;
+    case( db5[2:0] )
+        3'd0: lin_5b = 10'd512;
+        3'd1: lin_5b = 10'd470;
+        3'd2: lin_5b = 10'd431;
+        3'd3: lin_5b = 10'd395;
+        3'd4: lin_5b = 10'd362;
+        3'd5: lin_5b = 10'd332;
+        3'd6: lin_5b = 10'd305;
+        3'd7: lin_5b = 10'd280;
     endcase
 
-wire signed [15:0] lin4s = {6'b0,lin4};
-wire signed [15:0] pcm5b = pcm5[24:9];
+reg [7:0] lracl1, lracl2, lracl3, lracl4, lracl5, lracl6;
+reg  [9:0] lin_5b, lin1, lin6;
+reg [3:0] sh1, sh6;
 
+// dB to linear conversion
 always @(posedge clk or negedge rst_n)
     if( !rst_n ) begin
         lracl1  <= 8'd0; lracl2 <= 8'd0;
         lracl3  <= 8'd0; lracl4 <= 8'd0;
         lracl5  <= 8'd0; lracl6 <= 8'd0;
-        db2     <= 'd0;
-        db3     <= 'd0;
-        pcm5    <= 'd0;
-        pcm_l   <= 'd0;
-        pcm_r   <= 'd0;
+        db5     <= 'd0;
+        sh1     <= 4'd0; sh6    <= 4'd0;
+        lin1    <= 10'd0;
+        lin_5b  <= 10'd0;
+        lin6    <= 10'd0;
     end else if(cen) begin
 
         // I
         lracl2  <= up_ch_dec == cur_ch ? lracl : lracl1;
-        db2     <= { 1'b0, ~lracl1[5:0] } + {1'b0, ~atl};
         // II
         lracl3  <= lracl2;
-        lin3    <= lin_2b;
-        sh3     <= db2[6:3];
         // III
         lracl4  <= lracl3;
-        lin4    <= sh3[3] ? 10'h0 : lin3;
-        sh4     <= sh3;
         // IV: new data is accepted here
         lracl5  <= lracl4;
-        pcm5    <= pcm_in * lin4s; // multiplier
-        sh5     <= sh4;
+        db5     <= { 1'b0, ~lracl4[5:0] } + {1'b0, ~atl};
         // V
-        pcm6    <= pcm5b >>> sh5;
         lracl6  <= lracl5;
+        lin6    <= lin_5b;
+        sh6     <= db5[6:3];
         // VI close the loop
         lracl1  <= lracl6;
+        lin1    <= sh6[3] ? 10'h0 : lin6;
+        sh1     <= sh6;
+    end
+
+// Apply gain
+// The pipeline has 6 stages, there is new input data once every 6*6=36 clock cycles
+// New data is read once and it takes 4*6 cycles to get through because the shift
+// operation is distributed among several iterations. This prevents the need of
+// a 10x16-input mux which is very large. Instead of that, this uses two 10x2-input mux'es
+// which iterated allow the max 16 shift operation
+
+reg [3:0] shcnt1, shcnt2, shcnt3, shcnt4, shcnt5, shcnt6;
+
+reg shcnt_mod3, shcnt_mod4, shcnt_mod5;
+reg [31:0] pcm2_mul;
+wire signed [15:0] lin2s = {6'b0,lin2};
+
+always @(*) begin
+    shcnt_mod3 = shcnt3 != 0;
+    shcnt_mod4 = shcnt4 != 0;
+    shcnt_mod5 = shcnt5 != 0;
+    pcm2_mul   = pcm2 * lin2s;
+    pcm2_lim   = !pcm[31] ? 
+        (pcm5[31:5] == 0 ? pcm5[24:9] : 
+end
+
+reg signed [15:0] pcm1, pcm2, pcm3, pcm4, pcm5, pcm6;
+wire signed [15:0] pcm5b = pcm5[24:9];
+
+always @(posedge clk or negedge rst_n)
+    if( !rst_n ) begin
+        pcm_l   <= 'd0;
+        pcm_r   <= 'd0;
+    end else if(cen) begin
+        // I
+        pcm2    <= new1 ? pcm_in : pcm6;
+        lin2    <= lin1;
+        shcnt2  <= new1 ? sh1 : shcnt6;
+        new2    <= new1;
+        // II
+        pcm3    <= new2 ? pcm2_mul : pcm2;
+        shcnt3  <= shcnt2;
+        // III, shift by 0 or 1
+        pcm4    <= pcm3>>>shcnt_mod3;
+        shcnt4  <= shcnt3 - shcnt_mod3
+        // IV, shift by 0 or 1
+        pcm5    <= pcm4;   // pcm4>>>shcnt_mod4;
+        shcnt5  <= shcnt4; // shcnt4 - shcnt_mod4
+        // V, shift by 0 or 1
+        pcm6    <= pcm5;   // pcm5>>>shcnt_mod5;
+        shcnt6  <= shcnt5; // shcnt5 - shcnt_mod5
+        // VI close the loop and output
+        pcm1    <= pcm6;
+        shcnt1  <= shcnt6;
         if(en_ch2 == cur_ch) pcm_l  <= lracl6[7] ? pcm6 : 16'd0;
         if(en_ch2 == cur_ch) pcm_r  <= lracl6[6] ? pcm6 : 16'd0;
     end
