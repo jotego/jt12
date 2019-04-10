@@ -30,10 +30,12 @@ module jt10_adpcm_div #(parameter dw=16)(
     input      [dw-1:0] a,
     input      [dw-1:0] b,
     output reg [dw-1:0] d,
-    output reg [dw-1:0] r
+    output reg [dw-1:0] r,
+    output              working
 );
 
 reg  [dw-1:0] cycle;
+assign working = cycle[0];
 
 wire [dw:0] sub = { r[dw-2:0], d[dw-1] } - b;  
 

@@ -198,7 +198,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_l    ( adpcmA_l      ),
         .pcm55_r    ( adpcmA_r      )
     );
-    /* verilator tracing_off */
+    /* verilator tracing_on */
     jt10_adpcm_drvB u_adpcm_b(
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
@@ -562,6 +562,7 @@ generate
         // interpolate PCM samples with automatic sample rate detection
         // this feature is not present in original YM2612
         // this improves PCM sample sound greatly
+        /*
         jt12_pcm u_pcm(
             .rst        ( rst       ),
             .clk        ( clk       ),
@@ -571,6 +572,30 @@ generate
             .pcm_wr     ( pcm_wr    ),
             .pcm_resampled ( pcm2   )
         );
+        */
+        wire rst_pcm_n;
+
+        jt12_rst u_rst_pcm(
+            .rst    ( rst       ),
+            .clk    ( clk       ),
+            .rst_n  ( rst_pcm_n )
+        );
+
+        `ifndef NOPCMLINEAR
+        wire signed [10:0] pcm_full;
+        assign pcm2 = pcm_full[10:2];
+        jt12_pcm_interpol #(.dw(11), .stepw(5)) u_pcm (
+            .rst_n ( rst_pcm_n      ),
+            .clk   ( clk            ),
+            .cen   ( clk_en         ),
+            .cen55 ( clk_en_55      ),
+            .pcm_wr( pcm_wr         ),
+            .pcmin ( {pcm, 2'b0}    ),
+            .pcmout( pcm_full       )
+        );
+        `else
+        assign pcm2 = pcm;
+        `endif
 
         jt12_acc u_acc(
             .rst        ( rst       ),

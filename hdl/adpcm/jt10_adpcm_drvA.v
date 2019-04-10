@@ -68,9 +68,7 @@ always @(posedge clk or negedge rst_n)
         data <= !nibble_sel ? datain[7:4] : datain[3:0];
     end
 
-reg [ 5:0] up_start_sr, up_end_sr, aon_sr, aoff_sr, up_lracl_sr;
-reg [ 2:0] chlin, chfast;
-reg div3;
+reg [ 5:0] aon_sr, aoff_sr;
 
 reg [7:0] aon_cmd_cpy;
 

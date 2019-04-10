@@ -87,8 +87,9 @@ jt10_adpcm_div #(.dw(16)) u_div(
     .start  ( start_div   ),
     .a      ( delta_x     ),
     .b      ( {12'd0, deltan }   ),
-    .d      ( next_step        ),
-    .r      (             )
+    .d      ( next_step   ),
+    .r      (             ),
+    .working(             )
 );
 
 

@@ -29,7 +29,7 @@ jt12_sh_rst.v
 jt12_sh24.v
 jt12_sumch.v
 jt12_timers.v
-jt12_pcm.v
+jt12_pcm_interpol.v
 jt12_rst.v
 jt12_dout.v
 mixer/jt12_genmix.v
