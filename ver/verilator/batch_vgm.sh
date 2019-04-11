@@ -14,4 +14,8 @@ else
     SIMTIME=$(($2 * 1000))
 fi
 
-find $1 -name "*.vgz" | parallel go -2610 -d NOSSG -nomix -time $SIMTIME -nodecode -f
+GOPARAMS="-2610 -d NOSSG -nodecode -time $SIMTIME"
+# Compiles the verilog to avoid the parallel command from issuing parallel compilations
+go $GOPARAMS -f tests/adpcma.jtt -time 1
+
+find $1 -name "*.vgz" | parallel go $GOPARAMS -f
