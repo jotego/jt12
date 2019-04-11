@@ -67,7 +67,6 @@ parameter use_adpcm=0;
 
 wire flag_A, flag_B, busy;
 
-wire [7:0] fm_dout = { busy, 5'd0, flag_B, flag_A };
 wire write = !cs_n && !wr_n;
 wire clk_en, clk_en_ssg;
 
@@ -250,11 +249,15 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .right      ( fm_snd_right  )
     );
 end else begin : gen_adpcm_no
-    assign adpcmA_l      = 'd0;
-    assign adpcmA_r      = 'd0;
+    assign adpcmA_l     = 'd0;
+    assign adpcmA_r     = 'd0;
+    assign adpcmB_l     = 'd0;
+    assign adpcmB_r     = 'd0;
     assign adpcma_addr  = 'd0;
     assign adpcma_bank  = 'd0;
     assign adpcma_roe_n = 'b1;
+    assign adpcmb_addr  = 'd0;
+    assign adpcmb_roe_n = 'd1;
 end
 endgenerate
 
@@ -450,6 +453,9 @@ generate
         assign snd_left = fm_snd_left;
         assign snd_right= fm_snd_right;
         assign psg_dout = 8'd0;
+        assign psg_A    = 8'd0;
+        assign psg_B    = 8'd0;
+        assign psg_C    = 8'd0;
     end
 endgenerate
 `else

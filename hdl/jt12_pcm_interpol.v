@@ -31,7 +31,7 @@ module jt12_pcm_interpol
     output reg signed [dw-1:0] pcmout
 );
 
-reg [stepw-1:0] dn, pre_dn=~'d0;
+reg [stepw-1:0] dn, pre_dn={stepw{1'b1}};
 wire posedge_pcmwr =  pcm_wr && !last_pcm_wr;
 wire negedge_pcmwr = !pcm_wr &&  last_pcm_wr;
 
@@ -52,13 +52,13 @@ always @(posedge clk) begin
         pcmnew    <= pcmin;
         pcmlast   <= pcmnew;
         dn        <= pre_dn;
-        dx        <= dx_ext[dw] ? ~dx_ext[dw-1:0]+1 : dx_ext[dw-1:0];
+        dx        <= dx_ext[dw] ? ~dx_ext[dw-1:0] + 'd1 : dx_ext[dw-1:0];
         sign      <= dx_ext[dw];
         start_div <= 1;
     end
 
     if( !pcm_wr && cen55 ) begin
-        if( pre_dn != {stepw{1'b1}} ) pre_dn <= pre_dn+1;
+        if( pre_dn != {stepw{1'b1}} ) pre_dn <= pre_dn + 'd1;
     end
 end
 

@@ -232,12 +232,17 @@ always @(posedge clk) begin : memory_mapped_registers
         up_addr     <= 3'd7;
         up_lracl    <= 3'd7;
         up_aon      <=  'd0;
+        lracl       <=  'd0;
+        addr_a      <=  'd0;        
         // ADPCM-B
         acmd_on_b   <=  'd0;
         acmd_rep_b  <=  'd0;
         acmd_rst_b  <=  'd0;
         alr_b       <=  'd0;
         flag_ctl    <=  'd0;
+        astart_b    <=  'd0;
+        aend_b      <=  'd0;
+        adeltan_b   <=  'd0;
         aeg_b       <= 8'hff;
         // Original test features
         eg_stop     <= 1'b0;
