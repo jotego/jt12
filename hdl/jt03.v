@@ -59,6 +59,7 @@ u_jt12(
     .dout           ( dout         ),
     .irq_n          ( irq_n        ),
     // Unused ADPCM pins
+    .en_hifi_pcm    ( 1'b0 ), // used only on YM2612 mode
     .adpcma_addr    (      ), // real hardware has 10 pins multiplexed through RMPX pin
     .adpcma_bank    (      ),
     .adpcma_roe_n   (      ), // ADPCM-A ROM output enable

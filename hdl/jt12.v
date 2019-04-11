@@ -33,6 +33,8 @@ module jt12 (
     
     output  [7:0]   dout,
     output          irq_n,
+    // configuration
+    input           en_hifi_pcm,
     // combined output
     output  signed  [15:0]  snd_right,
     output  signed  [15:0]  snd_left,
@@ -51,6 +53,8 @@ jt12_top u_jt12(
     
     .dout   ( dout  ),  
     .irq_n  ( irq_n ),
+    // configuration
+    .en_hifi_pcm    ( en_hifi_pcm ),
     // Unused ADPCM pins
     .adpcma_addr    (      ), // real hardware has 10 pins multiplexed through RMPX pin
     .adpcma_bank    (      ),
