@@ -583,14 +583,14 @@ generate
 
         `ifndef NOPCMLINEAR
         wire signed [10:0] pcm_full;
-        assign pcm2 = pcm_full[10:2];
+        assign pcm2 = pcm_full[9:1];
         jt12_pcm_interpol #(.dw(11), .stepw(5)) u_pcm (
             .rst_n ( rst_pcm_n      ),
             .clk   ( clk            ),
             .cen   ( clk_en         ),
             .cen55 ( clk_en_55      ),
             .pcm_wr( pcm_wr         ),
-            .pcmin ( {pcm, 2'b0}    ),
+            .pcmin ( {pcm[8],pcm, 1'b0}    ),
             .pcmout( pcm_full       )
         );
         `else
