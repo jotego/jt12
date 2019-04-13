@@ -59,7 +59,6 @@ always @(posedge clk) if(cen) begin
     start_div <= 1'b0;
     if(adv2[1]) begin
         pcmlast <= pcmdec;
-        pcminter <= pcmlast;
     end
     if(adv2[4]) begin
         pre_dx <= { pcmdec[15], pcmdec } - { pcmlast[15], pcmlast };
