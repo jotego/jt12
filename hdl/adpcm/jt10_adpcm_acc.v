@@ -33,7 +33,7 @@ module jt10_adpcm_acc(
 
     input           en_sum,
     input  signed [15:0] pcm_in,    // 18.5 kHz
-    output signed [15:0] pcm_out    // 55.5 kHz
+    output reg signed [15:0] pcm_out    // 55.5 kHz
 );
 
 wire signed [17:0] pcm_in_long = en_sum ? { {2{pcm_in[15]}}, pcm_in } : 18'd0;

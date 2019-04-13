@@ -38,7 +38,7 @@ module jt10_adpcm_drvB(
     // memory
     output   [23:0] addr,
     input    [ 7:0] data,
-    output          roe_n,
+    output reg      roe_n,
 
     output reg signed [15:0]  pcm55_l,
     output reg signed [15:0]  pcm55_r

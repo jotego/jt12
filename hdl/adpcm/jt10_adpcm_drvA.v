@@ -28,7 +28,7 @@ module jt10_adpcm_drvA(
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
     output  [3:0]   bank,
-    output  reg     roe_n, // ADPCM-A ROM output enable
+    output          roe_n, // ADPCM-A ROM output enable
 
     // Control Registers
     input   [5:0]   atl,        // ADPCM Total Level
@@ -49,8 +49,8 @@ module jt10_adpcm_drvA(
     output  [5:0]   flags,
     input   [5:0]   clr_flags,
 
-    output reg signed [15:0]  pcm55_l,
-    output reg signed [15:0]  pcm55_r
+    output signed [15:0]  pcm55_l,
+    output signed [15:0]  pcm55_r
 );
 
 /* verilator tracing_on */
