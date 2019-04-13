@@ -27,7 +27,7 @@ module jt10(
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input   [7:0]   din,
-    input           addr,
+    input   [1:0]   addr,
     input           cs_n,
     input           wr_n,
     
@@ -60,7 +60,7 @@ u_jt12(
     .clk            ( clk          ),        // CPU clock
     .cen            ( cen          ),        // optional clock enable, it not needed leave as 1'b1
     .din            ( din          ),
-    .addr           ( {1'b0, addr} ),
+    .addr           ( addr         ),
     .cs_n           ( cs_n         ),
     .wr_n           ( wr_n         ),
     
