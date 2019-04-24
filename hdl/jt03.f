@@ -31,6 +31,9 @@ jt12_sh24.v
 jt12_sumch.v
 jt12_timers.v
 jt12_pcm.v
+jt12_dout.v
+mixer/jt12_interpol.v
+mixer/jt12_comb.v
 ../jt49/hdl/jt49.v      
 ../jt49/hdl/jt49_div.v  
 ../jt49/hdl/jt49_eg.v   
