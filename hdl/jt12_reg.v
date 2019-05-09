@@ -23,7 +23,7 @@
 module jt12_reg(
     input           rst,
     input           clk,
-    input           clk_en,
+    input           clk_en /* synthesis direct_enable */,
     input   [7:0]   din,
     
     input   [2:0]   ch,     // channel to update

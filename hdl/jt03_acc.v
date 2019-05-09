@@ -31,7 +31,7 @@ module jt03_acc
 (
     input               rst,
     input               clk,
-    input               clk_en,
+    input               clk_en /* synthesis direct_enable */,
     input signed [13:0] op_result,
     input               s1_enters,
     input               s2_enters,

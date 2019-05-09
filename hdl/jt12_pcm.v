@@ -1,7 +1,7 @@
 module jt12_pcm(
     input               rst,
     input               clk,
-(* direct_enable *) input clk_en,
+    input               clk_en /* synthesis direct_enable */,
     input               zero,
     input   signed [8:0] pcm,
     input               pcm_wr, 

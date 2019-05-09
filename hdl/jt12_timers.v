@@ -27,7 +27,7 @@
 module jt12_timers(
   input			clk,
   input			rst,
-  input			clk_en,	// clock enable
+  input			clk_en /* synthesis direct_enable */,
   input [9:0]	value_A,
   input [7:0]	value_B,
   input 		load_A,

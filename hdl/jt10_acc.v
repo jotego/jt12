@@ -37,7 +37,7 @@
 
 module jt10_acc(
     input               clk,
-    input               clk_en,
+    input               clk_en /* synthesis direct_enable */,
     input signed [13:0] op_result,
     input        [ 1:0] rl,
     input               zero,

@@ -29,7 +29,7 @@
 module jt12_op(
     input           rst,
     input           clk,
-    input           clk_en,
+    input           clk_en /* synthesis direct_enable */,
     input   [9:0]   pg_phase_VIII,
     input   [9:0]   eg_atten_IX,        // output from envelope generator
     input   [2:0]   fb_II,      // voice feedback

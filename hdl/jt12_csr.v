@@ -23,7 +23,7 @@
 module jt12_csr( // Circular Shift Register + input mux
     input           rst,
     input           clk,
-    input           clk_en,
+    input           clk_en /* synthesis direct_enable */,
     input   [ 7:0]  din,
     input   [43:0]  shift_in,
     output  [43:0]  shift_out,

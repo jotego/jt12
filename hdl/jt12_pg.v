@@ -34,7 +34,7 @@ http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc
 
 module jt12_pg(
     input               clk,
-    input               clk_en,
+    input               clk_en /* synthesis direct_enable */,
     input               rst,
     // Channel frequency
     input       [10:0]  fnum_I,

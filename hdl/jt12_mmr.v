@@ -23,7 +23,7 @@
 module jt12_mmr(
     input           rst,
     input           clk,
-    input           cen,
+    input           cen /* synthesis direct_enable */,
     output          clk_en,
     output          clk_en_ssg,
     output          clk_en_666,
