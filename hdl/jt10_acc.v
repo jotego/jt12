@@ -37,7 +37,7 @@
 
 module jt10_acc(
     input               clk,
-    input               clk_en,
+    input               clk_en /* synthesis direct_enable */,
     input signed [13:0] op_result,
     input        [ 1:0] rl,
     input               zero,
@@ -53,8 +53,8 @@ module jt10_acc(
     input signed [15:0] adpcmB_l,
     input signed [15:0] adpcmB_r,
     // combined output
-    output signed   [15:0]  left,
-    output signed   [15:0]  right
+    output signed [15:0] left,
+    output signed [15:0] right
 );
 
 reg sum_en;

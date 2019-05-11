@@ -100,7 +100,7 @@ u_jt12(
     .adpcmb_data    ( adpcmb_data  ), // Data from RAM
     .adpcmb_addr    ( adpcmb_addr  ), // real hardware has 12 pins multiplexed through PMPX pin
     .adpcmb_roe_n   ( adpcmb_roe_n ), // ADPCM-B ROM output enable
-
+    .en_hifi_pcm    ( 1'b1         ),
     .snd_right      ( snd_right ),
     .snd_left       ( snd_left  ),
     .snd_sample     ( snd_sample),

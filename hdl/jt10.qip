@@ -1,5 +1,6 @@
-set_global_assignment -name VHDL_FILE    [file join $::quartus(qip_path) jt12.vhd ]
-set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt10.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_rst.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_mmr.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_top.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_acc.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) jt12_single_acc.v ]
@@ -47,7 +48,7 @@ set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) ../jt49
 # ADPCM
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcm.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcm_acc.v ]
-set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcm_lut.v ]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcma_lut.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcmb.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcmb_cnt.v ]
 set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) adpcm/jt10_adpcmb_gain.v ]

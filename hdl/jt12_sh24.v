@@ -23,7 +23,7 @@
 module jt12_sh24 #(parameter width=5 )
 (
   input 	clk,
-  input   clk_en,  
+  input   clk_en /* synthesis direct_enable */,  
   input		[width-1:0]	din,
  	output reg [width-1:0]	st1,
  	output reg [width-1:0]	st2,
