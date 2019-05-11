@@ -27,7 +27,7 @@ module jt10(
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
     input   [7:0]   din,
-    input           addr,
+    input   [1:0]   addr,
     input           cs_n,
     input           wr_n,
     
@@ -41,9 +41,6 @@ module jt10(
     output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
     output          adpcmb_roe_n, // ADPCM-B ROM output enable
     // Separated output
-    output          [ 7:0] psg_A,
-    output          [ 7:0] psg_B,
-    output          [ 7:0] psg_C,
     output  signed  [15:0] fm_snd,
     // combined output
     output          [ 9:0] psg_snd,    
@@ -60,7 +57,7 @@ u_jt12(
     .clk            ( clk          ),        // CPU clock
     .cen            ( cen          ),        // optional clock enable, it not needed leave as 1'b1
     .din            ( din          ),
-    .addr           ( {1'b0, addr} ),
+    .addr           ( addr         ),
     .cs_n           ( cs_n         ),
     .wr_n           ( wr_n         ),
     
@@ -74,9 +71,6 @@ u_jt12(
     .adpcmb_addr    ( adpcmb_addr  ), // real hardware has 12 pins multiplexed through PMPX pin
     .adpcmb_roe_n   ( adpcmb_roe_n ), // ADPCM-B ROM output enable
     // Separated output
-    .psg_A          ( psg_A        ),
-    .psg_B          ( psg_B        ),
-    .psg_C          ( psg_C        ),
     .psg_snd        ( psg_snd      ),    
     .fm_snd_left    ( fm_snd       ),
     .fm_snd_right   (),

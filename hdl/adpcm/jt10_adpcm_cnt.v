@@ -103,8 +103,7 @@ wire [11:0] addr1_cmp = addr1[20:9];
 assign start_top = {bank1, start1};
 assign   end_top =   {bank1, end1};
 
-reg [5:0] cur_ch, addr_ch_dec;
-reg [5:0] en_ch;
+reg [5:0] addr_ch_dec;
 
 always @(*)
     case(addr_ch)

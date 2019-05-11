@@ -53,8 +53,8 @@ module jt10_acc(
     input signed [15:0] adpcmB_l,
     input signed [15:0] adpcmB_r,
     // combined output
-    output reg signed   [15:0]  left,
-    output reg signed   [15:0]  right
+    output signed   [15:0]  left,
+    output signed   [15:0]  right
 );
 
 reg sum_en;

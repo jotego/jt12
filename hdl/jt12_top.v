@@ -46,9 +46,6 @@ module jt12_top (
     input   [ 7:0]  adpcmb_data,
     output          adpcmb_roe_n, // ADPCM-B ROM output enable
     // Separated output
-    output          [ 7:0] psg_A,
-    output          [ 7:0] psg_B,
-    output          [ 7:0] psg_C,
     output  signed  [15:0] fm_snd_left,
     output  signed  [15:0] fm_snd_right,
     output  signed  [15:0] adpcmA_l,
@@ -437,16 +434,11 @@ generate
             .wr_n       ( psg_wr_n  ),  // write
             .din        ( psg_data  ),
             .sound      ( psg_snd   ),  // combined output
-            .A          ( psg_A     ),
-            .B          ( psg_B     ),
-            .C          ( psg_C     ),
             .dout       ( psg_dout  ),
             .sel        ( 1'b1      ),  // half clock speed
             // Unused:
             .IOA_out    (),
-            .IOB_out    (),
-            .IOA_in     (8'd0),
-            .IOB_in     (8'd0)
+            .IOB_out    ()
         );
         assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0};
         assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0};
@@ -455,9 +447,6 @@ generate
         assign snd_left = fm_snd_left;
         assign snd_right= fm_snd_right;
         assign psg_dout = 8'd0;
-        assign psg_A    = 8'd0;
-        assign psg_B    = 8'd0;
-        assign psg_C    = 8'd0;
     end
 endgenerate
 `else
