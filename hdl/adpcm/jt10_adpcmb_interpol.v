@@ -37,8 +37,8 @@ reg start_div=1'b0;
 reg [3:0] deltan, pre_dn;
 reg [stages-1:0] adv2;
 reg signed [15:0] pcminter;
-reg [15:0] step;
 wire [15:0] next_step;
+reg [15:0] step;
 reg step_sign, next_step_sign;
 
 assign pcmout = pcminter;
@@ -60,7 +60,6 @@ always @(posedge clk) if(cen) begin
     start_div <= 1'b0;
     if(adv2[1]) begin
         pcmlast <= pcmdec;
-        //pcminter <= pcmlast;
     end
     if(adv2[4]) begin
         pre_dx <= { pcmdec[15], pcmdec } - { pcmlast[15], pcmlast };
