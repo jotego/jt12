@@ -264,19 +264,21 @@ always @(posedge clk) begin : memory_mapped_registers
             end else begin
                 // Global registers
                 din_copy <= din;
-                up_keyon <= selected_register == REG_KON;
+                up_keyon <= (selected_register == REG_KON) & !part;
                 up_ch <= {part, selected_register[1:0]};
                 up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
                 casez( selected_register)
                     //REG_TEST: lfo_rst <= 1'b1; // regardless of din
                     8'h0?: if(!part) psg_wr_n <= 1'b0;
                     REG_TESTYM: begin
-                        eg_stop <= din[5];
-                        pg_stop <= din[3];
-                        fast_timers <= din[2];
-                        end
-                    REG_CLKA1:  value_A[9:2]<= din;
-                    REG_CLKA2:  value_A[1:0]<= din[1:0];
+									if(!part) begin
+									eg_stop <= din[5];
+									pg_stop <= din[3];
+									fast_timers <= din[2];
+									end
+								end
+                    REG_CLKA1: if(!part) value_A[9:2]<= din;
+                    REG_CLKA2: if(!part) value_A[1:0]<= din[1:0];
                     REG_CLKB:   value_B     <= din;
                     REG_TIMER: begin
                         effect  <= |din[7:6];
@@ -286,7 +288,7 @@ always @(posedge clk) begin : memory_mapped_registers
                           load_B, load_A } <= din[5:0];
                         end
                     `ifndef NOLFO                   
-                    REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
+                    REG_LFO: if(!part) { lfo_en, lfo_freq } <= din[3:0];
                     `endif
                     // clock divider
                     REG_CLK_N6: div_setting[1] <= 1'b1; 
