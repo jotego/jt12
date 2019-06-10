@@ -31,7 +31,7 @@ module jt12_exprom
 (
     input [7:0] addr,
     input clk, 
-    input clk_en,
+    input clk_en /* synthesis direct_enable */,
     output reg [9:0] exp
 );
 

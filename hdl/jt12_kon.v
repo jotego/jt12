@@ -26,7 +26,7 @@
 module jt12_kon(
     input           rst,
     input           clk,
-    input           clk_en,
+    input           clk_en /* synthesis direct_enable */,
     input   [3:0]   keyon_op,
     input   [2:0]   keyon_ch,
     input   [1:0]   next_op,

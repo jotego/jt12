@@ -23,7 +23,7 @@
 module jt12_div(
     input           rst,
     input           clk,
-    input           cen,
+    input           cen /* synthesis direct_enable */,
     input   [1:0]   div_setting,
     output  reg     clk_en,
     output  reg     clk_en_ssg,

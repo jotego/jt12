@@ -22,7 +22,7 @@
 module jt12_eg (
     input               rst,
     input               clk,
-    input               clk_en,
+    input               clk_en /* synthesis direct_enable */,
     input               zero,
     input               eg_stop,
     // envelope configuration

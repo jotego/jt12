@@ -22,7 +22,7 @@
 module jt12_eg_cnt(
 	input rst,
 	input clk,
-	input clk_en,
+	input clk_en /* synthesis direct_enable */,
 	input zero,
 	output reg [14:0] eg_cnt
 );

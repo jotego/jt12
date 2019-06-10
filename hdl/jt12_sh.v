@@ -24,7 +24,7 @@
 module jt12_sh #(parameter width=5, stages=24 )
 (
 	input 				clk,
-	input				clk_en,
+	input				clk_en /* synthesis direct_enable */,
 	input	[width-1:0]	din,
    	output	[width-1:0]	drop
 );
