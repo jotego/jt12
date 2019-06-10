@@ -264,35 +264,42 @@ always @(posedge clk) begin : memory_mapped_registers
             end else begin
                 // Global registers
                 din_copy <= din;
-                up_keyon <= selected_register == REG_KON;
+                up_keyon <= selected_register == REG_KON && !part;
                 up_ch <= {part, selected_register[1:0]};
                 up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
+
+                // General control (<0x20 registers and A0==0)
+                if(!part) begin
+                    casez( selected_register)
+                        //REG_TEST: lfo_rst <= 1'b1; // regardless of din
+                        8'h0?: psg_wr_n <= 1'b0;
+                        REG_TESTYM: begin
+                            eg_stop <= din[5];
+                            pg_stop <= din[3];
+                            fast_timers <= din[2];
+                            end
+                        REG_CLKA1:  value_A[9:2]<= din;
+                        REG_CLKA2:  value_A[1:0]<= din[1:0];
+                        REG_CLKB:   value_B     <= din;
+                        REG_TIMER: begin
+                            effect  <= |din[7:6];
+                            csm     <= din[7:6] == 2'b10;
+                            { clr_flag_B, clr_flag_A,
+                              enable_irq_B, enable_irq_A,
+                              load_B, load_A } <= din[5:0];
+                            end
+                        `ifndef NOLFO                   
+                        REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
+                        `endif
+                        // clock divider
+                        REG_CLK_N6: div_setting[1] <= 1'b1; 
+                        REG_CLK_N3: div_setting[0] <= 1'b1; 
+                        REG_CLK_N2: div_setting <= 2'b0;
+                    endcase
+                end
+
+                // CH3 special registers
                 casez( selected_register)
-                    //REG_TEST: lfo_rst <= 1'b1; // regardless of din
-                    8'h0?: if(!part) psg_wr_n <= 1'b0;
-                    REG_TESTYM: begin
-                        eg_stop <= din[5];
-                        pg_stop <= din[3];
-                        fast_timers <= din[2];
-                        end
-                    REG_CLKA1:  value_A[9:2]<= din;
-                    REG_CLKA2:  value_A[1:0]<= din[1:0];
-                    REG_CLKB:   value_B     <= din;
-                    REG_TIMER: begin
-                        effect  <= |din[7:6];
-                        csm     <= din[7:6] == 2'b10;
-                        { clr_flag_B, clr_flag_A,
-                          enable_irq_B, enable_irq_A,
-                          load_B, load_A } <= din[5:0];
-                        end
-                    `ifndef NOLFO                   
-                    REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
-                    `endif
-                    // clock divider
-                    REG_CLK_N6: div_setting[1] <= 1'b1; 
-                    REG_CLK_N3: div_setting[0] <= 1'b1; 
-                    REG_CLK_N2: div_setting <= 2'b0;
-                    // CH3 special registers
                     8'hA9: { block_ch3op1, fnum_ch3op1 } <= { latch_fnum, din };
                     8'hA8: { block_ch3op3, fnum_ch3op3 } <= { latch_fnum, din };
                     8'hAA: { block_ch3op2, fnum_ch3op2 } <= { latch_fnum, din };
@@ -301,6 +308,7 @@ always @(posedge clk) begin : memory_mapped_registers
                     8'hA4, 8'hA5, 8'hA6, 8'hAD, 8'hAC, 8'hAE: latch_fnum <= din[5:0];
                     default:;   // avoid incomplete-case warning
                 endcase
+
                 // YM2612 PCM support
                 if( use_pcm==1 ) begin
                     casez( selected_register)
