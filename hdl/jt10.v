@@ -40,6 +40,7 @@ module jt10(
     input   [7:0]   adpcma_data,  // Data from RAM
     output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
     output          adpcmb_roe_n, // ADPCM-B ROM output enable
+	 input	[7:0]	  adpcmb_data,
     // Separated output
     output  signed  [15:0] fm_snd,
     // combined output
@@ -68,8 +69,10 @@ u_jt12(
     .adpcma_bank    ( adpcma_bank  ),
     .adpcma_roe_n   ( adpcma_roe_n ), // ADPCM-A ROM output enable
     .adpcma_data    ( adpcma_data  ), // Data from RAM
+	 
     .adpcmb_addr    ( adpcmb_addr  ), // real hardware has 12 pins multiplexed through PMPX pin
     .adpcmb_roe_n   ( adpcmb_roe_n ), // ADPCM-B ROM output enable
+    .adpcmb_data    ( adpcmb_data  ), // Data from RAM
     // Separated output
     .psg_snd        ( psg_snd      ),    
     .fm_snd_left    ( fm_snd       ),
