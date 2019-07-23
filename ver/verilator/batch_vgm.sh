@@ -19,7 +19,7 @@ GOPARAMS="-2610 -d NOSSG -nodecode -time $SIMTIME"
 go $GOPARAMS -f tests/adpcma.jtt -time 1
 
 if [ -e nodes ]; then
-    find $1 -name "*.vgz" | parallel --sshloginfile nodes go $GOPARAMS -f
+    find $1 -name "*.vgz" | parallel --sshloginfile nodes 'cd github/jt12/ver/verilator; ./go $GOPARAMS -f {}'
 else
     find $1 -name "*.vgz" | parallel go $GOPARAMS -f
 fi
