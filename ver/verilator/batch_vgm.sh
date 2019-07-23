@@ -18,4 +18,8 @@ GOPARAMS="-2610 -d NOSSG -nodecode -time $SIMTIME"
 # Compiles the verilog to avoid the parallel command from issuing parallel compilations
 go $GOPARAMS -f tests/adpcma.jtt -time 1
 
-find $1 -name "*.vgz" | parallel go $GOPARAMS -f
+if [ -e nodes ]; then
+    find $1 -name "*.vgz" | parallel --sshloginfile nodes go $GOPARAMS -f
+else
+    find $1 -name "*.vgz" | parallel go $GOPARAMS -f
+fi
