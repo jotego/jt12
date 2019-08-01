@@ -57,9 +57,11 @@ always @(posedge clk or negedge rst_n)
         end else begin
             if( on ) 
                 {adv, cnt} <= {1'b0, cnt} + {1'b0, delta_n };
-            else
+            else begin
+                cnt <= 16'd0;
                 adv <= 1'b1; // let the rest of the signal chain advance
                     // when channel is off so all registers go to reset values
+            end
         end
     end
 
@@ -76,7 +78,7 @@ always @(posedge clk or negedge rst_n)
     end
 
 // Address
-reg last_on;
+//reg last_on;
 
 always @(posedge clk or negedge rst_n)
     if(!rst_n) begin
@@ -84,9 +86,10 @@ always @(posedge clk or negedge rst_n)
         nibble_sel <= 'b0;
         set_flag   <= 'd0;
     end else if(cen) begin
-        last_on <= on;
+        //last_on <= on;
 
-        if( (on && !last_on) || clr ) begin
+        //if( (on && !last_on) || clr ) begin
+        if( !on  || clr ) begin
             addr <= {astart,8'd0};
             nibble_sel <= 'b0;
         end else if( on && adv ) begin
