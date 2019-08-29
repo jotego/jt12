@@ -16,6 +16,37 @@ function set_slow {
     EXTRA="$EXTRA -slow"    
 }
 
+function show_help {
+    cat<<EOF
+JT12 Verilator-based simulation, with file playing capabilities
+    (c) Jose Tejada Gomez (@topapate, jotego) 2017
+
+    Note that default mode is YM2612. Use options to enable a different operation mode.
+
+    -w          signal dump enable
+    -w0 time    signal dump starting from specified time
+    -w1         signal dump of top level signals only
+    -slow       enable clock dividers. This slows down the sim but it is sometimes needed
+                for accurate tuning
+    -hex        enable hexadecimal dump
+    -f file     open GYM or VGM file for parsing
+    -t | -time  simulate for the given about of ms
+    -o name     specify name of the output .wav file
+    -2203       enable YM2203 mode
+    -2610       enable YM2610 mode
+    -d macro    specify verilog macro
+    -nomix      do not mix audio sources
+    -runonly    do not run verilator or compile just run the current executable file
+                this is useful for batch jobs
+    -noam       disable AM module
+    -noks       disable KS module
+    -nomul      disable MUL module
+    -mute       
+    -nodecode
+    -h | -help  shows this help
+EOF
+}
+
 #function eval_args {
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -77,6 +108,9 @@ function set_slow {
         "-runonly")
             echo Skipping Verilator and make steps
             SKIPMAKE=TRUE;;
+        -h | -help | --help)
+            show_help
+            exit 0;;
         *)
             echo go: unrecognized option $1
             exit 1

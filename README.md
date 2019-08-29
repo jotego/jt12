@@ -22,6 +22,18 @@ YM2610: top level file hdl/jt10.v. Use jt10.qip to automatically get all relevan
 YM2612: top level file hdl/jt12.v. Use jt12.qip to automatically get all relevant files in Quartus.
 YM2203: top level file hdl/jt03.v. Use jt03.qip to automatically get all relevant files in Quartus.
 
+## Notable Use Cases
+====================
+SEGA Genesis/Megadrive cores for MiST and MiSTer use this repo in its JT12 default mode
+Furrtek's NeoGeo core for MiSTer uses it as a YM2610 (JT10)
+Pre-CPS CAPCOM arcade cores (GnG, Commando, 1943...) written by myself use this core in YM2203 mode (JT03)
+
+## Contributors
+===============
+
+Sorgelig helped to debug the YM2612 mode and made the first attempt to use JT12 as a YM2203 (JT03)
+Furrtek, Greyrogue and Jamie helped fixing the bugs of the YM2610 mode (JT10)
+
 ## Simulation
 =============
 
