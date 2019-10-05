@@ -22,10 +22,13 @@
 
 `timescale 1ns / 1ps
 
-/* Use for YM2203
-    no left/right channels
-    full operator resolution
-    clamped to maximum output of signed 16 bits */
+// Use for YM2203
+// no left/right channels
+// full operator resolution
+// clamped to maximum output of signed 16 bits
+// This version does not clamp each channel individually
+// That does not correspond to real hardware behaviour. I should
+// change it.
 
 module jt03_acc
 (
