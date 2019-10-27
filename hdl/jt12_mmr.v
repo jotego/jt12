@@ -25,6 +25,7 @@ module jt12_mmr(
     input           clk,
     input           cen /* synthesis direct_enable */,
     output          clk_en,
+    output          clk_en_2,
     output          clk_en_ssg,
     output          clk_en_666,
     output          clk_en_111,
@@ -134,6 +135,7 @@ jt12_div #(.use_ssg(use_ssg)) u_div (
     .cen            ( cen             ),
     .div_setting    ( div_setting     ),
     .clk_en         ( clk_en          ),
+    .clk_en_2       ( clk_en_2        ),
     .clk_en_ssg     ( clk_en_ssg      ),
     .clk_en_666     ( clk_en_666      ),
     .clk_en_111     ( clk_en_111      ),
@@ -291,7 +293,8 @@ always @(posedge clk) begin : memory_mapped_registers
                         `ifndef NOLFO                   
                         REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
                         `endif
-                        // clock divider
+                        // clock divider: should work only for ym2203
+                        // and ym2608
                         REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
                         REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
                         REG_CLK_N2: div_setting    <= 2'b0; // 2F

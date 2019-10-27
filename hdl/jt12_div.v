@@ -25,11 +25,12 @@ module jt12_div(
     input           clk,
     input           cen /* synthesis direct_enable */,
     input   [1:0]   div_setting,
-    output  reg     clk_en,
+    output  reg     clk_en,      // after prescaler
+    output  reg     clk_en_2,    // cen divided by 2
     output  reg     clk_en_ssg,
     output  reg     clk_en_666,  // 666 kHz
-    output  reg     clk_en_111,  // 111
-    output  reg     clk_en_55    //  55
+    output  reg     clk_en_111,  // 111 kHz
+    output  reg     clk_en_55    //  55 kHz
 );
 
 parameter use_ssg=0;
@@ -69,6 +70,7 @@ initial clk_en_666 = 1'b0;
 `endif
 
 reg cen_55_int;
+reg [1:0] div2=2'b0;
 
 always @(negedge clk) begin
     cen_int        <= opn_cnt    == 4'd0;
@@ -78,12 +80,14 @@ always @(negedge clk) begin
     cen_55_int     <= adpcm_cnt55== 3'd0;
     `ifdef FASTDIV
     // always enabled for fast sims (use with GYM output, timer will not work well)
-    clk_en <= 1'b1;
+    clk_en     <= 1'b1;
+    clk_en2    <= 1'b1;
     clk_en_ssg <= 1'b1;
     clk_en_666 <= 1'b1;
-    clk_en_55    <= 1'b1;
+    clk_en_55  <= 1'b1;
     `else
     clk_en     <= cen & cen_int;   
+    clk_en_2   <= cen && (div2==2'b00);
     clk_en_ssg <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
     clk_en_666 <= cen & cen_adpcm_int; 
     clk_en_111 <= cen & cen_adpcm_int & cen_adpcm3_int; 
@@ -91,6 +95,11 @@ always @(negedge clk) begin
     `endif
 end
 
+// Div/2
+always @(posedge clk)
+    if( cen ) begin
+        div2 <= div2==2'b10 ? 2'b00 : (div2+2'b01);
+    end
 
 // OPN
 always @(posedge clk)

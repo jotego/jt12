@@ -157,7 +157,7 @@ wire        adpcmb_flag;
 wire [ 6:0] flag_ctl;
 
 
-wire clk_en_666, clk_en_111, clk_en_55;
+wire clk_en_2, clk_en_666, clk_en_111, clk_en_55;
 
 generate
 if( use_adpcm==1 ) begin: gen_adpcm
@@ -285,6 +285,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .clk        ( clk       ),
     .cen        ( cen       ),  // external clock enable
     .clk_en     ( clk_en    ),  // internal clock enable
+    .clk_en_2   ( clk_en_2  ),  // input cen divided by 2
     .clk_en_ssg ( clk_en_ssg),  // internal clock enable
     .clk_en_666 ( clk_en_666),
     .clk_en_111 ( clk_en_111),
@@ -383,9 +384,12 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
 );
 
 /* verilator tracing_off */
+// YM2203 seems to use a fixed cen/3 clock for the timers, regardless 
+// of the prescaler setting
+wire timer_cen = num_ch==3 ? clk_en_2 : ( fast_timers ? cen : clk_en);
 jt12_timers u_timers(
     .clk        ( clk           ),
-    .clk_en     ( clk_en | fast_timers  ),
+    .clk_en     ( timer_cen     ),
     .rst        ( rst           ),
     .value_A    ( value_A       ),
     .value_B    ( value_B       ),
