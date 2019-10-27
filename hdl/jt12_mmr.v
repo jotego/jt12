@@ -128,7 +128,7 @@ parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0;
 reg [1:0] div_setting;
 
 
-jt12_div #(.use_ssg(use_ssg),.num_ch(num_ch)) u_div (
+jt12_div #(.use_ssg(use_ssg)) u_div (
     .rst            ( rst             ),
     .clk            ( clk             ),
     .cen            ( cen             ),
@@ -201,7 +201,7 @@ reg part;
 always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
         selected_register   <= 8'h0;
-        div_setting         <= 2'b11; 
+        div_setting         <= 2'b10; // FM=1/6, SSG=1/4
         up_ch               <= 3'd0;
         up_op               <= 2'd0;
         up_keyon            <= 1'd0;
@@ -292,9 +292,9 @@ always @(posedge clk) begin : memory_mapped_registers
                         REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
                         `endif
                         // clock divider
-                        REG_CLK_N6: div_setting[1] <= 1'b1; 
-                        REG_CLK_N3: div_setting[0] <= 1'b1; 
-                        REG_CLK_N2: div_setting <= 2'b0;
+                        REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
+                        REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
+                        REG_CLK_N2: div_setting    <= 2'b0; // 2F
                         default:;
                     endcase
                 end

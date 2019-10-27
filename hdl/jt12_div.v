@@ -29,10 +29,10 @@ module jt12_div(
     output  reg     clk_en_ssg,
     output  reg     clk_en_666,  // 666 kHz
     output  reg     clk_en_111,  // 111
-    output  reg     clk_en_55         //  55
+    output  reg     clk_en_55    //  55
 );
 
-parameter use_ssg=0, num_ch=6;
+parameter use_ssg=0;
 
 reg [3:0] opn_pres, opn_cnt=4'd0;
 reg [2:0] ssg_pres, ssg_cnt=3'd0;
@@ -40,17 +40,29 @@ reg [4:0] adpcm_cnt666  = 5'd0;
 reg [2:0] adpcm_cnt111 = 3'd0, adpcm_cnt55=3'd0;
 reg cen_int, cen_ssg_int, cen_adpcm_int, cen_adpcm3_int;
 
-always @(*)
-    if( num_ch==6 ) begin
-        opn_pres = 4'd5;
-        ssg_pres = 3'd3; // unused, really
-    end
-    else
+// prescaler values for FM
+// reset: 1/3
+// sel1/sel2
+//    0 0    1/3
+//    0 1    1/2
+//    1 0    1/6  
+//    1 1    1/2
+//
+// According to YM2608 document
+//                  FM      SSG   div[1:0]
+// reset value     1/6      1/4    10
+// 2D              1/6      1/4    10   | 10
+// 2D,2E           1/3      1/2    11   | 01
+// 2F              1/2      1/1    00   & 00
+//  
+
+always @(*) begin
     casez( div_setting )
-        2'b0?: { opn_pres, ssg_pres } = { 4'd2-4'd1, 3'd0 }; // 2
-        2'b10: { opn_pres, ssg_pres } = { 4'd6-4'd1, 3'd1 }; // 6 - Default for YM2608
-        2'b11: { opn_pres, ssg_pres } = { 4'd3-4'd1, 3'd0 }; // 3 - Default for YM2203
+        2'b0?: { opn_pres, ssg_pres } = { 4'd2-4'd1, 3'd0 }; // FM 1/2 - SSG 1/1
+        2'b10: { opn_pres, ssg_pres } = { 4'd6-4'd1, 3'd3 }; // FM 1/6 - SSG 1/4 (reset value)
+        2'b11: { opn_pres, ssg_pres } = { 4'd3-4'd1, 3'd1 }; // FM 1/3 - SSG 1/2
     endcase // div_setting
+end
 
 `ifdef SIMULATION
 initial clk_en_666 = 1'b0;
