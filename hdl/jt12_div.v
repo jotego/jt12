@@ -59,9 +59,18 @@ reg cen_int, cen_ssg_int, cen_adpcm_int, cen_adpcm3_int;
 
 always @(*) begin
     casez( div_setting )
-        2'b0?: { opn_pres, ssg_pres } = { 4'd2-4'd1, 3'd0 }; // FM 1/2 - SSG 1/1
-        2'b10: { opn_pres, ssg_pres } = { 4'd6-4'd1, 3'd3 }; // FM 1/6 - SSG 1/4 (reset value)
-        2'b11: { opn_pres, ssg_pres } = { 4'd3-4'd1, 3'd1 }; // FM 1/3 - SSG 1/2
+        2'b0?: begin // FM 1/2 - SSG 1/1
+            opn_pres = 4'd2-4'd1;
+            ssg_pres = 3'd0;
+        end
+        2'b10: begin // FM 1/6 - SSG 1/4 (reset value. Fixed for YM2610)
+            opn_pres = 4'd6-4'd1;
+            ssg_pres = 3'd3;
+        end
+        2'b11: begin // FM 1/3 - SSG 1/2
+            opn_pres = 4'd3-4'd1;
+            ssg_pres = 3'd1;
+        end
     endcase // div_setting
 end
 
@@ -73,11 +82,11 @@ reg cen_55_int;
 reg [1:0] div2=2'b0;
 
 always @(negedge clk) begin
-    cen_int        <= opn_cnt    == 4'd0;
-    cen_ssg_int    <= ssg_cnt    == 3'd0;
-    cen_adpcm_int  <= adpcm_cnt666  == 5'd0;
+    cen_int        <= opn_cnt      == 4'd0;
+    cen_ssg_int    <= ssg_cnt      == 3'd0;
+    cen_adpcm_int  <= adpcm_cnt666 == 5'd0;
     cen_adpcm3_int <= adpcm_cnt111 == 3'd0;
-    cen_55_int     <= adpcm_cnt55== 3'd0;
+    cen_55_int     <= adpcm_cnt55  == 3'd0;
     `ifdef FASTDIV
     // always enabled for fast sims (use with GYM output, timer will not work well)
     clk_en     <= 1'b1;

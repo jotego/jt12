@@ -262,7 +262,15 @@ always @(posedge clk) begin : memory_mapped_registers
         if( write ) begin
             if( !addr[0] ) begin
                 selected_register <= din;  
-                part <= addr[1];             
+                part <= addr[1];        
+                case(din)
+                    // clock divider: should work only for ym2203
+                    // and ym2608.
+                    // clock divider works just by selecting the register
+                    REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
+                    REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
+                    REG_CLK_N2: div_setting    <= 2'b0; // 2F
+                endcase
             end else begin
                 // Global registers
                 din_copy <= din;
@@ -293,11 +301,6 @@ always @(posedge clk) begin : memory_mapped_registers
                         `ifndef NOLFO                   
                         REG_LFO:    { lfo_en, lfo_freq } <= din[3:0];
                         `endif
-                        // clock divider: should work only for ym2203
-                        // and ym2608
-                        REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
-                        REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
-                        REG_CLK_N2: div_setting    <= 2'b0; // 2F
                         default:;
                     endcase
                 end
