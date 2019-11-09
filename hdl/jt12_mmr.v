@@ -270,6 +270,7 @@ always @(posedge clk) begin : memory_mapped_registers
                     REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
                     REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
                     REG_CLK_N2: div_setting    <= 2'b0; // 2F
+                    default:;
                 endcase
             end else begin
                 // Global registers

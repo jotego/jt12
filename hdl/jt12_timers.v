@@ -44,7 +44,7 @@ module jt12_timers(
 
 assign irq_n = ~( (flag_A&enable_irq_A) | (flag_B&enable_irq_B) );
 
-jt12_timer #(.mult_width(5), .mult_max(24), .counter_width(10)) 
+jt12_timer #(.mult_width(5), .mult_max(23), .counter_width(10)) 
 timer_A(
 	.clk		( clk		), 
 	.rst		( rst		),
@@ -56,7 +56,7 @@ timer_A(
 	.overflow	( overflow_A)
 );
 
-jt12_timer #(.mult_width(9), .mult_max(384), .counter_width(8)) 
+jt12_timer #(.mult_width(9), .mult_max(383), .counter_width(8)) 
 timer_B(
 	.clk		( clk		), 
 	.rst		( rst		),
@@ -93,7 +93,7 @@ always@(posedge clk)
 reg [mult_width+counter_width-1:0] next, init;
 
 always @(*) begin
-	if( mult+1'b1<mult_max ) begin
+	if( mult<mult_max ) begin
 		// mult not meant to overflow in this line
 		{overflow, next } = { {1'b0, cnt}, mult+1'b1 } ; 
 	end else begin
