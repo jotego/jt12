@@ -31,11 +31,7 @@ module jt10_adpcm(
     output signed [15:0] pcm
 );
 
-localparam sigw = 13; // 1 bit more than the actual signal width so
-localparam shift = 3; //16-sigw;
-    // there is room for overflow
-wire signed [sigw-1:0] max_pos = { 2'b00, {sigw-2{1'b1}} };
-wire signed [sigw-1:0] max_neg = { 2'b11, {sigw-2{1'b0}} };
+localparam sigw = 12;
 
 reg signed [sigw-1:0] x1, x2, x3, x4, x5, x6;
 reg signed [sigw-1:0] inc4;
@@ -44,17 +40,17 @@ reg [5:0] step_next, step_1p;
 reg       sign2, sign3, sign4, sign5, xsign5;
 
 // All outputs from stage 1
-assign pcm = { {16-sigw{x1[sigw-1]}}, x1 } <<< shift;
+assign pcm = { {16-sigw{x1[sigw-1]}}, x1 };
 
 // This could be decomposed in more steps as the pipeline
 // has room for it
 always @(*) begin
     casez( data[2:0] )
-        3'b0??: step_next = step1=='d0 ? 6'd0 : (step1-1);
-        3'b100: step_next = step1+2;
-        3'b101: step_next = step1+5;
-        3'b110: step_next = step1+7;
-        3'b111: step_next = step1+9;
+        3'b0??: step_next = step1==6'd0 ? 6'd0 : (step1-1'd1);
+        3'b100: step_next = step1+6'd2;
+        3'b101: step_next = step1+6'd5;
+        3'b110: step_next = step1+6'd7;
+        3'b111: step_next = step1+6'd9;
     endcase
     step_1p = step_next > 6'd48 ? 6'd48 : step_next;
 end
@@ -93,9 +89,9 @@ always @( posedge clk or negedge rst_n )
     end else if(cen) begin
         // I
         sign2     <= data[3];
-        x2        <= clr ? 0 : x1;
-        step2     <= clr ? 0 : (chon ? step_1p : step1);
-        chon2     <= chon;
+        x2        <= clr ? {sigw-1{1'b0}} : x1;
+        step2     <= clr ? 6'd0 : (chon ? step_1p : step1);
+        chon2     <= ~clr && chon;
         lut_addr2 <= { step1, data[2:0] };
         // II 2's complement of inc2 if necessary
         sign3     <= sign2;
@@ -103,26 +99,18 @@ always @( posedge clk or negedge rst_n )
         step3     <= step2;
         chon3     <= chon2;
         // III
-        sign4     <= sign3;
-        inc4      <= sign3 ? ~inc3_long + 1 : inc3_long;
+        //sign4     <= sign3;
+        inc4      <= sign3 ? ~inc3_long + 1'd1 : inc3_long;
         x4        <= x3;
         step4     <= step3;
         chon4     <= chon3;
         // IV
-        sign5     <= sign4;
-        xsign5    <= x4[sigw-1];
+        //sign5     <= sign4;
+        //xsign5    <= x4[sigw-1];
         x5        <= chon4 ? x4 + inc4 : x4;
         step5     <= step4;
         // V
-        // if( xsign5!=x5[sigw-1] && sign5!=x5[sigw-1] ) begin // enable limiter
-        //     if( sign5 ) // it was negative
-        //         x6 <= {1'b1, {sigw-1{1'b0}}};
-        //     else // it was positive
-        //         x6 <= {1'b0, {sigw-1{1'b1}}};
-        // end else
         x6        <= x5;
-        if( x5 > max_pos) x6 <= max_pos;
-        if( x5 < max_neg) x6 <= max_neg;
         step6     <= step5;
         // VI: close the loop
         x1        <= x6;
