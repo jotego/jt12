@@ -51,8 +51,8 @@ always @(posedge clk) if(cen55) begin
     if ( adv ) begin
         pre_dn  <= 'd1;
         deltan  <= pre_dn;
-    end else
-        pre_dn <= pre_dn + 1;
+    end else if ( pre_dn != 4'hF )
+        pre_dn <= pre_dn + 1'd1;
 end
 
 
@@ -66,7 +66,7 @@ always @(posedge clk) if(cen) begin
     end
     if( adv2[5] ) begin
         start_div <= 1'b1;
-        delta_x <= pre_dx[16] ? ~pre_dx[15:0]+1 : pre_dx[15:0];
+        delta_x <= pre_dx[16] ? ~pre_dx[15:0]+1'd1 : pre_dx[15:0];
         next_step_sign <= pre_dx[16];
     end        
 end
@@ -77,7 +77,7 @@ always @(posedge clk) if(cen55) begin
         step_sign <= next_step_sign;
         pcminter <= pcmlast;
     end
-    else pcminter <= step_sign ? pcminter - step : pcminter + step;
+    else pcminter <= ( (pcminter < pcmlast) == step_sign ) ? pcminter : step_sign ? pcminter - step : pcminter + step;
 end
 
 jt10_adpcm_div #(.dw(16)) u_div(
