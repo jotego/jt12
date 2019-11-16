@@ -211,7 +211,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
         .acmd_rep_b ( acmd_rep_b    ),  // Control - Repeat
         .acmd_rst_b ( acmd_rst_b    ),  // Control - Reset
-        .acmd_on_b  ( acmd_on_b     ),  // Control - New command received
+        .acmd_up_b  ( acmd_up_b     ),  // Control - New command received
         .alr_b      ( alr_b         ),  // Left / Right
         .astart_b   ( astart_b      ),  // Start address
         .aend_b     ( aend_b        ),  // End   address
