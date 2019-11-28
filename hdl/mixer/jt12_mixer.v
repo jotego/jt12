@@ -59,7 +59,7 @@ wire signed [wout+11:0] scaled3 = { {wout+4-w3{ch3_amp[w3+7]}}, ch3_amp   };
 
 reg signed [wout+11:0] sum, limited;
 
-wire signed [wout+11:0] max_pos = { {13{1'b0}}, {(wout-1){1'b1}}};
+wire signed [wout+11:0] max_pos = { {12{1'b0}}, {(wout-1){1'b1}}};
 
 wire signed [8:0]
     g0 = {1'b0, gain0},
