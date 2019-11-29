@@ -70,7 +70,8 @@ assign roe_n    = roe_n1;
 assign clr      = clr1;
 assign decon    = decon1;
 
-wire active5 = { cur_ch[1:0], cur_ch[5:2] } == en_ch;
+// Two cycles early:  0            0             1            1             2            2             3            3             4            4             5            5
+wire active5 = (en_ch[1] && cur_ch[4]) || (en_ch[2] && cur_ch[5]) || (en_ch[2] && cur_ch[0]) || (en_ch[3] && cur_ch[1]) || (en_ch[4] && cur_ch[2]) || (en_ch[5] && cur_ch[3]);//{ cur_ch[3:0], cur_ch[5:4] } == en_ch;
 wire sumup5  = on5 && !done5 && active5;
 reg  sumup6;
 
