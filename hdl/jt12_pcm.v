@@ -56,7 +56,7 @@ always @(posedge clk)
         end
     end
 
-always @(negedge clk) begin
+always @(posedge clk) begin
     cen1 <= rate1;
     cen2 <= rate1 && rate2;
 //    cen4 <= rate1 && rate2 && rate4;
