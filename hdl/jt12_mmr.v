@@ -201,7 +201,7 @@ endgenerate
 reg part;
 
 // this runs at clk speed, no clock gating here
-always @(posedge clk) begin : memory_mapped_registers
+always @(posedge clk, posedge rst) begin : memory_mapped_registers
     if( rst ) begin
         selected_register   <= 8'h0;
         div_setting         <= 2'b10; // FM=1/6, SSG=1/4
@@ -412,7 +412,7 @@ end
 
 reg [4:0] busy_cnt; // busy lasts for 32 synth clock cycles, like in real chip
 
-always @(posedge clk)
+always @(posedge clk, posedge rst)
     if( rst ) begin
         busy <= 1'b0;
         busy_cnt <= 5'd0;
