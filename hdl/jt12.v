@@ -41,7 +41,7 @@ module jt12 (
     output          snd_sample
 );
 
-// Default parameters for JT12 select a YM2610
+// Default parameters for JT12 select a YM2612
 jt12_top u_jt12(
     .rst    ( rst   ),        // rst should be at least 6 clk&cen cycles long
     .clk    ( clk   ),        // CPU clock
