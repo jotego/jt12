@@ -201,7 +201,9 @@ endgenerate
 reg part;
 
 // this runs at clk speed, no clock gating here
-always @(posedge clk, posedge rst) begin : memory_mapped_registers
+// if I try to make this an async rst it fails to map it
+// as flip flops but uses latches instead. So I keep it as sync. reset
+always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
         selected_register   <= 8'h0;
         div_setting         <= 2'b10; // FM=1/6, SSG=1/4
