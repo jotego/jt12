@@ -90,7 +90,6 @@ always @(posedge clk) begin
     `ifdef FASTDIV
     // always enabled for fast sims (use with GYM output, timer will not work well)
     clk_en     <= 1'b1;
-    clk_en2    <= 1'b1;
     clk_en_ssg <= 1'b1;
     clk_en_666 <= 1'b1;
     clk_en_55  <= 1'b1;
