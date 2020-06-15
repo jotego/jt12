@@ -429,7 +429,7 @@ always @(posedge clk, posedge rst)
             busy_cnt <= busy_cnt+5'd1;
         end
     end
-/* verilator tracing_off */
+/* verilator tracing_on */
 jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1

@@ -265,7 +265,7 @@ end else begin : gen_adpcm_no
 end
 endgenerate
 
-/* verilator tracing_off */
+/* verilator tracing_on */
 jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
 //    .rst_n          ( rst_n         ),
     .clk            ( clk           ),        // CPU clock
@@ -280,7 +280,7 @@ jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
 );
 
 
-/* verilator tracing_off */
+/* verilator tracing_on */
 jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm))
     u_mmr(
     .rst        ( rst       ),
@@ -386,7 +386,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .psg_wr_n   ( psg_wr_n  )
 );
 
-/* verilator tracing_off */
+/* verilator tracing_on */
 // YM2203 seems to use a fixed cen/3 clock for the timers, regardless 
 // of the prescaler setting
 wire timer_cen = num_ch==3 ? clk_en_2 : ( fast_timers ? cen : clk_en);
@@ -478,7 +478,7 @@ endgenerate
 wire    [ 8:0]  op_result;
 wire    [13:0]  op_result_hd;
 `ifndef NOFM
-/* verilator tracing_off */
+/* verilator tracing_on */
 jt12_pg #(.num_ch(num_ch)) u_pg(
     .rst        ( rst           ),
     .clk        ( clk           ),
