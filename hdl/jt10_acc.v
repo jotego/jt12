@@ -80,8 +80,8 @@ reg acc_en_l, acc_en_r;
 always @(*)
     case( {cur_op,cur_ch} )
         {2'd0,3'd0}: begin // ADPCM-A:
-            acc_input_l = adpcmA_l<<<4;
-            acc_input_r = adpcmA_r<<<4;
+            acc_input_l = (adpcmA_l <<< 2) + (adpcmA_l <<< 1);
+            acc_input_r = (adpcmA_r <<< 2) + (adpcmA_r <<< 1);
             `ifndef NOMIX
             acc_en_l    = 1'b1;
             acc_en_r    = 1'b1;
@@ -91,8 +91,8 @@ always @(*)
             `endif
         end
         {2'd0,3'd4}: begin // ADPCM-B:
-            acc_input_l = adpcmB_l>>>2; // Operator width is 14 bit, ADPCM-B is 16 bit
-            acc_input_r = adpcmB_r>>>2; // accumulator width per input channel is 14 bit
+            acc_input_l = adpcmB_l >>> 1; // Operator width is 14 bit, ADPCM-B is 16 bit
+            acc_input_r = adpcmB_r >>> 1; // accumulator width per input channel is 14 bit
             `ifndef NOMIX
             acc_en_l    = 1'b1;
             acc_en_r    = 1'b1;
@@ -102,8 +102,14 @@ always @(*)
             `endif
         end
         default: begin
-            acc_input_l = opext;
-            acc_input_r = opext;
+            // Note by Jose Tejada:
+            // I don't think we should divide down the FM output
+            // but someone was looking at the balance of the different
+            // channels and made this arrangement
+            // I suppose ADPCM-A would saturate if taken up a factor of 8 instead of 4
+            // I'll leave it as it is but I think it is worth revisiting this:
+            acc_input_l = opext >>> 1;
+            acc_input_r = opext >>> 1;
             acc_en_l    = sum_en & left_en;
             acc_en_r    = sum_en & right_en;
         end
