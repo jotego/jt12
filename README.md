@@ -10,19 +10,34 @@ JT12 is an FM sound source written in Verilog, fully compatible with YM2612/YM34
 
 The implementation tries to be as close to original hardware as possible. Low usage of FPGA resources has also been a design goal. Except in the operator section (jt12_op) where an exact replica of the original circuit is done. This could be done in less space with a different style but because this piece of the circuit was reversed engineered by Sauraen, I decided to use that knowledge.
 
-Directories:
+## Directories
 
-hdl -> all relevant RTL files, written in verilog
-ver -> test benches
-ver/verilator -> test bench that can play vgm files
+* hdl -> all relevant RTL files, written in verilog
+* ver -> test benches
+* ver/verilator -> test bench that can play vgm files
 
-Usage:
+## Usage
 
-YM2610: top level file hdl/jt10.v. Use jt10.qip to automatically get all relevant files in Quartus.
-YM2612: top level file hdl/jt12.v. Use jt12.qip to automatically get all relevant files in Quartus.
-YM2203: top level file hdl/jt03.v. Use jt03.qip to automatically get all relevant files in Quartus.
+Chip    | Top Level     | QIP File
+--------|---------------|---------
+YM2610  |   jt10.v      | jt10.qip
+YM2612  |   jt12.v      | jt12.qip
+YM2203  |   jt03.v      | jt03.qip
 
 ## Simulation
-=============
 
 There are several simulation test benches in the **ver** folder. The most important one is in the **ver/verilator** folder. The simulation script is called with the shell script **go** in the same folder. The script will compile the file **test.cpp** together with other files and the design and will simulate the tune specificied with the -f command. It can read **vgm** tunes and generate .wav output of them.
+
+## Related Projects
+
+Other sound chips from the same author
+
+Chip                   | Repository
+-----------------------|------------
+YM2203, YM2612, YM2610 | [JT12](https://github.com/jotego/jt12)
+YM2151                 | [JT51](https://github.com/jotego/jt51)
+YM3526                 | [JTOPL](https://github.com/jotego/jtopl)
+YM2149                 | [JT49](https://github.com/jotego/jt49)
+sn76489an              | [JT89](https://github.com/jotego/jt89)
+OKI 6295               | [JT6295](https://github.com/jotego/jt6295)
+OKI MSM5205            | [JT5205](https://github.com/jotego/jt5205)
