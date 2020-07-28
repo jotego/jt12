@@ -13,7 +13,33 @@ SKIPMAKE=FALSE
 
 function set_slow {
     FAST=
-    EXTRA="$EXTRA -slow"    
+    EXTRA="$EXTRA -slow"
+}
+
+function show_help {
+    cat <<EOF
+go: verilator simulation of .vgm, .gym and .jtt files
+    Usage:
+    -f          input file
+    -t | -time  maximum simulation time in ms
+    -o          output wav file name
+    -2203       forces YM2203 mode
+    -2610       forces YM2610 mode
+    -d macro    defines an additional verilog macro
+    -w          enable signal dump
+    -w1         signal dump of only top level
+    -w0 time    signal dump enabled at specified time
+    -slow       clock dividers enabled (slows down simulation)
+    -hex        hexadecimal dump enabled
+    -nomix      does not mix the different sound sources
+    -noam       disables AM feature
+    -noks       disables KS feature
+    -nomul      disables MUL feature
+    -mute
+    -nodecode
+    -runonly    skips verilator compilation and tries to run the already existing binary
+    -help       shows this help
+EOF
 }
 
 #function eval_args {
@@ -77,6 +103,9 @@ function set_slow {
         "-runonly")
             echo Skipping Verilator and make steps
             SKIPMAKE=TRUE;;
+        -h|--help|-help)
+            show_help
+            exit 0;;
         *)
             echo go: unrecognized option $1
             exit 1

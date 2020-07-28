@@ -6,6 +6,8 @@
 *.vcd
 *.vgm
 *.lxt
+*.jtt
+*.raw
 ver/vgm/*
 last.jtt
 history
@@ -15,4 +17,6 @@ db/*
 obj_dir
 *.dec
 *.rom
+ise/*
+
 
