@@ -1,6 +1,6 @@
 /* This file is part of JT12.
 
- 
+
     JT12 program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -30,7 +30,7 @@ module jt10(
     input   [1:0]   addr,
     input           cs_n,
     input           wr_n,
-    
+
     output  [7:0]   dout,
     output          irq_n,
     // ADPCM pins
@@ -47,7 +47,7 @@ module jt10(
     output          [ 7:0] psg_C,
     output  signed  [15:0] fm_snd,
     // combined output
-    output          [ 9:0] psg_snd,    
+    output          [ 9:0] psg_snd,
     output  signed  [15:0] snd_right,
     output  signed  [15:0] snd_left,
     output          snd_sample
@@ -65,7 +65,7 @@ u_jt12(
     .addr           ( addr         ),
     .cs_n           ( cs_n         ),
     .wr_n           ( wr_n         ),
-    
+
     .dout           ( dout         ),
     .irq_n          ( irq_n        ),
     // ADPCM pins
@@ -80,10 +80,13 @@ u_jt12(
     .psg_A          ( psg_A        ),
     .psg_B          ( psg_B        ),
     .psg_C          ( psg_C        ),
-    .psg_snd        ( psg_snd      ),    
+    .psg_snd        ( psg_snd      ),
     .fm_snd_left    ( fm_snd       ),
     .fm_snd_right   (),
-
+    // Unused YM2203
+    .IOA_in         (),
+    .IOB_in         (),
+    // Sound output
     .snd_right      ( snd_right    ),
     .snd_left       ( snd_left     ),
     .snd_sample     ( snd_sample   ),
