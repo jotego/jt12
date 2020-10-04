@@ -45,6 +45,9 @@ module jt12_top (
     output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
     input   [ 7:0]  adpcmb_data,
     output          adpcmb_roe_n, // ADPCM-B ROM output enable
+    // I/O pins used by YM2203 embedded YM2149 chip
+    input      [7:0] IOA_in,
+    input      [7:0] IOB_in,
     // Separated output
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
@@ -207,7 +210,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .clk        ( clk           ),
         .cen        ( cen           ),
         .cen55      ( clk_en_55     ),
-        
+
         // Control
         .acmd_on_b  ( acmd_on_b     ),  // Control - Process start, Key On
         .acmd_rep_b ( acmd_rep_b    ),  // Control - Repeat
@@ -231,7 +234,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
     );
 
     /* verilator tracing_on */
-    assign snd_sample   = zero;        
+    assign snd_sample   = zero;
     jt10_acc u_acc(
         .clk        ( clk           ),
         .clk_en     ( clk_en        ),
@@ -338,7 +341,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .astart_b   ( astart_b      ),  // Start address
     .aend_b     ( aend_b        ),  // End   address
     .adeltan_b  ( adeltan_b     ),  // Delta-N
-    .aeg_b      ( aeg_b         ),  // Envelope Generator Control    
+    .aeg_b      ( aeg_b         ),  // Envelope Generator Control
     .flag_ctl   ( flag_ctl      ),
     // Operator
     .xuse_prevprev1 ( xuse_prevprev1  ),
@@ -388,7 +391,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
 );
 
 /* verilator tracing_on */
-// YM2203 seems to use a fixed cen/3 clock for the timers, regardless 
+// YM2203 seems to use a fixed cen/3 clock for the timers, regardless
 // of the prescaler setting
 wire timer_cen = num_ch==3 ? clk_en_2 : ( fast_timers ? cen : clk_en);
 jt12_timers u_timers(
@@ -454,8 +457,8 @@ generate
             // Unused:
             .IOA_out    (),
             .IOB_out    (),
-            .IOA_in     (8'd0),
-            .IOB_in     (8'd0)
+            .IOA_in     ( IOA_in    ),
+            .IOB_in     ( IOB_in    )
         );
         assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0};
         assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0};
@@ -562,7 +565,7 @@ jt12_op #(.num_ch(num_ch)) u_op(
     .op_result      ( op_result     ),
     .full_result    ( op_result_hd  )
 );
-`else 
+`else
 assign op_result    = 'd0;
 assign op_result_hd = 'd0;
 `endif
@@ -602,7 +605,7 @@ generate
         wire signed [10:0] pcm_full;
         always @(*)
             pcm2 = en_hifi_pcm ? pcm_full[9:1] : pcm;
-            
+
         jt12_pcm_interpol #(.dw(11), .stepw(5)) u_pcm (
             .rst_n ( rst_pcm_n      ),
             .clk   ( clk            ),
