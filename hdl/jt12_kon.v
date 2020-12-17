@@ -61,9 +61,13 @@ if(num_ch==6) begin
     always @(posedge clk) if( clk_en )
         keyon_I <= (csm&&next_ch==3'd2&&overflow2) || csr_out;
 
-    reg up_keyon_reg;
-    reg [3:0] tkeyon_op;
-    reg [2:0] tkeyon_ch;
+    reg        up_keyon_reg;
+    reg  [3:0] tkeyon_op;
+    reg  [2:0] tkeyon_ch;
+    wire       key_upnow;
+
+    assign key_upnow = up_keyon_reg && (tkeyon_ch==next_ch) && (next_op == 2'd3);
+
     always @(posedge clk) if( clk_en ) begin
         if (rst)
             up_keyon_reg <= 1'b0;
@@ -75,7 +79,6 @@ if(num_ch==6) begin
             up_keyon_reg <= 1'b0;
      end
 
-    wire key_upnow = up_keyon_reg && (tkeyon_ch==next_ch) && (next_op == 2'd3);
 
     wire middle1;
     wire middle2;
