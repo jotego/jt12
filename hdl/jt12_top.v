@@ -398,6 +398,7 @@ jt12_timers u_timers(
     .clk        ( clk           ),
     .clk_en     ( timer_cen     ),
     .rst        ( rst           ),
+    .zero       ( zero          ),
     .value_A    ( value_A       ),
     .value_B    ( value_B       ),
     .load_A     ( load_A        ),
