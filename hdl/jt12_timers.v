@@ -45,11 +45,10 @@ module jt12_timers(
 
 assign irq_n = ~( (flag_A&enable_irq_A) | (flag_B&enable_irq_B) );
 
-jt51_timer #(.CW(10))
-timer_A(
+jt51_timer #(.CW(10)) timer_A(
 	.clk		( clk		),
 	.rst		( rst		),
-	.clk_en		( clk_en 	),
+	.cen		( clk_en 	),
     .zero       ( zero      ),
 	.start_value( value_A	),
 	.load		( load_A   	),
@@ -59,10 +58,9 @@ timer_A(
 );
 
 jt51_timer #(.CW(8),.FREE_EN(1)) timer_B(
-timer_B(
 	.clk		( clk		),
 	.rst		( rst		),
-	.clk_en		( clk_en 	),
+	.cen		( clk_en 	),
     .zero       ( zero      ),
 	.start_value( value_B	),
 	.load		( load_B   	),
