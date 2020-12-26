@@ -394,7 +394,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
 // YM2203 seems to use a fixed cen/3 clock for the timers, regardless
 // of the prescaler setting
 wire timer_cen = num_ch==3 ? clk_en_2 : ( fast_timers ? cen : clk_en);
-jt12_timers u_timers(
+jt12_timers #(.num_ch(num_ch)) u_timers (
     .clk        ( clk           ),
     .clk_en     ( timer_cen     ),
     .rst        ( rst           ),

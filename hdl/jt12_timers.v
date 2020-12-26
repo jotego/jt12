@@ -43,36 +43,52 @@ module jt12_timers(
   output 	 	irq_n
 );
 
+parameter num_ch = 6;
+
 assign irq_n = ~( (flag_A&enable_irq_A) | (flag_B&enable_irq_B) );
 
-jt51_timer #(.CW(10)) timer_A(
-	.clk		( clk		),
-	.rst		( rst		),
-	.cen		( clk_en 	),
-    .zero       ( zero      ),
-	.start_value( value_A	),
-	.load		( load_A   	),
-	.clr_flag   ( clr_flag_A),
-	.flag		( flag_A	),
-	.overflow	( overflow_A)
+/*
+reg zero2;
+
+always @(posedge clk, posedge rst) begin
+    if( rst )
+        zero2 <= 0;
+    else if(clk_en) begin
+        if( zero ) zero2 <= ~zero;
+    end
+end
+
+wire zero       = num_ch == 6 ? zero : (zero2&zero);
+*/
+jt12_timer #(.CW(10),.FW(1),.FREE_EN(num_ch==3)) timer_A(
+	.clk		( clk		 ),
+	.rst		( rst		 ),
+	.cen		( clk_en 	 ),
+    .zero       ( zero       ),
+	.start_value( value_A	 ),
+	.load		( load_A   	 ),
+	.clr_flag   ( clr_flag_A ),
+	.flag		( flag_A	 ),
+	.overflow	( overflow_A )
 );
 
-jt51_timer #(.CW(8),.FREE_EN(1)) timer_B(
-	.clk		( clk		),
-	.rst		( rst		),
-	.cen		( clk_en 	),
-    .zero       ( zero      ),
-	.start_value( value_B	),
-	.load		( load_B   	),
-	.clr_flag   ( clr_flag_B),
-	.flag		( flag_B	),
-	.overflow	(			)
+jt12_timer #(.CW(8),.FW(num_ch==3?5:4),.FREE_EN(1)) timer_B(
+	.clk		( clk		 ),
+	.rst		( rst		 ),
+	.cen		( clk_en 	 ),
+    .zero       ( zero       ),
+	.start_value( value_B	 ),
+	.load		( load_B   	 ),
+	.clr_flag   ( clr_flag_B ),
+	.flag		( flag_B	 ),
+	.overflow	(			 )
 );
 
 endmodule
 
-module jt51_timer #(parameter
+module jt12_timer #(parameter
     CW      = 8, // counter bit width. This is the counter that can be loaded
+    FW      = 1, // number of bits for the free-running counter
     FREE_EN = 0  // enables a 4-bit free enable count
 ) (
     input   rst,
@@ -88,7 +104,7 @@ module jt51_timer #(parameter
 
 reg          last_load;
 reg [CW-1:0] cnt, next;
-reg [   3:0] free_cnt, free_next;
+reg [FW-1:0] free_cnt, free_next;
 reg          free_ov;
 
 always@(posedge clk, posedge rst)
@@ -116,9 +132,9 @@ end
 // Free running counter
 always @(posedge clk) begin
     if( rst ) begin
-        free_cnt <= 4'd0;
+        free_cnt <= {FW{1'b0}};
     end else if( cen&&zero ) begin
-        free_cnt <= free_cnt+4'd1;
+        free_cnt <= free_cnt+1'd1;
     end
 end
 
