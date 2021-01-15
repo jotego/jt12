@@ -1,46 +1,46 @@
 /*  This file is part of JT12.
 
-	JT12 is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+  JT12 is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
 
-	JT12 is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+  JT12 is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with JT12.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License
+  along with JT12.  If not, see <http://www.gnu.org/licenses/>.
 
-	Author: Jose Tejada Gomez. Twitter: @topapate
-	Version: 1.0
-	Date: 14-2-2017
+  Author: Jose Tejada Gomez. Twitter: @topapate
+  Version: 1.0
+  Date: 14-2-2017
 
-	YM3438_APL.pdf
-	Timer A = 144*(1024-NA)/Phi M
-	Timer B = 2304*(256-NB)/Phi M
-	*/
+  YM3438_APL.pdf
+  Timer A = 144*(1024-NA)/Phi M
+  Timer B = 2304*(256-NB)/Phi M
+  */
 
 `timescale 1ns / 1ps
 
 module jt12_timers(
-  input			clk,
-  input			rst,
-  input			clk_en /* synthesis direct_enable */,
+  input     clk,
+  input     rst,
+  input     clk_en /* synthesis direct_enable */,
   input         zero,
-  input [9:0]	value_A,
-  input [7:0]	value_B,
-  input 		load_A,
-  input 		load_B,
-  input 		clr_flag_A,
-  input 		clr_flag_B,
-  input 		enable_irq_A,
-  input 		enable_irq_B,
-  output 	 	flag_A,
-  output 	 	flag_B,
-  output		overflow_A,
-  output 	 	irq_n
+  input [9:0] value_A,
+  input [7:0] value_B,
+  input     load_A,
+  input     load_B,
+  input     clr_flag_A,
+  input     clr_flag_B,
+  input     enable_irq_A,
+  input     enable_irq_B,
+  output    flag_A,
+  output    flag_B,
+  output    overflow_A,
+  output    irq_n
 );
 
 parameter num_ch = 6;
@@ -60,35 +60,35 @@ end
 
 wire zero       = num_ch == 6 ? zero : (zero2&zero);
 */
-jt12_timer #(.CW(10),.FW(1),.FREE_EN(num_ch==3)) timer_A(
-	.clk		( clk		 ),
-	.rst		( rst		 ),
-	.cen		( clk_en 	 ),
-    .zero       ( zero       ),
-	.start_value( value_A	 ),
-	.load		( load_A   	 ),
-	.clr_flag   ( clr_flag_A ),
-	.flag		( flag_A	 ),
-	.overflow	( overflow_A )
+jt12_timer #(.CW(10)) timer_A(
+    .clk        ( clk         ),
+    .rst        ( rst         ),
+    .cen        ( clk_en      ),
+    .zero       ( zero        ),
+    .start_value( value_A     ),
+    .load       ( load_A      ),
+    .clr_flag   ( clr_flag_A  ),
+    .flag       ( flag_A      ),
+    .overflow   ( overflow_A  )
 );
 
-jt12_timer #(.CW(8),.FW(num_ch==3?5:4),.FREE_EN(1)) timer_B(
-	.clk		( clk		 ),
-	.rst		( rst		 ),
-	.cen		( clk_en 	 ),
-    .zero       ( zero       ),
-	.start_value( value_B	 ),
-	.load		( load_B   	 ),
-	.clr_flag   ( clr_flag_B ),
-	.flag		( flag_B	 ),
-	.overflow	(			 )
+jt12_timer #(.CW(8),.FREE_EN(1)) timer_B(
+    .clk        ( clk         ),
+    .rst        ( rst         ),
+    .cen        ( clk_en      ),
+    .zero       ( zero        ),
+    .start_value( value_B     ),
+    .load       ( load_B      ),
+    .clr_flag   ( clr_flag_B  ),
+    .flag       ( flag_B      ),
+    .overflow   (             )
 );
 
 endmodule
 
 module jt12_timer #(parameter
     CW      = 8, // counter bit width. This is the counter that can be loaded
-    FW      = 1, // number of bits for the free-running counter
+    FW      = 4, // number of bits for the free-running counter
     FREE_EN = 0  // enables a 4-bit free enable count
 ) (
     input   rst,
