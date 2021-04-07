@@ -456,10 +456,11 @@ generate
             .dout       ( psg_dout  ),
             .sel        ( 1'b1      ),  // half clock speed
             // Unused:
-            .IOA_out    (),
-            .IOB_out    (),
+            .IOA_out    (           ),
+            .IOB_out    (           ),
             .IOA_in     ( IOA_in    ),
-            .IOB_in     ( IOB_in    )
+            .IOB_in     ( IOB_in    ),
+            .sample     (           )
         );
         assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0};
         assign snd_right = fm_snd_right + { 1'b0, psg_snd[9:0],5'd0};
