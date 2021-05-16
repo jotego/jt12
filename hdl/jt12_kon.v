@@ -131,7 +131,7 @@ else begin // 3 channels
             2'd2: next_op_hot = 4'b0010; // S2
             2'd3: next_op_hot = 4'b1000; // S4
         endcase
-        din = keyon_ch==next_ch && up_keyon ? |(keyon_op&next_op_hot) : csr_out;
+        din = keyon_ch[1:0]==next_ch[1:0] && up_keyon ? |(keyon_op&next_op_hot) : csr_out;
     end
 
     always @(posedge clk) if( clk_en )
