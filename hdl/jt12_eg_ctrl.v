@@ -99,7 +99,7 @@ always @(*)
 				ssg_inv_out	= ssg_en & (ssg_alt ^ ssg_inv_in);
 			end
 			else begin
-				base_rate	=  eg[9:5] == sustain ? rate2 : rate1; // equal comparison according to Nuke
+				base_rate	=  eg[9:5] >= sustain ? rate2 : rate1; // equal comparison according to Nuke
 				state_next	= DECAY;
 				ssg_inv_out = ssg_inv_in;
 			end
