@@ -28,6 +28,7 @@ module jt10_adpcm_drvB(
     input           acmd_on_b,  // Control - Process start, Key On
     input           acmd_rep_b, // Control - Repeat
     input           acmd_rst_b, // Control - Reset
+    input           acmd_up_b, // Control - New command received
     input    [ 1:0] alr_b,      // Left / Right
     input    [15:0] astart_b,   // Start address
     input    [15:0] aend_b,     // End   address
@@ -38,7 +39,7 @@ module jt10_adpcm_drvB(
     // memory
     output   [23:0] addr,
     input    [ 7:0] data,
-    output          roe_n,
+    output reg roe_n,
 
     output reg signed [15:0]  pcm55_l,
     output reg signed [15:0]  pcm55_r
@@ -46,6 +47,8 @@ module jt10_adpcm_drvB(
 
 wire nibble_sel;
 wire adv;           // advance to next reading
+wire restart;
+wire chon;
 
 // `ifdef SIMULATION
 // real fsample;
@@ -57,13 +60,14 @@ wire adv;           // advance to next reading
 // end
 // `endif
 
-always @(posedge clk) roe_n <= ~adv;
+always @(posedge clk) roe_n <= ~(adv & cen55);
 
 jt10_adpcmb_cnt u_cnt(
     .rst_n       ( rst_n           ),
     .clk         ( clk             ),
     .cen         ( cen55           ),
     .delta_n     ( adeltan_b       ),
+	 .acmd_up_b   ( acmd_up_b       ),
     .clr         ( acmd_rst_b      ),
     .on          ( acmd_on_b       ),
     .astart      ( astart_b        ),
@@ -72,8 +76,10 @@ jt10_adpcmb_cnt u_cnt(
     .addr        ( addr            ),
     .nibble_sel  ( nibble_sel      ),
     // Flag control
+    .chon        ( chon            ),
     .clr_flag    ( clr_flag        ),
     .flag        ( flag            ),
+    .restart     ( restart         ),
     .adv         ( adv             )
 );
 
@@ -89,7 +95,8 @@ jt10_adpcmb u_decoder(
     .cen    ( cen            ),
     .adv    ( adv & cen55    ),
     .data   ( din            ),
-    .chon   ( acmd_on_b      ),
+    .chon   ( chon           ),
+    .clr    ( flag | restart ),
     .pcm    ( pcmdec         )
 );
 
@@ -98,7 +105,7 @@ jt10_adpcmb_interpol u_interpol(
     .rst_n  ( rst_n          ),
     .clk    ( clk            ),
     .cen    ( cen            ),
-    .cen55  ( cen55          ),
+    .cen55  ( cen55  && chon ),
     .adv    ( adv            ),
     .pcmdec ( pcmdec         ),
     .pcmout ( pcminter       )

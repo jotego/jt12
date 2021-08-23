@@ -50,7 +50,7 @@ always @(*)
         default: up_ch_dec = 6'd0;
     endcase
 
-wire [5:0] en_ch2 = { en_ch[4:0], en_ch[5] }; // shift the bits to fit in the pipeline slot correctly
+//wire [5:0] en_ch2 = { en_ch[4:0], en_ch[5] }; // shift the bits to fit in the pipeline slot correctly
 
 reg  [6:0] db5;
 always @(*)
@@ -91,7 +91,7 @@ always @(posedge clk or negedge rst_n)
         lracl4  <= lracl3;
         // IV: new data is accepted here
         lracl5  <= lracl4;
-        db5     <= { 1'b0, ~lracl4[5:0] } + {1'b0, ~atl};
+        db5     <= { 2'b0, ~lracl4[4:0] } + {1'b0, ~atl};
         // V
         lracl6  <= lracl5;
         lin6    <= lin_5b;
@@ -147,7 +147,7 @@ always @(posedge clk or negedge rst_n)
         // III, shift by 0 or 1
         if( shcnt_mod3 ) begin
             pcm4   <= pcm3>>>1;
-            shcnt4 <= shcnt3-1;
+            shcnt4 <= shcnt3-1'd1;
         end else begin
             pcm4   <= pcm3;
             shcnt4 <= shcnt3;
@@ -155,7 +155,7 @@ always @(posedge clk or negedge rst_n)
         // IV, shift by 0 or 1
         if( shcnt_mod4 ) begin
             pcm5   <= pcm4>>>1;
-            shcnt5 <= shcnt4-1;
+            shcnt5 <= shcnt4-1'd1;
         end else begin
             pcm5   <= pcm4;
             shcnt5 <= shcnt4;
@@ -163,7 +163,7 @@ always @(posedge clk or negedge rst_n)
         // V, shift by 0 or 1
         if( shcnt_mod5 ) begin
             pcm6   <= pcm5>>>1;
-            shcnt6 <= shcnt5-1;
+            shcnt6 <= shcnt5-1'd1;
         end else begin
             pcm6   <= pcm5;
             shcnt6 <= shcnt5;
