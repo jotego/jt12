@@ -100,7 +100,7 @@ module jt12_timer #(parameter
     output reg flag,
     output reg overflow
 );
-
+/* verilator lint_off WIDTH */
 reg          last_load;
 reg [CW-1:0] cnt, next;
 reg [FW-1:0] free_cnt, free_next;
@@ -136,5 +136,5 @@ always @(posedge clk) begin
         free_cnt <= free_cnt+1'd1;
     end
 end
-
+/* verilator lint_on WIDTH */
 endmodule
