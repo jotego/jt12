@@ -22,7 +22,6 @@
   Timer B = 2304*(256-NB)/Phi M
   */
 
-`timescale 1ns / 1ps
 
 module jt12_timers(
   input     clk,

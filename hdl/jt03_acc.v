@@ -20,7 +20,6 @@
 
 */
 
-`timescale 1ns / 1ps
 
 // Use for YM2203
 // no left/right channels
