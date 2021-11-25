@@ -24,7 +24,7 @@
 module jt10_adpcm_dbrom(
     input           clk,        // CPU clock
     input   [5:0]   db,
-    output  [8:0]   lin
+    output reg [8:0]   lin
 );
 
 reg [8:0] mem[0:63];

@@ -28,7 +28,7 @@ module jt10_adpcm_drvA(
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
     output  [3:0]   bank,
-    output  reg     roe_n, // ADPCM-A ROM output enable
+    output          roe_n, // ADPCM-A ROM output enable
 
     // Control Registers
     input   [5:0]   atl,        // ADPCM Total Level
@@ -49,8 +49,9 @@ module jt10_adpcm_drvA(
     output  [5:0]   flags,
     input   [5:0]   clr_flags,
 
-    output reg signed [15:0]  pcm55_l,
-    output reg signed [15:0]  pcm55_r
+    output signed [15:0]  pcm55_l,
+    output signed [15:0]  pcm55_r,
+	 input   [5:0]   ch_enable
 );
 
 /* verilator tracing_on */
@@ -89,7 +90,7 @@ end
 reg match; // high when cur_ch==en_ch, but calculated one clock cycle ahead
     // so it can be latched
 wire [5:0] cur_next = { cur_ch[4:0], cur_ch[5] };
-wire [5:0]  en_next = {en_ch[4:0], en_ch[5] };
+wire [5:0]  en_next = {  en_ch[0],  en_ch[5:1] };
 
 always @(posedge clk or negedge rst_n) 
     if( !rst_n ) begin
@@ -190,7 +191,7 @@ jt10_adpcm_acc u_acc_left(
     .en_ch  ( en_ch     ),
     .match  ( match     ),
     // left/right enable
-    .en_sum ( lr[1]     ),
+    .en_sum ( lr[1] && (ch_enable & cur_ch) ),
 
     .pcm_in ( pcm_att   ),    // 18.5 kHz
     .pcm_out( pre_pcm55_l   )     // 55.5 kHz
@@ -205,7 +206,7 @@ jt10_adpcm_acc u_acc_right(
     .en_ch  ( en_ch     ),
     .match  ( match     ),
     // left/right enable
-    .en_sum ( lr[0]     ),
+    .en_sum ( lr[0] && (ch_enable & cur_ch) ),
 
     .pcm_in ( pcm_att   ),    // 18.5 kHz
     .pcm_out( pre_pcm55_r   )     // 55.5 kHz
