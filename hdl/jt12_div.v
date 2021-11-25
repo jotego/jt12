@@ -25,12 +25,12 @@ module jt12_div(
     input           clk,
     input           cen /* synthesis direct_enable */,
     input   [1:0]   div_setting,
-    output  reg     clk_en,      // after prescaler
-    output  reg     clk_en_2,    // cen divided by 2
-    output  reg     clk_en_ssg,
-    output  reg     clk_en_666,  // 666 kHz
-    output  reg     clk_en_111,  // 111 kHz
-    output  reg     clk_en_55    //  55 kHz
+    (* direct_enable *) output  reg     clk_en,      // after prescaler
+    (* direct_enable *) output  reg     clk_en_2,    // cen divided by 2
+    (* direct_enable *) output  reg     clk_en_ssg,
+    (* direct_enable *) output  reg     clk_en_666,  // 666 kHz
+    (* direct_enable *) output  reg     clk_en_111,  // 111 kHz
+    (* direct_enable *) output  reg     clk_en_55    //  55 kHz
 );
 
 parameter use_ssg=0;
@@ -81,6 +81,17 @@ initial clk_en_666 = 1'b0;
 reg cen_55_int;
 reg [1:0] div2=2'b0;
 
+reg pre_clk_en, pre_clk_en_2, pre_clk_en_ssg, pre_clk_en_666, pre_clk_en_111, pre_clk_en_55;
+
+always @(negedge clk) begin     // It's important to leave the negedge to use the physical clock enable input
+    clk_en     <= pre_clk_en;
+    clk_en_2   <= pre_clk_en_2;
+    clk_en_ssg <= pre_clk_en_ssg;
+    clk_en_666 <= pre_clk_en_666;
+    clk_en_111 <= pre_clk_en_111;
+    clk_en_55  <= pre_clk_en_55;
+end
+
 always @(posedge clk) begin
     cen_int        <= opn_cnt      == 4'd0;
     cen_ssg_int    <= ssg_cnt      == 3'd0;
@@ -88,18 +99,18 @@ always @(posedge clk) begin
     cen_adpcm3_int <= adpcm_cnt111 == 3'd0;
     cen_55_int     <= adpcm_cnt55  == 3'd0;
     `ifdef FASTDIV
-    // always enabled for fast sims (use with GYM output, timer will not work well)
+    // always enabled for fast sims (use with GYM output, the timers will not work well)
     clk_en     <= 1'b1;
     clk_en_ssg <= 1'b1;
     clk_en_666 <= 1'b1;
     clk_en_55  <= 1'b1;
     `else
-    clk_en     <= cen & cen_int;   
-    clk_en_2   <= cen && (div2==2'b00);
-    clk_en_ssg <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
-    clk_en_666 <= cen & cen_adpcm_int; 
-    clk_en_111 <= cen & cen_adpcm_int & cen_adpcm3_int; 
-    clk_en_55  <= cen & cen_adpcm_int & cen_adpcm3_int & cen_55_int;
+    pre_clk_en     <= cen & cen_int;
+    pre_clk_en_2   <= cen && (div2==2'b00);
+    pre_clk_en_ssg <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
+    pre_clk_en_666 <= cen & cen_adpcm_int;
+    pre_clk_en_111 <= cen & cen_adpcm_int & cen_adpcm3_int;
+    pre_clk_en_55  <= cen & cen_adpcm_int & cen_adpcm3_int & cen_55_int;
     `endif
 end
 

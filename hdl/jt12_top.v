@@ -27,7 +27,7 @@ http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc
 module jt12_top (
     input           rst,        // rst should be at least 6 clk&cen cycles long
     input           clk,        // CPU clock
-    input           cen,        // optional clock enable, it not needed leave as 1'b1
+    (* direct_enable *) input cen,        // optional clock enable, if not needed leave as 1'b1
     input   [7:0]   din,
     input   [1:0]   addr,
     input           cs_n,
