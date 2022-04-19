@@ -63,6 +63,7 @@ module jt12_top (
     output  signed  [15:0] snd_right, // FM+PSG
     output  signed  [15:0] snd_left,  // FM+PSG
     output                 snd_sample,
+    input           [ 7:0] debug_bus,
     output          [ 7:0] debug_view
 );
 
@@ -391,6 +392,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .psg_addr   ( psg_addr  ),
     .psg_data   ( psg_data  ),
     .psg_wr_n   ( psg_wr_n  ),
+    .debug_bus  ( debug_bus ),
     .div_setting(div_setting)
 );
 

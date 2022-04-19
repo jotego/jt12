@@ -101,7 +101,7 @@ module jt12_timer #(parameter
     output reg overflow
 );
 /* verilator lint_off WIDTH */
-reg          last_load;
+reg          load_l;
 reg [CW-1:0] cnt, next;
 reg [FW-1:0] free_cnt, free_next;
 reg          free_ov;
@@ -112,7 +112,7 @@ always@(posedge clk, posedge rst)
     else /*if(cen)*/ begin
         if( clr_flag )
             flag <= 1'b0;
-        else if(overflow) flag<=1'b1;
+        else if( cen && zero && load && overflow ) flag<=1'b1;
     end
 
 always @(*) begin
@@ -120,19 +120,19 @@ always @(*) begin
     {overflow, next }    = { 1'b0, cnt }     + (FREE_EN ? free_ov : 1'b1);
 end
 
-always @(posedge clk) if(cen && zero) begin : counter
-    last_load <= load;
-    if( (load && !last_load) || overflow ) begin
-      cnt  <= start_value;
-    end
-    else if( last_load ) cnt <= next;
+always @(posedge clk) begin
+    load_l <= load;
+    if( !load_l && load ) begin
+        cnt <= start_value;
+    end else if( cen && zero && load )
+        cnt <= overflow ? start_value : next;
 end
 
 // Free running counter
 always @(posedge clk) begin
     if( rst ) begin
-        free_cnt <= {FW{1'b0}};
-    end else if( cen&&zero ) begin
+        free_cnt <= 0;
+    end else if( cen && zero ) begin
         free_cnt <= free_cnt+1'd1;
     end
 end

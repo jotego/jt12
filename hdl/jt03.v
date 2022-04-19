@@ -47,6 +47,7 @@ module jt03(
     output  signed  [15:0] snd,
     output                 snd_sample,
     // Debug
+    //input           [ 7:0] debug_bus,
     output          [ 7:0] debug_view
 );
 
@@ -91,6 +92,8 @@ u_jt12(
     .snd_left       (),
     .snd_sample     ( snd_sample   ),
 
+    //.debug_bus      ( debug_bus    ),
+    .debug_bus      ( 8'd0         ),
     .debug_view     ( debug_view   )
 );
 

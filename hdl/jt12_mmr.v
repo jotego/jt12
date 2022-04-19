@@ -122,7 +122,8 @@ module jt12_mmr(
     // PSG interace
     output  [3:0]   psg_addr,
     output  [7:0]   psg_data,
-    output  reg     psg_wr_n
+    output  reg     psg_wr_n,
+    input   [7:0]   debug_bus
 );
 
 parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0;
