@@ -62,7 +62,8 @@ module jt12_top (
     output          [ 9:0] psg_snd,
     output  signed  [15:0] snd_right, // FM+PSG
     output  signed  [15:0] snd_left,  // FM+PSG
-    output                 snd_sample
+    output                 snd_sample,
+    output          [ 7:0] debug_view
 );
 
 // parameters to select the features for each chip type
@@ -160,9 +161,11 @@ wire [ 7:0] aeg_b;         // Envelope Generator Control
 wire [ 5:0] adpcma_flags;  // ADPMC-A read over flags
 wire        adpcmb_flag;
 wire [ 6:0] flag_ctl;
-
+wire [ 1:0] div_setting;
 
 wire clk_en_2, clk_en_666, clk_en_111, clk_en_55;
+
+assign debug_view = { 4'd0, flag_B, flag_A, div_setting };
 
 generate
 if( use_adpcm==1 ) begin: gen_adpcm
@@ -387,7 +390,8 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     // PSG interace
     .psg_addr   ( psg_addr  ),
     .psg_data   ( psg_data  ),
-    .psg_wr_n   ( psg_wr_n  )
+    .psg_wr_n   ( psg_wr_n  ),
+    .div_setting(div_setting)
 );
 
 /* verilator tracing_on */

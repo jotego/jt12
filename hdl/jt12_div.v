@@ -23,13 +23,13 @@ module jt12_div(
     input           rst,
     input           clk,
     input           cen /* synthesis direct_enable */,
-    input   [1:0]   div_setting,
-    (* direct_enable *) output  reg     clk_en,      // after prescaler
-    (* direct_enable *) output  reg     clk_en_2,    // cen divided by 2
-    (* direct_enable *) output  reg     clk_en_ssg,
-    (* direct_enable *) output  reg     clk_en_666,  // 666 kHz
-    (* direct_enable *) output  reg     clk_en_111,  // 111 kHz
-    (* direct_enable *) output  reg     clk_en_55    //  55 kHz
+    input     [1:0] div_setting,
+    output reg      clk_en,      // after prescaler
+    output reg      clk_en_2,    // cen divided by 2
+    output reg      clk_en_ssg,
+    output reg      clk_en_666,  // 666 kHz
+    output reg      clk_en_111,  // 111 kHz
+    output reg      clk_en_55    //  55 kHz
 );
 
 parameter use_ssg=0;

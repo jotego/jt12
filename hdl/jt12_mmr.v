@@ -51,6 +51,7 @@ module jt12_mmr(
     output  reg         fast_timers,
     input               flag_A,
     input               overflow_A, 
+    output  reg [1:0]   div_setting,
     // PCM
     output  reg [8:0]   pcm,
     output  reg         pcm_en,
@@ -125,9 +126,6 @@ module jt12_mmr(
 );
 
 parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0;
-
-reg [1:0] div_setting;
-
 
 jt12_div #(.use_ssg(use_ssg)) u_div (
     .rst            ( rst             ),

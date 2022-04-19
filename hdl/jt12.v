@@ -75,6 +75,7 @@ jt12_top u_jt12(
     .psg_snd        (),
     .snd_right      ( snd_right     ), // FM+PSG
     .snd_left       ( snd_left      ),  // FM+PSG
-    .snd_sample     ( snd_sample    )
+    .snd_sample     ( snd_sample    ),
+    .debug_view     (               )
 );
 endmodule // jt03

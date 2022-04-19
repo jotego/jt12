@@ -45,7 +45,9 @@ module jt03(
     // combined output
     output          [ 9:0] psg_snd,
     output  signed  [15:0] snd,
-    output          snd_sample
+    output                 snd_sample,
+    // Debug
+    output          [ 7:0] debug_view
 );
 
 jt12_top #(
@@ -87,7 +89,9 @@ u_jt12(
 
     .snd_right      ( snd          ),
     .snd_left       (),
-    .snd_sample     ( snd_sample   )
+    .snd_sample     ( snd_sample   ),
+
+    .debug_view     ( debug_view   )
 );
 
 endmodule // jt03

@@ -91,7 +91,8 @@ u_jt12(
     .snd_left       ( snd_left     ),
     .snd_sample     ( snd_sample   ),
     // unused pins
-    .en_hifi_pcm    ( 1'b0         ) // used only on YM2612 mode
+    .en_hifi_pcm    ( 1'b0         ), // used only on YM2612 mode
+    .debug_view     (              )
 );
 
 endmodule // jt03
