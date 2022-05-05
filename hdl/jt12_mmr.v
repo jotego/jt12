@@ -126,7 +126,7 @@ module jt12_mmr(
     input   [7:0]   debug_bus
 );
 
-parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0;
+parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0, mask_div=1;
 
 jt12_div #(.use_ssg(use_ssg)) u_div (
     .rst            ( rst             ),
@@ -264,6 +264,7 @@ always @(posedge clk) begin : memory_mapped_registers
             if( !addr[0] ) begin
                 selected_register <= din;  
                 part <= addr[1];        
+                if (!mask_div)
                 case(din)
                     // clock divider: should work only for ym2203
                     // and ym2608.
