@@ -72,6 +72,7 @@ module jt12_top (
 parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1;
 parameter use_adpcm=0;
 parameter JT49_DIV=2;
+parameter mask_div=1;
 
 wire flag_A, flag_B, busy;
 
@@ -289,7 +290,7 @@ jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
 
 
 /* verilator tracing_on */
-jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm))
+jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm), .mask_div(mask_div))
     u_mmr(
     .rst        ( rst       ),
     .clk        ( clk       ),
