@@ -72,6 +72,7 @@ module jt12_top (
 parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1;
 parameter use_adpcm=0;
 parameter JT49_DIV=2;
+parameter mask_div=1;
 
 wire flag_A, flag_B, busy;
 
