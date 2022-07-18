@@ -18,6 +18,7 @@
     Date: 14-2-2017
     */
 
+`timescale 1ns / 1ps
 
 module jt12_mmr(
     input           rst,
@@ -51,7 +52,6 @@ module jt12_mmr(
     output  reg         fast_timers,
     input               flag_A,
     input               overflow_A, 
-    output  reg [1:0]   div_setting,
     // PCM
     output  reg [8:0]   pcm,
     output  reg         pcm_en,
@@ -77,6 +77,7 @@ module jt12_mmr(
     output  reg  [15:0] adeltan_b,  // Delta-N
     output  reg  [ 7:0] aeg_b,      // Envelope Generator Control
     output  reg  [ 6:0] flag_ctl,
+    output  reg  [ 6:0] flag_mask,
     // Operator
     output          xuse_prevprev1,
     output          xuse_internal,
@@ -122,11 +123,13 @@ module jt12_mmr(
     // PSG interace
     output  [3:0]   psg_addr,
     output  [7:0]   psg_data,
-    output  reg     psg_wr_n,
-    input   [7:0]   debug_bus
+    output  reg     psg_wr_n
 );
 
-parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0, mask_div=1;
+parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0, use_clkdiv=1;
+
+reg [1:0] div_setting;
+
 
 jt12_div #(.use_ssg(use_ssg)) u_div (
     .rst            ( rst             ),
@@ -199,8 +202,6 @@ endgenerate
 reg part;
 
 // this runs at clk speed, no clock gating here
-// if I try to make this an async rst it fails to map it
-// as flip flops but uses latches instead. So I keep it as sync. reset
 always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
         selected_register   <= 8'h0;
@@ -264,16 +265,17 @@ always @(posedge clk) begin : memory_mapped_registers
             if( !addr[0] ) begin
                 selected_register <= din;  
                 part <= addr[1];        
-                if (!mask_div)
-                case(din)
-                    // clock divider: should work only for ym2203
-                    // and ym2608.
-                    // clock divider works just by selecting the register
-                    REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
-                    REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
-                    REG_CLK_N2: div_setting    <= 2'b0; // 2F
-                    default:;
-                endcase
+                if( use_clkdiv==1 ) begin
+                    case(din)
+                        // clock divider: should work only for ym2203
+                        // and ym2608.
+                        // clock divider works just by selecting the register
+                        REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
+                        REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
+                        REG_CLK_N2: div_setting    <= 2'b0; // 2F
+                        default:;
+                    endcase
+                end
             end else begin
                 // Global registers
                 din_copy <= din;
@@ -373,7 +375,11 @@ always @(posedge clk) begin : memory_mapped_registers
                             4'h9: adeltan_b[ 7:0] <= din;
                             4'ha: adeltan_b[15:8] <= din;
                             4'hb: aeg_b           <= din;
-                            4'hc: flag_ctl        <= {din[7],din[5:0]}; // this lasts a single clock cycle
+                            4'hc: begin
+									           flag_mask   <= ~{din[7],din[5:0]};
+									           flag_ctl    <= {din[7],din[5:0]}; // this lasts a single clock cycle
+									       end
+                            
                             default:;
                         endcase
                     end
@@ -406,14 +412,14 @@ always @(posedge clk) begin : memory_mapped_registers
             pcm_wr   <= 1'b0;
             flag_ctl <= 'd0;
             up_aon   <= 1'b0;
-            acmd_up_b <= 1'b0;
+				acmd_up_b <= 1'b0;
         end
     end
 end
 
 reg [4:0] busy_cnt; // busy lasts for 32 synth clock cycles, like in real chip
 
-always @(posedge clk, posedge rst)
+always @(posedge clk)
     if( rst ) begin
         busy <= 1'b0;
         busy_cnt <= 5'd0;
@@ -428,7 +434,7 @@ always @(posedge clk, posedge rst)
             busy_cnt <= busy_cnt+5'd1;
         end
     end
-/* verilator tracing_on */
+/* verilator tracing_off */
 jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1
