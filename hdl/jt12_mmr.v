@@ -18,7 +18,6 @@
     Date: 14-2-2017
     */
 
-`timescale 1ns / 1ps
 
 module jt12_mmr(
     input           rst,
@@ -52,6 +51,7 @@ module jt12_mmr(
     output  reg         fast_timers,
     input               flag_A,
     input               overflow_A, 
+    output  reg [1:0]   div_setting,
     // PCM
     output  reg [8:0]   pcm,
     output  reg         pcm_en,
@@ -123,13 +123,11 @@ module jt12_mmr(
     // PSG interace
     output  [3:0]   psg_addr,
     output  [7:0]   psg_data,
-    output  reg     psg_wr_n
+    output  reg     psg_wr_n,
+    input   [7:0]   debug_bus
 );
 
-parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0, use_clkdiv=1;
-
-reg [1:0] div_setting;
-
+parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0, mask_div=1;
 
 jt12_div #(.use_ssg(use_ssg)) u_div (
     .rst            ( rst             ),
@@ -202,6 +200,8 @@ endgenerate
 reg part;
 
 // this runs at clk speed, no clock gating here
+// if I try to make this an async rst it fails to map it
+// as flip flops but uses latches instead. So I keep it as sync. reset
 always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
         selected_register   <= 8'h0;
@@ -265,17 +265,16 @@ always @(posedge clk) begin : memory_mapped_registers
             if( !addr[0] ) begin
                 selected_register <= din;  
                 part <= addr[1];        
-                if( use_clkdiv==1 ) begin
-                    case(din)
-                        // clock divider: should work only for ym2203
-                        // and ym2608.
-                        // clock divider works just by selecting the register
-                        REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
-                        REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
-                        REG_CLK_N2: div_setting    <= 2'b0; // 2F
-                        default:;
-                    endcase
-                end
+                if (!mask_div)
+                case(din)
+                    // clock divider: should work only for ym2203
+                    // and ym2608.
+                    // clock divider works just by selecting the register
+                    REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
+                    REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
+                    REG_CLK_N2: div_setting    <= 2'b0; // 2F
+                    default:;
+                endcase
             end else begin
                 // Global registers
                 din_copy <= din;
@@ -412,14 +411,14 @@ always @(posedge clk) begin : memory_mapped_registers
             pcm_wr   <= 1'b0;
             flag_ctl <= 'd0;
             up_aon   <= 1'b0;
-				acmd_up_b <= 1'b0;
+            acmd_up_b <= 1'b0;
         end
     end
 end
 
 reg [4:0] busy_cnt; // busy lasts for 32 synth clock cycles, like in real chip
 
-always @(posedge clk)
+always @(posedge clk, posedge rst)
     if( rst ) begin
         busy <= 1'b0;
         busy_cnt <= 5'd0;
@@ -434,7 +433,7 @@ always @(posedge clk)
             busy_cnt <= busy_cnt+5'd1;
         end
     end
-/* verilator tracing_off */
+/* verilator tracing_on */
 jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1
