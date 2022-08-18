@@ -2,7 +2,7 @@
 ===================================================================
 
 You can show your appreciation through
-* [Patreon](https://patreon.com/topapate), by supporting releases
+* [Patreon](https://patreon.com/jotego), by supporting releases
 * [Paypal](https://paypal.me/topapate), with a donation
 
 
