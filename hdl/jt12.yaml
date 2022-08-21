@@ -1,7 +1,7 @@
 here:
-  - jt03.v
+  - jt12.v
   - jt12_top.v
-  - jt03_acc.v
+  - jt12_acc.v
   - jt12_single_acc.v
   - jt12_eg.v
   - jt12_eg_cnt.v
