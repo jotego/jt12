@@ -272,6 +272,8 @@ end else begin : gen_adpcm_no
     assign adpcma_roe_n = 'b1;
     assign adpcmb_addr  = 'd0;
     assign adpcmb_roe_n = 'd1;
+    assign adpcma_flags = 0;
+    assign adpcmb_flag  = 0;
 end
 endgenerate
 
