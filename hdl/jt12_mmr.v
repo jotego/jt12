@@ -199,6 +199,13 @@ endgenerate
 
 reg part;
 
+`ifdef SIMULATION
+always @(posedge clk) if( write && rst ) begin
+    $display("WARNING [JT12]: detected write request while in reset.\nThis is likely a glue-logic error in the CPU-FM module.");
+    $finish;
+end
+`endif
+
 // this runs at clk speed, no clock gating here
 // if I try to make this an async rst it fails to map it
 // as flip flops but uses latches instead. So I keep it as sync. reset
