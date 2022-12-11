@@ -48,6 +48,8 @@ module jt12_top (
     // I/O pins used by YM2203 embedded YM2149 chip
     input      [7:0] IOA_in,
     input      [7:0] IOB_in,
+    output     [7:0] IOA_out,
+    output     [7:0] IOB_out,
     // Separated output
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
@@ -466,11 +468,11 @@ generate
             .C          ( psg_C     ),
             .dout       ( psg_dout  ),
             .sel        ( 1'b1      ),  // half clock speed
-            // Unused:
-            .IOA_out    (           ),
-            .IOB_out    (           ),
+            .IOA_out    ( IOA_out   ),
+            .IOB_out    ( IOB_out   ),
             .IOA_in     ( IOA_in    ),
             .IOB_in     ( IOB_in    ),
+            // Unused:
             .sample     (           )
         );
         assign snd_left  = fm_snd_left  + { 1'b0, psg_snd[9:0],5'd0};

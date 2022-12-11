@@ -37,6 +37,8 @@ module jt03(
     // I/O pins used by YM2203 embedded YM2149 chip
     input   [7:0]   IOA_in,
     input   [7:0]   IOB_in,
+    output  [7:0]   IOA_out,
+    output  [7:0]   IOB_out,
     // Separated output
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
@@ -64,9 +66,11 @@ u_jt12(
 
     .dout           ( dout         ),
     .irq_n          ( irq_n        ),
-    // YM2203 I/O pins, only input supported
+    // YM2203 I/O pins
     .IOA_in         ( IOA_in       ),
     .IOB_in         ( IOB_in       ),
+    .IOA_out        ( IOA_out      ),
+    .IOB_out        ( IOB_out      ),
     // Unused ADPCM pins
     .en_hifi_pcm    ( 1'b0         ), // used only on YM2612 mode
     .adpcma_addr    (              ), // real hardware has 10 pins multiplexed through RMPX pin
