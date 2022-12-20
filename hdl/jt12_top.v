@@ -50,6 +50,8 @@ module jt12_top (
     input      [7:0] IOB_in,
     output     [7:0] IOA_out,
     output     [7:0] IOB_out,
+    output           IOA_oe,
+    output           IOB_oe,
     // Separated output
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
@@ -472,6 +474,8 @@ generate
             .IOB_out    ( IOB_out   ),
             .IOA_in     ( IOA_in    ),
             .IOB_in     ( IOB_in    ),
+            .IOA_oe     ( IOA_oe    ),
+            .IOB_oe     ( IOB_oe    ),
             // Unused:
             .sample     (           )
         );
