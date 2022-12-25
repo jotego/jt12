@@ -133,7 +133,7 @@ always @(posedge clk) begin
     if( rst ) begin
         free_cnt <= 0;
     end else if( cen && zero ) begin
-        free_cnt <= free_cnt+1'd1;
+        free_cnt <= free_next;
     end
 end
 /* verilator lint_on WIDTH */
