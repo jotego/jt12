@@ -679,4 +679,15 @@ generate
         );
     end
 endgenerate
+
+`ifdef SIMULATION
+integer fsnd;
+initial begin
+    fsnd=$fopen("jt12.raw","wb");
+end
+
+always @(posedge zero) begin
+    $fwrite(fsnd,"%u", {snd_left, snd_right});
+end
+`endif
 endmodule
