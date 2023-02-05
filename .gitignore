@@ -18,5 +18,5 @@ obj_dir
 *.dec
 *.rom
 ise/*
-
+.DS_Store
 
