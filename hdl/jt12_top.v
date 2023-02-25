@@ -621,7 +621,7 @@ generate
         always @(*)
             pcm2 = en_hifi_pcm ? pcm_full[9:1] : pcm;
 
-        jt12_pcm_interpol #(.dw(11), .stepw(5)) u_pcm (
+        jt12_pcm_interpol #(.DW(11), .stepw(5)) u_pcm (
             .rst_n ( rst_pcm_n      ),
             .clk   ( clk            ),
             .cen   ( clk_en         ),

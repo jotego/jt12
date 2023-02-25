@@ -211,61 +211,62 @@ end
 // as flip flops but uses latches instead. So I keep it as sync. reset
 always @(posedge clk) begin : memory_mapped_registers
     if( rst ) begin
-        selected_register   <= 8'h0;
+        selected_register   <= 0;
         div_setting         <= 2'b10; // FM=1/6, SSG=1/4
-        up_ch               <= 3'd0;
-        up_op               <= 2'd0;
-        up_keyon            <= 1'd0;
-        up_opreg            <= 7'd0;
-        up_chreg            <= 3'd0;
+        up_ch               <= 0;
+        up_op               <= 0;
+        up_keyon            <= 0;
+        up_opreg            <= 0;
+        up_chreg            <= 0;
         // IRQ Mask
         /*{ irq_zero_en, irq_brdy_en, irq_eos_en,
             irq_tb_en, irq_ta_en } = 5'h1f; */
         // timers
-        { value_A, value_B } <= 18'd0;
+        { value_A, value_B } <= 0;
         { clr_flag_B, clr_flag_A,
-        enable_irq_B, enable_irq_A, load_B, load_A } <= 6'd0;
-        fast_timers <= 1'b0;
+        enable_irq_B, enable_irq_A, load_B, load_A } <= 0;
+        fast_timers <= 0;
         // LFO
-        lfo_freq    <= 3'd0;
-        lfo_en      <= 1'b0;
-        csm         <= 1'b0;
-        effect      <= 1'b0;
+        lfo_freq    <= 0;
+        lfo_en      <= 0;
+        csm         <= 0;
+        effect      <= 0;
         // PCM
-        pcm         <= 9'h0;
-        pcm_en      <= 1'b0;
-        pcm_wr      <= 1'b0;
+        pcm         <= 0;
+        pcm_en      <= 0;
+        pcm_wr      <= 0;
         // ADPCM-A
-        aon_a       <=  'd0;
-        atl_a       <=  'd0;
-        up_start    <=  'd0;
-        up_end      <=  'd0;
-        up_addr     <= 3'd7;
-        up_lracl    <= 3'd7;
-        up_aon      <=  'd0;
-        lracl       <=  'd0;
-        addr_a      <=  'd0;        
+        aon_a       <= 0;
+        atl_a       <= 0;
+        up_start    <= 0;
+        up_end      <= 0;
+        up_addr     <= 7;
+        up_lracl    <= 7;
+        up_aon      <= 0;
+        lracl       <= 0;
+        addr_a      <= 0;
         // ADPCM-B
-        acmd_on_b   <=  'd0;
-        acmd_rep_b  <=  'd0;
-        acmd_rst_b  <=  'd0;
-        alr_b       <=  'd0;
-        flag_ctl    <=  'd0;
-        astart_b    <=  'd0;
-        aend_b      <=  'd0;
-        adeltan_b   <=  'd0;
+        acmd_on_b   <= 0;
+        acmd_rep_b  <= 0;
+        acmd_rst_b  <= 0;
+        alr_b       <= 0;
+        flag_ctl    <= 0;
+        astart_b    <= 0;
+        aend_b      <= 0;
+        adeltan_b   <= 0;
+        flag_mask   <= 0;
         aeg_b       <= 8'hff;
         // Original test features
-        eg_stop     <= 1'b0;
-        pg_stop     <= 1'b0;
-        psg_wr_n    <= 1'b1;
+        eg_stop     <= 0;
+        pg_stop     <= 0;
+        psg_wr_n    <= 1;
         // 
         { block_ch3op1, fnum_ch3op1 } <= {3'd0, 11'd0 };
         { block_ch3op3, fnum_ch3op3 } <= {3'd0, 11'd0 };
         { block_ch3op2, fnum_ch3op2 } <= {3'd0, 11'd0 };
-        latch_fnum <= 6'd0;
-        din_copy   <= 8'd0;
-        part       <= 1'b0;
+        latch_fnum <= 0;
+        din_copy   <= 0;
+        part       <= 0;
     end else begin
         // WRITE IN REGISTERS
         if( write ) begin
@@ -382,10 +383,9 @@ always @(posedge clk) begin : memory_mapped_registers
                             4'ha: adeltan_b[15:8] <= din;
                             4'hb: aeg_b           <= din;
                             4'hc: begin
-									           flag_mask   <= ~{din[7],din[5:0]};
-									           flag_ctl    <= {din[7],din[5:0]}; // this lasts a single clock cycle
-									       end
-                            
+                               flag_mask   <= ~{din[7],din[5:0]};
+                               flag_ctl    <= {din[7],din[5:0]}; // this lasts a single clock cycle
+                           end
                             default:;
                         endcase
                     end
