@@ -67,6 +67,7 @@ module jt12_top (
     output  signed  [15:0] snd_right, // FM+PSG
     output  signed  [15:0] snd_left,  // FM+PSG
     output                 snd_sample,
+    input           [ 5:0] ch_enable, // ADPCM-A channels
     input           [ 7:0] debug_bus,
     output          [ 7:0] debug_view
 );
@@ -212,7 +213,8 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .clr_flags  ( flag_ctl[5:0] ),
 
         .pcm55_l    ( adpcmA_l      ),
-        .pcm55_r    ( adpcmA_r      )
+        .pcm55_r    ( adpcmA_r      ),
+        .ch_enable  ( ch_enable     )
     );
     /* verilator tracing_on */
     jt10_adpcm_drvB u_adpcm_b(
