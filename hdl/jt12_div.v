@@ -86,8 +86,8 @@ always @(negedge clk) begin     // It's important to leave the negedge to use th
     clk_en     <= pre_clk_en;
     clk_en_2   <= pre_clk_en_2;
     clk_en_ssg <= pre_clk_en_ssg;
-    clk_en_666 <= pre_clk_en_666;
-    clk_en_111 <= pre_clk_en_111;
+    clk_en_666 <= cen && pre_clk_en_666;
+    clk_en_111 <= cen && pre_clk_en_111;
     clk_en_55  <= pre_clk_en_55;
 end
 
@@ -107,8 +107,8 @@ always @(posedge clk) begin
     pre_clk_en     <= cen & cen_int;
     pre_clk_en_2   <= cen && (div2==2'b00);
     pre_clk_en_ssg <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
-    pre_clk_en_666 <= cen & cen_adpcm_int;
-    pre_clk_en_111 <= cen & cen_adpcm_int & cen_adpcm3_int;
+    pre_clk_en_666 <= cen_adpcm_int;
+    pre_clk_en_111 <= cen_adpcm_int & cen_adpcm3_int;
     pre_clk_en_55  <= cen & cen_adpcm_int & cen_adpcm3_int & cen_55_int;
     `endif
 end
