@@ -65,6 +65,7 @@ u_jt12(
     .addr           ( {1'b0, addr} ),
     .cs_n           ( cs_n         ),
     .wr_n           ( wr_n         ),
+    .ch_enable      ( 5'd0         ),
 
     .dout           ( dout         ),
     .irq_n          ( irq_n        ),
