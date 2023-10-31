@@ -181,11 +181,7 @@ reg [ 5:0] latch_fnum;
 reg [2:0] up_ch;
 reg [1:0] up_op;
 
-reg old_write;
 reg [7:0] din_copy;
-
-always @(posedge clk)
-    old_write <= write;
 
 generate
     if( use_ssg ) begin
@@ -423,23 +419,19 @@ always @(posedge clk) begin : memory_mapped_registers
     end
 end
 
-reg [4:0] busy_cnt; // busy lasts for 32 synth clock cycles, like in real chip
+reg  [4:0] busy_cnt; // busy lasts for 32 synth clock cycles
+wire [5:0] nx_busy = {1'd0,busy_cnt}+{5'd0,busy};
 
-always @(posedge clk, posedge rst)
+always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        busy <= 1'b0;
-        busy_cnt <= 5'd0;
+        busy_cnt <= 0;
+        busy     <= 0;
+    end else if(cen) begin
+        busy <= write&addr[0] | (busy & ~nx_busy[5]);
+        busy_cnt <= nx_busy[4:0];
     end
-    else begin
-        if (!old_write && write && addr[0] ) begin // only set for data writes
-            busy <= 1'b1;
-            busy_cnt <= 5'd0;
-        end
-        else if(clk_en) begin
-            if( busy_cnt == 5'd31 ) busy <= 1'b0;
-            busy_cnt <= busy_cnt+5'd1;
-        end
-    end
+end
+
 /* verilator tracing_on */
 jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
