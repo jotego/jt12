@@ -115,7 +115,17 @@ u_jt12(
     .adpcmB_l       ( adpcmB_l      ),
     .adpcmB_r       ( adpcmB_r      ),    
     // combined output
-    .psg_snd        ()  
+    .psg_snd        (),
+    // unused
+    .IOA_in         ( 8'b0          ),
+    .IOB_in         ( 8'b0          ),
+    .ch_enable      ( 6'h3f         ),
+    .debug_view     (               ),
+    .IOA_out        (               ),
+    .IOB_out        (               ),
+    .IOA_oe         (               ),
+    .IOB_oe         (               ),
+    .debug_bus      ( 8'd0          )
 );
 
 `ifdef MEGADRIVE_PSG
@@ -133,6 +143,7 @@ jt89 u_jt89(
     .rst            ( rst       ),        // rst should be at least 6 clk&cen cycles long
     .clk            ( clk       ),        // CPU clock
     .clk_en         ( psg_cen   ),
+    .cs_n           ( 1'b0      ),
     .wr_n           ( psg_wr_n  ),
     .din            ( din       ),
     .sound          ( psg_snd   ),

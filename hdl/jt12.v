@@ -62,15 +62,27 @@ jt12_top u_jt12(
     .adpcma_data    ( 8'd0 ), // Data from RAM
     .adpcmb_addr    (      ), // real hardware has 12 pins multiplexed through PMPX pin
     .adpcmb_roe_n   (      ), // ADPCM-B ROM output enable
+    .adpcmb_data    ( 8'd0 ),
+    .ch_enable      ( 6'h3f),
     // Separated output
     .psg_A          (),
     .psg_B          (),
     .psg_C          (),
     .fm_snd_left    (),
     .fm_snd_right   (),
+    .adpcmA_l       (              ),
+    .adpcmA_r       (              ),
+    .adpcmB_l       (              ),
+    .adpcmB_r       (              ),
     // Unused YM2203
-    .IOA_in         (),
-    .IOB_in         (),
+    .IOA_in         ( 8'b0          ),
+    .IOB_in         ( 8'b0          ),
+    .debug_view     (               ),
+    .IOA_out        (               ),
+    .IOB_out        (               ),
+    .IOA_oe         (               ),
+    .IOB_oe         (               ),
+    .debug_bus      ( 8'd0          ),
     // combined output
     .psg_snd        (),
     .snd_right      ( snd_right     ), // FM+PSG
