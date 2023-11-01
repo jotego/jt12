@@ -26,6 +26,7 @@ here:
   - jt12_pm.v
   - jt12_logsin.v
   - jt12_reg.v
+  - jt12_reg_ch.v
   - jt12_sh.v
   - jt12_sh_rst.v
   - jt12_sh24.v
