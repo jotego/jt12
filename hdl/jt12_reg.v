@@ -181,18 +181,6 @@ wire update_op_IV = cur == req_opch_IV;
 // key on/off
 wire    [3:0]   keyon_op = din[7:4];
 wire    [2:0]   keyon_ch = din[2:0];
-// channel data
-wire    [2:0]   fb_in   = din[5:3];
-wire    [2:0]   alg_in  = din[2:0];
-wire    [2:0]   pms_in  = din[2:0];
-wire    [1:0]   ams_in  = din[5:4];
-wire    [7:0]   fnlo_in = din;
-
-
-wire    update_ch_I  = cur_ch == ch;
-wire    update_ch_IV = num_ch==6 ? 
-    { ~cur_ch[2], cur_ch[1:0]} == ch : // 6 channels
-    cur[1:0] == ch[1:0]; // 3 channels
 
 always @(*) begin
     // next = cur==5'd23 ? 5'd0 : cur +1'b1;
