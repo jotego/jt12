@@ -47,6 +47,7 @@ module jt12_reg_ch(
 );
 
 parameter NUM_CH=6;
+localparam M=NUM_CH==3?2:3;
 
 reg [ 2:0] reg_block[0:NUM_CH-1];
 reg [10:0] reg_fnum [0:NUM_CH-1];
@@ -65,13 +66,13 @@ always @* begin
 end
 
 always @(posedge clk) if(cen) begin
-    block <= reg_block[ch];
-    fnum  <= reg_fnum [ch];
-    fb    <= reg_fb   [ch];
-    alg   <= reg_alg  [ch];
-    rl    <= reg_rl   [ch];
-    ams_IV<= reg_ams  [ch_IV];
-    pms   <= reg_pms  [ch];
+    block <= reg_block[ch[M-1:0]];
+    fnum  <= reg_fnum [ch[M-1:0]];
+    fb    <= reg_fb   [ch[M-1:0]];
+    alg   <= reg_alg  [ch[M-1:0]];
+    rl    <= reg_rl   [ch[M-1:0]];
+    ams_IV<= reg_ams  [ch_IV[M-1:0]];
+    pms   <= reg_pms  [ch[M-1:0]];
     if( NUM_CH==3 ) rl <= 3; // YM2203 has no stereo output
 end
 
@@ -86,15 +87,15 @@ always @(posedge clk, posedge rst) begin
         reg_pms  [i] <= 0;
     end else begin
         i = 0; // prevents latch warning in Quartus
-        if( up_fnumlo  ) { reg_block[up_ch], reg_fnum[up_ch] } <= {latch_fnum,din};
+        if( up_fnumlo  ) { reg_block[up_ch[M-1:0]], reg_fnum[up_ch[M-1:0]] } <= {latch_fnum,din};
         if( up_alg ) begin
-            reg_fb [up_ch] <= din[5:3];
-            reg_alg[up_ch] <= din[2:0];
+            reg_fb [up_ch[M-1:0]] <= din[5:3];
+            reg_alg[up_ch[M-1:0]] <= din[2:0];
         end
         if( up_pms ) begin
-            reg_rl [up_ch] <= din[7:6];
-            reg_ams[up_ch] <= din[5:4];
-            reg_pms[up_ch] <= din[2:0];
+            reg_rl [up_ch[M-1:0]] <= din[7:6];
+            reg_ams[up_ch[M-1:0]] <= din[5:4];
+            reg_pms[up_ch[M-1:0]] <= din[2:0];
         end
     end
 end
