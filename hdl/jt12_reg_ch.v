@@ -42,7 +42,7 @@ module jt12_reg_ch(
     output reg [ 2:0] fb,
     output reg [ 2:0] alg,
     output reg [ 1:0] rl,
-    output reg [ 1:0] ams,
+    output reg [ 1:0] ams_IV,
     output reg [ 2:0] pms
 );
 
@@ -55,8 +55,14 @@ reg [ 2:0] reg_alg  [0:NUM_CH-1];
 reg [ 1:0] reg_rl   [0:NUM_CH-1];
 reg [ 1:0] reg_ams  [0:NUM_CH-1];
 reg [ 2:0] reg_pms  [0:NUM_CH-1];
+reg [ 2:0] ch_IV;
 
 integer i;
+
+always @* begin
+    ch_IV = ch;
+    if( NUM_CH==6 ) ch_IV = ch-3'd3;
+end
 
 always @(posedge clk) if(cen) begin
     block <= reg_block[ch];
@@ -64,7 +70,7 @@ always @(posedge clk) if(cen) begin
     fb    <= reg_fb   [ch];
     alg   <= reg_alg  [ch];
     rl    <= reg_rl   [ch];
-    ams   <= reg_ams  [ch];
+    ams_IV<= reg_ams  [ch_IV];
     pms   <= reg_pms  [ch];
     if( NUM_CH==3 ) rl <= 3; // YM2203 has no stereo output
 end

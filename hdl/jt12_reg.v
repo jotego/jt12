@@ -310,7 +310,7 @@ assign { tl_IV,   dt1_I,    mul_II,    ks_II,
 
 
 // memory for CH registers
-jt12_reg_ch u_regch(
+jt12_reg_ch #(.NUM_CH(num_ch)) u_regch(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .cen        ( clk_en        ),
@@ -328,7 +328,7 @@ jt12_reg_ch u_regch(
     .fb         ( fb_I          ),
     .alg        ( alg_I         ),
     .rl         ( rl            ),
-    .ams        ( ams_IV        ),
+    .ams_IV     ( ams_IV        ),
     .pms        ( pms_I         )
 );
 
