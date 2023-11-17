@@ -419,16 +419,21 @@ always @(posedge clk) begin : memory_mapped_registers
     end
 end
 
-reg  [4:0] busy_cnt; // busy lasts for 32 synth clock cycles
+reg  [4:0] busy_cnt; // busy lasts for 32 synthesizer clock cycles
 wire [5:0] nx_busy = {1'd0,busy_cnt}+{5'd0,busy};
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
-        busy_cnt <= 0;
         busy     <= 0;
-    end else if(cen) begin
-        busy <= write&addr[0] | (busy & ~nx_busy[5]);
-        busy_cnt <= nx_busy[4:0];
+        busy_cnt <= 0;
+    end else begin
+        if( write&addr[0] ) begin
+            busy     <= 1;
+            busy_cnt <= 0;
+        end else if(clk_en) begin
+            busy     <= ~nx_busy[5] & busy;
+            busy_cnt <=  nx_busy[4:0];
+        end
     end
 end
 
