@@ -437,7 +437,6 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-/* verilator tracing_on */
 jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1

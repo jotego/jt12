@@ -21,8 +21,6 @@
 
 // Wrapper to output only combined channels. Defaults to YM2203 mode.
 
-
-
 module jt03(
     input           rst,        // rst should be at least 6 clk&cen cycles long
     input           clk,        // CPU clock

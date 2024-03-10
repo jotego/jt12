@@ -216,7 +216,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_r    ( adpcmA_r      ),
         .ch_enable  ( ch_enable     )
     );
-    /* verilator tracing_on */
+
     jt10_adpcm_drvB u_adpcm_b(
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
@@ -245,7 +245,6 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_r    ( adpcmB_r      )
     );
 
-    /* verilator tracing_on */
     assign snd_sample   = zero;
     jt10_acc u_acc(
         .clk        ( clk           ),
@@ -283,7 +282,6 @@ end else begin : gen_adpcm_no
 end
 endgenerate
 
-/* verilator tracing_on */
 jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
 //    .rst_n          ( rst_n         ),
     .clk            ( clk           ),        // CPU clock
@@ -297,8 +295,6 @@ jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
     .dout           ( dout          )
 );
 
-
-/* verilator tracing_on */
 jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm), .mask_div(mask_div))
     u_mmr(
     .rst        ( rst       ),
@@ -407,7 +403,6 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .div_setting(div_setting)
 );
 
-/* verilator tracing_on */
 // YM2203 seems to use a fixed cen/3 clock for the timers, regardless
 // of the prescaler setting
 wire timer_cen = fast_timers ? cen : clk_en;
@@ -503,7 +498,7 @@ endgenerate
 wire    [ 8:0]  op_result;
 wire    [13:0]  op_result_hd;
 `ifndef NOFM
-/* verilator tracing_on */
+
 jt12_pg #(.num_ch(num_ch)) u_pg(
     .rst        ( rst           ),
     .clk        ( clk           ),
@@ -590,8 +585,6 @@ jt12_op #(.num_ch(num_ch)) u_op(
 assign op_result    = 'd0;
 assign op_result_hd = 'd0;
 `endif
-
-/* verilator tracing_on */
 
 generate
     if( use_pcm==1 ) begin: gen_pcm_acc // YM2612 accumulator
