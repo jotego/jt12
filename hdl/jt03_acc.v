@@ -56,17 +56,18 @@ always @(*) begin
     endcase
 end
 
-localparam res=18;
-wire [res-1:0] hires;
-assign snd = hires[res-1:res-16];
-
-jt12_single_acc #(.win(14),.wout(res)) u_mono(
+// real YM2608 drops the op_result LSB, resulting in a 13-bit accumulator
+// but in YM2203, a 13-bit acc for 3 channels only requires 15 bits
+// and YM3014 has a 16-bit dynamic range.
+// I am leaving the LSB and scaling the output voltage accordingly. This
+// should result in less quantification noise.
+jt12_single_acc #(.win(14),.wout(16)) u_mono(
     .clk        ( clk            ),
     .clk_en     ( clk_en         ),
     .op_result  ( op_result      ),
     .sum_en     ( sum_en         ),
     .zero       ( zero           ),
-    .snd        ( hires          )
+    .snd        ( snd            )
 );
 
 endmodule
