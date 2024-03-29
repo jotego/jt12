@@ -452,7 +452,7 @@ endgenerate
 `ifndef NOSSG
 generate
     if( use_ssg==1 ) begin : gen_ssg
-        jt49 #(.COMP(2'b01), .CLKDIV(JT49_DIV))
+        jt49 #(.COMP(3'b01), .CLKDIV(JT49_DIV))
             u_psg( // note that input ports are not multiplexed
             .rst_n      ( ~rst      ),
             .clk        ( clk       ),    // signal on positive edge
