@@ -76,7 +76,8 @@ module jt12_top (
 // defaults to YM2612
 parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1;
 parameter use_adpcm=0;
-parameter JT49_DIV=2;
+parameter JT49_DIV=2,
+          YM2203_LUMPED=0;
 parameter mask_div=1;
 
 wire flag_A, flag_B, busy;
@@ -452,7 +453,7 @@ endgenerate
 `ifndef NOSSG
 generate
     if( use_ssg==1 ) begin : gen_ssg
-        jt49 #(.COMP(3'b01), .CLKDIV(JT49_DIV))
+        jt49 #(.COMP(3'b01), .CLKDIV(JT49_DIV), .YM2203_LUMPED(YM2203_LUMPED))
             u_psg( // note that input ports are not multiplexed
             .rst_n      ( ~rst      ),
             .clk        ( clk       ),    // signal on positive edge

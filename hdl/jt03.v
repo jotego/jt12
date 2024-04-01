@@ -53,8 +53,11 @@ module jt03(
     output          [ 7:0] debug_view
 );
 
+parameter YM2203_LUMPED=0; // set to 1 if all PSG outputs are shorted together without any resistor
+
 jt12_top #(
-    .use_lfo(0),.use_ssg(1), .num_ch(3), .use_pcm(0), .use_adpcm(0), .mask_div(0) )
+    .use_lfo(0),.use_ssg(1), .num_ch(3), .use_pcm(0), .use_adpcm(0), .mask_div(0),
+    .YM2203_LUMPED(YM2203_LUMPED) )
 u_jt12(
     .rst            ( rst          ),        // rst should be at least 6 clk&cen cycles long
     .clk            ( clk          ),        // CPU clock
