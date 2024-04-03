@@ -24,7 +24,6 @@ module jt12_reg(
     input           rst,
     input           clk,
     input           clk_en /* synthesis direct_enable */,
-    input   [7:0]   din,
     
     input   [2:0]   ch,     // channel to update
     input   [1:0]   op,
@@ -33,16 +32,20 @@ module jt12_reg(
     input           flag_A,
     input           overflow_A,
 
-    input           up_keyon,   
+    // channel udpates
+    input   [2:0]   ch_sel,
+    input   [7:0]   ch_din,
     input           up_alg, 
     input           up_fnumlo,
+    // operator updates
+    input   [7:0]   din,
+    input           up_keyon,
     input           up_pms,
     input           up_dt1,
     input           up_tl,
     input           up_ks_ar,
     input           up_amen_dr,
     input           up_sr,
-        
     input           up_sl_rr,
     input           up_ssgeg,
 
@@ -314,9 +317,9 @@ jt12_reg_ch #(.NUM_CH(num_ch)) u_regch(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .cen        ( clk_en        ),
-    .din        ( din           ),
+    .din        ( ch_din        ),
 
-    .up_ch      ( ch            ),
+    .up_ch      ( ch_sel        ),
     .latch_fnum ( latch_fnum    ),
     .up_fnumlo  ( up_fnumlo     ),
     .up_alg     ( up_alg        ),

@@ -181,12 +181,12 @@ reg [ 5:0] latch_fnum;
 reg [2:0] up_ch;
 reg [1:0] up_op;
 
-reg [7:0] din_copy;
+reg [7:0] op_din, ch_din;
 
 generate
     if( use_ssg ) begin
         assign psg_addr = selected_register[3:0];
-        assign psg_data = din_copy;
+        assign psg_data = ch_din;
     end else begin
         assign psg_addr = 4'd0;
         assign psg_data = 8'd0;
@@ -201,6 +201,8 @@ always @(posedge clk) if( write && rst ) begin
     $finish;
 end
 `endif
+
+wire [2:0] ch_sel = {part, selected_register[1:0]};
 
 // this runs at clk speed, no clock gating here
 // if I try to make this an async rst it fails to map it
@@ -261,9 +263,10 @@ always @(posedge clk) begin : memory_mapped_registers
         { block_ch3op3, fnum_ch3op3 } <= {3'd0, 11'd0 };
         { block_ch3op2, fnum_ch3op2 } <= {3'd0, 11'd0 };
         latch_fnum <= 0;
-        din_copy   <= 0;
+        op_din     <= 0;
         part       <= 0;
     end else begin
+        up_chreg   <= 0;
         // WRITE IN REGISTERS
         if( write ) begin
             if( !addr[0] ) begin
@@ -281,11 +284,13 @@ always @(posedge clk) begin : memory_mapped_registers
                 endcase
             end else begin
                 // Global registers
-                din_copy <= din;
-                up_keyon <= selected_register == REG_KON && !part;
-                up_ch <= {part, selected_register[1:0]};
-                up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
-
+                ch_din <= din;
+                if( selected_register == REG_KON && !part ) begin
+                    up_keyon <= 1;
+                    op_din   <= din;
+                end else begin
+                    up_keyon <= 0;
+                end
                 // General control (<0x20 registers and A0==0)
                 if(!part) begin
                     casez( selected_register)
@@ -388,7 +393,7 @@ always @(posedge clk) begin : memory_mapped_registers
                 end
                 if( selected_register[1:0]==2'b11 ) 
                     { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
-                else
+                else begin
                     casez( selected_register )
                         // channel registers
                         8'hA0, 8'hA1, 8'hA2:    { up_chreg, up_opreg } <= { 3'h1, 7'd0 }; // up_fnumlo
@@ -405,6 +410,12 @@ always @(posedge clk) begin : memory_mapped_registers
                         8'h9?: { up_chreg, up_opreg } <= { 3'h0, 7'h40 }; // up_ssgeg
                         default: { up_chreg, up_opreg } <= { 3'h0, 7'h0 };
                     endcase // selected_register
+                    if( selected_register[7:4]>=3 && selected_register[7:4]<=9 ) begin
+                        op_din <= din;
+                        up_ch <= {part, selected_register[1:0]};
+                        up_op <= selected_register[3:2]; // 0=S1,1=S3,2=S2,3=S4
+                    end
+                end
             end
         end
         else if(clk_en) begin /* clear once-only bits */
@@ -441,12 +452,17 @@ jt12_reg #(.num_ch(num_ch)) u_reg(
     .rst        ( rst       ),
     .clk        ( clk       ),      // P1
     .clk_en     ( clk_en    ),
-    .din        ( din_copy  ),
 
-    .up_keyon   ( up_keyon  ),
+    // channel udpates
+    .ch_sel     ( ch_sel        ),
+    .ch_din     ( ch_din        ),
     .up_fnumlo  ( up_chreg[0]   ),
     .up_alg     ( up_chreg[1]   ),
     .up_pms     ( up_chreg[2]   ),
+
+    // operator updates
+    .din        ( op_din        ),
+    .up_keyon   ( up_keyon      ),
     .up_dt1     ( up_opreg[0]   ),
     .up_tl      ( up_opreg[1]   ),
     .up_ks_ar   ( up_opreg[2]   ),
