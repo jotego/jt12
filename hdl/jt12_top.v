@@ -487,6 +487,10 @@ generate
         assign psg_A    = 8'd0;
         assign psg_B    = 8'd0;
         assign psg_C    = 8'd0;
+        assign IOA_oe   = 0;
+        assign IOB_oe   = 0;
+        assign IOA_out  = 0;
+        assign IOB_out  = 0;
     end
 endgenerate
 `else

@@ -52,7 +52,7 @@ always @(posedge clk) begin
         pcmnew    <= pcmin;
         pcmlast   <= pcmnew;
         dn        <= pre_dn;
-        dx        <= dx_ext[DW] ? ~dx_ext[DW-1:0] + 'd1 : dx_ext[DW-1:0];
+        dx        <= dx_ext[DW] ? -dx_ext[DW-1:0] : dx_ext[DW-1:0];
         sign      <= dx_ext[DW];
         start_div <= 1;
     end

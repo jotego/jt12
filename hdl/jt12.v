@@ -77,7 +77,6 @@ jt12_top u_jt12(
     // Unused YM2203
     .IOA_in         ( 8'b0          ),
     .IOB_in         ( 8'b0          ),
-    .debug_view     (               ),
     .IOA_out        (               ),
     .IOB_out        (               ),
     .IOA_oe         (               ),
