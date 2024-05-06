@@ -92,7 +92,6 @@ u_jt12(
     // unused
     .IOA_in         ( 8'b0          ),
     .IOB_in         ( 8'b0          ),
-    .debug_view     (               ),
     .IOA_out        (               ),
     .IOB_out        (               ),
     .IOA_oe         (               ),

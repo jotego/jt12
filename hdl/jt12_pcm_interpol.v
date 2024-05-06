@@ -31,6 +31,7 @@ module jt12_pcm_interpol
     output reg signed [DW-1:0] pcmout
 );
 
+reg sign, last_pcm_wr;
 reg [stepw-1:0] dn, pre_dn={stepw{1'b1}};
 wire posedge_pcmwr =  pcm_wr && !last_pcm_wr;
 wire negedge_pcmwr = !pcm_wr &&  last_pcm_wr;
@@ -40,7 +41,6 @@ wire working;
 
 reg signed [DW-1:0] pcmnew, dx, pcmlast, pcminter;
 wire signed [DW:0]  dx_ext = { pcmin[DW-1], pcmin } - { pcmnew[DW-1], pcmnew };
-reg sign, last_pcm_wr;
 
 // latch new data and compute the two deltas : dx and dn, slope = dx/dn
 always @(posedge clk) begin
