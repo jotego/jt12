@@ -60,11 +60,12 @@ reg [ 2:0] ch_IV;
 
 wire [M-1:0] ch_sel, out_sel;
 
-function [M-1:0] chtr( input [M-1:0] chin );
+function [M-1:0] chtr( input [2:0] chin );
+reg [2:0] aux;
 begin
-    chtr = NUM_CH==3 ? chin :
-            chin[2]  ? {1'b0,chin[1:0]}+3'd3 : // upper channels
+    aux  = chin[M-1] ? {1'b0,chin[1:0]}+3'd3 : // upper channels
                        {1'b0,chin[1:0]};       // lower
+    chtr = NUM_CH==3 ? chin[M-1:0] : aux[M-1:0];
 
 end
 endfunction
@@ -73,7 +74,7 @@ assign ch_sel  = chtr(up_ch);
 assign out_sel = chtr(ch);
 
 integer i;
-
+/* verilator lint_off WIDTHEXPAND */
 always @* begin
     ch_IV = ch;
     if( NUM_CH==6 )
@@ -87,6 +88,7 @@ always @* begin
             default: ch_IV = 0;
         endcase
 end
+/* verilator lint_on WIDTHEXPAND */
 
 always @(posedge clk) if(cen) begin
     block <= reg_block[out_sel];
