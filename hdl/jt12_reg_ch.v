@@ -58,21 +58,44 @@ reg [ 1:0] reg_ams  [0:NUM_CH-1];
 reg [ 2:0] reg_pms  [0:NUM_CH-1];
 reg [ 2:0] ch_IV;
 
+wire [M-1:0] ch_sel, out_sel;
+
+function [M-1:0] chtr( input [M-1:0] chin );
+begin
+    chtr = NUM_CH==3 ? chin :
+            chin[2]  ? {1'b0,chin[1:0]}+3'd3 : // upper channels
+                       {1'b0,chin[1:0]};       // lower
+
+end
+endfunction
+
+assign ch_sel  = chtr(up_ch);
+assign out_sel = chtr(ch);
+
 integer i;
 
 always @* begin
     ch_IV = ch;
-    if( NUM_CH==6 ) ch_IV = ch-3'd3;
+    if( NUM_CH==6 )
+        case(out_sel)
+            0: ch_IV = 3;
+            1: ch_IV = 4;
+            2: ch_IV = 5;
+            3: ch_IV = 0;
+            4: ch_IV = 1;
+            5: ch_IV = 2;
+            default: ch_IV = 0;
+        endcase
 end
 
 always @(posedge clk) if(cen) begin
-    block <= reg_block[ch[M-1:0]];
-    fnum  <= reg_fnum [ch[M-1:0]];
-    fb    <= reg_fb   [ch[M-1:0]];
-    alg   <= reg_alg  [ch[M-1:0]];
-    rl    <= reg_rl   [ch[M-1:0]];
+    block <= reg_block[out_sel];
+    fnum  <= reg_fnum [out_sel];
+    fb    <= reg_fb   [out_sel];
+    alg   <= reg_alg  [out_sel];
+    rl    <= reg_rl   [out_sel];
     ams_IV<= reg_ams  [ch_IV[M-1:0]];
-    pms   <= reg_pms  [ch[M-1:0]];
+    pms   <= reg_pms  [out_sel];
     if( NUM_CH==3 ) rl <= 3; // YM2203 has no stereo output
 end
 
@@ -87,15 +110,15 @@ always @(posedge clk, posedge rst) begin
         reg_pms  [i] <= 0;
     end else begin
         i = 0; // prevents latch warning in Quartus
-        if( up_fnumlo  ) { reg_block[up_ch[M-1:0]], reg_fnum[up_ch[M-1:0]] } <= {latch_fnum,din};
+        if( up_fnumlo  ) { reg_block[ch_sel], reg_fnum[ch_sel] } <= {latch_fnum,din};
         if( up_alg ) begin
-            reg_fb [up_ch[M-1:0]] <= din[5:3];
-            reg_alg[up_ch[M-1:0]] <= din[2:0];
+            reg_fb [ch_sel] <= din[5:3];
+            reg_alg[ch_sel] <= din[2:0];
         end
         if( up_pms ) begin
-            reg_rl [up_ch[M-1:0]] <= din[7:6];
-            reg_ams[up_ch[M-1:0]] <= din[5:4];
-            reg_pms[up_ch[M-1:0]] <= din[2:0];
+            reg_rl [ch_sel] <= din[7:6];
+            reg_ams[ch_sel] <= din[5:4];
+            reg_pms[ch_sel] <= din[2:0];
         end
     end
 end
