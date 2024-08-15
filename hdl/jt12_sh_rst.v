@@ -37,7 +37,7 @@ generate
 		always @(posedge clk) if(clk_en) begin
 			bits[i] <= {bits[i][stages-2:0], din[i]};
 		end
-		assign drop[i] = rst ? {stages{rstval[0]}} : bits[i][stages-1];
+		assign drop[i] = rst ? rstval[0] : bits[i][stages-1];
 	end
 endgenerate
 
