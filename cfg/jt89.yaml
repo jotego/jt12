@@ -1,3 +1,7 @@
+jt12:
+  - from: mixer
+    get:
+      - jt12_interpol.v
 jt12/jt89:
   - get:
     - jt89.v
