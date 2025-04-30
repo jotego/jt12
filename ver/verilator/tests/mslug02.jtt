@@ -1,5 +1,5 @@
 ym2610
-load_adpcma 2.rom
+load_adpcma 201-v1.v1
 
 # INFO: read 4864 bytes into ADPCM ROM at 0x2b1b00 (ADDR 0x2b1b - 0x2b2e) 
 # INFO: read 4608 bytes into ADPCM ROM at 0x2b3d00 (ADDR 0x2b3d - 0x2b4f) 
