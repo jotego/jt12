@@ -154,7 +154,7 @@ if [ $SKIPMAKE = FALSE ]; then
         -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
         $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp WaveWritter.cpp"
 
-    if ! verilator --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
+    if ! verilator --timescale 1ns/1ps --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
         -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
         $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp WaveWritter.cpp; then
         exit $?

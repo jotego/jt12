@@ -4,6 +4,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <cstdint>
 
 // Do not output to cout because it will interfere with
 // signal dumping!
