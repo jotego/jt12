@@ -107,4 +107,4 @@ u_jt12(
     .debug_view     (              )
 );
 
-endmodule // jt03
+endmodule

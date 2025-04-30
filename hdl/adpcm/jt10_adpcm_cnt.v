@@ -50,7 +50,7 @@ module jt10_adpcm_cnt(
 );
 
 reg [20:0] addr1, addr2, addr3, addr4, addr5, addr6;
-reg [3:0] bank1, bank2, bank3, bank4, bank5, bank6;
+reg [ 3:0] bank1, bank2, bank3, bank4, bank5, bank6;
 reg [11:0] start1, start2, start3, start4, start5, start6,
            end1,   end2,   end3,   end4,   end5,   end6;
 reg on1, on2, on3, on4, on5, on6;
@@ -82,6 +82,7 @@ always @(posedge clk or negedge rst_n)
         zero      <= 6'd1;
         done_sr   <= ~6'd0;
         last_done <= ~6'd0;
+        set_flags <= 0;
     end else if(cen) begin
         zero    <= { zero[0], zero[5:1] };
         done_sr <= { done1, done_sr[5:1]};
@@ -105,7 +106,7 @@ wire [11:0] addr1_cmp = addr1[20:9];
 assign start_top = {bank1, start1};
 assign   end_top =   {bank1, end1};
 
-reg [5:0] addr_ch_dec;
+reg [5:0] addr_ch_dec=0;
 
 always @(*)
     case(addr_ch)
@@ -132,6 +133,14 @@ always @(posedge clk or negedge rst_n)
         end4   <= 'd0;     end5 <= 'd0;     end6 <= 'd0;
         skip1  <= 'd0;    skip2 <= 'd0;    skip3 <= 'd0;
         skip4  <= 'd0;    skip5 <= 'd0;    skip6 <= 'd0;
+        clr1   <= 0;      clr2  <= 0;      clr3  <= 0;
+        clr4   <= 0;      clr5  <= 0;      clr6  <= 0;
+        on1    <= 0;      on2   <= 0;      on3   <= 0;
+        on4    <= 0;      on5   <= 0;      on6   <= 0;
+        bank1  <= 0;      bank2 <= 0;      bank3 <= 0;
+        bank4  <= 0;      bank5 <= 0;      bank6 <= 0;
+        roe_n1 <= 1;
+        decon1 <= 0;
     end else if( cen ) begin
         addr2  <= addr1;
         on2    <= aoff ? 1'b0 : (aon | (on1 && ~done1));

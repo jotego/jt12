@@ -89,7 +89,7 @@ always @( posedge clk or negedge rst_n )
     end else if(cen) begin
         // I
         sign2     <= data[3];
-        x2        <= clr ? {sigw-1{1'b0}} : x1;
+        x2        <= clr ? {sigw{1'b0}} : x1;
         step2     <= clr ? 6'd0 : (chon ? step_1p : step1);
         chon2     <= ~clr && chon;
         lut_addr2 <= { step1, data[2:0] };
@@ -99,14 +99,11 @@ always @( posedge clk or negedge rst_n )
         step3     <= step2;
         chon3     <= chon2;
         // III
-        //sign4     <= sign3;
         inc4      <= sign3 ? ~inc3_long + 1'd1 : inc3_long;
         x4        <= x3;
         step4     <= step3;
         chon4     <= chon3;
         // IV
-        //sign5     <= sign4;
-        //xsign5    <= x4[sigw-1];
         x5        <= chon4 ? x4 + inc4 : x4;
         step5     <= step4;
         // V
