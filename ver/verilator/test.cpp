@@ -47,16 +47,14 @@ public:
             toggle = true;
             return false; // toggle clock
         }
-        else {
-            main_time = main_next;
-            if( --verbose_ticks == 0 ) {
-                // cerr << "Current time " << dec << (int)(main_time/1000000) << " ms\n";
-                cerr << '.';
-                verbose_ticks = 48000*24/2;
-            }
-            toggle=false;
-            return true; // do not toggle clock
+        main_time = main_next;
+        if( --verbose_ticks == 0 ) {
+            // cerr << "Current time " << dec << (int)(main_time/1000000) << " ms\n";
+            cerr << '.';
+            verbose_ticks = 48000*24/2;
         }
+        toggle=false;
+        return true; // do not toggle clock
     }
     bool finish() { return main_time > time_limit && limited(); }
 };
@@ -227,8 +225,10 @@ void WaveOutputs::write( class Vtop *top ) {
 }
 
 int main(int argc, char** argv, char** env) {
-    Verilated::commandArgs(argc, argv);
-    Vtop* top = new Vtop;
+    VerilatedContext context;
+    context.commandArgs(argc, argv);
+
+    Vtop* top = new Vtop(&context);
     CmdWritter writter(top);
     PSGCmdWritter psg_writter(top);
     bool trace = false, slow=false;
@@ -250,7 +250,7 @@ int main(int argc, char** argv, char** env) {
             trace_start_time = aux;
             trace_start_time *= 1000'000;
             trace=true;
-            continue; 
+            continue;
         }
         if( string(argv[k])=="-slow" )  { slow=true;  continue; }
         if( string(argv[k])=="-nomix" )  { nomix=true;  continue; }
@@ -385,7 +385,7 @@ int main(int argc, char** argv, char** env) {
     if( trace ) {
         Verilated::traceEverOn(true);
         top->trace(tfp,99);
-        tfp->open("/dev/stdout");
+        tfp->open("test.vcd");
     }
     gym->set_decodeADPCM( decode_pcm );
     // Reset
@@ -487,21 +487,11 @@ int main(int argc, char** argv, char** env) {
                     timeout = 0;
                     break;
                 case RipParser::cmd_write:
-                    // if( /*(gym->cmd&(char)0xfc)==(char)0xb4 ||*/
-                    // /*(gym->addr==0 && gym->cmd>=(char)0x30) || */
-                    // ((gym->cmd&(char)0xf0)==(char)0x90)) {
-                    //   cerr << "Skipping write to " << hex << (gym->cmd&0xff) << " register\n" ;
-                    //  break; // do not write to RL register
-                    // }
-                    // cerr << "CMD = " << hex << ((int)gym->cmd&0xff) << '\n';
                     writter.Write( gym->addr, gym->cmd, gym->val );
                     timeout = sim_time.get_time() + sim_time.period()*6*100;
                     break; // parse register
                 case RipParser::cmd_wait:
-                    // cerr << "Waiting\n";
                     wait=gym->wait;
-                    // cerr << "Wait for " << dec << wait << "ns (" << wait/1000000 << " ms)\n";
-                    // if(trace) wait/=3;
                     wait+=sim_time.get_time();
                     timeout=0;
                     break;// wait 16.7ms
@@ -511,7 +501,7 @@ int main(int argc, char** argv, char** env) {
                     goto finish;
             }
         }
-        if( trace && sim_time.get_time()>trace_start_time ) tfp->dump(sim_time.get_time());
+        if( trace && sim_time.get_time()>trace_start_time ) tfp->dump(sim_time.get_time()*1000);
     }
 finish:
     gym->saveADPCMA("adpcma.rom");
@@ -526,10 +516,14 @@ finish:
     } else {
         cerr << "$finish at " << dec << sim_time.get_time_ms() << "ms = " << sim_time.get_time() << " ns\n";
     }
-    if(trace) tfp->close();
     delete gym;
     delete top;
- }
+    if(trace) {
+        tfp->close();
+        delete tfp;
+        tfp = NULL;
+    }
+}
 
 
 

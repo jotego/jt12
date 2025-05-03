@@ -154,7 +154,7 @@ if [ $SKIPMAKE = FALSE ]; then
         -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
         $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp WaveWritter.cpp"
 
-    if ! verilator --timescale 1ns/1ps --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
+    if ! verilator --timescale 1us/1ns --cc -f gather.f test.v $CHIPTYPE --top-module $TOP \
         -I../../hdl -I../../jt89/hdl --trace -DTEST_SUPPORT \
         $VERI_EXTRA $FAST --exe test.cpp VGMParser.cpp WaveWritter.cpp; then
         exit $?
@@ -173,7 +173,11 @@ if [[ $DUMPSIGNALS == "-trace" ]]; then
         echo VCD to FST conversion running in parallel
         # filter out lines starting with INFO: because these come from $display commands in verilog and are
         # routed to standard output but are not part of the VCD file
-        obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" |  grep -v "^INFO: " | vcd2fst -v - -f test.fst
+        mkfifo test.vcd
+        vcd2fst -p test.vcd test.fst&
+
+        obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE"
+        rm -f test.vcd
     else
         if which simvisdbutil; then
             obj_dir/V${TOP} $DUMPSIGNALS $EXTRA $GYM_ARG "$UNZIP_GYM" -o "$WAV_FILE" | grep -v "^INFO: " > test.vcd

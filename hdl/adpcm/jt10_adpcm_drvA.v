@@ -27,13 +27,13 @@ module jt10_adpcm_drvA(
     input           cen1,   // clk & cen = 111 kHz
 
     output  [19:0]  addr,  // real hardware has 10 pins multiplexed through RMPX pin
-    output  [3:0]   bank,
+    output  [4:0]   bank,
     output          roe_n, // ADPCM-A ROM output enable
 
     // Control Registers
     input   [5:0]   atl,        // ADPCM Total Level
     input   [7:0]   lracl_in,
-    input   [15:0]  addr_in,
+    input   [16:0]  addr_in,
 
     input   [2:0]   up_lracl,
     input           up_start,
@@ -100,7 +100,7 @@ always @(posedge clk or negedge rst_n)
         match <= cur_next == (cur_ch[5] ? en_next : en_ch);
     end
 
-wire [15:0] start_top, end_top;
+wire [16:0] start_top, end_top;
 
 wire clr_dec, decon;
 
@@ -253,8 +253,8 @@ always @(posedge cen6) if(en_ch[0]) begin
     end
 end
 
-reg [15:0] sim_start0, sim_start1, sim_start2, sim_start3, sim_start4, sim_start5;
-reg [15:0] sim_end0, sim_end1, sim_end2, sim_end3, sim_end4, sim_end5;
+reg [16:0] sim_start0, sim_start1, sim_start2, sim_start3, sim_start4, sim_start5;
+reg [16:0] sim_end0, sim_end1, sim_end2, sim_end3, sim_end4, sim_end5;
 reg [ 7:0] sim_lracl0, sim_lracl1, sim_lracl2, sim_lracl3, sim_lracl4, sim_lracl5;
 /*
 reg div3b;
