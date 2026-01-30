@@ -27,7 +27,7 @@ http://gendev.spritesmind.net/forum/viewtopic.php?t=386&postdays=0&postorder=asc
 module jt12_top (
     input           rst,        // rst should be at least 6 clk&cen cycles long
     input           clk,        // CPU clock
-    (* direct_enable *) input cen,        // optional clock enable, if not needed leave as 1'b1
+    input           cen,        // optional clock enable, if not needed leave as 1'b1
     input   [7:0]   din,
     input   [1:0]   addr,
     input           cs_n,
@@ -173,8 +173,11 @@ wire [ 6:0] flag_mask;
 wire [ 1:0] div_setting;
 
 wire clk_en_2, clk_en_666, clk_en_111, clk_en_55;
+reg cen_reg;
 
 assign debug_view = { 4'd0, flag_B, flag_A, div_setting };
+
+always @(posedge clk) cen_reg <= cen;
 
 generate
 if( use_adpcm==1 ) begin: gen_adpcm
@@ -189,7 +192,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
     jt10_adpcm_drvA u_adpcm_a(
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
-        .cen        ( cen           ),
+        .cen        ( cen_reg       ),
         .cen6       ( clk_en_666    ),  // clk & cen must be 666  kHz
         .cen1       ( clk_en_111    ),  // clk & cen must be 111 kHz
 
@@ -221,7 +224,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
     jt10_adpcm_drvB u_adpcm_b(
         .rst_n      ( rst_n         ),
         .clk        ( clk           ),
-        .cen        ( cen           ),
+        .cen        ( cen_reg       ),
         .cen55      ( clk_en_55     ),
 
         // Control
@@ -300,7 +303,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     u_mmr(
     .rst        ( rst       ),
     .clk        ( clk       ),
-    .cen        ( cen       ),  // external clock enable
+    .cen        ( cen_reg   ),  // external clock enable
     .clk_en     ( clk_en    ),  // internal clock enable
     .clk_en_2   ( clk_en_2  ),  // input cen divided by 2
     .clk_en_ssg ( clk_en_ssg),  // internal clock enable
@@ -406,7 +409,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
 
 // YM2203 seems to use a fixed cen/3 clock for the timers, regardless
 // of the prescaler setting
-wire timer_cen = fast_timers ? cen : clk_en;
+wire timer_cen = fast_timers ? cen_reg : clk_en;
 jt12_timers #(.num_ch(num_ch)) u_timers (
     .clk        ( clk           ),
     .clk_en     ( timer_cen     ),
