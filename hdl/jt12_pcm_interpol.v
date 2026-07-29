@@ -106,4 +106,4 @@ jt10_adpcm_div #(.DW(DW)) u_div(
 );
 
 
-endmodule // jt10_adpcmb_interpol
+endmodule

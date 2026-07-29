@@ -128,4 +128,4 @@ always @( posedge clk or negedge rst_n )
     end
 	 end
 
-endmodule // jt10_adpcm
+endmodule

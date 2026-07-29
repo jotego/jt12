@@ -79,4 +79,4 @@ always @(*)
         up_ssg_op   ? din[3:0]    : shift_in[ 3: 0]       // 4 
     };
 
-endmodule // jt12_reg
+endmodule

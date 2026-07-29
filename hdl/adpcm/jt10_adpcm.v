@@ -114,4 +114,4 @@ always @( posedge clk or negedge rst_n )
         step1     <= step6;
     end
 
-endmodule // jt10_adpcm    
+endmodule

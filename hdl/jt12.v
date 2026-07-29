@@ -89,4 +89,4 @@ jt12_top u_jt12(
     .snd_sample     ( snd_sample    ),
     .debug_view     (               )
 );
-endmodule // jt03
+endmodule

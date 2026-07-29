@@ -131,4 +131,4 @@ always @(posedge clk or negedge rst_n)
         data1 <= data;
     end
 
-endmodule // jt10_adpcm    
+endmodule
