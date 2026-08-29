@@ -75,7 +75,7 @@ module jt12_top (
 // parameters to select the features for each chip type
 // defaults to YM2612
 parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1;
-parameter use_adpcm=0;
+parameter use_adpcm=0, mix_adpcm=1'b1;
 parameter JT49_DIV=2,
           YM2203_LUMPED=0;
 parameter mask_div=1;
@@ -250,7 +250,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
     );
 
     assign snd_sample   = zero;
-    jt10_acc u_acc(
+    jt10_acc #(.mix_adpcm(mix_adpcm)) u_acc(
         .clk        ( clk           ),
         .clk_en     ( clk_en        ),
         .op_result  ( op_result_hd  ),

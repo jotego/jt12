@@ -25,7 +25,7 @@
 module vgm12(
 );
 
-wire signed [15:0] snd_right, snd_left;
+wire signed [15:0] dig_right, dig_left;
 wire [1:0]  fm_addr;
 wire [7:0]  fm_din;
 
@@ -47,14 +47,14 @@ jt10 u_jt10(
     input   [7:0]   adpcma_data,  // Data from RAM
     output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
     output          adpcmb_roe_n, // ADPCM-B ROM output enable
-    // Separated output: unused
-    .psg_A          ( ),
-    .psg_B          ( ),
-    .psg_C          ( ),
-    .fm_snd         ( ),
-    // combined output
-    .snd_right      ( snd_right ),
-    .snd_left       ( snd_left  ),
+    // Sound output
+    .psg_snd        (           ),
+    .fm_left        (           ),
+    .fm_right       (           ),
+    .pcm_left       (           ),
+    .pcm_right      (           ),
+    .dig_right      ( dig_right ),
+    .dig_left       ( dig_left  ),
     .snd_sample     ( )
 );
 

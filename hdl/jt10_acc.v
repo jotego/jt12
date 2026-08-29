@@ -57,6 +57,14 @@ module jt10_acc(
     output signed [15:0] right
 );
 
+parameter mix_adpcm=1'b1;
+
+`ifdef NOMIX
+localparam MIX_ADPCM = 1'b0;
+`else
+localparam MIX_ADPCM = mix_adpcm;
+`endif
+
 reg sum_en;
 
 always @(*) begin
@@ -82,24 +90,14 @@ always @(*)
         {2'd0,3'd0}: begin // ADPCM-A:
             acc_input_l = (adpcmA_l <<< 2) + (adpcmA_l <<< 1) + adpcmA_l + (adpcmA_l >>> 2); // amplify by 7.25x to match AES channel balance
             acc_input_r = (adpcmA_r <<< 2) + (adpcmA_r <<< 1) + adpcmA_r + (adpcmA_r >>> 2);
-            `ifndef NOMIX
-            acc_en_l    = 1'b1;
-            acc_en_r    = 1'b1;
-            `else 
-            acc_en_l    = 1'b0;
-            acc_en_r    = 1'b0;
-            `endif
+            acc_en_l    = MIX_ADPCM;
+            acc_en_r    = MIX_ADPCM;
         end
         {2'd0,3'd4}: begin // ADPCM-B:
             acc_input_l = adpcmB_l >>> 1; // Operator width is 14 bit, ADPCM-B is 16 bit
             acc_input_r = adpcmB_r >>> 1; // accumulator width per input channel is 14 bit
-            `ifndef NOMIX
-            acc_en_l    = 1'b1;
-            acc_en_r    = 1'b1;
-            `else 
-            acc_en_l    = 1'b0;
-            acc_en_r    = 1'b0;
-            `endif
+            acc_en_l    = MIX_ADPCM;
+            acc_en_r    = MIX_ADPCM;
         end
         default: begin
             // Note by Jose Tejada:

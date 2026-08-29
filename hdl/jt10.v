@@ -41,23 +41,49 @@ module jt10(
     output  [23:0]  adpcmb_addr,  // real hardware has 12 pins multiplexed through PMPX pin
     output          adpcmb_roe_n, // ADPCM-B ROM output enable
     input   [7:0]   adpcmb_data,
-    // Separated output
-    output          [ 7:0] psg_A,
-    output          [ 7:0] psg_B,
-    output          [ 7:0] psg_C,
-    output  signed  [15:0] fm_snd,
-    // combined output
+    // Sound output
     output          [ 9:0] psg_snd,
-    output  signed  [15:0] snd_right,
-    output  signed  [15:0] snd_left,
+    output  signed  [15:0] fm_left,
+    output  signed  [15:0] fm_right,
+    output  signed  [15:0] pcm_left,
+    output  signed  [15:0] pcm_right,
+    output  signed  [15:0] dig_left,
+    output  signed  [15:0] dig_right,
     output          snd_sample,
     input           [ 5:0] ch_enable // ADPCM-A channels
 );
 
+wire signed [15:0] adpcma_l, adpcma_r, adpcmb_l, adpcmb_r;
+
+function signed [15:0] limsum2;
+    input signed [15:0] a, b;
+    reg   signed [16:0] full;
+begin
+    full    = {a[15],a} + {b[15],b};
+    limsum2 = full[16] == full[15] ? full[15:0] :
+              full[16] ? 16'h8000 : 16'h7fff;
+end
+endfunction
+
+function signed [15:0] limsum3;
+    input signed [15:0] a, b, c;
+    reg   signed [17:0] full;
+begin
+    full    = {{2{a[15]}},a} + {{2{b[15]}},b} + {{2{c[15]}},c};
+    limsum3 = (&full[17:15] || ~|full[17:15]) ? full[15:0] :
+              full[17] ? 16'h8000 : 16'h7fff;
+end
+endfunction
+
+assign pcm_left  = limsum2(adpcma_l,adpcmb_l);
+assign pcm_right = limsum2(adpcma_r,adpcmb_r);
+assign dig_left  = limsum3(fm_left,adpcma_l,adpcmb_l);
+assign dig_right = limsum3(fm_right,adpcma_r,adpcmb_r);
+
 // Uses 6 FM channels but only 4 are outputted
 jt12_top #(
     .use_lfo(1),.use_ssg(1), .num_ch(6), .use_pcm(0), .use_adpcm(1),
-    .JT49_DIV(3) )
+    .mix_adpcm(1'b0), .JT49_DIV(3) )
 u_jt12(
     .rst            ( rst          ),        // rst should be at least 6 clk&cen cycles long
     .clk            ( clk          ),        // CPU clock
@@ -78,16 +104,16 @@ u_jt12(
     .adpcmb_roe_n   ( adpcmb_roe_n ), // ADPCM-B ROM output enable
     .adpcmb_data    ( adpcmb_data  ), // Data from RAM
     // Separated output
-    .psg_A          ( psg_A        ),
-    .psg_B          ( psg_B        ),
-    .psg_C          ( psg_C        ),
+    .psg_A          (              ),
+    .psg_B          (              ),
+    .psg_C          (              ),
     .psg_snd        ( psg_snd      ),
-    .fm_snd_left    ( fm_snd       ),
-    .fm_snd_right   (              ),
-    .adpcmA_l       (              ),
-    .adpcmA_r       (              ),
-    .adpcmB_l       (              ),
-    .adpcmB_r       (              ),
+    .fm_snd_left    ( fm_left      ),
+    .fm_snd_right   ( fm_right     ),
+    .adpcmA_l       ( adpcma_l     ),
+    .adpcmA_r       ( adpcma_r     ),
+    .adpcmB_l       ( adpcmb_l     ),
+    .adpcmB_r       ( adpcmb_r     ),
     // Unused YM2203
     // unused
     .IOA_in         ( 8'b0          ),
@@ -98,8 +124,8 @@ u_jt12(
     .IOB_oe         (               ),
     .debug_bus      ( 8'd0          ),
     // Sound output
-    .snd_right      ( snd_right    ),
-    .snd_left       ( snd_left     ),
+    .snd_right      (              ),
+    .snd_left       (              ),
     .snd_sample     ( snd_sample   ),
     .ch_enable      ( ch_enable    ),
     // unused pins
