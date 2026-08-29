@@ -45,11 +45,10 @@ module jt10(
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
     output          [ 7:0] psg_C,
-    output  signed  [15:0] fm_snd,
+    output  signed  [15:0] fm_left, fm_right,
     // combined output
     output          [ 9:0] psg_snd,
-    output  signed  [15:0] snd_right,
-    output  signed  [15:0] snd_left,
+    output  signed  [15:0] snd_right, snd_left,
     output          snd_sample,
     input           [ 5:0] ch_enable // ADPCM-A channels
 );
@@ -82,14 +81,14 @@ u_jt12(
     .psg_B          ( psg_B        ),
     .psg_C          ( psg_C        ),
     .psg_snd        ( psg_snd      ),
-    .fm_snd_left    ( fm_snd       ),
-    .fm_snd_right   (              ),
+    // fm_snd = FM + ADPCM channels = all that goes through the YM3016
+    .fm_snd_left    ( fm_left      ),
+    .fm_snd_right   ( fm_right     ),
     .adpcmA_l       (              ),
     .adpcmA_r       (              ),
     .adpcmB_l       (              ),
     .adpcmB_r       (              ),
     // Unused YM2203
-    // unused
     .IOA_in         ( 8'b0          ),
     .IOB_in         ( 8'b0          ),
     .IOA_out        (               ),
