@@ -37,6 +37,7 @@ The advantages of a using a git submodule are:
 Chip    | Top Level     | QIP File
 --------|---------------|---------
 YM2610  |   jt10.v      | jt10.qip
+YM2610B |   jt10b.v     | jt10.qip
 YM2612  |   jt12.v      | jt12.qip
 YM2203  |   jt03.v      | jt03.qip
 

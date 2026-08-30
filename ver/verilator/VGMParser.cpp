@@ -327,7 +327,9 @@ void VGMParser::open(const char* filename, int limit) {
         if( ym_freq ==0 ) { // try YM2610
             file.seekg(0x4C); // offset to YM2610
             file.read( (char*) &ym_freq, 4 );
-            if( ym_freq && !(ym_freq&0x8000'0000) ) chip_cfg = ym2610;
+            // Bit 31 selects the YM2610B variant; it is not part of the clock.
+            ym_freq &= 0x7fff'ffff;
+            if( ym_freq ) chip_cfg = ym2610;
         }
         else chip_cfg = ym2203;
     }
