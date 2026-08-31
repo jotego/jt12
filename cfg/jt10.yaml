@@ -1,6 +1,7 @@
 here:
   - ../hdl/jt10.v
   - ../hdl/jt10b.v
+  - ../hdl/jt10b_mixer.v
   - ../hdl/jt10_acc.v
   - ../hdl/jt12_top.v
   - ../hdl/jt12_single_acc.v

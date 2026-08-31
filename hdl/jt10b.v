@@ -43,29 +43,38 @@ module jt10b(
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
     output          [ 7:0] psg_C,
-    output  reg signed [15:0] fm_left, fm_right,
+    output      signed [15:0] fm_left, fm_right,
     // combined output
     output          [ 9:0] psg_snd,
-    output  reg signed [15:0] snd_right, snd_left,
+    output      signed [15:0] snd_right, snd_left,
     output          snd_sample,
     input           [ 5:0] ch_enable // ADPCM-A channels
 );
 
-localparam signed [5:0] ADPCMA_GAIN = 6'sd29; // Q2: 29/4 = 7.25
-
 wire signed [15:0] fm_only_l, fm_only_r;
 wire signed [15:0] adpcma_l, adpcma_r, adpcmb_l, adpcmb_r;
-wire signed [20:0] adpcma_mul_l, adpcma_mul_r;
 
-assign adpcma_mul_l = adpcma_l * ADPCMA_GAIN;
-assign adpcma_mul_r = adpcma_r * ADPCMA_GAIN;
+jt10b_mixer u_left(
+    .clk       ( clk          ),
+    .cen       ( cen          ),
+    .fm_in     ( fm_only_l    ),
+    .adpcma_in ( adpcma_l     ),
+    .adpcmb_in ( adpcmb_l     ),
+    .psg_in    ( psg_snd      ),
+    .fm_out    ( fm_left      ),
+    .snd_out   ( snd_left     )
+);
 
-always @(posedge clk) if(cen) begin
-    fm_left   <= fm_only_l + adpcma_mul_l[17:2] + (adpcmb_l >>> 1);
-    fm_right  <= fm_only_r + adpcma_mul_r[17:2] + (adpcmb_r >>> 1);
-    snd_left  <= fm_only_l + adpcma_mul_l[17:2] + (adpcmb_l >>> 1) + { 1'b0, psg_snd[9:0], 5'd0 };
-    snd_right <= fm_only_r + adpcma_mul_r[17:2] + (adpcmb_r >>> 1) + { 1'b0, psg_snd[9:0], 5'd0 };
-end
+jt10b_mixer u_right(
+    .clk       ( clk          ),
+    .cen       ( cen          ),
+    .fm_in     ( fm_only_r    ),
+    .adpcma_in ( adpcma_r     ),
+    .adpcmb_in ( adpcmb_r     ),
+    .psg_in    ( psg_snd      ),
+    .fm_out    ( fm_right     ),
+    .snd_out   ( snd_right    )
+);
 
 jt12_top #(
     .use_lfo(1), .use_ssg(1), .num_ch(6), .use_pcm(0), .use_adpcm(1),
