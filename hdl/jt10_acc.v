@@ -31,11 +31,13 @@
 // ADPCM inputs
 // Full OP resolution
 // No PCM
-// 4 OP channels
+// 4 OP channels by default; FULLFM exposes all 6 FM channels
 
-// ADPCM-A input is added for the time assigned to FM channel 0_10 (i.e. 3)
+// ADPCM inputs replace two FM slots unless FULLFM is set
 
-module jt10_acc(
+module jt10_acc #(
+    parameter FULLFM=0
+)(
     input               clk,
     input               clk_en /* synthesis direct_enable */,
     input signed [13:0] op_result,
@@ -77,43 +79,45 @@ reg acc_en_l, acc_en_r;
 // YM2610 mode:
 // uses channels 0 and 4 for ADPCM data, throwing away FM data for those channels
 // reference: YM2610 Application Notes.
-always @(*)
-    case( {cur_op,cur_ch} )
-        {2'd0,3'd0}: begin // ADPCM-A:
-            acc_input_l = (adpcmA_l <<< 2) + (adpcmA_l <<< 1) + adpcmA_l + (adpcmA_l >>> 2); // amplify by 7.25x to match AES channel balance
-            acc_input_r = (adpcmA_r <<< 2) + (adpcmA_r <<< 1) + adpcmA_r + (adpcmA_r >>> 2);
-            `ifndef NOMIX
-            acc_en_l    = 1'b1;
-            acc_en_r    = 1'b1;
-            `else 
-            acc_en_l    = 1'b0;
-            acc_en_r    = 1'b0;
-            `endif
-        end
-        {2'd0,3'd4}: begin // ADPCM-B:
-            acc_input_l = adpcmB_l >>> 1; // Operator width is 14 bit, ADPCM-B is 16 bit
-            acc_input_r = adpcmB_r >>> 1; // accumulator width per input channel is 14 bit
-            `ifndef NOMIX
-            acc_en_l    = 1'b1;
-            acc_en_r    = 1'b1;
-            `else 
-            acc_en_l    = 1'b0;
-            acc_en_r    = 1'b0;
-            `endif
-        end
-        default: begin
-            // Note by Jose Tejada:
-            // I don't think we should divide down the FM output
-            // but someone was looking at the balance of the different
-            // channels and made this arrangement
-            // I suppose ADPCM-A would saturate if taken up a factor of 8 instead of 4
-            // I'll leave it as it is but I think it is worth revisiting this:
-            acc_input_l = opext >>> 1;
-            acc_input_r = opext >>> 1;
-            acc_en_l    = sum_en & left_en;
-            acc_en_r    = sum_en & right_en;
-        end
-    endcase
+always @(*) begin
+    // Note by Jose Tejada:
+    // I don't think we should divide down the FM output
+    // but someone was looking at the balance of the different
+    // channels and made this arrangement
+    // I suppose ADPCM-A would saturate if taken up a factor of 8 instead of 4
+    // I'll leave it as it is but I think it is worth revisiting this:
+    acc_input_l = opext >>> 1;
+    acc_input_r = opext >>> 1;
+    acc_en_l    = sum_en & left_en;
+    acc_en_r    = sum_en & right_en;
+    if( !FULLFM ) begin
+        case( {cur_op,cur_ch} )
+            {2'd0,3'd0}: begin // ADPCM-A:
+                acc_input_l = (adpcmA_l <<< 2) + (adpcmA_l <<< 1) + adpcmA_l + (adpcmA_l >>> 2); // amplify by 7.25x to match AES channel balance
+                acc_input_r = (adpcmA_r <<< 2) + (adpcmA_r <<< 1) + adpcmA_r + (adpcmA_r >>> 2);
+                `ifndef NOMIX
+                acc_en_l    = 1'b1;
+                acc_en_r    = 1'b1;
+                `else
+                acc_en_l    = 1'b0;
+                acc_en_r    = 1'b0;
+                `endif
+            end
+            {2'd0,3'd4}: begin // ADPCM-B:
+                acc_input_l = adpcmB_l >>> 1; // Operator width is 14 bit, ADPCM-B is 16 bit
+                acc_input_r = adpcmB_r >>> 1; // accumulator width per input channel is 14 bit
+                `ifndef NOMIX
+                acc_en_l    = 1'b1;
+                acc_en_r    = 1'b1;
+                `else
+                acc_en_l    = 1'b0;
+                acc_en_r    = 1'b0;
+                `endif
+            end
+            default: begin end
+        endcase
+    end
+end
 
 // Continuous output
 

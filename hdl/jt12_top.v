@@ -76,6 +76,7 @@ module jt12_top (
 // defaults to YM2612
 parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1;
 parameter use_adpcm=0;
+parameter FULLFM=0;
 parameter JT49_DIV=2,
           YM2203_LUMPED=0;
 parameter mask_div=1;
@@ -249,7 +250,7 @@ if( use_adpcm==1 ) begin: gen_adpcm
     );
 
     assign snd_sample   = zero;
-    jt10_acc u_acc(
+    jt10_acc #(.FULLFM(FULLFM)) u_acc(
         .clk        ( clk           ),
         .clk_en     ( clk_en        ),
         .op_result  ( op_result_hd  ),

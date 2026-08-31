@@ -4,6 +4,7 @@
 ../../hdl/jt03.v
 ../../hdl/jt10_acc.v
 ../../hdl/jt10.v
+../../hdl/jt10b.v
 ../../hdl/jt12_acc.v
 ../../hdl/jt12_csr.v
 ../../hdl/jt12_div.v
