@@ -60,7 +60,11 @@ wire chon;
 // end
 // `endif
 
-always @(posedge clk) roe_n <= ~(adv & cen55);
+always @(posedge clk or negedge rst_n)
+    if( !rst_n )
+        roe_n <= 1'b1;
+    else if( cen )
+        roe_n <= ~(adv & cen55);
 
 jt10_adpcmb_cnt u_cnt(
     .rst_n       ( rst_n           ),
