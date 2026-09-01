@@ -48,7 +48,8 @@ initial begin // generated with file gen_lingain.py
    mem[060] = 9'd002;   mem[061] = 9'd002;   mem[062] = 9'd002;   mem[063] = 9'd002;
 end
 
-always @(posedge clk)
+always @(posedge clk) begin
     lin <= mem[db];
+end
 
 endmodule // jt10_adpcm_dbrom

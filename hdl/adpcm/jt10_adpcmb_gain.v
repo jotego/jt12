@@ -33,7 +33,8 @@ module jt10_adpcmb_gain(
 wire signed [15:0] factor = {8'd0, tl};
 wire signed [31:0] pcm_mul = pcm_in * factor; // linear gain
 
-always @(posedge clk) if(cen55)
+always @(posedge clk) if(cen55) begin
     pcm_out <= pcm_mul[23:8];
+end
 
 endmodule

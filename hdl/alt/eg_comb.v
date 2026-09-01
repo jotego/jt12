@@ -46,8 +46,9 @@ always @(*) begin : pre_rate_calc
 		endcase
 end
 
-always @(*)
+always @(*) begin
 	rate = pre_rate[6] ? 6'd63 : pre_rate[5:0];
+end
 
 reg	[2:0] cnt;
 
@@ -177,8 +178,9 @@ always @(*) begin
 	sum_eg_tl_am = sum_eg_tl + { 3'd0, am_final };
 end
 
-always @(*)  
+always @(*) begin
 	eg_limited = sum_eg_tl_am[11:10]==2'd0 ? sum_eg_tl_am[9:0] : 10'h3ff;
+end
 
 
 endmodule // eg_comb

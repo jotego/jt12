@@ -57,8 +57,9 @@ if(num_ch==6) begin
         end
     end
 
-    always @(posedge clk) if( clk_en )
+    always @(posedge clk) if( clk_en ) begin
         keyon_I <= (csm&&next_ch==3'd2&&overflow2) || csr_out;
+    end
 
     reg        up_keyon_reg;
     reg  [3:0] tkeyon_op;
@@ -133,8 +134,9 @@ else begin // 3 channels
         din = keyon_ch[1:0]==next_ch[1:0] && up_keyon ? |(keyon_op&next_op_hot) : csr_out;
     end
 
-    always @(posedge clk) if( clk_en )
+    always @(posedge clk) if( clk_en ) begin
         keyon_I <= csr_out; // No CSM for YM2203
+    end
 
     jt12_sh_rst #(.width(1),.stages(12),.rstval(1'b0)) u_konch1(
         .clk    ( clk       ),

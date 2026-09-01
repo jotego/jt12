@@ -135,10 +135,11 @@ lut[9'o60_0] = 12'o0302; lut[9'o60_1] = 12'o1106; lut[9'o60_2] = 12'o1712; lut[9
 lut[9'o60_4] = 12'o3322; lut[9'o60_5] = 12'o4126; lut[9'o60_6] = 12'o4732; lut[9'o60_7] = 12'o5536;//12'o3777; lut[9'o60_6] = 12'o3777; lut[9'o60_7] = 12'o3777; 
 end
 
-always @(posedge clk or negedge rst_n) 
+always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
         inc <= 'd0;
     else if(cen)
         inc <= lut[addr];
+end
 
 endmodule // jt10_adpcma_lut

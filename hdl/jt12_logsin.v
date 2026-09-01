@@ -292,7 +292,8 @@ initial begin
 	sinelut[8'd255] = 12'h859;
 end
 
-    always @ (posedge clk) if(clk_en)
+    always @ (posedge clk) if(clk_en) begin
         logsin <= sinelut[addr];
+    end
 
 endmodule

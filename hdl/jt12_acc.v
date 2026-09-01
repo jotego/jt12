@@ -66,9 +66,10 @@ end
 
 reg pcm_sum;
 
-always @(posedge clk) if(clk_en)
+always @(posedge clk) if(clk_en) begin
     if( zero ) pcm_sum <= 1'b1;
     else if( ch6op ) pcm_sum <= 1'b0;
+end
 
 wire use_pcm = ch6op && pcm_en;
 wire sum_or_pcm = sum_en | use_pcm;

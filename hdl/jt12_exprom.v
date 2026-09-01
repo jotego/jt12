@@ -295,7 +295,8 @@ module jt12_exprom
         explut_jt51[8'd255] = 10'd0000;
     end
 
-    always @ (posedge clk) if(clk_en)
+    always @ (posedge clk) if(clk_en) begin
         exp <= explut_jt51[addr];
+    end
 
 endmodule

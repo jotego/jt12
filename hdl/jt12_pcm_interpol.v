@@ -91,7 +91,9 @@ end
 
 // output only at cen55
 
-always @(posedge clk) if(cen55) pcmout <= pcminter;
+always @(posedge clk) if(cen55) begin
+    pcmout <= pcminter;
+end
 
 jt10_adpcm_div #(.DW(DW)) u_div(
     .rst_n  ( rst_n       ),

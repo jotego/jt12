@@ -42,8 +42,9 @@ generate
     genvar k2;
     reg [calcw-1:0] integ_data[0:n];
     assign integ_op = integ_data[n];
-    always @(*)
+    always @(*) begin
         integ_data[0] = { {wdiff{snd_in[inw-1]}}, snd_in };
+    end
     for(k2=1;k2<=n;k2=k2+1) begin : integ_gen
         always @(posedge clk) 
             if(rst) begin

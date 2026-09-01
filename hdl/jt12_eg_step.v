@@ -46,8 +46,9 @@ always @(*) begin : pre_rate_calc
         endcase
 end
 
-always @(*)
+always @(*) begin
     rate = pre_rate[6] ? 6'd63 : pre_rate[5:0];
+end
 
 reg [2:0] cnt;
 

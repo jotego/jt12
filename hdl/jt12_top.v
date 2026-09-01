@@ -177,7 +177,9 @@ reg cen_reg;
 
 assign debug_view = { 4'd0, flag_B, flag_A, div_setting };
 
-always @(posedge clk) cen_reg <= cen;
+always @(posedge clk) begin
+    cen_reg <= cen;
+end
 
 generate
 if( use_adpcm==1 ) begin: gen_adpcm
@@ -624,8 +626,9 @@ generate
 
         `ifndef NOPCMLINEAR
         wire signed [10:0] pcm_full;
-        always @(*)
+        always @(*) begin
             pcm2 = en_hifi_pcm ? pcm_full[9:1] : pcm;
+        end
 
         jt12_pcm_interpol #(.DW(11), .stepw(5)) u_pcm (
             .rst_n ( rst_pcm_n      ),
