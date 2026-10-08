@@ -134,8 +134,22 @@ else begin // 3 channels
         din = keyon_ch[1:0]==next_ch[1:0] && up_keyon ? |(keyon_op&next_op_hot) : csr_out;
     end
 
+    // CSM: capture the timer A overflow so it keys on all operators of
+    // channel 3 for one sample, without touching the register key state
+    reg overflow2;
+    reg [4:0] overflow_cycle;
+
     always @(posedge clk) if( clk_en ) begin
-        keyon_I <= csr_out; // No CSM for YM2203
+        if(overflow_A) begin
+            overflow2 <= 1'b1;
+            overflow_cycle <= { next_op, next_ch };
+        end else begin
+            if(overflow_cycle == {next_op, next_ch}) overflow2<=1'b0;
+        end
+    end
+
+    always @(posedge clk) if( clk_en ) begin
+        keyon_I <= (csm&&next_ch==3'd2&&overflow2) || csr_out;
     end
 
     jt12_sh_rst #(.width(1),.stages(12),.rstval(1'b0)) u_konch1(
