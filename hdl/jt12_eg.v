@@ -38,6 +38,9 @@ module jt12_eg (
     input       [2:0]   ssg_eg_I,
     // envelope operation
     input               keyon_I,
+    input               csm_key_I,
+    input               csm_mode,
+    input       [2:0]   cur_ch,
     // envelope number
     input       [6:0]   lfo_mod,
     input               amsen_IV,
@@ -80,9 +83,14 @@ wire sum_out_II;
 reg sum_in_III;
 
 wire [9:0] eg_in_I, pure_eg_out_III, eg_next_III, eg_out_IV;
-reg  [9:0] eg_in_II, eg_in_III, eg_in_IV;
+reg  [9:0] eg_in_II, eg_in_III, eg_pure_IV;
+wire [9:0] eg_feedback_IV;
+wire [6:0] effective_tl_IV;
+reg csm_key_II, csm_key_III, csm_key_IV;
+reg ch3_II, ch3_III, ch3_IV;
 
-
+assign eg_feedback_IV = eg_pure_IV | (csm_key_IV ? {tl_IV,3'b000} : 10'd0);
+assign effective_tl_IV = csm_mode && ch3_IV ? 7'd0 : tl_IV;
 
 jt12_eg_comb u_comb(
     ///////////////////////////////////
@@ -133,14 +141,16 @@ jt12_eg_comb u_comb(
     .lfo_mod        ( lfo_mod       ),
     .amsen          ( amsen_IV      ),
     .ams            ( ams_IV        ),
-    .tl             ( tl_IV         ),
+    .tl             (effective_tl_IV),
     .final_ssg_inv  ( ssg_inv_IV    ), 
-    .final_eg_in    ( eg_in_IV      ),
+    .final_eg_in    ( eg_pure_IV    ),
     .final_eg_out   ( eg_out_IV     )
 );
 
 always @(posedge clk) if(clk_en) begin
     eg_in_II    <= eg_in_I;
+    csm_key_II  <= csm_key_I;
+    ch3_II      <= cur_ch==3'd2;
     attack_II   <= state_next_I[0];
     base_rate_II<= base_rate_I;
     ssg_en_II   <= ssg_en_I;
@@ -148,6 +158,8 @@ always @(posedge clk) if(clk_en) begin
     pg_rst_II   <= pg_rst_I;
 
     eg_in_III   <= eg_in_II;
+    csm_key_III <= csm_key_II;
+    ch3_III     <= ch3_II;
     attack_III  <= attack_II;
     rate_in_III <= rate_out_II[5:1];
     ssg_en_III  <= ssg_en_II;
@@ -156,7 +168,9 @@ always @(posedge clk) if(clk_en) begin
     sum_in_III  <= sum_out_II;
 
     ssg_inv_IV  <= ssg_inv_III;
-    eg_in_IV    <= pure_eg_out_III;
+    eg_pure_IV  <= pure_eg_out_III;
+    csm_key_IV  <= csm_key_III;
+    ch3_IV      <= ch3_III;
     eg_V        <= eg_out_IV;
 end
 
@@ -171,7 +185,7 @@ jt12_sh_rst #( .width(10), .stages(4*num_ch-3), .rstval(1'b1) ) u_egsh(
     .clk    ( clk       ),
     .clk_en ( clk_en    ),
     .rst    ( rst       ),
-    .din    ( eg_in_IV  ),
+    .din    ( eg_feedback_IV ),
     .drop   ( eg_in_I   )
 );
 

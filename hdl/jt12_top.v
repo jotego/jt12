@@ -92,7 +92,7 @@ wire    [7:0]   value_B;
 wire            load_A, load_B;
 wire            enable_irq_A, enable_irq_B;
 wire            clr_flag_A, clr_flag_B;
-wire            overflow_A;
+wire            overflow_A, trigger_A, csm_mode;
 wire            fast_timers;
 
 wire            zero; // Single-clock pulse at the begginig of s1_enters
@@ -116,7 +116,7 @@ wire    [ 1:0]  ks_II;
 wire            ssg_en_I;
 wire    [2:0]   ssg_eg_I;
 // envelope operation
-wire            keyon_I;
+wire            keyon_I, csm_key_I;
 wire    [9:0]   eg_IX;
 wire            pg_rst_II;
 // Channel
@@ -333,6 +333,8 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .clr_flag_B ( clr_flag_B    ),
     .flag_A     ( flag_A        ),
     .overflow_A ( overflow_A    ),
+    .trigger_A  ( trigger_A     ),
+    .csm_mode   ( csm_mode      ),
     .fast_timers( fast_timers   ),
     // PCM
     .pcm        ( pcm           ),
@@ -394,6 +396,7 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
     .ssg_eg_I   ( ssg_eg_I  ),
 
     .keyon_I    ( keyon_I   ),
+    .csm_key_I  ( csm_key_I ),
     // Operator
     .zero       ( zero      ),
     .s1_enters  ( s1_enters ),
@@ -427,6 +430,7 @@ jt12_timers #(.num_ch(num_ch)) u_timers (
     .flag_A     ( flag_A        ),
     .flag_B     ( flag_B        ),
     .overflow_A ( overflow_A    ),
+    .trigger_A  ( trigger_A     ),
     .irq_n      ( irq_n         )
 );
 
@@ -550,6 +554,9 @@ jt12_eg #(.num_ch(num_ch)) u_eg(
     .ssg_eg_I       ( ssg_eg_I      ),
     // envelope operation
     .keyon_I        ( keyon_I       ),
+    .csm_key_I      ( csm_key_I     ),
+    .csm_mode       ( csm_mode      ),
+    .cur_ch         ( cur_ch        ),
     // envelope number
     .lfo_mod        ( lfo_mod       ),
     .tl_IV          ( tl_IV         ),

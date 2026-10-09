@@ -31,6 +31,7 @@ module jt12_reg(
     input           csm,
     input           flag_A,
     input           overflow_A,
+    input           trigger_A,
 
     // channel udpates
     input   [2:0]   ch_sel,
@@ -104,7 +105,8 @@ module jt12_reg(
     output              amsen_IV,
 
     // envelope operation
-    output          keyon_I
+    output          keyon_I,
+    output          csm_key_I
 );
 
 parameter num_ch=6; // Use only 3 (YM2203/YM2610) or 6 (YM2612/YM2608)
@@ -216,8 +218,10 @@ jt12_kon #(.num_ch(num_ch)) u_kon(
     .csm        ( csm       ),
     // .flag_A      ( flag_A    ),
     .overflow_A ( overflow_A),
+    .trigger_A  ( trigger_A ),
     
-    .keyon_I    ( keyon_I   )
+    .keyon_I    ( keyon_I   ),
+    .csm_key_I  ( csm_key_I )
 );
 
 jt12_mod #(.num_ch(num_ch)) u_mod(

@@ -1,7 +1,4 @@
-
-
 /* This file is part of JT12.
-
 
     JT12 program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,31 +31,42 @@ module jt12_kon(
     input           csm,
     // input            flag_A,
     input           overflow_A,
+    input           trigger_A,
 
-    output  reg     keyon_I
+    output  reg     keyon_I,
+    output  reg     csm_key_I
 );
 
 parameter num_ch=6;
 
 wire csr_out;
+reg csm_pending, csm_window;
+
+always @(posedge clk) begin
+    if (rst || !csm) begin
+        csm_pending <= 1'b0;
+        csm_window  <= 1'b0;
+    end else begin
+        if (clk_en && next_op==2'd0 && next_ch==3'd0) begin
+            csm_window  <= csm_pending || trigger_A;
+            csm_pending <= 1'b0;
+        end else if (trigger_A) begin
+            if (next_op==2'd0 && next_ch==3'd1)
+                csm_window <= 1'b1;
+            else
+                csm_pending <= 1'b1;
+        end
+    end
+end
+
+always @(posedge clk) if (clk_en) begin
+    csm_key_I <= csm && next_ch==3'd2 && csm_window;
+end
 
 generate
 if(num_ch==6) begin
-    // capture overflow signal so it lasts long enough
-    reg overflow2;
-    reg [4:0] overflow_cycle;
-
     always @(posedge clk) if( clk_en ) begin
-        if(overflow_A) begin
-            overflow2 <= 1'b1;
-            overflow_cycle <= { next_op, next_ch };
-        end else begin
-            if(overflow_cycle == {next_op, next_ch}) overflow2<=1'b0;
-        end
-    end
-
-    always @(posedge clk) if( clk_en ) begin
-        keyon_I <= (csm&&next_ch==3'd2&&overflow2) || csr_out;
+        keyon_I <= (csm && next_ch==3'd2 && csm_window) || csr_out;
     end
 
     reg        up_keyon_reg;
@@ -135,7 +143,7 @@ else begin // 3 channels
     end
 
     always @(posedge clk) if( clk_en ) begin
-        keyon_I <= csr_out; // No CSM for YM2203
+        keyon_I <= (csm && next_ch==3'd2 && csm_window) || csr_out;
     end
 
     jt12_sh_rst #(.width(1),.stages(12),.rstval(1'b0)) u_konch1(

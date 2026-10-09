@@ -18,7 +18,6 @@
     Date: 14-2-2017
     */
 
-
 module jt12_mmr(
     input           rst,
     input           clk,
@@ -51,6 +50,8 @@ module jt12_mmr(
     output  reg         fast_timers,
     input               flag_A,
     input               overflow_A, 
+    input               trigger_A,
+    output              csm_mode,
     output  reg [1:0]   div_setting,
     // PCM
     output  reg [8:0]   pcm,
@@ -111,6 +112,7 @@ module jt12_mmr(
     output  [2:0]   ssg_eg_I,
 
     output          keyon_I,
+    output          csm_key_I,
 
     // Operator
     output          zero,
@@ -171,6 +173,7 @@ localparam  REG_TESTYM  =   8'h21,
             REG_ADPCMA_TEST = 8'h02;
 
 reg csm, effect;
+assign csm_mode = csm;
 
 reg [ 2:0] block_ch3op2,  block_ch3op3,  block_ch3op1;
 reg [10:0] fnum_ch3op2, fnum_ch3op3, fnum_ch3op1;
@@ -475,6 +478,7 @@ jt12_reg #(.num_ch(num_ch)) u_reg(
     .csm        ( csm       ),
     .flag_A     ( flag_A    ),
     .overflow_A ( overflow_A),
+    .trigger_A  ( trigger_A ),
 
     .ch6op      ( ch6op     ),
     .cur_ch     ( cur_ch    ),
@@ -521,6 +525,7 @@ jt12_reg #(.num_ch(num_ch)) u_reg(
     .fb_II      ( fb_II     ),
     .alg_I      ( alg_I     ),
     .keyon_I    ( keyon_I   ),
+    .csm_key_I  ( csm_key_I ),
 
     .zero       ( zero      ),
     .s1_enters  ( s1_enters ),

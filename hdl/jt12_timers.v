@@ -22,7 +22,6 @@
   Timer B = 2304*(256-NB)/Phi M
   */
 
-
 module jt12_timers(
   input     clk,
   input     rst,
@@ -39,6 +38,7 @@ module jt12_timers(
   output    flag_A,
   output    flag_B,
   output    overflow_A,
+  output    trigger_A,
   output    irq_n
 );
 
@@ -68,7 +68,8 @@ jt12_timer #(.CW(10)) timer_A(
     .load       ( load_A      ),
     .clr_flag   ( clr_flag_A  ),
     .flag       ( flag_A      ),
-    .overflow   ( overflow_A  )
+    .overflow   ( overflow_A  ),
+    .trigger    ( trigger_A   )
 );
 
 jt12_timer #(.CW(8),.FREE_EN(1)) timer_B(
@@ -80,7 +81,8 @@ jt12_timer #(.CW(8),.FREE_EN(1)) timer_B(
     .load       ( load_B      ),
     .clr_flag   ( clr_flag_B  ),
     .flag       ( flag_B      ),
-    .overflow   (             )
+    .overflow   (             ),
+    .trigger    (             )
 );
 
 endmodule
@@ -98,13 +100,16 @@ module jt12_timer #(parameter
     input   load,
     input   clr_flag,
     output reg flag,
-    output reg overflow
+    output reg overflow,
+    output    trigger
 );
 /* verilator lint_off WIDTH */
 reg          load_l;
 reg [CW-1:0] cnt, next;
 reg [FW-1:0] free_cnt, free_next;
 reg          free_ov;
+
+assign trigger = (!load_l && load) || (cen && zero && load && overflow);
 
 always@(posedge clk, posedge rst)
     if( rst )

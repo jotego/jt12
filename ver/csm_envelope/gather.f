@@ -1,0 +1,9 @@
+$JTROOT/modules/jt12/hdl/jt12_eg.v
+$JTROOT/modules/jt12/hdl/jt12_eg_cnt.v
+$JTROOT/modules/jt12/hdl/jt12_eg_comb.v
+$JTROOT/modules/jt12/hdl/jt12_eg_ctrl.v
+$JTROOT/modules/jt12/hdl/jt12_eg_step.v
+$JTROOT/modules/jt12/hdl/jt12_eg_pure.v
+$JTROOT/modules/jt12/hdl/jt12_eg_final.v
+$JTROOT/modules/jt12/hdl/jt12_sh.v
+$JTROOT/modules/jt12/hdl/jt12_sh_rst.v
