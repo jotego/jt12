@@ -83,6 +83,7 @@ wire sum_out_II;
 reg sum_in_III;
 
 wire [9:0] eg_in_I, pure_eg_out_III, eg_next_III, eg_out_IV;
+wire [9:0] eg_release_I;
 reg  [9:0] eg_in_II, eg_in_III, eg_pure_IV;
 wire [9:0] eg_feedback_IV;
 wire [6:0] effective_tl_IV;
@@ -91,6 +92,8 @@ reg ch3_II, ch3_III, ch3_IV;
 
 assign eg_feedback_IV = eg_pure_IV | (csm_key_IV ? {tl_IV,3'b000} : 10'd0);
 assign effective_tl_IV = csm_mode && ch3_IV ? 7'd0 : tl_IV;
+// Release starts from the audible SSG level, which may be inverted.
+assign eg_release_I = keyoff_now_I && ssg_inv_in_I ? 10'h200-eg_in_I : eg_in_I;
 
 jt12_eg_comb u_comb(
     ///////////////////////////////////
@@ -148,7 +151,7 @@ jt12_eg_comb u_comb(
 );
 
 always @(posedge clk) if(clk_en) begin
-    eg_in_II    <= eg_in_I;
+    eg_in_II    <= eg_release_I;
     csm_key_II  <= csm_key_I;
     ch3_II      <= cur_ch==3'd2;
     attack_II   <= state_next_I[0];

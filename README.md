@@ -41,6 +41,12 @@ YM2610B |   jt10b.v     | jt10.qip
 YM2612  |   jt12.v      | jt12.qip
 YM2203  |   jt03.v      | jt03.qip
 
+JT03 produces signed 16-bit FM samples. Its accumulator keeps the YM2203's
+18-bit running sum and clips when a sample is loaded; it does not expose the
+chip's serialized YM3014 output pin. The PSG channel ports are 8-bit digital
+approximations of the YM2203 analog voltage levels. The combined `snd` port
+uses the selected board mixing option.
+
 ## Simulation
 
 There are several simulation test benches in the **ver** folder. The most important one is in the **ver/verilator** folder. The simulation script is called with the shell script **go** in the same folder. The script will compile the file **test.cpp** together with other files and the design and will simulate the tune specificied with the -f command. It can read **vgm** tunes and generate .wav output of them.

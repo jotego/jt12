@@ -23,11 +23,8 @@
 
 // Use for YM2203
 // no left/right channels
-// full operator resolution
-// clamped to maximum output of signed 16 bits
-// This version does not clamp each channel individually
-// That does not correspond to real hardware behaviour. I should
-// change it.
+// Full operator resolution and 18-bit accumulation, as in YM2203.
+// Clip to the signed 16-bit sample range only when loading the sample.
 
 module jt03_acc
 (
@@ -56,18 +53,19 @@ always @(*) begin
     endcase
 end
 
-// real YM2608 drops the op_result LSB, resulting in a 13-bit accumulator
-// but in YM2203, a 13-bit acc for 3 channels only requires 15 bits
-// and YM3014 has a 16-bit dynamic range.
-// I am leaving the LSB and scaling the output voltage accordingly. This
-// should result in less quantification noise.
-jt12_single_acc #(.win(14),.wout(16)) u_mono(
-    .clk        ( clk            ),
-    .clk_en     ( clk_en         ),
-    .op_result  ( op_result      ),
-    .sum_en     ( sum_en         ),
-    .zero       ( zero           ),
-    .snd        ( snd            )
-);
+reg signed [17:0] acc;
+reg signed [15:0] sample;
+wire signed [17:0] current;
+
+assign current = sum_en ? {{4{op_result[13]}},op_result} : 18'd0;
+assign snd = sample;
+
+always @(posedge clk) if( clk_en ) begin
+    acc <= zero ? current : acc+current;
+    if( zero ) begin
+        sample <= acc > 18'sd32767  ? 16'sh7fff :
+                  acc < -18'sd32768 ? 16'sh8000 : acc[15:0];
+    end
+end
 
 endmodule

@@ -73,7 +73,7 @@ initial begin
     keys=0;
     monitor_audio=1;
     repeat(1500) @(negedge clk);
-    if(keys<12 || irq_n!==1'b1 || uut.u_jt12.flag_A!==1'b1 || maxfm<10)
+    if(keys<12 || irq_n!==1'b1 || uut.u_jt12.flag_A!==1'b0 || maxfm<10)
         begin $display("FAIL Timer A overflows: %0d keys, FM peak %0d, fm %h eg %h op %h phase %h",keys,maxfm,fm_snd,uut.u_jt12.eg_V,uut.u_jt12.op_result,uut.u_jt12.phase_VIII); $finish; end
     $display("CSM FM peak: %0d",maxfm);
     $display("PASS"); $finish;

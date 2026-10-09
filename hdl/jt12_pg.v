@@ -47,7 +47,7 @@ module jt12_pg(
     input       [ 2:0]  pms_I,
     // phase operation
     input               pg_rst_II,
-    input               pg_stop,    // not implemented
+    input               pg_stop,
     
     output  reg [ 4:0]  keycode_II,
     output      [ 9:0]  phase_VIII
@@ -62,6 +62,9 @@ wire [16:0] phinc_I;
 reg  [16:0] phinc_II;
 wire [19:0] phase_drop, phase_in;
 wire [ 9:0] phase_II;
+wire pg_reset_II;
+
+assign pg_reset_II = pg_rst_II | (num_ch==3 && pg_stop);
 
 always @(posedge clk) if(clk_en) begin
     keycode_II      <= keycode_I;
@@ -85,7 +88,7 @@ jt12_pg_comb u_comb(
     // Phase add
     .mul        ( mul_II        ),
     .phase_in   ( phase_drop    ),
-    .pg_rst     ( pg_rst_II     ),
+    .pg_rst     ( pg_reset_II   ),
     .detune_in  ( detune_mod_II ),
     .phinc_in   ( phinc_II      ),
 

@@ -13,6 +13,7 @@ jt12_timer #(.CW(10)) uut(
     .zero        ( zero      ),
     .start_value ( 10'h3ff  ),
     .load        ( load      ),
+    .enable_status ( irq_enable ),
     .clr_flag    ( clr       ),
     .flag        ( flag      ),
     .overflow    ( overflow  ),
@@ -44,11 +45,18 @@ initial begin
     if (trigger!==1'b1 || wrapper_trigger!==1'b1)
         begin $display("FAIL overflow reload"); $finish; end
     @(negedge clk);
-    if (flag!==1'b1 || wrapper_flag!==1'b1 || irq_n!==1'b1)
-        begin $display("FAIL status without IRQ enable"); $finish; end
+    if (flag!==1'b0 || wrapper_flag!==1'b0 || irq_n!==1'b1)
+        begin $display("FAIL disabled overflow set status"); $finish; end
     irq_enable=1;
     #1;
-    if (irq_n!==1'b0) begin $display("FAIL IRQ enable"); $finish; end
+    if (irq_n!==1'b1) begin $display("FAIL late IRQ enable"); $finish; end
+    @(negedge clk);
+    if (flag!==1'b1 || wrapper_flag!==1'b1 || irq_n!==1'b0)
+        begin $display("FAIL enabled overflow status"); $finish; end
+    irq_enable=0;
+    #1;
+    if (irq_n!==1'b0)
+        begin $display("FAIL disabling enable cleared latched IRQ"); $finish; end
     zero=0;
     #1;
     if (trigger!==1'b0) begin $display("FAIL clock gate"); $finish; end

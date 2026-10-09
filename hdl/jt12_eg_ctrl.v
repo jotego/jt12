@@ -112,9 +112,7 @@ always @(*)
 		default: begin // RELEASE, note that keyoff_now==1 will enter this state too
 			base_rate	= { rrate, 1'b1 };
 			state_next	= RELEASE;	// release
-			ssg_inv_out	= 1'b0; // this can produce a glitch in the output
-				// But to release from SSG cannot be done nicely while
-				// inverting the ouput
+			ssg_inv_out	= 1'b0; // key-off loads the inverted level into the EG
 		end
 	endcase
 
