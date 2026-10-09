@@ -20,13 +20,15 @@
     
 */
 
-// Accumulates an arbitrary number of inputs with saturation
-// restart the sum when input "zero" is high
+// Accumulates an arbitrary number of inputs. The default saturates the
+// running sum; a wider accumulator clips only when loading the sample.
+// Restart the sum when input "zero" is high.
 
 
 module jt12_single_acc #(parameter 
-        win=14, // input data width 
-        wout=16 // output data width
+        win=14, // input data width
+        wout=16, // output data width
+        wacc=wout // internal accumulator width
 )(
     input                 clk,
     input                 clk_en /* synthesis direct_enable */,
@@ -36,27 +38,33 @@ module jt12_single_acc #(parameter
     output reg [wout-1:0] snd
 );
 
-// for full resolution use win=14, wout=16
+// YM2203 uses win=14, wout=16, wacc=18
 // for cut down resolution use win=9, wout=12
-// wout-win should be > 0
+// wacc must be at least as wide as win and wout. With wacc>wout,
+// accumulate without intermediate clipping and clip the output sample.
 
-reg signed [wout-1:0] next, acc, current;
+reg signed [wacc-1:0] next, acc, current;
 reg overflow;
 
-wire [wout-1:0] plus_inf  = { 1'b0, {(wout-1){1'b1}} }; // maximum positive value
-wire [wout-1:0] minus_inf = { 1'b1, {(wout-1){1'b0}} }; // minimum negative value
+wire [wacc-1:0] plus_inf  = { 1'b0, {(wacc-1){1'b1}} };
+wire [wacc-1:0] minus_inf = { 1'b1, {(wacc-1){1'b0}} };
+wire signed [wacc-1:0] output_max = {{(wacc-wout){1'b0}},1'b0,{(wout-1){1'b1}}};
+wire signed [wacc-1:0] output_min = {{(wacc-wout){1'b1}},1'b1,{(wout-1){1'b0}}};
+wire [wout-1:0] sample_max = {1'b0,{(wout-1){1'b1}}};
+wire [wout-1:0] sample_min = {1'b1,{(wout-1){1'b0}}};
 
 always @(*) begin
-    current = sum_en ? { {(wout-win){op_result[win-1]}}, op_result } : {wout{1'b0}};
+    current = sum_en ? { {(wacc-win){op_result[win-1]}}, op_result } : {wacc{1'b0}};
     next = zero ? current : current + acc;
     overflow = !zero && 
-        (current[wout-1] == acc[wout-1]) && 
-        (acc[wout-1]!=next[wout-1]);
+        (current[wacc-1] == acc[wacc-1]) &&
+        (acc[wacc-1]!=next[wacc-1]);
 end
 
 always @(posedge clk) if( clk_en ) begin
-    acc <= overflow ? (acc[wout-1] ? minus_inf : plus_inf) : next;
-    if(zero) snd <= acc;
+    acc <= wacc==wout && overflow ? (acc[wacc-1] ? minus_inf : plus_inf) : next;
+    if(zero) snd <= acc > output_max ? sample_max :
+                     acc < output_min ? sample_min : acc[wout-1:0];
 end
 
 endmodule // jt12_single_acc
