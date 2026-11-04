@@ -13,6 +13,8 @@
     You should have received a copy of the GNU General Public License
     along with JT12.  If not, see <http://www.gnu.org/licenses/>.
 
+    SPDX-FileCopyrightText: 2026 Andrea Bogazzi
+
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
     Date: 14-2-2016
@@ -35,6 +37,9 @@ module jt12_top (
 
     output  [7:0]   dout,
     output          irq_n,
+    input   [3:0]   opna_adpcm_flags,
+    input   [7:0]   opna_adpcm_data,
+    output          opna_flag_reset,
     // Configuration
     input           en_hifi_pcm,  // high to enable PCM interpolation on YM2612 mode
     // ADPCM pins
@@ -56,6 +61,7 @@ module jt12_top (
     output          [ 7:0] psg_A,
     output          [ 7:0] psg_B,
     output          [ 7:0] psg_C,
+    output  signed  [17:0] fm_full_left, fm_full_right,
     output  signed  [15:0] fm_snd_left,
     output  signed  [15:0] fm_snd_right,
     output  signed  [15:0] adpcmA_l,
@@ -76,12 +82,15 @@ module jt12_top (
 // defaults to YM2612
 parameter use_lfo=1, use_ssg=0, num_ch=6, use_pcm=1;
 parameter use_adpcm=0;
-parameter FULLFM=0;
+parameter FULLFM=0, OPNA=0;
 parameter JT49_DIV=2,
           YM2203_LUMPED=0;
 parameter mask_div=1;
 
 wire flag_A, flag_B, busy;
+wire fm_irq_n, opna_irq_n, opna_6ch, opna_clr_flags;
+assign irq_n = OPNA ? opna_irq_n : fm_irq_n;
+assign opna_flag_reset = opna_clr_flags;
 
 wire write = !cs_n && !wr_n;
 wire clk_en, clk_en_ssg;
@@ -251,28 +260,6 @@ if( use_adpcm==1 ) begin: gen_adpcm
         .pcm55_r    ( adpcmB_r      )
     );
 
-    assign snd_sample   = zero;
-    jt10_acc #(.FULLFM(FULLFM)) u_acc(
-        .clk        ( clk           ),
-        .clk_en     ( clk_en        ),
-        .op_result  ( op_result_hd  ),
-        .rl         ( rl            ),
-        .zero       ( zero          ),
-        .s1_enters  ( s2_enters     ),
-        .s2_enters  ( s1_enters     ),
-        .s3_enters  ( s4_enters     ),
-        .s4_enters  ( s3_enters     ),
-        .cur_ch     ( cur_ch        ),
-        .cur_op     ( cur_op        ),
-        .alg        ( alg_I         ),
-        .adpcmA_l   ( adpcmA_l      ),
-        .adpcmA_r   ( adpcmA_r      ),
-        .adpcmB_l   ( adpcmB_l      ),
-        .adpcmB_r   ( adpcmB_r      ),
-        // combined output
-        .left       ( fm_snd_left   ),
-        .right      ( fm_snd_right  )
-    );
 end else begin : gen_adpcm_no
     assign adpcmA_l     = 'd0;
     assign adpcmA_r     = 'd0;
@@ -288,6 +275,63 @@ end else begin : gen_adpcm_no
 end
 endgenerate
 
+generate
+if( use_adpcm==1 || OPNA ) begin: gen_stereo_acc
+    assign snd_sample   = zero;
+    jt10_acc #(
+        .FULLFM    ( OPNA ? 1 : FULLFM ),
+        .OPNA      ( OPNA              )
+    ) u_acc(
+        .full_left  ( fm_full_left  ),
+        .full_right ( fm_full_right ),
+        .opna_6ch  ( opna_6ch          ),
+        .clk       ( clk               ),
+        .clk_en    ( clk_en            ),
+        .op_result ( op_result_hd      ),
+        .rl        ( rl                ),
+        .zero      ( zero              ),
+        .s1_enters ( s2_enters         ),
+        .s2_enters ( s1_enters         ),
+        .s3_enters ( s4_enters         ),
+        .s4_enters ( s3_enters         ),
+        .cur_ch    ( cur_ch            ),
+        .cur_op    ( cur_op            ),
+        .alg       ( alg_I             ),
+        .adpcmA_l  ( adpcmA_l          ),
+        .adpcmA_r  ( adpcmA_r          ),
+        .adpcmB_l  ( adpcmB_l          ),
+        .adpcmB_r  ( adpcmB_r          ),
+        // combined output
+        .left      ( fm_snd_left       ),
+        .right     ( fm_snd_right      )
+    );
+end
+if( use_adpcm==0 && !OPNA ) begin: gen_legacy_full
+    assign fm_full_left={{2{fm_snd_left[15]}},fm_snd_left};
+    assign fm_full_right={{2{fm_snd_right[15]}},fm_snd_right};
+end
+if( OPNA ) begin: gen_opna_ctrl
+    jt08_ctrl u_ctrl(
+        .rst         ( rst              ),
+        .clk         ( clk              ),
+        .write       ( write            ),
+        .addr        ( addr             ),
+        .din         ( din              ),
+        .busy        ( busy             ),
+        .timer_flags ( {flag_B,flag_A}  ),
+        .adpcm_flags ( opna_adpcm_flags ),
+        .adpcm_dout  ( opna_adpcm_data  ),
+        .psg_dout    ( psg_dout         ),
+        .six_ch      ( opna_6ch         ),
+        .clear_flags ( opna_clr_flags   ),
+        .irq_n       ( opna_irq_n       ),
+        .dout        ( dout             )
+    );
+end else begin: gen_legacy_dout
+    assign opna_6ch = 1'b1;
+    assign opna_clr_flags = 1'b0;
+    assign opna_irq_n = 1'b1;
+
 jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
 //    .rst_n          ( rst_n         ),
     .clk            ( clk           ),        // CPU clock
@@ -301,8 +345,17 @@ jt12_dout #(.use_ssg(use_ssg),.use_adpcm(use_adpcm)) u_dout(
     .dout           ( dout          )
 );
 
-jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_adpcm), .mask_div(mask_div))
-    u_mmr(
+end
+endgenerate
+
+jt12_mmr #(
+    .use_ssg        ( use_ssg        ),
+    .num_ch         ( num_ch         ),
+    .use_pcm        ( use_pcm        ),
+    .use_adpcm      ( use_adpcm      ),
+    .mask_div       ( mask_div       ),
+    .OPNA           ( OPNA           )
+) u_mmr(
     .rst        ( rst       ),
     .clk        ( clk       ),
     .cen        ( cen_reg   ),  // external clock enable
@@ -415,23 +468,23 @@ jt12_mmr #(.use_ssg(use_ssg),.num_ch(num_ch),.use_pcm(use_pcm), .use_adpcm(use_a
 // of the prescaler setting
 wire timer_cen = fast_timers ? cen_reg : clk_en;
 jt12_timers #(.num_ch(num_ch)) u_timers (
-    .clk        ( clk           ),
-    .clk_en     ( timer_cen     ),
-    .rst        ( rst           ),
-    .zero       ( zero          ),
-    .value_A    ( value_A       ),
-    .value_B    ( value_B       ),
-    .load_A     ( load_A        ),
-    .load_B     ( load_B        ),
-    .enable_irq_A( enable_irq_A ),
-    .enable_irq_B( enable_irq_B ),
-    .clr_flag_A ( clr_flag_A    ),
-    .clr_flag_B ( clr_flag_B    ),
-    .flag_A     ( flag_A        ),
-    .flag_B     ( flag_B        ),
-    .overflow_A ( overflow_A    ),
-    .trigger_A  ( trigger_A     ),
-    .irq_n      ( irq_n         )
+    .clk          ( clk                         ),
+    .clk_en       ( timer_cen                   ),
+    .rst          ( rst                         ),
+    .zero         ( zero                        ),
+    .value_A      ( value_A                     ),
+    .value_B      ( value_B                     ),
+    .load_A       ( load_A                      ),
+    .load_B       ( load_B                      ),
+    .enable_irq_A ( enable_irq_A                ),
+    .enable_irq_B ( enable_irq_B                ),
+    .clr_flag_A   ( clr_flag_A | opna_clr_flags ),
+    .clr_flag_B   ( clr_flag_B | opna_clr_flags ),
+    .flag_A       ( flag_A                      ),
+    .flag_B       ( flag_B                      ),
+    .overflow_A   ( overflow_A                  ),
+    .trigger_A    ( trigger_A                   ),
+    .irq_n        ( fm_irq_n                    )
 );
 
 // YM2203 does not have LFO
@@ -672,7 +725,7 @@ generate
             .right      ( fm_snd_right[15:4]  )
         );
     end
-    if( use_pcm==0 && use_adpcm==0 ) begin : gen_2203_acc // YM2203 accumulator
+    if( use_pcm==0 && use_adpcm==0 && !OPNA ) begin : gen_2203_acc // YM2203 accumulator
         wire signed [15:0] mono_snd;
         assign fm_snd_left  = mono_snd;
         assign fm_snd_right = mono_snd;

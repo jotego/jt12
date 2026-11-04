@@ -14,6 +14,8 @@
     You should have received a copy of the GNU General Public License
     along with JT12.  If not, see <http://www.gnu.org/licenses/>.
 
+    SPDX-FileCopyrightText: 2026 Andrea Bogazzi
+
     Author: Jose Tejada Gomez. Twitter: @topapate
 */
 
@@ -55,76 +57,86 @@ wire signed [15:0] fm_only_l, fm_only_r;
 wire signed [15:0] adpcma_l, adpcma_r, adpcmb_l, adpcmb_r;
 
 jt10b_mixer u_left(
-    .clk       ( clk          ),
-    .cen       ( cen          ),
-    .fm_in     ( fm_only_l    ),
-    .adpcma_in ( adpcma_l     ),
-    .adpcmb_in ( adpcmb_l     ),
-    .psg_in    ( psg_snd      ),
-    .fm_out    ( fm_left      ),
-    .snd_out   ( snd_left     )
+    .clk       ( clk       ),
+    .cen       ( cen       ),
+    .fm_in     ( fm_only_l ),
+    .adpcma_in ( adpcma_l  ),
+    .adpcmb_in ( adpcmb_l  ),
+    .psg_in    ( psg_snd   ),
+    .fm_out    ( fm_left   ),
+    .snd_out   ( snd_left  )
 );
 
 jt10b_mixer u_right(
-    .clk       ( clk          ),
-    .cen       ( cen          ),
-    .fm_in     ( fm_only_r    ),
-    .adpcma_in ( adpcma_r     ),
-    .adpcmb_in ( adpcmb_r     ),
-    .psg_in    ( psg_snd      ),
-    .fm_out    ( fm_right     ),
-    .snd_out   ( snd_right    )
+    .clk       ( clk       ),
+    .cen       ( cen       ),
+    .fm_in     ( fm_only_r ),
+    .adpcma_in ( adpcma_r  ),
+    .adpcmb_in ( adpcmb_r  ),
+    .psg_in    ( psg_snd   ),
+    .fm_out    ( fm_right  ),
+    .snd_out   ( snd_right )
 );
 
 jt12_top #(
-    .use_lfo(1), .use_ssg(1), .num_ch(6), .use_pcm(0), .use_adpcm(1),
-    .FULLFM(1), .JT49_DIV(3)
+    .use_lfo   ( 1 ),
+    .use_ssg   ( 1 ),
+    .num_ch    ( 6 ),
+    .use_pcm   ( 0 ),
+    .use_adpcm ( 1 ),
+    .FULLFM    ( 1 ),
+    .JT49_DIV  ( 3 )
 ) u_jt12(
-    .rst            ( rst          ),
-    .clk            ( clk          ),
-    .cen            ( cen          ),
-    .din            ( din          ),
-    .addr           ( addr         ),
-    .cs_n           ( cs_n         ),
-    .wr_n           ( wr_n         ),
+    .fm_full_left     (              ),
+    .fm_full_right    (              ),
+    .opna_adpcm_flags ( 4'b0010      ),
+    .opna_adpcm_data  ( 8'd0         ),
+    .opna_flag_reset  (              ),
+    .rst              ( rst          ),
+    .clk              ( clk          ),
+    .cen              ( cen          ),
+    .din              ( din          ),
+    .addr             ( addr         ),
+    .cs_n             ( cs_n         ),
+    .wr_n             ( wr_n         ),
 
-    .dout           ( dout         ),
-    .irq_n          ( irq_n        ),
+    .dout             ( dout         ),
+    .irq_n            ( irq_n        ),
     // ADPCM pins
-    .adpcma_addr    ( adpcma_addr  ),
-    .adpcma_bank    ( adpcma_bank  ),
-    .adpcma_roe_n   ( adpcma_roe_n ),
-    .adpcma_data    ( adpcma_data  ),
-    .adpcmb_addr    ( adpcmb_addr  ),
-    .adpcmb_roe_n   ( adpcmb_roe_n ),
-    .adpcmb_data    ( adpcmb_data  ),
+    .adpcma_addr      ( adpcma_addr  ),
+    .adpcma_bank      ( adpcma_bank  ),
+    .adpcma_roe_n     ( adpcma_roe_n ),
+    .adpcma_data      ( adpcma_data  ),
+    .adpcmb_addr      ( adpcmb_addr  ),
+    .adpcmb_roe_n     ( adpcmb_roe_n ),
+    .adpcmb_data      ( adpcmb_data  ),
     // Separated output
-    .psg_A          ( psg_A        ),
-    .psg_B          ( psg_B        ),
-    .psg_C          ( psg_C        ),
-    .psg_snd        ( psg_snd      ),
-    .fm_snd_left    ( fm_only_l    ),
-    .fm_snd_right   ( fm_only_r    ),
-    .adpcmA_l       ( adpcma_l     ),
-    .adpcmA_r       ( adpcma_r     ),
-    .adpcmB_l       ( adpcmb_l     ),
-    .adpcmB_r       ( adpcmb_r     ),
+    .psg_A            ( psg_A        ),
+    .psg_B            ( psg_B        ),
+    .psg_C            ( psg_C        ),
+    .psg_snd          ( psg_snd      ),
+    .fm_snd_left      ( fm_only_l    ),
+    .fm_snd_right     ( fm_only_r    ),
+    .adpcmA_l         ( adpcma_l     ),
+    .adpcmA_r         ( adpcma_r     ),
+    .adpcmB_l         ( adpcmb_l     ),
+    .adpcmB_r         ( adpcmb_r     ),
     // Unused YM2203
-    .IOA_in         ( 8'b0         ),
-    .IOB_in         ( 8'b0         ),
-    .IOA_out        (              ),
-    .IOB_out        (              ),
-    .IOA_oe         (              ),
-    .IOB_oe         (              ),
-    .debug_bus      ( 8'd0         ),
+    .IOA_in           ( 8'b0         ),
+    .IOB_in           ( 8'b0         ),
+    .IOA_out          (              ),
+    .IOB_out          (              ),
+    .IOA_oe           (              ),
+    .IOB_oe           (              ),
+    .debug_bus        ( 8'd0         ),
     // Sound output
-    .snd_right      (              ),
-    .snd_left       (              ),
-    .snd_sample     ( snd_sample   ),
-    .ch_enable      ( ch_enable    ),
+    .snd_right        (              ),
+    .snd_left         (              ),
+    .snd_sample       ( snd_sample   ),
+    .ch_enable        ( ch_enable    ),
     // unused pins
-    .en_hifi_pcm    ( 1'b0         ),
-    .debug_view     (              )
+    .en_hifi_pcm      ( 1'b0         ),
+    .debug_view       (              )
 );
 
 endmodule

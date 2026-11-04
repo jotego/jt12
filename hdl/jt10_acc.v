@@ -14,6 +14,8 @@
     You should have received a copy of the GNU General Public License
     along with JT12.  If not, see <http://www.gnu.org/licenses/>.
 
+    SPDX-FileCopyrightText: 2026 Andrea Bogazzi
+
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
     Date: 21-03-2019
@@ -36,8 +38,9 @@
 // ADPCM inputs replace two FM slots unless FULLFM is set
 
 module jt10_acc #(
-    parameter FULLFM=0
+    parameter FULLFM=0, OPNA=0
 )(
+    input               opna_6ch,
     input               clk,
     input               clk_en /* synthesis direct_enable */,
     input signed [13:0] op_result,
@@ -55,6 +58,7 @@ module jt10_acc #(
     input signed [15:0] adpcmB_l,
     input signed [15:0] adpcmB_r,
     // combined output
+    output signed [17:0] full_left, full_right,
     output signed [15:0] left,
     output signed [15:0] right
 );
@@ -88,8 +92,8 @@ always @(*) begin
     // I'll leave it as it is but I think it is worth revisiting this:
     acc_input_l = opext >>> 1;
     acc_input_r = opext >>> 1;
-    acc_en_l    = sum_en & left_en;
-    acc_en_r    = sum_en & right_en;
+    acc_en_l    = sum_en & left_en & (!OPNA || opna_6ch || !cur_ch[2]);
+    acc_en_r    = sum_en & right_en & (!OPNA || opna_6ch || !cur_ch[2]);
     if( !FULLFM ) begin
         case( {cur_op,cur_ch} )
             {2'd0,3'd0}: begin // ADPCM-A:
@@ -119,24 +123,45 @@ always @(*) begin
     end
 end
 
+wire signed [OPNA ? 17 : 15:0] wide_left, wide_right;
+generate
+if(OPNA) begin: gen_full_opna
+    assign full_left=wide_left;
+    assign full_right=wide_right;
+end else begin: gen_full_legacy
+    assign full_left={{2{wide_left[15]}},wide_left};
+    assign full_right={{2{wide_right[15]}},wide_right};
+end
+endgenerate
+assign left=wide_left>32767 ? 16'sh7fff : wide_left< -32768 ? 16'sh8000 : wide_left[15:0];
+assign right=wide_right>32767 ? 16'sh7fff : wide_right< -32768 ? 16'sh8000 : wide_right[15:0];
+
 // Continuous output
 
-jt12_single_acc #(.win(16),.wout(16)) u_left(
+jt12_single_acc #(
+    .win  ( 16             ),
+    .wout ( OPNA ? 18 : 16 ),
+    .wacc ( OPNA ? 18 : 16 )
+) u_left(
     .clk        ( clk            ),
     .clk_en     ( clk_en         ),
     .op_result  ( acc_input_l    ),
     .sum_en     ( acc_en_l       ),
     .zero       ( zero           ),
-    .snd        ( left           )
+    .snd        ( wide_left      )
 );
 
-jt12_single_acc #(.win(16),.wout(16)) u_right(
+jt12_single_acc #(
+    .win  ( 16             ),
+    .wout ( OPNA ? 18 : 16 ),
+    .wacc ( OPNA ? 18 : 16 )
+) u_right(
     .clk        ( clk            ),
     .clk_en     ( clk_en         ),
     .op_result  ( acc_input_r    ),
     .sum_en     ( acc_en_r       ),
     .zero       ( zero           ),
-    .snd        ( right          )
+    .snd        ( wide_right     )
 );
 
 `ifdef SIMULATION

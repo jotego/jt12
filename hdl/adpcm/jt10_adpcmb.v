@@ -14,6 +14,8 @@
     You should have received a copy of the GNU General Public License
     along with JT12.  If not, see <http://www.gnu.org/licenses/>.
 
+    SPDX-FileCopyrightText: 2026 Andrea Bogazzi
+
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
     Date: 21-03-2019
@@ -21,7 +23,7 @@
 
 // Sampling rates: 2kHz ~ 55.5 kHz. in 0.85Hz steps
 
-module jt10_adpcmb(
+module jt10_adpcmb #(parameter OPNA=0)(
     input           rst_n,
     input           clk,        // CPU clock
     input           cen,        // optional clock enable, if not needed leave as 1'b1
@@ -35,6 +37,8 @@ module jt10_adpcmb(
 localparam stepw = 15, xw=16;
 
 reg signed [xw-1:0] x1, next_x5;
+reg signed [17:0] wide_next_x5;
+wire signed [17:0] wide_delta=sign_data4 ? -$signed({2'b0,d3}) : $signed({2'b0,d3});
 reg [stepw-1:0] step1;
 reg [stepw+1:0] next_step3;
 assign pcm = x1[xw-1:xw-16];
@@ -97,11 +101,14 @@ always @( posedge clk or negedge rst_n )
 		  sign_data4<=sign_data3;
         // IV   Advance the waveform
         next_x5   <= x1+d4;
+        wide_next_x5 <= $signed({{2{x1[15]}},x1}) + wide_delta;
 		  sign_data5<=sign_data4;
         // V: limit or reset outputs
         if( chon ) begin // update values if needed
             if( adv2[0] ) begin
-                    if( sign_data5 == x1[xw-1] && (x1[xw-1]!=next_x5[xw-1]) )
+                    if(OPNA) begin
+                        x1 <= wide_next_x5>32767 ? 16'sh7fff : wide_next_x5< -32768 ? 16'sh8000 : wide_next_x5[15:0];
+                    end else if( sign_data5 == x1[xw-1] && (x1[xw-1]!=next_x5[xw-1]) )
                         x1 <= x1[xw-1] ? limneg : limpos;
                     else
                         x1 <= next_x5;
