@@ -27,7 +27,7 @@ wire signed [15:0] decoded;
 wire [6:0] attenuation = {2'd0,~level[voice][4:0]} + {1'd0,~total};
 wire signed [31:0] expanded = $signed(decoded) * 32'sd16;
 wire signed [31:0] scaled = (expanded * $signed({1'b0,4'd15-{1'b0,attenuation[2:0]}})) >>> (5+attenuation[6:3]);
-integer i;
+integer i, ch;
 reg signed [18:0] sum_l, sum_r;
 
 function [14:0] start_address;
@@ -65,7 +65,7 @@ assign right = sum_r;
 always @* begin
     sum_l=0;
     sum_r=0;
-    for(integer ch=0;ch<6;ch=ch+1) begin
+    for(ch=0;ch<6;ch=ch+1) begin
         if(active[ch] && level[ch][7]) sum_l=sum_l+{{3{sample[ch][15]}},sample[ch]};
         if(active[ch] && level[ch][6]) sum_r=sum_r+{{3{sample[ch][15]}},sample[ch]};
     end
