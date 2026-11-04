@@ -28,7 +28,11 @@ reg [7:0] divider;
 reg dec_adv, dec_clear;
 reg [3:0] dec_data, decode_wait;
 reg signed [15:0] previous, current;
-wire signed [15:0] decoded, interpolated, gained;
+wire signed [15:0] decoded, gained;
+reg signed [15:0] interpolated;
+reg signed [33:0] mix_previous, mix_current;
+reg [7:0] gain_level;
+reg [1:0] mix_valid;
 wire external_mem=regs[0][5];
 wire recording=regs[0][6];
 wire repeat_on=regs[0][4];
@@ -39,17 +43,35 @@ wire at_end=(mem_addr & block_mask)==block_mask && (mem_addr>>address_shift)=={r
 wire at_limit=(mem_addr & block_mask)==block_mask && (mem_addr>>address_shift)=={regs[13],regs[12]};
 wire [16:0] next_phase={1'b0,phase}+{1'b0,regs[10],regs[9]};
 wire base_cen=cen && divider==143;
-wire signed [17:0] weight={1'b0,phase};
-wire signed [33:0] mix_previous=$signed(previous)*(18'sd65536-weight);
-wire signed [33:0] mix_current=$signed(current)*weight;
+wire signed [17:0] weight={2'b0,phase};
+wire signed [17:0] inverse_weight=18'sd65536-weight;
+wire signed [33:0] product_previous=$signed(previous)*inverse_weight;
+wire signed [33:0] product_current=$signed(current)*weight;
 wire signed [33:0] mixed=mix_previous+mix_current;
 integer i;
 
-assign interpolated=mixed[31:16];
 assign left=regs[1][7] ? gained>>>1 : 16'sd0;
 assign right=regs[1][6] ? gained>>>1 : 16'sd0;
 assign flags={playing,1'b0,ready,eos};
 assign dout=external_mem && !recording && !regs[0][7] ? read_data : 8'd0;
+
+always @(posedge clk) begin
+    if(rst) begin
+        mix_previous<=0;
+        mix_current<=0;
+        interpolated<=0;
+        gain_level<=0;
+        mix_valid<=0;
+    end else begin
+        mix_valid<={mix_valid[0],base_cen};
+        if(base_cen) begin
+            mix_previous<=product_previous;
+            mix_current<=product_current;
+            gain_level<=regs[11];
+        end
+        if(mix_valid[0]) interpolated<=mixed[31:16];
+    end
+end
 
 always @(posedge clk) begin
     if(rst) begin
@@ -240,12 +262,12 @@ jt10_adpcmb #(
 );
 
 jt10_adpcmb_gain u_gain(
-    .rst_n   ( ~rst         ),
-    .clk     ( clk          ),
-    .cen55   ( base_cen     ),
-    .tl      ( regs[11]     ),
-    .pcm_in  ( interpolated ),
-    .pcm_out ( gained       )
+    .rst_n   ( ~rst                 ),
+    .clk     ( clk                  ),
+    .cen55   ( mix_valid[1] && !rst ),
+    .tl      ( gain_level           ),
+    .pcm_in  ( interpolated         ),
+    .pcm_out ( gained               )
 );
 
 endmodule

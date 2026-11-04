@@ -18,6 +18,11 @@ OPNA register/memory controllers and a wide stereo mixer. The digital output
 includes FM, rhythm and Delta-T. SSG outputs remain separate for board mixing.
 Existing chip variants default to `OPNA=0`.
 
+Delta-T interpolation products, their sum and the volume multiplier occupy
+separate registered stages. Phase, decoded samples and volume are captured at
+the sample enable; the resulting output updates two host clocks later. Integer
+widths and truncation are preserved.
+
 The comparison covers bank selection, identification, defined SSG register bits,
 GPIO, SSG oscillation, three/six FM channels, stereo panning, prescalers,
 timers, IRQ masks, all six rhythm instruments, Delta-T rates, saturation,
