@@ -23,6 +23,13 @@ separate registered stages. Phase, decoded samples and volume are captured at
 the sample enable; the resulting output updates two host clocks later. Integer
 widths and truncation are preserved.
 
+The six rhythm voices use a three-stage registered adder tree with 17-, 18-
+and 19-bit sums. FM and Delta-T are delayed by the same three host clocks before
+mixing. The chip mixer registers FM+Delta-T, the full sum and the final saturation
+in three further stages. Digital stereo and its sample pulse therefore gain six
+host clocks of latency; clipping stays after the full-width sum. These stages
+run on every host clock, independently of the chip enable. SSG remains separate.
+
 The comparison covers bank selection, identification, defined SSG register bits,
 GPIO, SSG oscillation, three/six FM channels, stereo panning, prescalers,
 timers, IRQ masks, all six rhythm instruments, Delta-T rates, saturation,

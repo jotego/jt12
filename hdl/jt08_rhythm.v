@@ -27,7 +27,11 @@ wire signed [15:0] decoded;
 wire [6:0] attenuation = {2'd0,~level[voice][4:0]} + {1'd0,~total};
 wire signed [31:0] expanded = $signed(decoded) * 32'sd16;
 wire signed [31:0] scaled = (expanded * $signed({1'b0,4'd15-{1'b0,attenuation[2:0]}})) >>> (5+attenuation[6:3]);
-integer i, ch;
+integer i, pair;
+genvar channel;
+wire signed [15:0] lane_l[0:5], lane_r[0:5];
+reg signed [16:0] pair_l[0:2], pair_r[0:2];
+reg signed [17:0] quad_l, quad_r, tail_l, tail_r;
 reg signed [18:0] sum_l, sum_r;
 
 function [14:0] start_address;
@@ -62,12 +66,36 @@ assign rom_cs = advance && running && !clear[voice] && !position[voice][0] && po
 assign left = sum_l;
 assign right = sum_r;
 
-always @* begin
-    sum_l=0;
-    sum_r=0;
-    for(ch=0;ch<6;ch=ch+1) begin
-        if(active[ch] && level[ch][7]) sum_l=sum_l+{{3{sample[ch][15]}},sample[ch]};
-        if(active[ch] && level[ch][6]) sum_r=sum_r+{{3{sample[ch][15]}},sample[ch]};
+generate
+    for(channel=0;channel<6;channel=channel+1) begin: gen_mix_lane
+        assign lane_l[channel]=active[channel] && level[channel][7] ? sample[channel] : 16'sd0;
+        assign lane_r[channel]=active[channel] && level[channel][6] ? sample[channel] : 16'sd0;
+    end
+endgenerate
+
+always @(posedge clk) begin
+    if(rst) begin
+        for(pair=0;pair<3;pair=pair+1) begin
+            pair_l[pair]<=0;
+            pair_r[pair]<=0;
+        end
+        quad_l<=0;
+        quad_r<=0;
+        tail_l<=0;
+        tail_r<=0;
+        sum_l<=0;
+        sum_r<=0;
+    end else begin
+        for(pair=0;pair<3;pair=pair+1) begin
+            pair_l[pair]<=$signed({lane_l[2*pair][15],lane_l[2*pair]})+$signed({lane_l[2*pair+1][15],lane_l[2*pair+1]});
+            pair_r[pair]<=$signed({lane_r[2*pair][15],lane_r[2*pair]})+$signed({lane_r[2*pair+1][15],lane_r[2*pair+1]});
+        end
+        quad_l<=$signed({pair_l[0][16],pair_l[0]})+$signed({pair_l[1][16],pair_l[1]});
+        quad_r<=$signed({pair_r[0][16],pair_r[0]})+$signed({pair_r[1][16],pair_r[1]});
+        tail_l<={pair_l[2][16],pair_l[2]};
+        tail_r<={pair_r[2][16],pair_r[2]};
+        sum_l<=$signed({quad_l[17],quad_l})+$signed({tail_l[17],tail_l});
+        sum_r<=$signed({quad_r[17],quad_r})+$signed({tail_r[17],tail_r});
     end
 end
 

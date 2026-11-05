@@ -29,6 +29,12 @@ module jt08(
     output reg           snd_sample
 );
 
+localparam RHYTHM_DELAY=3, MIXER_DELAY=3;
+localparam AUDIO_DELAY=RHYTHM_DELAY+MIXER_DELAY;
+reg signed [17:0] fm_delay_l[0:RHYTHM_DELAY-1], fm_delay_r[0:RHYTHM_DELAY-1];
+reg signed [15:0] adpcm_delay_l[0:RHYTHM_DELAY-1], adpcm_delay_r[0:RHYTHM_DELAY-1];
+reg [AUDIO_DELAY-1:0] sample_delay;
+integer audio_stage;
 wire [7:0] core_dout;
 wire signed [17:0] fm_full_left, fm_full_right;
 wire raw_sample;
@@ -88,16 +94,20 @@ jt08_adpcm u_adpcm(
 );
 
 jt08_mixer u_mix_left(
-    .fm     ( fm_full_left ),
-    .rhythm ( rhythm_left  ),
-    .adpcm  ( adpcm_left   ),
-    .snd    ( snd_left     )
+    .rst    ( rst                           ),
+    .clk    ( clk                           ),
+    .fm     ( fm_delay_l[RHYTHM_DELAY-1]    ),
+    .rhythm ( rhythm_left                   ),
+    .adpcm  ( adpcm_delay_l[RHYTHM_DELAY-1] ),
+    .snd    ( snd_left                      )
 );
 jt08_mixer u_mix_right(
-    .fm     ( fm_full_right ),
-    .rhythm ( rhythm_right  ),
-    .adpcm  ( adpcm_right   ),
-    .snd    ( snd_right     )
+    .rst    ( rst                           ),
+    .clk    ( clk                           ),
+    .fm     ( fm_delay_r[RHYTHM_DELAY-1]    ),
+    .rhythm ( rhythm_right                  ),
+    .adpcm  ( adpcm_delay_r[RHYTHM_DELAY-1] ),
+    .snd    ( snd_right                     )
 );
 
 reg sample_l;
@@ -106,10 +116,28 @@ assign dout = !cs_n && !rd_n ? core_dout : 8'hff;
 always @(posedge clk) begin
     if(rst) begin
         sample_l <= 0;
+        sample_delay <= 0;
         snd_sample <= 0;
+        for(audio_stage=0;audio_stage<RHYTHM_DELAY;audio_stage=audio_stage+1) begin
+            fm_delay_l[audio_stage]<=0;
+            fm_delay_r[audio_stage]<=0;
+            adpcm_delay_l[audio_stage]<=0;
+            adpcm_delay_r[audio_stage]<=0;
+        end
     end else begin
+        fm_delay_l[0]<=fm_full_left;
+        fm_delay_r[0]<=fm_full_right;
+        adpcm_delay_l[0]<=adpcm_left;
+        adpcm_delay_r[0]<=adpcm_right;
+        for(audio_stage=1;audio_stage<RHYTHM_DELAY;audio_stage=audio_stage+1) begin
+            fm_delay_l[audio_stage]<=fm_delay_l[audio_stage-1];
+            fm_delay_r[audio_stage]<=fm_delay_r[audio_stage-1];
+            adpcm_delay_l[audio_stage]<=adpcm_delay_l[audio_stage-1];
+            adpcm_delay_r[audio_stage]<=adpcm_delay_r[audio_stage-1];
+        end
         sample_l <= raw_sample;
-        snd_sample <= raw_sample && !sample_l;
+        sample_delay <= {sample_delay[AUDIO_DELAY-2:0],raw_sample && !sample_l};
+        snd_sample <= sample_delay[AUDIO_DELAY-1];
     end
 end
 
