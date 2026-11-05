@@ -13,6 +13,8 @@
     You should have received a copy of the GNU General Public License
     along with JT12.  If not, see <http://www.gnu.org/licenses/>.
 
+    SPDX-FileCopyrightText: 2026 Andrea Bogazzi
+
     Author: Jose Tejada Gomez. Twitter: @topapate
     Version: 1.0
     Date: 14-2-2017
@@ -128,7 +130,7 @@ module jt12_mmr(
     input   [7:0]   debug_bus
 );
 
-parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0, mask_div=1;
+parameter use_ssg=0, num_ch=6, use_pcm=1, use_adpcm=0, mask_div=1, OPNA=0;
 
 jt12_div #(.use_ssg(use_ssg)) u_div (
     .rst            ( rst             ),
@@ -274,12 +276,13 @@ always @(posedge clk) begin : memory_mapped_registers
             if( !addr[0] ) begin
                 selected_register <= din;  
                 part <= addr[1];        
-                if (!mask_div)
+                if (!mask_div && (!OPNA || !addr[1]))
                 case(din)
                     // clock divider: should work only for ym2203
                     // and ym2608.
                     // clock divider works just by selecting the register
-                    REG_CLK_N6: div_setting[1] <= 1'b1; // 2D
+                    REG_CLK_N6: if(OPNA) div_setting <= 2'b10;
+                                else div_setting[1] <= 1'b1; // 2D
                     REG_CLK_N3: div_setting[0] <= 1'b1; // 2E
                     REG_CLK_N2: div_setting    <= 2'b0; // 2F
                     default:;

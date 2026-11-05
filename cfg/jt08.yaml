@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 Andrea Bogazzi
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Date: 04-11-2026
+jt12:
+  - get:
+    - jt03.yaml
+    - jt08.v
+    - jt08_ctrl.v
+    - jt10_acc.v
+    - jt08_rhythm.v
+    - jt08_adpcm.v
+    - jt08_mixer.v
+  - from: adpcm
+    get:
+    - jt10_adpcm.v
+    - jt10_adpcma_lut.v
+    - jt10_adpcmb.v
+    - jt10_adpcmb_gain.v
