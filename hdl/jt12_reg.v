@@ -198,8 +198,6 @@ always @(*) begin
     end
 end
 
-// The slot counter keeps running during reset, but it restarts when the reset
-// is released, so the chip always has the same phase after the reset
 reg rst_l=0;
 
 always @(posedge clk) begin : up_counter

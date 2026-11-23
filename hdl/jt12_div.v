@@ -40,7 +40,7 @@ reg [4:0] adpcm_cnt666  = 5'd0;
 reg [2:0] adpcm_cnt111 = 3'd0, adpcm_cnt55=3'd0;
 reg cen_int, cen_ssg_int, cen_adpcm_int, cen_adpcm3_int;
 reg rst_l=0;
-wire restart = rst_l & ~rst; // first clock after the reset release
+wire restart = rst_l & ~rst;
 
 // prescaler values for FM
 // reset: 1/3
@@ -105,9 +105,6 @@ always @(negedge clk) begin
     `endif
 end
 
-// The counters keep running during reset, but they restart when the reset is
-// released, so the chip always has the same phase after the reset. Otherwise,
-// it would depend on how long the reset lasted and the game would not repeat
 always @(posedge clk) rst_l <= rst;
 
 // Div/2
