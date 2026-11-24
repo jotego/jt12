@@ -198,8 +198,14 @@ always @(*) begin
     end
 end
 
+reg rst_l=0;
+
 always @(posedge clk) begin : up_counter
-    if( clk_en ) begin
+    rst_l <= rst;
+    if( rst_l && !rst ) begin
+        { cur_op, cur_ch }  <= 0;
+        zero    <= 1;
+    end else if( clk_en ) begin
         { cur_op, cur_ch }  <= { next_op, next_ch };
         zero    <= next == 5'd0;
     end
