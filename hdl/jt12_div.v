@@ -39,6 +39,8 @@ reg [2:0] ssg_pres, ssg_cnt=3'd0;
 reg [4:0] adpcm_cnt666  = 5'd0;
 reg [2:0] adpcm_cnt111 = 3'd0, adpcm_cnt55=3'd0;
 reg cen_int, cen_ssg_int, cen_adpcm_int, cen_adpcm3_int;
+reg rst_l=0;
+wire restart = rst_l & ~rst;
 
 // prescaler values for FM
 // reset: 1/3
@@ -94,24 +96,28 @@ always @(negedge clk) begin
     clk_en_666 <= 1'b1;
     clk_en_55  <= 1'b1;
     `else
-    clk_en     <= cen & cen_int;
-    clk_en_2   <= cen && (div2==2'b00);
-    clk_en_ssg <= use_ssg ? (cen & cen_ssg_int) : 1'b0;
-    clk_en_666 <= cen & cen_adpcm_int;
-    clk_en_111 <= cen & cen_adpcm_int & cen_adpcm3_int;
-    clk_en_55  <= cen & cen_adpcm_int & cen_adpcm3_int & cen_55_int;
+    clk_en     <= cen & cen_int & ~restart;
+    clk_en_2   <= cen && (div2==2'b00) && !restart;
+    clk_en_ssg <= use_ssg ? (cen & cen_ssg_int & ~restart) : 1'b0;
+    clk_en_666 <= cen & cen_adpcm_int & ~restart;
+    clk_en_111 <= cen & cen_adpcm_int & cen_adpcm3_int & ~restart;
+    clk_en_55  <= cen & cen_adpcm_int & cen_adpcm3_int & cen_55_int & ~restart;
     `endif
 end
 
+always @(posedge clk) rst_l <= rst;
+
 // Div/2
 always @(posedge clk)
-    if( cen ) begin
+    if( restart ) div2 <= 2'b00;
+    else if( cen ) begin
         div2 <= div2==2'b10 ? 2'b00 : (div2+2'b01);
     end
 
 // OPN
 always @(posedge clk)
-    if( cen ) begin
+    if( restart ) opn_cnt <= 4'd0;
+    else if( cen ) begin
         if( opn_cnt == opn_pres ) begin
             opn_cnt <= 4'd0;  
         end
@@ -120,7 +126,8 @@ always @(posedge clk)
 
 // SSG
 always @(posedge clk)
-    if( cen ) begin
+    if( restart ) ssg_cnt <= 3'd0;
+    else if( cen ) begin
         if( ssg_cnt == ssg_pres ) begin
             ssg_cnt <= 3'd0;            
         end
@@ -129,7 +136,11 @@ always @(posedge clk)
 
 // ADPCM-A
 always @(posedge clk)
-    if( cen ) begin
+    if( restart ) begin
+        adpcm_cnt666 <= 5'd0;
+        adpcm_cnt111 <= 3'd0;
+        adpcm_cnt55  <= 3'd0;
+    end else if( cen ) begin
         adpcm_cnt666 <= adpcm_cnt666==5'd11 ? 5'd0 : adpcm_cnt666 + 5'd1;
         if( adpcm_cnt666==5'd0 ) begin
             adpcm_cnt111 <= adpcm_cnt111==3'd5 ? 3'd0 : adpcm_cnt111+3'd1;
